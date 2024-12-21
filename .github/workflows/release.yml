@@ -12,8 +12,8 @@ jobs:
       contents: write    
     env:
       BETA: ${{ contains(github.event.inputs.gorm_version, 'M') }}
-      GIT_USER_NAME: puneetbehl
-      GIT_USER_EMAIL: behlp@unityfoundation.io
+      GIT_USER_NAME: grails-build
+      GIT_USER_EMAIL: grails-build@users.noreply.github.com
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
