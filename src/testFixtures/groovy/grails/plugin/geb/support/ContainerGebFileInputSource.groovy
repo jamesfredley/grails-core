@@ -44,7 +44,7 @@ class ContainerGebFileInputSource extends File {
      * @return the normalized path with forward slashes
      */
     protected String normalizePath(String path) {
-        // Replace backslashes with forward slashes for Windows compatibility
-        path.replaceAll('\\\\', '/')
+        // Normalize separator to forward slash
+        path.replace(separatorChar, (char) '/')
     }
 }
