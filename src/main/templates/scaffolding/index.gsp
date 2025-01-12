@@ -32,7 +32,7 @@
 
                 <g:if test="\${${propertyName}Count > params.int('max')}">
                     <div class="btn-toolbar mb-3" role="toolbar" aria-label="Toolbar with button groups">
-                        <boot:paginate activeClass="active" class="btn" total="\${${propertyName}Count ?: 0}" />
+                        <g:paginate activeClass="active" class="btn" total="\${${propertyName}Count ?: 0}" />
                     </div>
                 </g:if>
             </div>
