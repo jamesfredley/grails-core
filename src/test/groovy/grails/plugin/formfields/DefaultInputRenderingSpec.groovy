@@ -21,6 +21,8 @@ import spock.lang.Shared
 import spock.lang.Unroll
 
 import java.sql.Blob
+import java.time.LocalDate
+import java.time.LocalDateTime
 
 @Unroll
 class DefaultInputRenderingSpec extends AbstractFormFieldsTagLibSpec  implements TagLibUnitTest<FormFieldsTagLib> {
@@ -248,6 +250,8 @@ class DefaultInputRenderingSpec extends AbstractFormFieldsTagLibSpec  implements
 		Calendar      | /select name="prop_day"/
 		java.sql.Date | /select name="prop_day"/
 		java.sql.Time | /select name="prop_day"/
+		LocalDate     | /select name="prop_day"/
+		LocalDateTime | /select name="prop_day"/
 		TimeZone      | /<option value="Europe\/London"/
 		Locale        | /<option value="en_GB"/
 		Currency      | /<option value="GBP"/
@@ -265,6 +269,8 @@ class DefaultInputRenderingSpec extends AbstractFormFieldsTagLibSpec  implements
 		Date          | new Date(108, 9, 2)                   | /option value="2008" selected="selected"/
 		Calendar      | new GregorianCalendar(2008, 9, 2)     | /option value="2008" selected="selected"/
 		java.sql.Date | new java.sql.Date(108, 9, 2)          | /option value="2008" selected="selected"/
+		LocalDate     | LocalDate.of(2008, 9, 2)              | /option value="2008" selected="selected"/
+		LocalDateTime | LocalDateTime.of(2008, 9, 2, 0, 0)    | /option value="2008" selected="selected"/
 		java.sql.Time | new java.sql.Time(13, 29, 1)          | /option value="13" selected="selected"/
 		TimeZone      | TimeZone.getTimeZone("Europe/London") | /<option value="Europe\/London" selected="selected"/
 		Locale        | Locale.ITALIAN                        | /<option value="it" selected="selected"/
@@ -287,10 +293,14 @@ class DefaultInputRenderingSpec extends AbstractFormFieldsTagLibSpec  implements
 		Calendar      | true
 		java.sql.Date | true
 		java.sql.Time | true
+		LocalDate     | true
+		LocalDateTime | true
 		Date          | false
 		Calendar      | false
 		java.sql.Date | false
 		java.sql.Time | false
+		LocalDate     | false
+		LocalDateTime | false
 	}
 
 	def "select for a #type.simpleName property has a precision of 'day'"() {
@@ -308,12 +318,12 @@ class DefaultInputRenderingSpec extends AbstractFormFieldsTagLibSpec  implements
 		!output.contains('select name="prop_minute"')
 
 		where:
-		type << [Date, Calendar, java.sql.Date]
+		type << [Date, Calendar, java.sql.Date, LocalDate]
 	}
 
 	def "select for a Time property has a precision of 'minute'"() {
 		given:
-		def model = [type: java.sql.Time, property: "prop", constraints: null, persistentProperty: basicProperty]
+		def model = [type: type, property: "prop", constraints: null, persistentProperty: basicProperty]
 
 		when:
 		def output = tagLib.renderDefaultInput(model)
@@ -324,6 +334,9 @@ class DefaultInputRenderingSpec extends AbstractFormFieldsTagLibSpec  implements
 		output.contains('select name="prop_day"')
 		output.contains('select name="prop_hour"')
 		output.contains('select name="prop_minute"')
+
+		where:
+		type << [java.sql.Time, LocalDateTime]
 	}
 
 	def "select with Locale,TZ,currency for #{required ? 'a required' : 'an optional'} #type.simpleName property #{required ? 'does not have' : 'has'} a no-selection option"() {
