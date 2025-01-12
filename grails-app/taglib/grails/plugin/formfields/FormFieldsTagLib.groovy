@@ -728,7 +728,7 @@ class FormFieldsTagLib {
 
 
 	CharSequence renderDateTimeInput(Map model, Map attrs) {
-		attrs.precision = (model.type == java.sql.Time || java.time.LocalDate)? "minute" : "day"
+		attrs.precision = model.type in [java.sql.Time, LocalDateTime]? "minute" : "day"
 		if (!model.required) {
 			attrs.noSelection = ["": ""]
 			attrs.default = "none"
