@@ -42,6 +42,8 @@ import org.springframework.web.servlet.LocaleResolver
 import jakarta.servlet.http.HttpServletRequest
 import java.sql.Blob
 import java.text.NumberFormat
+import java.time.LocalDate
+import java.time.LocalDateTime
 
 import static FormFieldsTemplateService.toPropertyNameFormat
 
@@ -712,7 +714,7 @@ class FormFieldsTagLib {
 			return renderAssociationInput(model, attrs)
 		} else if (oneToMany) {
 			return renderOneToManyInput(model, attrs)
-		} else if (model.type in [Date, Calendar, java.sql.Date, java.sql.Time]) {
+		} else if (model.type in [Date, Calendar, java.sql.Date, java.sql.Time, LocalDate, LocalDateTime]) {
 			return renderDateTimeInput(model, attrs)
 		} else if (model.type in [byte[], Byte[], Blob]) {
 			return g.field(attrs + [type: "file"])
@@ -726,7 +728,7 @@ class FormFieldsTagLib {
 
 
 	CharSequence renderDateTimeInput(Map model, Map attrs) {
-		attrs.precision = model.type == java.sql.Time ? "minute" : "day"
+		attrs.precision = (model.type == java.sql.Time || java.time.LocalDate)? "minute" : "day"
 		if (!model.required) {
 			attrs.noSelection = ["": ""]
 			attrs.default = "none"
@@ -915,6 +917,8 @@ class FormFieldsTagLib {
 			case Date:
 			case java.sql.Date:
 			case java.sql.Time:
+			case LocalDate:
+			case LocalDateTime:
 				g.formatDate(date: model.value)
 				break
 			default:
