@@ -700,6 +700,7 @@ class FormFieldsTagLib {
 			}
 		}
 
+		// TODO: https://github.com/gpc/fields/issues/392
 		boolean datePicker = model.type in [Date, Calendar, java.sql.Date, java.sql.Time, LocalDate, LocalDateTime]
 		if (!datePicker) {
 			attrs.remove('selectDateClass')
