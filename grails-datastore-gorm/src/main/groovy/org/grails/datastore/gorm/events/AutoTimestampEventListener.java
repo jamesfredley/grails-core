@@ -23,6 +23,7 @@ import grails.gorm.annotation.AutoTimestamp;
 import org.grails.datastore.gorm.timestamp.DefaultTimestampProvider;
 import org.grails.datastore.gorm.timestamp.TimestampProvider;
 import org.grails.datastore.mapping.config.Entity;
+import org.grails.datastore.mapping.config.Settings;
 import org.grails.datastore.mapping.core.Datastore;
 import org.grails.datastore.mapping.engine.EntityAccess;
 import org.grails.datastore.mapping.engine.event.AbstractPersistenceEvent;
@@ -46,7 +47,7 @@ import org.springframework.context.ApplicationEvent;
 public class AutoTimestampEventListener extends AbstractPersistenceEventListener implements MappingContext.Listener {
 
     // if false, will not set timestamp on insert event if value is not null
-    @Value("${grails.gorm.events.insertOverwrite:true}")
+    @Value("${" + Settings.SETTING_AUTO_TIMESTAMP_INSERT_OVERWRITE + ":true}")
     boolean insertOverwrite = true;
 
     public static final String DATE_CREATED_PROPERTY = "dateCreated";
