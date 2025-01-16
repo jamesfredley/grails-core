@@ -84,13 +84,10 @@ class SingleResultAdapter implements ServiceImplementer, Ordered, AdaptedImpleme
     @Override
     void implement(ClassNode domainClassNode, MethodNode abstractMethodNode, MethodNode newMethodNode, ClassNode targetClassNode) {
         ClassNode returnType = resolveSingleGenericType(abstractMethodNode.returnType)
-        if(isDomainReturnType && !(adapted instanceof SingleResultInterfaceProjectionBuilder)) {
-            domainClassNode = returnType
-        }
         newMethodNode.setNodeMetaData(RETURN_TYPE, returnType )
         adapted.implement(domainClassNode, abstractMethodNode, newMethodNode, targetClassNode)
 
-        if(!isRxEntity(domainClassNode)) {
+        if(!isRxEntity(returnType)) {
             def ann = addAnnotationOrGetExisting(newMethodNode, RxSchedule)
             ann.setMember(RxScheduleIOTransformation.ANN_SINGLE_RESULT, ConstantExpression.TRUE)
             newMethodNode.addAnnotation(ann)

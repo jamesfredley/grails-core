@@ -75,7 +75,7 @@ trait ValidatedService<T> extends Service<T> {
      */
     void jakartaValidate(Object instance, Method method, Object...args) throws ConstraintViolationException {
         ExecutableValidator validator = executableValidatorMap.get(method)
-        Set<ConstraintViolation> constraintViolations = validator.validateParameters(instance, method, args)
+        Set<ConstraintViolation<Object>> constraintViolations = validator.validateParameters(instance, method, args)
         if(!constraintViolations.isEmpty()) {
             throw new ConstraintViolationException(constraintViolations)
         }
@@ -92,7 +92,7 @@ trait ValidatedService<T> extends Service<T> {
      */
     void validate(Object instance, Method method, Object...args) throws ValidationException {
         ExecutableValidator validator = executableValidatorMap.get(method)
-        Set<ConstraintViolation> constraintViolations = validator.validateParameters(instance, method, args)
+        Set<ConstraintViolation<Object>> constraintViolations = validator.validateParameters(instance, method, args)
         if(!constraintViolations.isEmpty()) {
             throw ValidationException.newInstance("Validation failed for method: $method.name ", asErrors(instance, constraintViolations))
         }

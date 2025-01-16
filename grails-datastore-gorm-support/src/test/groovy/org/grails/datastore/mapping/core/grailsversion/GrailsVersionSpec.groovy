@@ -15,24 +15,25 @@ class GrailsVersionSpec extends Specification {
 
         where:
         requiredVersion | expected
-        "3.2.0" | true
-        "3.1.0" | true
-        "3.3.0" | true
-        "4.0.0" | false
+        "3.2.0"         | true
+        "3.1.0"         | true
+        "3.3.0"         | true
+        "7.0.0"         | false
     }
 
     @Unroll
-    void "isAtLeastMajorMinor(#version, #majorVersion, #minorVersion) => #expected"(String version, int majorVersion, int minorVersion, boolean expected) {
+    void "isAtLeastMajorMinor(#grailsVersion, #majorVersion, #minorVersion) => #expected"(String grailsVersion, int majorVersion, int minorVersion, boolean expected) {
         expect:
-        expected == GrailsVersion.isAtLeastMajorMinor(version, majorVersion, minorVersion)
+        expected == GrailsVersion.isAtLeastMajorMinor(grailsVersion, majorVersion, minorVersion)
 
         where:
-        version                | majorVersion | minorVersion | expected
-        "4.0.0.BUILD-SNAPSHOT" | 3            | 3            | true
-        "4.0.0.BUILD-SNAPSHOT" | 4            | 0            | true
-        "3.3.0.BUILD-SNAPSHOT" | 3            | 3            | true
-        "3.3.0.BUILD-SNAPSHOT" | 3            | 4            | false
-        "3.3.0.BUILD-SNAPSHOT" | 3            | 2            | true
+        grailsVersion    | majorVersion | minorVersion | expected
+        "4.0.0-SNAPSHOT" | 3            | 3            | true
+        "4.0.0-SNAPSHOT" | 4            | 0            | true
+        "3.3.0-SNAPSHOT" | 3            | 3            | true
+        "3.3.0-SNAPSHOT" | 3            | 4            | false
+        "3.3.0-SNAPSHOT" | 3            | 2            | true
+        "3.3.0-SNAPSHOT" | 3            | 2            | true
     }
 
     @Unroll
@@ -43,11 +44,11 @@ class GrailsVersionSpec extends Specification {
         expected == GrailsVersion.isAtLeast(version, requiredVersion)
 
         where:
-        version                | requiredVersion        | expected
-        "3.3.0"                | "3.3.0.BUILD-SNAPSHOT" | true
-        "3.3.0"                | "3.3.0.M1"             | true
-        "3.3.0.BUILD-SNAPSHOT" | "3.3.0"                | false
-        "3.3.0"                | "3.3.0"                | true
+        version          | requiredVersion  | expected
+        "3.3.0"          | "3.3.0-SNAPSHOT" | true
+        "3.3.0"          | "3.3.0.M1"       | true
+        "3.3.0-SNAPSHOT" | "3.3.0"          | false
+        "3.3.0"          | "3.3.0"          | true
     }
 
     void "test compareTo"() {
@@ -55,17 +56,17 @@ class GrailsVersionSpec extends Specification {
         new GrailsVersion(greater) > new GrailsVersion(lesser)
 
         where:
-        greater                | lesser
-        "3.0.0"                | "2.99.99.BUILD-SNAPSHOT"
-        "3.0.0"                | "2.99.99"
-        "3.0.1"                | "3.0.1.BUILD-SNAPSHOT"
-        "3.1.2"                | "3.1.1"
-        "3.2.2"                | "3.1.2"
-        "4.1.1"                | "3.1.1"
-        "3.0.0.RC2"            | "3.0.0.RC1"
-        "3.0.0.M3"             | "3.0.0.M2"
-        "3.0.0.RC1"            | "3.0.0.M9"
-        "3.0.0.BUILD-SNAPSHOT" | "3.0.0.RC9"
+        greater          | lesser
+        "3.0.0"          | "2.99.99-SNAPSHOT"
+        "3.0.0"          | "2.99.99"
+        "3.0.1"          | "3.0.1-SNAPSHOT"
+        "3.1.2"          | "3.1.1"
+        "3.2.2"          | "3.1.2"
+        "4.1.1"          | "3.1.1"
+        "3.0.0.RC2"      | "3.0.0.RC1"
+        "3.0.0.M3"       | "3.0.0.M2"
+        "3.0.0.RC1"      | "3.0.0.M9"
+        "3.0.0-SNAPSHOT" | "3.0.0.RC9"
     }
 
     void "test compareTo equal"() {
@@ -73,11 +74,11 @@ class GrailsVersionSpec extends Specification {
         new GrailsVersion(left) == new GrailsVersion(right)
 
         where:
-        left                   | right
-        "3.0.0"                | "3.0.0"
-        "3.0.0.M2"             | "3.0.0.M2"
-        "3.0.0.RC2"            | "3.0.0.RC2"
-        "3.0.0.BUILD-SNAPSHOT" | "3.0.0.BUILD-SNAPSHOT"
+        left             | right
+        "3.0.0"          | "3.0.0"
+        "3.0.0.M2"       | "3.0.0.M2"
+        "3.0.0.RC2"      | "3.0.0.RC2"
+        "3.0.0-SNAPSHOT" | "3.0.0-SNAPSHOT"
     }
 
     void "test illegal argument to constructor"() {

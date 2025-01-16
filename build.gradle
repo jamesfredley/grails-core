@@ -1,11 +1,11 @@
+io.github.gradlenexus.publishplugin.InitializeNexusStagingRepository
+
 buildscript {
     repositories {
-        maven { url "https://repo.grails.org/grails/core" }
-        maven { url "https://plugins.gradle.org/m2/" }
+        maven { url = 'https://repo.grails.org/grails/core' }
     }
     dependencies {
-        classpath "io.github.gradle-nexus:publish-plugin:$gradleNexusPublishPluginVersion"
-        classpath "com.bmuschko:gradle-nexus-plugin:$gradleNexusPluginVersion"
+        classpath 'io.github.gradle-nexus:publish-plugin:2.0.0'
     }
 }
 
@@ -13,300 +13,54 @@ ext {
     isCiBuild = System.getenv().get("CI") as Boolean
     isSnapshot = project.projectVersion.endsWith("-SNAPSHOT")
     isReleaseVersion = !isSnapshot
-
-    nexusUsername = System.getenv("SONATYPE_USERNAME") ?: project.hasProperty("sonatypeOssUsername") ? project.sonatypeOssUsername : ''
-    nexusPassword = System.getenv("SONATYPE_PASSWORD") ?: project.hasProperty("sonatypeOssPassword") ? project.sonatypeOssPassword : ''
 }
 
-def isGroovyProject(project) {
-    !project.name.contains("grails-plugins")
-}
-
-configurations {
-   all*.exclude group: "commons-logging"
-}
-
-version = project.projectVersion
 group = "org.grails"
-
-apply plugin: 'idea'
-apply plugin: 'project-report'
+version = project.projectVersion
 
 allprojects {
-
     repositories {
         mavenCentral()
         maven { url = 'https://repo.grails.org/grails/core' }
-        maven { url = 'https://oss.sonatype.org/content/repositories/snapshots' }
-        if (isSnapshot) {
-            maven { url = 'https://repo.grails.org/grails/libs-snapshots-local' }
-        }
         // mavenLocal() // Keep, this will be uncommented and used by CI (groovy-joint-workflow)
-        if (groovyVersion?.endsWith('-SNAPSHOT')) {
+        if (findProperty('groovyVersion')?.endsWith('-SNAPSHOT')) {
             maven {
                 name = 'ASF Snapshot repo'
                 url = 'https://repository.apache.org/content/repositories/snapshots'
             }
         }
-        if (System.getenv("GITHUB_MAVEN_PASSWORD") && !grailsVersion.endsWith('-SNAPSHOT')) {
-            System.out.println("Adding Grails Core Repo")
+        if (System.getenv('GITHUB_MAVEN_PASSWORD') && !grailsVersion.endsWith('-SNAPSHOT')) {
+            System.out.println("Adding Grails Core Staging Repo for project: $name")
             maven {
                 url = 'https://maven.pkg.github.com/grails/grails-core'
                 credentials {
                     username = 'DOES_NOT_MATTER'
-                    password = System.getenv("GITHUB_MAVEN_PASSWORD")
+                    password = System.getenv('GITHUB_MAVEN_PASSWORD')
                 }
             }
         }
     }
+}
 
-    configurations {
-        all {
-            resolutionStrategy {
-                eachDependency { DependencyResolveDetails details ->
-                    if ((details.requested.group == 'org.codehaus.groovy' || details.requested.group == 'org.apache.groovy') && details.requested.name != 'groovy-bom') {
-                        details.useTarget(group: 'org.apache.groovy', name: details.requested.name, version: "$groovyVersion")
-                        details.because "The dependency coordinates are changed in Apache Groovy 4, plus ensure version"
-                    }
-                }
+if (isReleaseVersion) {
+    apply plugin: 'io.github.gradle-nexus.publish-plugin'
+    nexusPublishing {
+        repositories {
+            sonatype {
+                nexusUrl = uri('https://s01.oss.sonatype.org/service/local')
+                username = System.getenv('SONATYPE_USERNAME') ?: project.findProperty('sonatypeOssUsername') ?: ''
+                password = System.getenv('SONATYPE_PASSWORD') ?: project.findProperty('sonatypeOssPassword') ?: ''
+                stagingProfileId = System.getenv('SONATYPE_STAGING_PROFILE_ID') ?: project.findProperty('sonatypeOssStagingProfileId') ?: ''
             }
         }
+    }
+    //do not generate extra load on Nexus with new staging repository if signing fails
+    tasks.withType(InitializeNexusStagingRepository).configureEach {
+        shouldRunAfter = tasks.withType(Sign)
     }
 }
 
 apply from: "gradle/idea.gradle"
-
-subprojects {
-
-    configurations {
-        documentation
-    }
-   version = project.projectVersion
-   group = "org.grails"
-
-   afterEvaluate { subproject ->
-        if (isGroovyProject(subproject)) {
-            def hasSnapshotVersion = subproject.version.endsWith("-SNAPSHOT")
-            if(isSnapshot != hasSnapshotVersion) {
-                throw new StopExecutionException("${subproject.name} has version \"${subproject.version}\" which is${isSnapshot ? 'n\'t' : ''} a snapshot version.")
-            }
-        }
-    }
+apply from: "gradle/aggregate-test-report.gradle"
 
 
-    def isStandardGroovyMavenProject = isGroovyProject(project)
-
-    if (isStandardGroovyMavenProject) {
-        apply plugin: 'groovy'
-        apply plugin: 'eclipse'
-        apply plugin: 'idea'
-        apply plugin: 'java-library'
-
-
-    }
-
-    compileJava.options.release = 17
-
-    def isGormDatasource = project.name.startsWith("grails-datastore-gorm-") &&
-                                !project.name.endsWith("tck") &&
-                                !project.name.endsWith("-support") &&
-                                !project.name.endsWith("-core") &&
-                                !project.name.endsWith("-gorm-validation") &&
-                                !project.name.contains("-rx") &&
-            project.name != 'grails-datastore-gorm-rest-client'
-
-
-    dependencies {
-        api platform("org.grails:grails-bom:$grailsVersion")
-        api "jakarta.annotation:jakarta.annotation-api"
-        implementation "jakarta.validation:jakarta.validation-api"
-        compileOnly "com.github.spotbugs:spotbugs-annotations"
-
-        if (isStandardGroovyMavenProject) {
-            documentation platform("org.grails:grails-bom:$grailsVersion")
-            documentation "org.fusesource.jansi:jansi"
-            documentation "org.apache.groovy:groovy-dateutil:$groovyVersion"
-            documentation "info.picocli:picocli:$picocliVersion"
-            documentation "com.github.javaparser:javaparser-core"
-
-            compileOnly "org.apache.groovy:groovy:$groovyVersion"
-            testImplementation "org.apache.groovy:groovy-test-junit5:$groovyVersion"
-            testImplementation "org.junit.jupiter:junit-jupiter-api"
-            testImplementation "org.junit.jupiter:junit-jupiter-engine"
-            testImplementation "org.junit.platform:junit-platform-runner"
-
-            testImplementation "org.spockframework:spock-core"
-        }
-
-        if (project.name == "grails-datastore-gorm-tck") {
-            api "org.apache.groovy:groovy-test-junit5:$groovyVersion"
-            api "org.junit.jupiter:junit-jupiter-api"
-            api "org.junit.platform:junit-platform-runner"
-            runtimeOnly "org.junit.jupiter:junit-jupiter-engine"
-            implementation "org.spockframework:spock-core"
-        }
-    }
-
-    if (isGormDatasource) {
-        dependencies {
-            testImplementation project(":grails-datastore-gorm-tck")
-        }
-
-        // We need to test against the TCK. Gradle cannot find/run tests from jars
-        // without a lot of plumbing, so here we copy the class files from the TCK
-        // project into this project's test classes dir so Gradle can find the test
-        // classes and run them. See grails.gorm.tests.GormDatastoreSpec for on the TCK.
-
-        // helper, used below.
-        def toBaseClassRelativePathWithoutExtension = { String base, String classFile ->
-            if (classFile.startsWith(base)) {
-                def sansClass = classFile[0 .. classFile.size() - ".class".size() - 1]
-                def dollarIndex = sansClass.indexOf('$')
-                def baseClass = dollarIndex > 0 ? sansClass[0..dollarIndex - 1] : sansClass
-                def relative = baseClass - base - '/'
-                relative
-            }
-            else {
-                null
-            }
-        }
-
-        compileTestGroovy {
-            configure(groovyOptions.forkOptions) {
-                jvmArgs = [ '-Xmx768m']
-            }
-        }
-
-        test {
-            useJUnitPlatform()
-            testLogging {
-                exceptionFormat ='full'
-            }
-            if (isCiBuild) {
-                maxParallelForks = 2
-                jvmArgs = ['-server', '-Xmx1024M']
-                forkEvery = 20
-                afterSuite {
-                    System.out.print('.')
-                    System.out.flush()
-                }
-            } else {
-                maxParallelForks = 4
-                forkEvery = 100
-                jvmArgs = ['-server', '-Xmx2048M']
-            }
-            if(System.getProperty("debug.tests")) {
-                jvmArgs '-Xmx2g', '-Xdebug', '-Xnoagent', '-Djava.compiler=NONE',
-                        '-Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=5005'
-            }
-        }
-        test.doFirst {
-            File tckClassesDir = project(":grails-datastore-gorm-tck").sourceSets.main.output.classesDirs.files.first()
-            def thisProjectsTests = // surely there is a less hardcoded way to do this
-            copy {
-                from tckClassesDir
-                into sourceSets.test.output.classesDirs.files.first()
-                include "**/*.class"
-                exclude { details ->
-                    // Do not copy across any TCK class (or nested classes of that class)
-                    // If there is a corresponding source file in the particular modules
-                    // test source tree. Allows a module to override a test/helper.
-
-                    if (!details.file.isFile()) {
-                        return false
-                    }
-                    def candidatePath = details.file.absolutePath
-                    def relativePath = toBaseClassRelativePathWithoutExtension(tckClassesDir.absolutePath, candidatePath)
-
-                    if (relativePath == null) {
-                        throw new IllegalStateException("$candidatePath does not appear to be in the TCK")
-                    }
-
-                    project.file("src/test/groovy/${relativePath}.groovy").exists()
-                }
-            }
-        }
-//        Only enable to force update dependencies
-//        configurations.all {
-//            resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
-//        }
-    }
-
-    if (isStandardGroovyMavenProject) {
-
-        configure([javadoc]) {
-            options.encoding "UTF-8"
-            options.docEncoding "UTF-8"
-            options.charSet "UTF-8"
-            options.jFlags "-Xms64M", "-Xmx512M"
-        }
-
-        configure([groovydoc]) {
-            classpath += configurations.documentation
-        }
-    }
-}
-
-configurations {
-    build
-}
-
-dependencies {
-    build "org.openclover:clover:$cloverVersion"
-    build "org.apache.ant:ant-junit"
-    build "org.apache.ant:ant"
-}
-
-task install(dependsOn: subprojects*.tasks*.withType(PublishToMavenLocal))
-
-apply from: 'https://raw.githubusercontent.com/grails/grails-common-build/master/common-publishing.gradle'
-
-task test(dependsOn: getTasksByName("test", true)) {
-     doLast {
-         def reportsDir = "${buildDir}/reports"
-
-         // Aggregate the test results
-         ant.taskdef(
-             name: 'junitreport2',
-             classname: "org.apache.tools.ant.taskdefs.optional.junit.XMLResultAggregator",
-             classpath: configurations.build.asPath
-         )
-
-         def testReportsDir = new File("${reportsDir}/tests")
-         if (testReportsDir.exists()) {
-             testReportsDir.deleteDir()
-         }
-         testReportsDir.mkdirs()
-
-         ant.junitreport2(todir: testReportsDir) {
-             subprojects.each {
-                 def testResultsDir = "${it.buildDir}/test-results"
-                 if (new File(testResultsDir).exists()) {
-                     fileset(dir: testResultsDir) {
-                         include(name: "TEST-*.xml")
-                     }
-                 }
-             }
-             report(todir: testReportsDir)
-         }
-     }
-}
-
-if (isReleaseVersion) {
-    nexusPublishing {
-        transitionCheckOptions {
-            maxRetries.set(50)
-            delayBetween.set(java.time.Duration.ofMillis(5000))
-        }
-    }
-}
-
-project.afterEvaluate {
-    allprojects.repositories.each { handler ->
-        handler.each {
-            if (it.url.toString().startsWith("http://")) {
-                throw new RuntimeException("Build should not define insecure HTTP-based Maven repostories")
-            }
-        }
-    }
-}

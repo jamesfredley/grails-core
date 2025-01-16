@@ -1,12 +1,35 @@
+plugins {
+    id 'groovy'
+    id 'java-library'
+}
+
+version = projectVersion
+group = 'org.grails'
+
 dependencies {
-    api "io.reactivex:rxjava:$rxjavaVersion"
+    implementation platform("org.grails:grails-bom:$grailsVersion")
+    implementation 'org.apache.groovy:groovy'
+
+    api "io.reactivex:rxjava"
     api project(":grails-datastore-gorm"), {
         exclude group:"org.grails", module:'grails-async'
         exclude group:"org.grails", module:'grails-datastore-core'
     }
     api project(":grails-datastore-core")
     implementation "org.javassist:javassist:$javassistVersion"
-    compileOnly("org.hibernate.validator:hibernate-validator")
-    documentation "org.springframework:spring-beans"
-    documentation "org.grails:grails-async"
+    api "jakarta.annotation:jakarta.annotation-api"
+    implementation "jakarta.validation:jakarta.validation-api"
+    compileOnly "org.hibernate.validator:hibernate-validator"
+
+    testImplementation "org.apache.groovy:groovy-test-junit5"
+    testImplementation "org.apache.groovy:groovy-test"
+    testImplementation "org.junit.jupiter:junit-jupiter-engine"
+    testImplementation "org.junit.platform:junit-platform-runner"
+
+    testImplementation "org.junit.jupiter:junit-jupiter-api"
+    testImplementation "org.spockframework:spock-core"
 }
+
+apply from: rootProject.layout.projectDirectory.file('gradle/java-config.gradle')
+apply from: rootProject.layout.projectDirectory.file('gradle/test-config.gradle')
+apply from: rootProject.layout.projectDirectory.file('gradle/doc-config.gradle')

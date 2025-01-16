@@ -39,39 +39,37 @@ class RxServiceSupport {
      * @return The {@link Observable}
      */
     static <T> Observable<T> create(Scheduler scheduler, Callable<T> callable) {
-        Observable.create(new SyncOnSubscribe() {
+        Observable<T> observable = Observable.create(new SyncOnSubscribe() {
             @Override
             protected Object generateState() {
                 def result = callable.call()
-                if(result instanceof Iterable) {
-                    return ((Iterable)result).iterator()
+                if (result instanceof Iterable) {
+                    return ((Iterable) result).iterator()
                 }
                 return result
             }
 
             @Override
             protected Object next(Object state, Observer observer) {
-                if(state == null) {
+                if (state == null) {
                     observer.onCompleted()
-                }
-                else if(state instanceof Iterator) {
-                    Iterator i = (Iterator)state
-                    if(i.hasNext()) {
+                } else if (state instanceof Iterator) {
+                    Iterator i = (Iterator) state
+                    if (i.hasNext()) {
                         observer.onNext(i.next())
-                    }
-                    else {
+                    } else {
                         observer.onCompleted()
                     }
 
-                }
-                else {
+                } else {
                     observer.onNext(state)
                     observer.onCompleted()
                 }
                 return state
             }
 
-        }).observeOn(scheduler)
+        })
+        observable.observeOn(scheduler)
     }
 
     /**
@@ -91,14 +89,15 @@ class RxServiceSupport {
      * @param callable The callable
      * @return The {@link Observable}
      */
-    static <T>  Single<T> createSingle(Scheduler scheduler, Callable<T> callable) {
-        Single.create({ SingleSubscriber<? super T> singleSubscriber ->
+    static <T> Single<T> createSingle(Scheduler scheduler, Callable<T> callable) {
+        Single<T> single = Single.create({ SingleSubscriber<? super T> singleSubscriber ->
             try {
                 def result = callable.call()
                 singleSubscriber.onSuccess(result)
             } catch (Throwable e) {
                 singleSubscriber.onError(e)
             }
-        } as Single.OnSubscribe).observeOn(scheduler)
+        } as Single.OnSubscribe)
+        single.observeOn(scheduler)
     }
 }

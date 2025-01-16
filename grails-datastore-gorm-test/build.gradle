@@ -1,12 +1,39 @@
+plugins {
+    id 'groovy'
+    id 'java-library'
+}
+
+version = projectVersion
+group = 'org.grails'
+
 dependencies {
-    api project(":grails-datastore-gorm"),
-            project(":grails-datastore-core")
+    implementation platform("org.grails:grails-bom:$grailsVersion")
+    implementation 'org.apache.groovy:groovy'
+
+    api project(":grails-datastore-gorm")
+    api project(":grails-datastore-core")
+
+    api "jakarta.annotation:jakarta.annotation-api"
+    implementation "jakarta.validation:jakarta.validation-api"
 
     implementation "com.github.ben-manes.caffeine:caffeine"
-    testImplementation project(":grails-datastore-gorm-rx")
+    // Commented out since we aren't building / publishing
+    //testImplementation project(":grails-datastore-gorm-rx")
     testImplementation project(":grails-datastore-gorm-tck")
-    testImplementation "org.apache.groovy:groovy-json:$groovyVersion"
+    testImplementation "org.apache.groovy:groovy-json"
     testRuntimeOnly "org.springframework:spring-aop"
+
+    testImplementation "org.apache.groovy:groovy-test-junit5"
+    testImplementation "org.junit.jupiter:junit-jupiter-engine"
+    testImplementation "org.junit.platform:junit-platform-runner"
+
+    testImplementation "org.junit.jupiter:junit-jupiter-api"
+    testImplementation "org.spockframework:spock-core"
 }
 
 //compileTestGroovy.groovyOptions.forkOptions.jvmArgs = ['-Xdebug', '-Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=5005']
+
+apply from: rootProject.layout.projectDirectory.file('gradle/java-config.gradle')
+apply from: rootProject.layout.projectDirectory.file('gradle/test-config.gradle')
+apply from: rootProject.layout.projectDirectory.file('gradle/doc-config.gradle')
+apply from: rootProject.layout.projectDirectory.file('gradle/tck-config.gradle')

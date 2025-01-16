@@ -1,0 +1,7 @@
+
+configure([javadoc]) {
+    options.encoding "UTF-8"
+    options.docEncoding "UTF-8"
+    options.charSet "UTF-8"
+    options.jFlags "-Xms64M", "-Xmx512M"
+}

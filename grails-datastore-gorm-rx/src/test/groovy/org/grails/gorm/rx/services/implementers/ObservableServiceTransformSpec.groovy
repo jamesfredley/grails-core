@@ -2,18 +2,14 @@ package org.grails.gorm.rx.services.implementers
 
 import grails.gorm.annotation.Entity
 import grails.gorm.services.Service
-import grails.gorm.transactions.ReadOnly
 import org.grails.datastore.gorm.services.Implemented
 import org.grails.datastore.gorm.services.implementers.CountWhereImplementer
 import org.grails.datastore.gorm.services.implementers.FindAllByImplementer
 import org.grails.datastore.gorm.services.implementers.FindAllByInterfaceProjectionImplementer
 import org.grails.datastore.gorm.services.implementers.FindAllImplementer
-import org.grails.datastore.gorm.services.implementers.FindAllInterfaceProjectionImplementer
 import org.grails.datastore.gorm.services.implementers.FindAllWhereImplementer
 import org.grails.datastore.gorm.services.implementers.FindOneImplementer
 import org.grails.datastore.gorm.services.implementers.FindOnePropertyProjectionImplementer
-import org.grails.datastore.gorm.services.implementers.FindOneWhereImplementer
-import org.grails.datastore.gorm.services.implementers.UpdateOneImplementer
 import org.grails.datastore.gorm.services.implementers.UpdateStringQueryImplementer
 import org.grails.gorm.rx.services.support.RxServiceSupport
 import rx.Observable

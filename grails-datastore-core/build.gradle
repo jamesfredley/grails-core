@@ -1,4 +1,18 @@
+plugins {
+    id 'groovy'
+    id 'java-library'
+}
+
+version = projectVersion
+group = 'org.grails'
+
 dependencies {
+    implementation platform("org.grails:grails-bom:$grailsVersion")
+    implementation 'org.apache.groovy:groovy'
+
+    api "jakarta.annotation:jakarta.annotation-api"
+    implementation "jakarta.validation:jakarta.validation-api"
+
     api "jakarta.transaction:jakarta.transaction-api"
     api "org.slf4j:slf4j-api"
     api "org.slf4j:jcl-over-slf4j"
@@ -10,8 +24,20 @@ dependencies {
     implementation "com.github.ben-manes.caffeine:caffeine"
     implementation "org.javassist:javassist:$javassistVersion"
 
-    testImplementation project(":grails-datastore-gorm")
     // we need the Grails @Entity annotation to test GORM syntax mapping
+    testImplementation project(":grails-datastore-gorm")
+
     testImplementation "org.springframework:spring-context"
     testImplementation "org.springframework:spring-web"
+
+    testImplementation "org.apache.groovy:groovy-test-junit5"
+    testImplementation "org.junit.jupiter:junit-jupiter-engine"
+    testImplementation "org.junit.platform:junit-platform-runner"
+
+    testImplementation "org.junit.jupiter:junit-jupiter-api"
+    testImplementation "org.spockframework:spock-core"
 }
+
+apply from: rootProject.layout.projectDirectory.file('gradle/java-config.gradle')
+apply from: rootProject.layout.projectDirectory.file('gradle/test-config.gradle')
+apply from: rootProject.layout.projectDirectory.file('gradle/doc-config.gradle')

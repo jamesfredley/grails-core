@@ -1,10 +1,31 @@
+plugins {
+    id 'groovy'
+    id 'java-library'
+}
+
+version = projectVersion
+group = 'org.grails'
+
 dependencies {
-    api "org.springframework:spring-expression"
+    implementation platform("org.grails:grails-bom:$grailsVersion")
+    implementation 'org.apache.groovy:groovy'
+
     api project(":grails-datastore-gorm-async")
     api project(":grails-datastore-gorm-support")
-    api("jakarta.servlet:jakarta.servlet-api")
-    runtimeOnly "org.apache.groovy:groovy-dateutil:$groovyVersion"
+
+    api "jakarta.servlet:jakarta.servlet-api"
+    api "org.apache.groovy:groovy-test-junit5"
+    api "org.junit.jupiter:junit-jupiter-api"
+    api "org.junit.platform:junit-platform-runner"
+    api "org.springframework:spring-expression"
+
+    implementation "org.spockframework:spock-core"
+    runtimeOnly "org.apache.groovy:groovy-dateutil"
+    runtimeOnly "org.junit.jupiter:junit-jupiter-engine"
 }
 
 //compileGroovy.groovyOptions.fork = false
 //compileGroovy.groovyOptions.forkOptions.jvmArgs = ['-Xdebug', '-Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=5005']
+
+apply from: rootProject.layout.projectDirectory.file('gradle/java-config.gradle')
+apply from: rootProject.layout.projectDirectory.file('gradle/test-config.gradle')

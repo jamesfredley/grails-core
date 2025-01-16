@@ -1,18 +1,17 @@
 plugins {
-    id 'com.gradle.develocity' version '3.18.2'
+    id 'com.gradle.develocity' version '3.19'
     id 'com.gradle.common-custom-user-data-gradle-plugin' version '2.0.2'
 }
 
 def isCI = System.getenv('CI') != null
 def isLocal = !isCI
 def isAuthenticated = System.getenv('DEVELOCITY_ACCESS_KEY') != null
-def isBuildCacheAuthenticated =
-        System.getenv('DEVELOCITY_BUILD_CACHE_NODE_USER') != null &&
-        System.getenv('DEVELOCITY_BUILD_CACHE_NODE_KEY') != null
 
 develocity {
     server = 'https://ge.grails.org'
     buildScan {
+        tag('grails')
+        tag('grails-gsp')
         publishing.onlyIf { isAuthenticated }
         uploadInBackground = isLocal
     }
@@ -21,15 +20,12 @@ develocity {
 buildCache {
     local { enabled = isLocal }
     remote(develocity.buildCache) {
-        push = isCI && isBuildCacheAuthenticated
+        push = isCI && isAuthenticated
         enabled = true
-        usernameAndPassword(
-                System.getenv('DEVELOCITY_BUILD_CACHE_NODE_USER') ?: '',
-                System.getenv('DEVELOCITY_BUILD_CACHE_NODE_KEY') ?: ''
-        )
     }
 }
 
+rootProject.name = 'grails-data-mapping'
 
 include ("grails-datastore-core",
         "grails-datastore-web",
@@ -43,7 +39,10 @@ include ("grails-datastore-core",
         'grails-datastore-gorm-tck',
         'grails-datastore-gorm-test',
 
-
         // RX projects
-        'grails-datastore-gorm-rx'
+        // until this can be finished ported to grails 7, we are disabling
+        //'grails-datastore-gorm-rx',
+
+        // Testing Support
+        'grails-gorm-testing-support'
 )

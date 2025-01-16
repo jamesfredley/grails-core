@@ -1,4 +1,18 @@
+plugins {
+    id 'groovy'
+    id 'java-library'
+}
+
+version = projectVersion
+group = 'org.grails'
+
 dependencies {
+    implementation platform("org.grails:grails-bom:$grailsVersion")
+    implementation 'org.apache.groovy:groovy'
+
+    api "jakarta.annotation:jakarta.annotation-api"
+    implementation "jakarta.validation:jakarta.validation-api"
+
     api project(":grails-datastore-core")
     api project(":grails-datastore-gorm-validation")
 
@@ -15,6 +29,18 @@ dependencies {
     testImplementation("org.springframework:spring-jdbc")
     testImplementation("org.hibernate.validator:hibernate-validator")
     testRuntimeOnly("com.h2database:h2")
+
+    testImplementation "org.apache.groovy:groovy-test-junit5"
+    testImplementation "org.junit.jupiter:junit-jupiter-engine"
+    testImplementation "org.junit.platform:junit-platform-runner"
+
+    testImplementation "org.junit.jupiter:junit-jupiter-api"
+    testImplementation "org.spockframework:spock-core"
 }
 
 //compileGroovy.groovyOptions.forkOptions.jvmArgs = ['-Xdebug', '-Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=5005']
+
+apply from: rootProject.layout.projectDirectory.file('gradle/java-config.gradle')
+apply from: rootProject.layout.projectDirectory.file('gradle/test-config.gradle')
+apply from: rootProject.layout.projectDirectory.file('gradle/doc-config.gradle')
+apply from: rootProject.layout.projectDirectory.file('gradle/tck-config.gradle')

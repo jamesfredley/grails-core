@@ -1,7 +1,21 @@
+plugins {
+    id 'groovy'
+    id 'java-library'
+}
+
+version = projectVersion
+group = 'org.grails'
+
 dependencies {
+    implementation platform("org.grails:grails-bom:$grailsVersion")
+    implementation 'org.apache.groovy:groovy'
+
     api project(':grails-datastore-gorm')
     api "org.grails:grails-core:$grailsVersion"
     api "org.grails:grails-bootstrap:$grailsVersion"
+
+    api "jakarta.annotation:jakarta.annotation-api"
+    implementation "jakarta.validation:jakarta.validation-api"
 
     compileOnly "org.springframework:spring-orm"
     compileOnly "org.springframework:spring-webmvc"
@@ -15,6 +29,13 @@ dependencies {
         exclude group:'dom4j', module:'dom4j'
         exclude group:'antlr', module: 'antlr'
     }
+
+    testImplementation "org.apache.groovy:groovy-test-junit5"
+    testImplementation "org.junit.jupiter:junit-jupiter-engine"
+    testImplementation "org.junit.platform:junit-platform-runner"
+
+    testImplementation "org.junit.jupiter:junit-jupiter-api"
+    testImplementation "org.spockframework:spock-core"
 }
 
 project.tasks.withType(Jar) {
@@ -22,3 +43,7 @@ project.tasks.withType(Jar) {
         duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     }
 }
+
+apply from: rootProject.layout.projectDirectory.file('gradle/java-config.gradle')
+apply from: rootProject.layout.projectDirectory.file('gradle/test-config.gradle')
+apply from: rootProject.layout.projectDirectory.file('gradle/doc-config.gradle')

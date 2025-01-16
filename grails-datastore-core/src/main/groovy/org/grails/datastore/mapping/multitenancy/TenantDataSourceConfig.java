@@ -21,12 +21,12 @@ import java.lang.annotation.*;
  * <p>An annotation that adds possibility to configure whether a domain should be excluded from particular
  * data source(s). For example:</p>
  *
- * <pre>
- * {@literal @}TenantDataSourceConfig(dataSourcesToExclude=["adminDataSource"])
+ * <pre>{@code
+ * @TenantDataSourceConfig(dataSourcesToExclude=["adminDataSource"])
  * class Animal implements MultiTenant<Animal> {
  *       ...
  * }
- * </pre>
+ * }</pre>
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)

@@ -9,16 +9,16 @@ import spock.lang.Specification
 class AutoTimestampEventListenerSpec extends Specification {
 
     TestEventListener listener
-    Map<String, Boolean> lastUpdatedBaseState = [:]
-    Map<String, Boolean> dateCreatedBaseState = [:]
+    Map<String, Optional<Set<String>>> lastUpdatedBaseState = [:]
+    Map<String, Optional<Set<String>>> dateCreatedBaseState = [:]
 
     void setup() {
         listener = new TestEventListener(Stub(Datastore) {
             getMappingContext() >> null
         })
         [Foo, Bar, FooBar].each {
-            lastUpdatedBaseState.put(it.getName(), true)
-            dateCreatedBaseState.put(it.getName(), true)
+            lastUpdatedBaseState.put(it.getName(), Optional.of(['lastUpdated'] as Set<String>))
+            dateCreatedBaseState.put(it.getName(), Optional.of(['dateCreated'] as Set<String>))
         }
     }
 
@@ -38,23 +38,23 @@ class AutoTimestampEventListenerSpec extends Specification {
         }
 
         then:
-        lastUpdatedBaseState[Foo.getName()] == false
-        lastUpdatedBaseState[Bar.getName()] == false
-        lastUpdatedBaseState[FooBar.getName()] == false
-        dateCreatedBaseState[Foo.getName()] == true
-        dateCreatedBaseState[Bar.getName()] == true
-        dateCreatedBaseState[FooBar.getName()] == true
+        lastUpdatedBaseState[Foo.getName()].isEmpty()
+        lastUpdatedBaseState[Bar.getName()].isEmpty()
+        lastUpdatedBaseState[FooBar.getName()].isEmpty()
+        dateCreatedBaseState[Foo.getName()].isPresent()
+        dateCreatedBaseState[Bar.getName()].isPresent()
+        dateCreatedBaseState[FooBar.getName()].isPresent()
 
         when:
         updateBaseStates()
 
         then:
-        lastUpdatedBaseState[Foo.getName()] == true
-        lastUpdatedBaseState[Bar.getName()] == true
-        lastUpdatedBaseState[FooBar.getName()] == true
-        dateCreatedBaseState[Foo.getName()] == true
-        dateCreatedBaseState[Bar.getName()] == true
-        dateCreatedBaseState[FooBar.getName()] == true
+        lastUpdatedBaseState[Foo.getName()].isPresent()
+        lastUpdatedBaseState[Bar.getName()].isPresent()
+        lastUpdatedBaseState[FooBar.getName()].isPresent()
+        dateCreatedBaseState[Foo.getName()].isPresent()
+        dateCreatedBaseState[Bar.getName()].isPresent()
+        dateCreatedBaseState[FooBar.getName()].isPresent()
     }
 
     void "test withoutLastUpdated(Class)"() {
@@ -64,23 +64,23 @@ class AutoTimestampEventListenerSpec extends Specification {
         }
 
         then:
-        lastUpdatedBaseState[Foo.getName()] == true
-        lastUpdatedBaseState[Bar.getName()] == false
-        lastUpdatedBaseState[FooBar.getName()] == true
-        dateCreatedBaseState[Foo.getName()] == true
-        dateCreatedBaseState[Bar.getName()] == true
-        dateCreatedBaseState[FooBar.getName()] == true
+        lastUpdatedBaseState[Foo.getName()].isPresent()
+        lastUpdatedBaseState[Bar.getName()].isEmpty()
+        lastUpdatedBaseState[FooBar.getName()].isPresent()
+        dateCreatedBaseState[Foo.getName()].isPresent()
+        dateCreatedBaseState[Bar.getName()].isPresent()
+        dateCreatedBaseState[FooBar.getName()].isPresent()
 
         when:
         updateBaseStates()
 
         then:
-        lastUpdatedBaseState[Foo.getName()] == true
-        lastUpdatedBaseState[Bar.getName()] == true
-        lastUpdatedBaseState[FooBar.getName()] == true
-        dateCreatedBaseState[Foo.getName()] == true
-        dateCreatedBaseState[Bar.getName()] == true
-        dateCreatedBaseState[FooBar.getName()] == true
+        lastUpdatedBaseState[Foo.getName()].isPresent()
+        lastUpdatedBaseState[Bar.getName()].isPresent()
+        lastUpdatedBaseState[FooBar.getName()].isPresent()
+        dateCreatedBaseState[Foo.getName()].isPresent()
+        dateCreatedBaseState[Bar.getName()].isPresent()
+        dateCreatedBaseState[FooBar.getName()].isPresent()
     }
 
     void "test withoutLastUpdated(Class[])"() {
@@ -90,23 +90,23 @@ class AutoTimestampEventListenerSpec extends Specification {
         }
 
         then:
-        lastUpdatedBaseState[Foo.getName()] == true
-        lastUpdatedBaseState[Bar.getName()] == false
-        lastUpdatedBaseState[FooBar.getName()] == false
-        dateCreatedBaseState[Foo.getName()] == true
-        dateCreatedBaseState[Bar.getName()] == true
-        dateCreatedBaseState[FooBar.getName()] == true
+        lastUpdatedBaseState[Foo.getName()].isPresent()
+        lastUpdatedBaseState[Bar.getName()].isEmpty()
+        lastUpdatedBaseState[FooBar.getName()].isEmpty()
+        dateCreatedBaseState[Foo.getName()].isPresent()
+        dateCreatedBaseState[Bar.getName()].isPresent()
+        dateCreatedBaseState[FooBar.getName()].isPresent()
 
         when:
         updateBaseStates()
 
         then:
-        lastUpdatedBaseState[Foo.getName()] == true
-        lastUpdatedBaseState[Bar.getName()] == true
-        lastUpdatedBaseState[FooBar.getName()] == true
-        dateCreatedBaseState[Foo.getName()] == true
-        dateCreatedBaseState[Bar.getName()] == true
-        dateCreatedBaseState[FooBar.getName()] == true
+        lastUpdatedBaseState[Foo.getName()].isPresent()
+        lastUpdatedBaseState[Bar.getName()].isPresent()
+        lastUpdatedBaseState[FooBar.getName()].isPresent()
+        dateCreatedBaseState[Foo.getName()].isPresent()
+        dateCreatedBaseState[Bar.getName()].isPresent()
+        dateCreatedBaseState[FooBar.getName()].isPresent()
     }
 
     void "test withoutDateCreated"() {
@@ -116,23 +116,23 @@ class AutoTimestampEventListenerSpec extends Specification {
         }
 
         then:
-        lastUpdatedBaseState[Foo.getName()] == true
-        lastUpdatedBaseState[Bar.getName()] == true
-        lastUpdatedBaseState[FooBar.getName()] == true
-        dateCreatedBaseState[Foo.getName()] == false
-        dateCreatedBaseState[Bar.getName()] == false
-        dateCreatedBaseState[FooBar.getName()] == false
+        lastUpdatedBaseState[Foo.getName()].isPresent()
+        lastUpdatedBaseState[Bar.getName()].isPresent()
+        lastUpdatedBaseState[FooBar.getName()].isPresent()
+        dateCreatedBaseState[Foo.getName()].isEmpty()
+        dateCreatedBaseState[Bar.getName()].isEmpty()
+        dateCreatedBaseState[FooBar.getName()].isEmpty()
 
         when:
         updateBaseStates()
 
         then:
-        lastUpdatedBaseState[Foo.getName()] == true
-        lastUpdatedBaseState[Bar.getName()] == true
-        lastUpdatedBaseState[FooBar.getName()] == true
-        dateCreatedBaseState[Foo.getName()] == true
-        dateCreatedBaseState[Bar.getName()] == true
-        dateCreatedBaseState[FooBar.getName()] == true
+        lastUpdatedBaseState[Foo.getName()].isPresent()
+        lastUpdatedBaseState[Bar.getName()].isPresent()
+        lastUpdatedBaseState[FooBar.getName()].isPresent()
+        dateCreatedBaseState[Foo.getName()].isPresent()
+        dateCreatedBaseState[Bar.getName()].isPresent()
+        dateCreatedBaseState[FooBar.getName()].isPresent()
     }
 
     void "test withoutDateCreated(Class)"() {
@@ -142,23 +142,23 @@ class AutoTimestampEventListenerSpec extends Specification {
         }
 
         then:
-        lastUpdatedBaseState[Foo.getName()] == true
-        lastUpdatedBaseState[Bar.getName()] == true
-        lastUpdatedBaseState[FooBar.getName()] == true
-        dateCreatedBaseState[Foo.getName()] == true
-        dateCreatedBaseState[Bar.getName()] == false
-        dateCreatedBaseState[FooBar.getName()] == true
+        lastUpdatedBaseState[Foo.getName()].isPresent()
+        lastUpdatedBaseState[Bar.getName()].isPresent()
+        lastUpdatedBaseState[FooBar.getName()].isPresent()
+        dateCreatedBaseState[Foo.getName()].isPresent()
+        dateCreatedBaseState[Bar.getName()].isEmpty()
+        dateCreatedBaseState[FooBar.getName()].isPresent()
 
         when:
         updateBaseStates()
 
         then:
-        lastUpdatedBaseState[Foo.getName()] == true
-        lastUpdatedBaseState[Bar.getName()] == true
-        lastUpdatedBaseState[FooBar.getName()] == true
-        dateCreatedBaseState[Foo.getName()] == true
-        dateCreatedBaseState[Bar.getName()] == true
-        dateCreatedBaseState[FooBar.getName()] == true
+        lastUpdatedBaseState[Foo.getName()].isPresent()
+        lastUpdatedBaseState[Bar.getName()].isPresent()
+        lastUpdatedBaseState[FooBar.getName()].isPresent()
+        dateCreatedBaseState[Foo.getName()].isPresent()
+        dateCreatedBaseState[Bar.getName()].isPresent()
+        dateCreatedBaseState[FooBar.getName()].isPresent()
     }
 
     void "test withoutDateCreated(Class[])"() {
@@ -168,23 +168,23 @@ class AutoTimestampEventListenerSpec extends Specification {
         }
 
         then:
-        lastUpdatedBaseState[Foo.getName()] == true
-        lastUpdatedBaseState[Bar.getName()] == true
-        lastUpdatedBaseState[FooBar.getName()] == true
-        dateCreatedBaseState[Foo.getName()] == true
-        dateCreatedBaseState[Bar.getName()] == false
-        dateCreatedBaseState[FooBar.getName()] == false
+        lastUpdatedBaseState[Foo.getName()].isPresent()
+        lastUpdatedBaseState[Bar.getName()].isPresent()
+        lastUpdatedBaseState[FooBar.getName()].isPresent()
+        dateCreatedBaseState[Foo.getName()].isPresent()
+        dateCreatedBaseState[Bar.getName()].isEmpty()
+        dateCreatedBaseState[FooBar.getName()].isEmpty()
 
         when:
         updateBaseStates()
 
         then:
-        lastUpdatedBaseState[Foo.getName()] == true
-        lastUpdatedBaseState[Bar.getName()] == true
-        lastUpdatedBaseState[FooBar.getName()] == true
-        dateCreatedBaseState[Foo.getName()] == true
-        dateCreatedBaseState[Bar.getName()] == true
-        dateCreatedBaseState[FooBar.getName()] == true
+        lastUpdatedBaseState[Foo.getName()].isPresent()
+        lastUpdatedBaseState[Bar.getName()].isPresent()
+        lastUpdatedBaseState[FooBar.getName()].isPresent()
+        dateCreatedBaseState[Foo.getName()].isPresent()
+        dateCreatedBaseState[Bar.getName()].isPresent()
+        dateCreatedBaseState[FooBar.getName()].isPresent()
     }
 
 
@@ -195,23 +195,23 @@ class AutoTimestampEventListenerSpec extends Specification {
         }
 
         then:
-        lastUpdatedBaseState[Foo.getName()] == false
-        lastUpdatedBaseState[Bar.getName()] == false
-        lastUpdatedBaseState[FooBar.getName()] == false
-        dateCreatedBaseState[Foo.getName()] == false
-        dateCreatedBaseState[Bar.getName()] == false
-        dateCreatedBaseState[FooBar.getName()] == false
+        lastUpdatedBaseState[Foo.getName()].isEmpty()
+        lastUpdatedBaseState[Bar.getName()].isEmpty()
+        lastUpdatedBaseState[FooBar.getName()].isEmpty()
+        dateCreatedBaseState[Foo.getName()].isEmpty()
+        dateCreatedBaseState[Bar.getName()].isEmpty()
+        dateCreatedBaseState[FooBar.getName()].isEmpty()
 
         when:
         updateBaseStates()
 
         then:
-        lastUpdatedBaseState[Foo.getName()] == true
-        lastUpdatedBaseState[Bar.getName()] == true
-        lastUpdatedBaseState[FooBar.getName()] == true
-        dateCreatedBaseState[Foo.getName()] == true
-        dateCreatedBaseState[Bar.getName()] == true
-        dateCreatedBaseState[FooBar.getName()] == true
+        lastUpdatedBaseState[Foo.getName()].isPresent()
+        lastUpdatedBaseState[Bar.getName()].isPresent()
+        lastUpdatedBaseState[FooBar.getName()].isPresent()
+        dateCreatedBaseState[Foo.getName()].isPresent()
+        dateCreatedBaseState[Bar.getName()].isPresent()
+        dateCreatedBaseState[FooBar.getName()].isPresent()
     }
 
     void "test withoutTimestamps(Class)"() {
@@ -221,23 +221,23 @@ class AutoTimestampEventListenerSpec extends Specification {
         }
 
         then:
-        lastUpdatedBaseState[Foo.getName()] == true
-        lastUpdatedBaseState[Bar.getName()] == false
-        lastUpdatedBaseState[FooBar.getName()] == true
-        dateCreatedBaseState[Foo.getName()] == true
-        dateCreatedBaseState[Bar.getName()] == false
-        dateCreatedBaseState[FooBar.getName()] == true
+        lastUpdatedBaseState[Foo.getName()].isPresent()
+        lastUpdatedBaseState[Bar.getName()].isEmpty()
+        lastUpdatedBaseState[FooBar.getName()].isPresent()
+        dateCreatedBaseState[Foo.getName()].isPresent()
+        dateCreatedBaseState[Bar.getName()].isEmpty()
+        dateCreatedBaseState[FooBar.getName()].isPresent()
 
         when:
         updateBaseStates()
 
         then:
-        lastUpdatedBaseState[Foo.getName()] == true
-        lastUpdatedBaseState[Bar.getName()] == true
-        lastUpdatedBaseState[FooBar.getName()] == true
-        dateCreatedBaseState[Foo.getName()] == true
-        dateCreatedBaseState[Bar.getName()] == true
-        dateCreatedBaseState[FooBar.getName()] == true
+        lastUpdatedBaseState[Foo.getName()].isPresent()
+        lastUpdatedBaseState[Bar.getName()].isPresent()
+        lastUpdatedBaseState[FooBar.getName()].isPresent()
+        dateCreatedBaseState[Foo.getName()].isPresent()
+        dateCreatedBaseState[Bar.getName()].isPresent()
+        dateCreatedBaseState[FooBar.getName()].isPresent()
     }
 
     void "test withoutTimestamps(Class[])"() {
@@ -247,23 +247,23 @@ class AutoTimestampEventListenerSpec extends Specification {
         }
 
         then:
-        lastUpdatedBaseState[Foo.getName()] == true
-        lastUpdatedBaseState[Bar.getName()] == false
-        lastUpdatedBaseState[FooBar.getName()] == false
-        dateCreatedBaseState[Foo.getName()] == true
-        dateCreatedBaseState[Bar.getName()] == false
-        dateCreatedBaseState[FooBar.getName()] == false
+        lastUpdatedBaseState[Foo.getName()].isPresent()
+        lastUpdatedBaseState[Bar.getName()].isEmpty()
+        lastUpdatedBaseState[FooBar.getName()].isEmpty()
+        dateCreatedBaseState[Foo.getName()].isPresent()
+        dateCreatedBaseState[Bar.getName()].isEmpty()
+        dateCreatedBaseState[FooBar.getName()].isEmpty()
 
         when:
         updateBaseStates()
 
         then:
-        lastUpdatedBaseState[Foo.getName()] == true
-        lastUpdatedBaseState[Bar.getName()] == true
-        lastUpdatedBaseState[FooBar.getName()] == true
-        dateCreatedBaseState[Foo.getName()] == true
-        dateCreatedBaseState[Bar.getName()] == true
-        dateCreatedBaseState[FooBar.getName()] == true
+        lastUpdatedBaseState[Foo.getName()].isPresent()
+        lastUpdatedBaseState[Bar.getName()].isPresent()
+        lastUpdatedBaseState[FooBar.getName()].isPresent()
+        dateCreatedBaseState[Foo.getName()].isPresent()
+        dateCreatedBaseState[Bar.getName()].isPresent()
+        dateCreatedBaseState[FooBar.getName()].isPresent()
     }
 }
 
@@ -282,17 +282,17 @@ class FooBar {
 @InheritConstructors
 class TestEventListener extends AutoTimestampEventListener {
 
-    Map<String, Boolean> getDateCreated() {
+    Map<String, Optional<Set<String>>> getDateCreated() {
         this.entitiesWithDateCreated
     }
-    Map<String, Boolean> getLastUpdated() {
+    Map<String, Optional<Set<String>>> getLastUpdated() {
         this.entitiesWithLastUpdated
     }
 
     protected void initForMappingContext(MappingContext mappingContext) {
         [Foo, Bar, FooBar].each {
-            entitiesWithLastUpdated.put(it.getName(), true)
-            entitiesWithDateCreated.put(it.getName(), true)
+            entitiesWithLastUpdated.put(it.getName(), Optional.of(['lastUpdated'] as Set<String>))
+            entitiesWithDateCreated.put(it.getName(), Optional.of(['dateCreated'] as Set<String>))
         }
     }
 }

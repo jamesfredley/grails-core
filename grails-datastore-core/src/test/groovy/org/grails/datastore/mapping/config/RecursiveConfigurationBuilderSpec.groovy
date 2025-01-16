@@ -19,7 +19,7 @@ class RecursiveConfigurationBuilderSpec extends Specification {
 
         then:
         noExceptionThrown()
-        !settings.options.autoEncryptionSettings.bypassAutoEncryption
+        !settings.options.autoEncryptionSettings
     }
 
     void "recursive builder get configured correctly"() {

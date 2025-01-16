@@ -111,7 +111,7 @@ public class ClassPropertyFetcher {
     }
 
     /**
-     * @Deprecated will be removed in a future version of GORM
+     * @deprecated will be removed in a future version of GORM
      */
     @Deprecated
     public Object getReference() {

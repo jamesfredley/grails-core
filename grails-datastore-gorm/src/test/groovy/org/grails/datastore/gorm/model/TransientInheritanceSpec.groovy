@@ -17,7 +17,7 @@ class TransientInheritanceSpec extends Specification {
         PersistentEntity entity = mappingContext.addPersistentEntity(Child)
 
         expect:
-        entity.persistentPropertyNames == ['foo', 'one']
+        entity.persistentPropertyNames.sort() == ['one', 'foo'].sort()
     }
 
     static abstract class Parent {

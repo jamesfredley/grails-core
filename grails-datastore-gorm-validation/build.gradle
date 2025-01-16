@@ -1,4 +1,18 @@
+plugins {
+    id 'groovy'
+    id 'java-library'
+}
+
+version = projectVersion
+group = 'org.grails'
+
 dependencies {
+    implementation platform("org.grails:grails-bom:$grailsVersion")
+    implementation 'org.apache.groovy:groovy'
+
+    api "jakarta.annotation:jakarta.annotation-api"
+    implementation "jakarta.validation:jakarta.validation-api"
+
     api project(":grails-datastore-core")
     api "commons-validator:commons-validator:$commonsValidatorVersion", {
         exclude group: 'xml-apis', module:'xml-apis'
@@ -9,4 +23,15 @@ dependencies {
 
     compileOnly("org.hibernate.validator:hibernate-validator")
     testImplementation("org.hibernate.validator:hibernate-validator")
+
+    testImplementation "org.apache.groovy:groovy-test-junit5"
+    testImplementation "org.junit.jupiter:junit-jupiter-engine"
+    testImplementation "org.junit.platform:junit-platform-runner"
+
+    testImplementation "org.junit.jupiter:junit-jupiter-api"
+    testImplementation "org.spockframework:spock-core"
 }
+
+apply from: rootProject.layout.projectDirectory.file('gradle/java-config.gradle')
+apply from: rootProject.layout.projectDirectory.file('gradle/test-config.gradle')
+apply from: rootProject.layout.projectDirectory.file('gradle/doc-config.gradle')

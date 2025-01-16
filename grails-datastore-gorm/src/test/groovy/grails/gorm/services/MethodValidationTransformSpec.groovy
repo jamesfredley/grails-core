@@ -1,9 +1,9 @@
 package grails.gorm.services
 
 import grails.gorm.annotation.Entity
+import grails.validation.ValidationException
 import jakarta.validation.constraints.NotNull
 import org.grails.datastore.gorm.validation.jakarta.services.ValidatedService
-import org.grails.datastore.mapping.validation.ValidationException
 import spock.lang.Specification
 
 import jakarta.validation.ConstraintViolationException
@@ -28,7 +28,7 @@ interface MyService {
     Foo find(@NotNull String title) throws jakarta.validation.ConstraintViolationException
     
     @grails.gorm.transactions.NotTransactional
-    Foo findAgain(@NotNull @org.hibernate.validator.constraints.NotBlank String title)
+    Foo findAgain(@NotNull @NotBlank String title)
 }
 @Entity
 class Foo {

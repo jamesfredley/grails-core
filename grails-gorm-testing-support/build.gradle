@@ -1,0 +1,30 @@
+plugins {
+    id 'groovy'
+    id 'java-library'
+}
+
+version = projectVersion
+group = 'org.grails'
+
+ext {
+    pomTitle = 'Grails Web Testing Support'
+    pomDescription = 'Support for writing concise expressive tests for Grails Web Artifacts'
+    pomDevelopers = [
+            [id: 'jeffscottbrown', name: 'Jeff Brown'],
+            [id: 'jameskleeh', name: 'James Kleeh']
+    ]
+}
+
+dependencies {
+    implementation platform("org.grails:grails-bom:$grailsVersion")
+    implementation 'org.apache.groovy:groovy'
+
+    api 'org.grails:grails-plugin-domain-class'
+    api project(':grails-datastore-gorm-test')
+
+    api 'org.grails:grails-testing-support'
+}
+
+apply from: rootProject.layout.projectDirectory.file('gradle/java-config.gradle')
+apply from: rootProject.layout.projectDirectory.file('gradle/test-config.gradle')
+apply from: rootProject.layout.projectDirectory.file('gradle/doc-config.gradle')

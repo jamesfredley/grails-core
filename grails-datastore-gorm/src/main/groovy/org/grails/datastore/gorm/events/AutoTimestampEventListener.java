@@ -53,8 +53,8 @@ public class AutoTimestampEventListener extends AbstractPersistenceEventListener
     public static final String DATE_CREATED_PROPERTY = "dateCreated";
     public static final String LAST_UPDATED_PROPERTY = "lastUpdated";
 
-    protected Map<String, Set<String>> entitiesWithDateCreated = new ConcurrentHashMap<>();
-    protected Map<String, Set<String>> entitiesWithLastUpdated = new ConcurrentHashMap<>();
+    protected Map<String, Optional<Set<String>>> entitiesWithDateCreated = new ConcurrentHashMap<>();
+    protected Map<String, Optional<Set<String>>> entitiesWithLastUpdated = new ConcurrentHashMap<>();
     protected Collection<String> uninitializedEntities = new ConcurrentLinkedQueue<>();
 
     private TimestampProvider timestampProvider = new DefaultTimestampProvider();
@@ -146,11 +146,13 @@ public class AutoTimestampEventListener extends AbstractPersistenceEventListener
     }
 
     protected Set<String> getLastUpdatedPropertyNames(String entityName) {
-        return entitiesWithLastUpdated.get(entityName);
+        Optional<Set<String>> properties = entitiesWithLastUpdated.get(entityName);
+        return properties == null ? null : properties.orElse(null);
     }
 
     protected Set<String> getDateCreatedPropertyNames(String entityName) {
-        return entitiesWithDateCreated.get(entityName);
+        Optional<Set<String>> properties = entitiesWithDateCreated.get(entityName);
+        return properties == null ? null : properties.orElse(null);
     }
 
     private static Field getFieldFromHierarchy(PersistentEntity persistentEntity, String fieldName) {
@@ -194,10 +196,15 @@ public class AutoTimestampEventListener extends AbstractPersistenceEventListener
         }
     }
 
-    protected void storeTimestampAvailability(Map<String, Set<String>> timestampAvailabilityMap, PersistentEntity persistentEntity, PersistentProperty<?> property) {
+    protected void storeTimestampAvailability(Map<String, Optional<Set<String>>> timestampAvailabilityMap, PersistentEntity persistentEntity, PersistentProperty<?> property) {
         if (property != null && timestampProvider.supportsCreating(property.getType())) {
-            Set<String> timestampProperties = timestampAvailabilityMap.computeIfAbsent(persistentEntity.getName(), k -> new HashSet<>());
-            timestampProperties.add(property.getName());
+            Optional<Set<String>> timestampProperties = timestampAvailabilityMap.computeIfAbsent(persistentEntity.getName(), k -> Optional.of(new HashSet<>()));
+            if(timestampProperties.isPresent()) {
+                timestampProperties.get().add(property.getName());
+            }
+            else {
+                throw new IllegalStateException("Timestamp properties for entity [" + persistentEntity.getName() + "] have been disabled. Cannot add property [" + property.getName() + "]");
+            }
         }
     }
 
@@ -213,25 +220,25 @@ public class AutoTimestampEventListener extends AbstractPersistenceEventListener
         this.timestampProvider = timestampProvider;
     }
 
-    private void processAllEntries(final Set<Map.Entry<String, Set<String>>> entries, final Runnable runnable)  {
-        Map<String, Set<String>> originalValues = new LinkedHashMap<>();
-        for (Map.Entry<String, Set<String>> entry: entries) {
+    private void processAllEntries(final Set<Map.Entry<String, Optional<Set<String>>>> entries, final Runnable runnable)  {
+        Map<String, Optional<Set<String>>> originalValues = new LinkedHashMap<>();
+        for (Map.Entry<String, Optional<Set<String>>> entry: entries) {
             originalValues.put(entry.getKey(), entry.getValue());
-            entry.setValue(null);
+            entry.setValue(Optional.empty());
         }
         runnable.run();
-        for (Map.Entry<String, Set<String>> entry: entries) {
+        for (Map.Entry<String, Optional<Set<String>>> entry: entries) {
             entry.setValue(originalValues.get(entry.getKey()));
         }
     }
 
-    private void processEntries(final List<Class> classes, Map<String, Set<String>> entities, final Runnable runnable) {
-        Set<Map.Entry<String, Set<String>>> entries = new HashSet<>();
+    private void processEntries(final List<Class> classes, Map<String, Optional<Set<String>>> entities, final Runnable runnable) {
+        Set<Map.Entry<String, Optional<Set<String>>>> entries = new HashSet<>();
         final List<String> classNames = new ArrayList<>(classes.size());
         for (Class clazz: classes) {
             classNames.add(clazz.getName());
         }
-        for (Map.Entry<String, Set<String>> entry: entities.entrySet()) {
+        for (Map.Entry<String, Optional<Set<String>>> entry: entities.entrySet()) {
             if (classNames.contains(entry.getKey())) {
                 entries.add(entry);
             }
