@@ -47,3 +47,4 @@ project.tasks.withType(Jar) {
 apply from: rootProject.layout.projectDirectory.file('gradle/java-config.gradle')
 apply from: rootProject.layout.projectDirectory.file('gradle/test-config.gradle')
 apply from: rootProject.layout.projectDirectory.file('gradle/doc-config.gradle')
+apply from: rootProject.layout.projectDirectory.file('gradle/publish-config.gradle')
