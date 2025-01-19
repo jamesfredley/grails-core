@@ -92,5 +92,12 @@ java {
     sourceCompatibility = JavaVersion.VERSION_11
 }
 
+tasks.withType(GroovyCompile).configureEach {
+    // Preserve method parameter names in compiled Groovy classes
+    // IDE support for parameter hints
+    options.debug = true
+    options.compilerArgs << '--parameters'
+}
+
 tasks.named('bootRun') { enabled = false }
 tasks.named('findMainClass') { enabled = false }

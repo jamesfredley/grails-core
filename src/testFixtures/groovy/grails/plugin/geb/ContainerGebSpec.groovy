@@ -15,14 +15,15 @@
  */
 package grails.plugin.geb
 
+import geb.Browser
+import geb.Page
 import geb.report.CompositeReporter
 import geb.report.PageSourceReporter
 import geb.report.Reporter
 import geb.test.GebTestManager
 import geb.transform.DynamicallyDispatchesToBrowser
-import grails.plugin.geb.support.ContainerGebFileInputSource
+import grails.plugin.geb.support.ContainerSupport
 import org.testcontainers.containers.BrowserWebDriverContainer
-import org.testcontainers.images.builder.Transferable
 import spock.lang.Shared
 import spock.lang.Specification
 
@@ -48,12 +49,7 @@ import spock.lang.Specification
  * @since 4.1
  */
 @DynamicallyDispatchesToBrowser
-abstract class ContainerGebSpec extends Specification implements ContainerAwareDownloadSupport {
-
-    @Shared
-    @Delegate(includes = ['getBrowser', 'report'])
-    @SuppressWarnings('unused')
-    static GebTestManager testManager
+abstract class ContainerGebSpec extends Specification implements ContainerSupport {
 
     /**
      * Get access to container running the web-driver, for convenience to execInContainer, copyFileToContainer etc.
@@ -65,6 +61,27 @@ abstract class ContainerGebSpec extends Specification implements ContainerAwareD
      */
     @Shared
     static BrowserWebDriverContainer container
+
+    @Shared
+    static GebTestManager testManager
+
+    @Delegate(interfaces = false)
+    Page getPage() {
+        testManager.browser.page
+    }
+
+    @Delegate
+    Browser getBrowser() {
+        testManager.browser
+    }
+
+    void report(String message) {
+        testManager.report(message)
+    }
+
+    String getPageSource() {
+        testManager.browser.driver.pageSource
+    }
 
     static void setTestManager(GebTestManager testManager) {
         this.testManager = testManager
@@ -79,19 +96,5 @@ abstract class ContainerGebSpec extends Specification implements ContainerAwareD
      */
     Reporter createReporter() {
         new CompositeReporter(new PageSourceReporter())
-    }
-
-    /**
-     * Copies a file from the host to the container for assignment to a Geb FileInput module.
-     * This method is useful when you need to upload a file to a form in a Geb test and will work cross-platform.
-     *
-     * @param hostPath relative path to the file on the host
-     * @param containerPath absolute path to where to put the file in the container
-     * @return the file object to assign to the FileInput module
-     * @since 4.2
-     */
-    File createFileInputSource(String hostPath, String containerPath) {
-        container.copyFileToContainer(Transferable.of(new File(hostPath).bytes), containerPath)
-        return new ContainerGebFileInputSource(containerPath)
     }
 }
