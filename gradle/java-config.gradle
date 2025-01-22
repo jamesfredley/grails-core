@@ -4,10 +4,3 @@ java {
     withSourcesJar()
     withJavadocJar()
 }
-
-afterEvaluate { project ->
-    def hasSnapshotVersion = project.version.endsWith("-SNAPSHOT")
-    if(isSnapshot != hasSnapshotVersion) {
-        throw new StopExecutionException("${project.name} has version \"${project.version}\" which is${isSnapshot ? 'n\'t' : ''} a snapshot version.")
-    }
-}
