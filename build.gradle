@@ -61,6 +61,3 @@ if (isReleaseVersion) {
 }
 
 apply from: "gradle/idea.gradle"
-apply from: "gradle/aggregate-test-report.gradle"
-
-
