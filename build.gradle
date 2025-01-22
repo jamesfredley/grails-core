@@ -13,6 +13,7 @@ ext {
     isCiBuild = System.getenv('CI')
     isSnapshot = projectVersion.endsWith('-SNAPSHOT')
     isReleaseVersion = !isSnapshot
+    excludeUnusedTransDeps = findProperty('excludeUnusedTransDeps')
 }
 
 group = 'org.grails'
