@@ -38,10 +38,9 @@ dependencies {
     testImplementation "org.spockframework:spock-core"
 }
 
-project.tasks.withType(Jar) {
-    configure {
-        duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-    }
+tasks.withType(Jar).configureEach {
+    // META-INF/grails.factories is also present in grails-core
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
 
 apply from: rootProject.layout.projectDirectory.file('gradle/java-config.gradle')

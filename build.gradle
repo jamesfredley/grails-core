@@ -10,12 +10,12 @@ buildscript {
 }
 
 ext {
-    isCiBuild = System.getenv().get("CI") as Boolean
-    isSnapshot = project.projectVersion.endsWith("-SNAPSHOT")
+    isCiBuild = System.getenv('CI')
+    isSnapshot = projectVersion.endsWith('-SNAPSHOT')
     isReleaseVersion = !isSnapshot
 }
 
-group = "org.grails"
+group = 'org.grails'
 version = project.projectVersion
 
 allprojects {
@@ -24,13 +24,14 @@ allprojects {
         maven { url = 'https://repo.grails.org/grails/core' }
         // mavenLocal() // Keep, this will be uncommented and used by CI (groovy-joint-workflow)
         if (findProperty('groovyVersion')?.endsWith('-SNAPSHOT')) {
+            logger.lifecycle('Adding Groovy Snapshot Repo for project: {}, Using Groovy {}', name, findProperty('groovyVersion'))
             maven {
                 name = 'ASF Snapshot repo'
                 url = 'https://repository.apache.org/content/repositories/snapshots'
             }
         }
         if (System.getenv('GITHUB_MAVEN_PASSWORD') && !grailsVersion.endsWith('-SNAPSHOT')) {
-            System.out.println("Adding Grails Core Staging Repo for project: $name")
+            logger.lifecycle('Adding Grails Core Staging Repo for project: {}', name)
             maven {
                 url = 'https://maven.pkg.github.com/grails/grails-core'
                 credentials {
@@ -48,9 +49,9 @@ if (isReleaseVersion) {
         repositories {
             sonatype {
                 nexusUrl = uri('https://s01.oss.sonatype.org/service/local')
-                username = System.getenv('SONATYPE_USERNAME') ?: project.findProperty('sonatypeOssUsername') ?: ''
-                password = System.getenv('SONATYPE_PASSWORD') ?: project.findProperty('sonatypeOssPassword') ?: ''
-                stagingProfileId = System.getenv('SONATYPE_STAGING_PROFILE_ID') ?: project.findProperty('sonatypeOssStagingProfileId') ?: ''
+                username = System.getenv('SONATYPE_USERNAME') ?: ''
+                password = System.getenv('SONATYPE_PASSWORD') ?: ''
+                stagingProfileId = System.getenv('SONATYPE_STAGING_PROFILE_ID') ?: ''
             }
         }
     }
