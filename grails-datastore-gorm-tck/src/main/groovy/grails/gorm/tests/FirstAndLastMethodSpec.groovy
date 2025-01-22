@@ -2,11 +2,11 @@ package grails.gorm.tests
 
 import grails.persistence.Entity
 
-import spock.lang.Ignore
+import spock.lang.PendingFeature
 
-@Ignore
 class FirstAndLastMethodSpec extends GormDatastoreSpec {
 
+    @PendingFeature(reason = 'Was previously @Ignore')
     void "Test first and last method with empty datastore"() {
         given:
         assert SimpleWidget.count() == 0
@@ -24,6 +24,7 @@ class FirstAndLastMethodSpec extends GormDatastoreSpec {
         result == null
     }
 
+    @PendingFeature(reason = 'Was previously @Ignore')
     void "Test first and last method with multiple entities in the datastore"() {
         given:
         assert new SimpleWidget(name: 'one', spanishName: 'uno').save()
@@ -44,6 +45,7 @@ class FirstAndLastMethodSpec extends GormDatastoreSpec {
         result?.name == 'three'
     }
 
+    @PendingFeature(reason = 'Was previously @Ignore')
     void "Test first and last method with one entity"() {
         given:
         assert new SimpleWidget(name: 'one', spanishName: 'uno').save()
@@ -62,6 +64,7 @@ class FirstAndLastMethodSpec extends GormDatastoreSpec {
         result?.name == 'one'
     }
 
+    @PendingFeature(reason = 'Was previously @Ignore')
     void "Test first and last method with sort parameter"() {
         given:
         assert new SimpleWidget(name: 'one', spanishName: 'uno').save()
@@ -118,6 +121,7 @@ class FirstAndLastMethodSpec extends GormDatastoreSpec {
         result?.spanishName == 'uno'
     }
 
+    @PendingFeature(reason = 'Was previously @Ignore')
     void "Test first and last method with non standard identifier"() {
         given:
         ['one', 'two', 'three'].each { name ->
@@ -138,6 +142,7 @@ class FirstAndLastMethodSpec extends GormDatastoreSpec {
         result?.name == 'three'
     }
 
+    @PendingFeature(reason = 'Was previously @Ignore')
     void "Test first and last method with composite key"() {
         given:
         assert new PersonWithCompositeKey(firstName: 'Steve', lastName: 'Harris', age: 56).save()
