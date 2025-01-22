@@ -26,7 +26,6 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 
 import java.lang.reflect.Field;
-import java.security.AccessControlException;
 
 /**
  * {@link AnnotationVisitor} to recursively visit annotations.
@@ -98,7 +97,7 @@ abstract class AbstractRecursiveAnnotationVisitor extends AnnotationVisitor {
         catch (ClassNotFoundException | NoClassDefFoundError ex) {
             logger.debug("Failed to classload enum type while reading annotation metadata", ex);
         }
-        catch (IllegalAccessException | AccessControlException ex) {
+        catch (IllegalAccessException | SecurityException ex) {
             logger.debug("Could not access enum value while reading annotation metadata", ex);
         }
         return valueToUse;
