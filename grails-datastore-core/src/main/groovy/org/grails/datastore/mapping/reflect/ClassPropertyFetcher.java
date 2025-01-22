@@ -115,7 +115,7 @@ public class ClassPropertyFetcher {
      */
     @Deprecated
     public Object getReference() {
-        return BeanUtils.instantiate(clazz);
+        return BeanUtils.instantiateClass(clazz);
     }
 
     /**
