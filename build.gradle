@@ -61,3 +61,7 @@ if (isReleaseVersion) {
     }
 }
 
+tasks.register('clean', Delete) {
+    group = 'build'
+    delete layout.buildDirectory
+}
