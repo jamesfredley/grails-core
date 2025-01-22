@@ -48,7 +48,7 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
         with:
           develocity-access-key: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
-      - name: "📝 Store Groovy version to use when building Grails Views"
+      - name: "📝 Store Groovy version to use when building the project"
         id: groovy-version
         run: |
           cd groovy
