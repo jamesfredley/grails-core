@@ -12,14 +12,18 @@ jobs:
     permissions:
       contents: read
       packages: read
+    strategy:
+      fail-fast: false
+      matrix:
+        java: [17, 21]
     steps:
       - name: "📥 Checkout the repository"
         uses: actions/checkout@v4
       - name: "☕️ Setup JDK"
         uses: actions/setup-java@v4
         with:
-          distribution: 'liberica'
-          java-version: '17'
+          java-version: ${{ matrix.java }}
+          distribution: liberica
       - name: "🐘 Setup Gradle"
         uses: gradle/actions/setup-gradle@v4
         with:
@@ -42,8 +46,8 @@ jobs:
       - name: "☕️ Setup JDK"
         uses: actions/setup-java@v4
         with:
-          distribution: 'liberica'
-          java-version: '17'
+          java-version: 17
+          distribution: liberica
       - name: "🐘 Setup Gradle"
         uses: gradle/actions/setup-gradle@v4
         with:
