@@ -29,13 +29,14 @@ dependencies {
         // impl: Promises
     }
 
-    compileOnly project(':grails-datastore-async'), {
-        // comp: DelegateAsync
+    compileOnlyApi project(':grails-datastore-async'), {
+        // AST (source retention annotation): DelegateAsync
         if (excludeUnusedTransDeps) {
             // API dependencies in grails-datastore-async
             exclude group: 'org.grails', module: 'grails-async'
         }
     }
+
     compileOnly 'org.apache.groovy:groovy'
 }
 
