@@ -1195,8 +1195,6 @@ class Project {
 
    }
 
-   // Could we use @PendingFeatureIf here?
-   @Ignore('rlike not supported by all datastores yet')
    def "Test rlike query"() {
        given:"A bunch of people"
             createPeople()
