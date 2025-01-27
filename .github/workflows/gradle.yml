@@ -8,6 +8,7 @@ on:
       - '[7-9]+.[0-9]+.x'
 jobs:
   build:
+    name: "Build Project"
     runs-on: ubuntu-24.04
     permissions:
       contents: read
@@ -35,6 +36,7 @@ jobs:
         run: ./gradlew build --continue
   publish:
     if: github.event_name == 'push'
+    name: "Publish Snapshot"
     needs: build
     runs-on: ubuntu-24.04
     permissions:
@@ -63,6 +65,7 @@ jobs:
         run: ./gradlew --no-build-cache publish
   trigger-build-gorm-impls:
     if: github.event_name == 'push'
+    name: "Trigger Build in GORM Implementations"
     needs: [build, publish]
     runs-on: ubuntu-24.04
     continue-on-error: true
