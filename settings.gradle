@@ -50,3 +50,14 @@ include(
     // Test Report
     'test-report'
 )
+
+// Documentation
+include 'docs-guide-developer'
+project(':docs-guide-developer').projectDir = file('docs/guide-developer')
+
+// until this can be finished ported to grails 7, we are disabling
+//include 'docs-guide-rx'
+//project(':docs-guide-rx').projectDir = file('docs/guide-rx')
+
+include 'docs-guide-whats-new'
+project(':docs-guide-whats-new').projectDir = file('docs/guide-whats-new')

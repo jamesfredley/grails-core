@@ -6,6 +6,9 @@ on:
   pull_request:
     branches:
       - '[7-9]+.[0-9]+.x'
+env:
+  GIT_USER_NAME: grails-build
+  GIT_USER_EMAIL: grails-build@users.noreply.github.com
 jobs:
   build:
     name: "Build Project"
@@ -63,6 +66,39 @@ jobs:
           # NOTE: secrets.MAVEN_PUBLISH_URL == https://repo.grails.org/grails/plugins3-snapshot-local
           MAVEN_PUBLISH_URL: https://repo.grails.org/grails/libs-snapshots-local
         run: ./gradlew --no-build-cache publish
+  docs:
+    if: github.event_name == 'push'
+    needs: publish
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+      packages: read
+    steps:
+      - name: "📥 Checkout the repository"
+        uses: actions/checkout@v4
+      - name: "☕️ Setup JDK"
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'liberica'
+          java-version: '17'
+      - name: "🐘 Setup Gradle"
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          develocity-access-key: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
+      - name: "🔨 Build Docs"
+        id: docs
+        env:
+          GITHUB_MAVEN_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
+        run: ./gradlew docs --refresh-dependencies
+      - name: "📤 Publish docs to Github Pages"
+        if: steps.docs.outcome == 'success'
+        uses: grails/github-pages-deploy-action@v2
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+          BRANCH: gh-pages
+          FOLDER: build/docs
+          COMMIT_EMAIL: ${{ env.GIT_USER_EMAIL }}
+          COMMIT_NAME: ${{ env.GIT_USER_NAME }}
   trigger-build-gorm-impls:
     if: github.event_name == 'push'
     name: "Trigger Build in GORM Implementations"
@@ -106,6 +142,7 @@ jobs:
           token: ${{ secrets.GH_TOKEN }}
           inputs: ${{ steps.dispatch_message.outputs.value }}
       - name: "📡 Invoke the Java CI workflow in GORM Neo4j"
+        if: false # Skip until neo4j is ported to grails 7
         continue-on-error: true
         uses: benc-uk/workflow-dispatch@e2e5e9a103e331dad343f381a29e654aea3cf8fc # v1.2.4 (Use commit sha as this is a 3rd party action)
         with:

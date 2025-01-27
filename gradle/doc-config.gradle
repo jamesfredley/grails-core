@@ -1,4 +1,0 @@
-tasks.withType(Javadoc).configureEach {
-    options.encoding('UTF-8')
-    options.jFlags('-Xms64M', '-Xmx512M')
-}
