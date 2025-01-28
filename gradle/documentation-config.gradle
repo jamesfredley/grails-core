@@ -34,6 +34,10 @@ tasks.register('data-mapping-groovydoc', Groovydoc) {
         ]
     }
 
+    for (Project docProject : docProjects) {
+        docProject.sourceSets.main.allSource.srcDirs.each { File srcDir -> if(srcDir.exists()) inputs.dir(srcDir) }
+    }
+
     docTitle = "Grails Data Mapping API - ${projectVersion}"
     source = docProjects.collect { it.sourceSets.main.allSource }.flatten()
     classpath = files(configurations.documentation + docProjects.configurations.compileClasspath)
@@ -46,6 +50,7 @@ tasks.register('data-mapping-groovydoc', Groovydoc) {
 
     dependsOn([':cleanDocs'] + docProjects.collect { "$it.name:classes" })
 
+    outputs.dir(project.layout.buildDirectory.dir('docs/api').get().asFile)
     doLast {
         delete(rootProject.layout.buildDirectory.dir('tmp'))
     }
