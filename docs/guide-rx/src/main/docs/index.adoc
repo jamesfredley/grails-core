@@ -1,0 +1,17 @@
+:author: Graeme Rocher
+:source-highlighter: coderay
+:numbered:
+:toc: left
+:toc-title: RxGORM Documentation
+
+= RxGORM - GORM for RxJava
+
+include::introduction.adoc[]
+
+include::gettingStarted/index.adoc[]
+
+include::configuration/index.adoc[]
+
+include::querying/index.adoc[]
+
+include::associations/index.adoc[]

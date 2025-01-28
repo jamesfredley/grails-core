@@ -46,7 +46,4 @@ allprojects {
     }
 }
 
-tasks.register('clean', Delete) {
-    group = 'build'
-    delete layout.buildDirectory
-}
+apply from: layout.projectDirectory.file('gradle/documentation-config.gradle')

@@ -51,6 +51,9 @@ dependencies {
         // api: PlatformTransactionManager
     }
 
+    // RemovalListener (caffeine)
+    implementation "com.github.ben-manes.caffeine:caffeine"
+
     compileOnly 'org.apache.groovy:groovy', {
         // comp: CompileStatic
     }
@@ -93,6 +96,5 @@ dependencies {
 
 apply from: rootProject.layout.projectDirectory.file('gradle/java-config.gradle')
 apply from: rootProject.layout.projectDirectory.file('gradle/test-config.gradle')
-apply from: rootProject.layout.projectDirectory.file('gradle/doc-config.gradle')
 apply from: rootProject.layout.projectDirectory.file('gradle/tck-config.gradle')
 apply from: rootProject.layout.projectDirectory.file('gradle/publish-config.gradle')
