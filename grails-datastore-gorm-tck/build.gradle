@@ -53,7 +53,7 @@ dependencies {
     }
 
     implementation 'org.grails:grails-core', {
-        // impl: ValidationException
+        // impl: Entity, ValidationException
         if (excludeUnusedTransDeps) {
             // API dependencies in grails-core
             exclude group: 'jakarta.annotation', module: 'jakarta.annotation-api'
