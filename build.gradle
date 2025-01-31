@@ -80,16 +80,21 @@ tasks.withType(Groovydoc).configureEach {
 tasks.withType(Test).configureEach {
     useJUnitPlatform()
     testLogging {
-        events 'passed', 'skipped', 'failed'
-        showExceptions true
-        exceptionFormat 'full'
-        showCauses true
-        showStackTraces true
+        events('passed', 'skipped', 'failed')
+        showExceptions = true
+        exceptionFormat = 'full'
+        showCauses = true
+        showStackTraces = true
     }
 }
 
 java {
     sourceCompatibility = JavaVersion.VERSION_11
+}
+
+tasks.withType(GroovyCompile).configureEach {
+    // Preserve method parameter names in Groovy classes for IDE parameter hints.
+    groovyOptions.parameters = true
 }
 
 tasks.named('bootRun') { enabled = false }
