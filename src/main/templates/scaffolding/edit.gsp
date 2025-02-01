@@ -40,7 +40,7 @@
                 <g:form resource="\${this.${propertyName}}" controller="\${controllerName}" method="PUT">
                     <g:hiddenField name="version" value="\${this.${propertyName}?.version}" />
                     <fieldset class="form">
-                        <f:all bean="${propertyName}" class="row" requiredClass="mb-3 required" labelClass="col-sm-2 col-form-label text-sm-end" divClass="col-sm-10" widget-class="form-control" widget-invalidClass="is-invalid" />
+                        <f:all bean="${propertyName}" class="row" requiredClass="mb-3 required" labelClass="col-sm-2 col-form-label text-sm-end" divClass="col-sm-10" widget-class="form-control" widget-invalidClass="is-invalid" widget-selectDateClass="w-auto form-select d-inline" widget-checkBoxClass="form-check-input align-middle" />
                     </fieldset>
                     <fieldset class="bg-body-tertiary">
                         <button class="btn btn-outline-primary" type="submit">
