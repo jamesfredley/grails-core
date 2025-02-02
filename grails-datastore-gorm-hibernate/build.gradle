@@ -37,6 +37,10 @@ dependencies {
         exclude group:'xml-apis', module:'xml-apis'
     }
 
+    testImplementation 'org.postgresql:postgresql:42.7.5'
+    testImplementation "org.testcontainers:postgresql:1.20.4"
+    testImplementation "org.testcontainers:spock:1.20.4"
+
     testImplementation "org.apache.groovy:groovy-test-junit5"
     testImplementation "org.apache.groovy:groovy-sql"
     testImplementation "org.apache.groovy:groovy-json"

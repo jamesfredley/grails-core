@@ -1,6 +1,7 @@
 package grails.gorm.tests.hibernatequery
 
 import grails.gorm.tests.GormDatastoreSpec
+import grails.gorm.tests.HibernateGormDatastoreSpec
 import grails.gorm.tests.Person
 import org.grails.datastore.mapping.core.Session
 import org.grails.orm.hibernate.AbstractHibernateSession
@@ -9,7 +10,7 @@ import org.grails.orm.hibernate.query.HibernateQuery
 import spock.lang.Ignore
 
 
-class HibernateQuerySpec extends GormDatastoreSpec {
+class HibernateQuerySpec extends HibernateGormDatastoreSpec {
 
 
     HibernateQuery hibernateQuery
@@ -18,13 +19,9 @@ class HibernateQuerySpec extends GormDatastoreSpec {
 
     def setup() {
         HibernateDatastore hibernateDatastore = setupClass.hibernateDatastore
-        AbstractHibernateSession session = hibernateDatastore.getCurrentSession() as AbstractHibernateSession
+        AbstractHibernateSession session = hibernateDatastore.connect() as AbstractHibernateSession
         hibernateQuery = new HibernateQuery(session, hibernateDatastore.getMappingContext().getPersistentEntity(Person.typeName))
         oldBob = new Person(firstName:"Bob", lastName:"Builder", age: 50).save(flush: true)
-    }
-
-    Session createSession() {
-        setupClass.setup(((getDomainClasses()) as Set) as List)
     }
 
     List getDomainClasses() {
@@ -91,7 +88,6 @@ class HibernateQuerySpec extends GormDatastoreSpec {
         then:
         oldBob == newBob
     }
-
 
 
     def like() {
