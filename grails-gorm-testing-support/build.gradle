@@ -80,7 +80,7 @@ dependencies {
             exclude group: 'org.springframework', module: 'spring-tx'
         }
     }
-    implementation project(':grails-datastore-gorm-test'), {
+    api project(':grails-datastore-gorm-test'), {
         // impl: SimpleMapDatastore
         if (excludeUnusedTransDeps) {
             // API dependencies in grails-datastore-gorm-test
