@@ -607,6 +607,7 @@ public abstract class AbstractHibernateCriteriaBuilder extends GroovyObjectSuppo
 
     @Override
     public Criteria geSome(String propertyName, QueryableCriteria propertyValue) {
+        hibernateQuery.geSome(propertyName,propertyValue);
         return this;
     }
 
@@ -617,6 +618,7 @@ public abstract class AbstractHibernateCriteriaBuilder extends GroovyObjectSuppo
 
     @Override
     public Criteria ltSome(String propertyName, QueryableCriteria propertyValue) {
+        hibernateQuery.ltSome(propertyName,propertyValue);
         return this;
     }
 
@@ -627,6 +629,7 @@ public abstract class AbstractHibernateCriteriaBuilder extends GroovyObjectSuppo
 
     @Override
     public Criteria leSome(String propertyName, QueryableCriteria propertyValue) {
+        hibernateQuery.leSome(propertyName,propertyValue);
         return this;
     }
 
@@ -658,6 +661,7 @@ public abstract class AbstractHibernateCriteriaBuilder extends GroovyObjectSuppo
 
     @Override
     public Criteria notIn(String propertyName, QueryableCriteria<?> subquery) {
+        hibernateQuery.notIn(propertyName,subquery);
         return this;
     }
 
@@ -711,6 +715,7 @@ public abstract class AbstractHibernateCriteriaBuilder extends GroovyObjectSuppo
      * @return A Criterion instance
      */
     public Criteria gt(String propertyName, Object propertyValue) {
+        hibernateQuery.gt(propertyName,propertyValue);
         return this;
     }
 
@@ -983,6 +988,7 @@ public abstract class AbstractHibernateCriteriaBuilder extends GroovyObjectSuppo
      * @return A Criterion instance
      */
     public Criteria sizeEq(String propertyName, int size) {
+        hibernateQuery.sizeEq(propertyName,size);
         return this;
     }
 
@@ -995,6 +1001,7 @@ public abstract class AbstractHibernateCriteriaBuilder extends GroovyObjectSuppo
      * @return A Criterion instance
      */
     public Criteria sizeGt(String propertyName, int size) {
+        hibernateQuery.sizeGt(propertyName,size);
         return this;
     }
 
@@ -1007,6 +1014,7 @@ public abstract class AbstractHibernateCriteriaBuilder extends GroovyObjectSuppo
      * @return A Criterion instance
      */
     public Criteria sizeGe(String propertyName, int size) {
+        hibernateQuery.sizeGe(propertyName,size);
         return this;
     }
 
@@ -1019,6 +1027,7 @@ public abstract class AbstractHibernateCriteriaBuilder extends GroovyObjectSuppo
      * @return A Criterion instance
      */
     public Criteria sizeLe(String propertyName, int size) {
+        hibernateQuery.sizeLe(propertyName,size);
         return this;
     }
 
@@ -1031,6 +1040,7 @@ public abstract class AbstractHibernateCriteriaBuilder extends GroovyObjectSuppo
      * @return A Criterion instance
      */
     public Criteria sizeLt(String propertyName, int size) {
+        hibernateQuery.sizeLt(propertyName,size);
         return this;
     }
 
@@ -1055,6 +1065,7 @@ public abstract class AbstractHibernateCriteriaBuilder extends GroovyObjectSuppo
      * @return A Criterion instance
      */
     public Criteria sizeNe(String propertyName, int size) {
+        hibernateQuery.sizeNe(propertyName,size);
         return this;
     }
 
@@ -1065,6 +1076,7 @@ public abstract class AbstractHibernateCriteriaBuilder extends GroovyObjectSuppo
      * @return The criterion object
      */
     public Criteria ne(String propertyName, Object propertyValue) {
+        hibernateQuery.ne(propertyName,propertyValue);
         return this;
     }
 
@@ -1140,7 +1152,7 @@ public abstract class AbstractHibernateCriteriaBuilder extends GroovyObjectSuppo
 //                resultTransformer = CriteriaSpecification.DISTINCT_ROOT_ENTITY;
 //            }
 
-            createCriteriaInstance();
+//            createCriteriaInstance();
 
             // Check for pagination params
             if (name.equals(LIST_CALL) && args.length == 2) {
@@ -1157,12 +1169,10 @@ public abstract class AbstractHibernateCriteriaBuilder extends GroovyObjectSuppo
             Object result;
             if (!uniqueResult) {
                 if (scroll) {
-                    root = criteriaQuery.from(this.targetClass);
-                    criteriaQuery.select(root);
-                    criteriaQuery.where(cb.and(PredicateGenerator.getPredicates(cb, criteriaQuery, root, this.junction.getCriteria())));
-                    result = hibernateSession.createQuery(criteriaQuery).scroll();
+                    result = hibernateQuery.scroll();
                 }
                 else if (count) {
+                    hibernateQuery.projections().count();
                     criteriaQuery = cb.createQuery(Long.class);
                     root = criteriaQuery.from(this.targetClass);
                     criteriaQuery.select(cb.count(root));

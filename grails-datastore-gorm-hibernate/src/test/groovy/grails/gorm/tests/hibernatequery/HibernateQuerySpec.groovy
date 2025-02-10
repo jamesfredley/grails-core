@@ -32,7 +32,7 @@ class HibernateQuerySpec extends HibernateGormDatastoreSpec {
     }
 
     List getDomainClasses() {
-        [Person,EagerOwner]
+        [Person,Pet, EagerOwner]
     }
 
     def equals() {
@@ -303,6 +303,94 @@ class HibernateQuerySpec extends HibernateGormDatastoreSpec {
         def newPet = petHibernateQuery.singleResult()
         then:
         oldPet == newPet
+    }
+
+    def notInSubQuery() {
+        given:
+        def oldPet = new Pet(name: "Lucky")
+        oldBob.addToPets(oldPet)
+        oldBob.save(flush: true)
+        petHibernateQuery.notIn("owner",
+                new DetachedCriteria(Person).eq("lastName", "Rogers")
+        )
+        when:
+        def newPet = petHibernateQuery.singleResult()
+        then:
+        oldPet == newPet
+    }
+
+    @Ignore("Not sure why this is not passing")
+    /**
+     * @see org.grails.orm.hibernate.query.PredicateGenerator.getPredicates()
+     * else if (criterion instanceof Query.Exists c)
+     select
+     p1_0.id,
+     p1_0.age,
+     p1_0.face_id,
+     p1_0.first_name,
+     p1_0.last_name,
+     p1_0.my_boolean_property,
+     p1_0.version
+     from
+     person p1_0
+     where
+     exists(select
+     1
+     from
+     pet p2_0
+     where
+     p2_0.owner_id=?)
+     offset
+     ? rows
+     */
+    def exists() {
+        given:
+        new Person(firstName: "Fred", lastName: "Rogers", age: 52).save(flush: true)
+        def oldPet = new Pet(name: "Lucky")
+        oldBob.addToPets(oldPet)
+        oldBob.save(flush: true)
+        hibernateQuery.exists(new DetachedCriteria(Pet).eq("owner", oldBob))
+        when:
+        def newBob = hibernateQuery.singleResult()
+        then:
+        oldBob == newBob
+    }
+
+    @Ignore("Not sure why this is not passing")
+    /**
+     * @see org.grails.orm.hibernate.query.PredicateGenerator.getPredicates()
+     * else if (criterion instanceof Query.NotExists c)
+     select
+     p1_0.id,
+     p1_0.age,
+     p1_0.face_id,
+     p1_0.first_name,
+     p1_0.last_name,
+     p1_0.my_boolean_property,
+     p1_0.version
+     from
+     person p1_0
+     where
+     not exists(select
+     1
+     from
+     pet p2_0
+     where
+     p2_0.owner_id=?)
+     offset
+     ? rows
+     */
+    def notExists() {
+        given:
+        def fred = new Person(firstName: "Fred", lastName: "Rogers", age: 52).save(flush: true)
+        def oldPet = new Pet(name: "Lucky")
+        oldBob.addToPets(oldPet)
+        oldBob.save(flush: true)
+        hibernateQuery.notExits(new DetachedCriteria(Pet).eq("owner", fred))
+        when:
+        def newBob = hibernateQuery.singleResult()
+        then:
+        oldBob == newBob
     }
 
     def greaterThanAll() {

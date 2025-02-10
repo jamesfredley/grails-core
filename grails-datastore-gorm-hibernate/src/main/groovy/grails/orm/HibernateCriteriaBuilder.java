@@ -145,19 +145,19 @@ public class HibernateCriteriaBuilder extends AbstractHibernateCriteriaBuilder {
 
     @Override
     protected void createCriteriaInstance() {
-        {
-            if (TransactionSynchronizationManager.hasResource(sessionFactory)) {
-                participate = true;
-                hibernateSession = ((SessionHolder)TransactionSynchronizationManager.getResource(sessionFactory)).getSession();
-            }
-            else {
-                hibernateSession = sessionFactory.openSession();
-            }
-            criteriaQuery = hibernateSession.getCriteriaBuilder().createQuery(targetClass);
-            root = criteriaQuery.from(targetClass);
-            cacheCriteriaMapping();
-            criteriaMetaClass = GroovySystem.getMetaClassRegistry().getMetaClass(criteriaQuery.getClass());
-        }
+//        {
+//            if (TransactionSynchronizationManager.hasResource(sessionFactory)) {
+//                participate = true;
+//                hibernateSession = ((SessionHolder)TransactionSynchronizationManager.getResource(sessionFactory)).getSession();
+//            }
+//            else {
+//                hibernateSession = sessionFactory.openSession();
+//            }
+//            criteriaQuery = hibernateSession.getCriteriaBuilder().createQuery(targetClass);
+//            root = criteriaQuery.from(targetClass);
+//            cacheCriteriaMapping();
+//            criteriaMetaClass = GroovySystem.getMetaClassRegistry().getMetaClass(criteriaQuery.getClass());
+//        }
     }
 
 

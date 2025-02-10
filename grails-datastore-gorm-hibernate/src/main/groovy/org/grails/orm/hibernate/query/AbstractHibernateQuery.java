@@ -449,7 +449,7 @@ public abstract class AbstractHibernateQuery extends Query {
                 .orElse(x -> true);
     }
 
-    private org.hibernate.query.Query createQuery() {
+    protected org.hibernate.query.Query createQuery() {
         HibernateCriteriaBuilder cb = getCriteriaBuilder();
         List<Projection> projections = collectProjections();
         List<GroupPropertyProjection> groupProjections = collectGroupProjections();

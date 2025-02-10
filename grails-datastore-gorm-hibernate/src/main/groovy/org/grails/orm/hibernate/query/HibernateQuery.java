@@ -66,6 +66,21 @@ public class HibernateQuery extends AbstractHibernateQuery {
         return this;
     }
 
+    public Query notIn(String propertyName, QueryableCriteria<?> subquery) {
+        detachedCriteria.notIn(propertyName,subquery);
+        return this;
+    }
+
+    public Query exists(QueryableCriteria<?> subquery) {
+        detachedCriteria.exists(subquery);
+        return this;
+    }
+
+    public Query notExits( QueryableCriteria<?> subquery) {
+        detachedCriteria.notExists(subquery);
+        return this;
+    }
+
 
     public Query gtAll(String propertyName, QueryableCriteria<?> subquery) {
         detachedCriteria.gtAll(propertyName,subquery);
@@ -207,6 +222,11 @@ public class HibernateQuery extends AbstractHibernateQuery {
      public Query sizeNe(String propertyName, int size) {
         detachedCriteria.sizeNe(propertyName, size);
         return this;
+    }
+
+
+    public Object scroll() {
+        return createQuery().scroll();
     }
 
 
