@@ -580,11 +580,12 @@ class HibernateQuerySpec extends HibernateGormDatastoreSpec {
 
     def projectionProperty() {
         given:
-        hibernateQuery.projections().property("lastName")
+        oldBob.addToPets(new Pet(name:"Lucky")).save(flush:true)
+        hibernateQuery.createAlias("pets", "mascota").projections().property("mascota.name")
         when:
-        def lastName = hibernateQuery.singleResult()
+        def petName = hibernateQuery.singleResult()
         then:
-        lastName == "Builder"
+        petName == "Lucky"
     }
 
     def projectionId() {

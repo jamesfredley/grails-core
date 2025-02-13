@@ -21,8 +21,10 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Expression;
 import jakarta.persistence.criteria.From;
+import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Path;
+import org.grails.datastore.gorm.query.criteria.DetachedAssociationCriteria;
 import org.grails.datastore.mapping.model.PersistentEntity;
 import org.grails.datastore.mapping.model.PersistentProperty;
 import org.grails.datastore.mapping.model.types.Association;
@@ -49,6 +51,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Bridges the Query API with the Hibernate Criteria API
@@ -116,6 +119,11 @@ public abstract class AbstractHibernateQuery extends Query {
     public Query isNotNull(String property) {
         detachedCriteria.isNotNull(property);
         return this;
+    }
+
+    public Query createAlias(String associationPath, String alias) {
+        detachedCriteria.createAlias(associationPath, alias);
+        return  this;
     }
 
 
@@ -451,13 +459,26 @@ public abstract class AbstractHibernateQuery extends Query {
 
     protected org.hibernate.query.Query createQuery() {
         HibernateCriteriaBuilder cb = getCriteriaBuilder();
+        Map<String, String> aliasMap = ((List<DetachedAssociationCriteria>) detachedCriteria.getCriteria()
+                .stream()
+                .filter(DetachedAssociationCriteria.class::isInstance)
+                .map(DetachedAssociationCriteria.class::cast)
+                .toList()).stream()
+                .collect(Collectors.toMap(
+                    DetachedAssociationCriteria::getAssociationPath,
+                    DetachedAssociationCriteria::getAlias)
+                );
+
         List<Projection> projections = collectProjections();
+
         List<GroupPropertyProjection> groupProjections = collectGroupProjections();
-        List<String> joinColumns = collectJoinColumns();
+
+        List<String> joinColumns = Stream.concat(aliasMap.keySet().stream(), collectJoinColumns().stream()).distinct().toList();
+
 
         CriteriaQuery cq = projections.size() > 1 ?  cb.createQuery(Object[].class) : cb.createQuery(Object.class);
         From root = cq.from(entity.getJavaClass());
-        Map<String, From> tablesByName = assignJoinTables(joinColumns, root);
+        Map<String, From> tablesByName = assignJoinTables(joinColumns, root,aliasMap);
         assignProjections(projections, cb, root, tablesByName, cq);
         assignGroupBy(groupProjections, root, cq);
         assignOrderBy(cq, cb, root);
@@ -550,7 +571,7 @@ public abstract class AbstractHibernateQuery extends Query {
     private void assignProjections(List<Projection> projections, HibernateCriteriaBuilder cb, From root, Map<String, From> tablesByName, CriteriaQuery cq) {
         List<Expression> projectionExpressions = projections
                 .stream()
-                .map(projectionToJpaExpression(cb, root, tablesByName))
+                .map(projectionToJpaExpression(cb, tablesByName))
                 .filter(Objects::nonNull)
                 .map(Expression.class::cast)
                 .toList();
@@ -563,7 +584,7 @@ public abstract class AbstractHibernateQuery extends Query {
         }
     }
 
-    private Map<String, From> assignJoinTables(List<String> joinColumns, From root) {
+    private Map<String, From> assignJoinTables(List<String> joinColumns, From root, Map<String,String> aliasMap) {
         Map<String, JoinType> joinTypes = detachedCriteria.getJoinTypes();
         //The join column is column for joining from the root entity
         Map<String, From> tablesByName = joinColumns.stream().map(joinColumn -> {
@@ -573,17 +594,23 @@ public abstract class AbstractHibernateQuery extends Query {
                     .map(Map.Entry::getValue)
                     .findFirst()
                     .orElse(JoinType.INNER);
-            From table = root.join(joinColumn, joinType);
-            return new AbstractMap.SimpleEntry<>(joinColumn, table);
+
+
+            Join table = root.join(joinColumn, joinType);
+            String column = joinColumn;
+            if (aliasMap.containsKey(joinColumn)) {
+                column = aliasMap.get(joinColumn);
+                table.alias(column);
+            }
+            return new AbstractMap.SimpleEntry<>(column, table);
         }).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
         tablesByName.put("root", root);
         return tablesByName;
     }
 
     private Function<Projection, JpaExpression> projectionToJpaExpression(
-            HibernateCriteriaBuilder cb
-            , From root
-            , Map<String, From> tablesByName) {
+            HibernateCriteriaBuilder cb,
+            Map<String, From> tablesByName) {
         return projection -> {
             if (countProjectionPredicate.test(projection)) {
                 return cb.count(tablesByName.get("root"));
