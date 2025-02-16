@@ -45,11 +45,11 @@ class HibernateQuerySpec extends HibernateGormDatastoreSpec {
         oldBob == newBob
     }
 
-    def equalsAlias() {
+    def equalsJoins() {
         given:
         new Person(firstName: "Fred", lastName: "Rogers", age: 51).save(flush: true)
         oldBob.addToPets(new Pet(name: "Lucky")).save(flush:"true")
-        hibernateQuery.createAlias("pets","mascota").eq("mascota.name", "Lucky")
+        hibernateQuery.join("pets").eq("pets.name", "Lucky")
         when:
         def newBob = hibernateQuery.singleResult()
         then:
@@ -321,7 +321,7 @@ class HibernateQuerySpec extends HibernateGormDatastoreSpec {
         oldBob.save(flush: true)
         DetachedCriteria detachedCriteria = new DetachedCriteria(Person)
         detachedCriteria.eq("owner.lastName", "Rogers")
-        petHibernateQuery.createAlias("owner","owner").notIn("owner", detachedCriteria)
+        petHibernateQuery.join("owner").notIn("owner", detachedCriteria)
         when:
         def newPet = petHibernateQuery.singleResult()
         then:
@@ -367,7 +367,7 @@ class HibernateQuerySpec extends HibernateGormDatastoreSpec {
 
     @Ignore("Exists subquery is broken")
     /**
-     * @see org.grails.orm.hibernate.query.PredicateGenerator.getPredicates()
+     *  org.grails.orm.hibernate.query.PredicateGenerator.getPredicates()
      * else if (criterion instanceof Query.NotExists c)
      select
      p1_0.id,
@@ -603,8 +603,8 @@ class HibernateQuerySpec extends HibernateGormDatastoreSpec {
         oldBob.addToPets(new Pet(name:"Lucky",age:1)).save(flush:true)
         fred.addToPets(new Pet(name:"Tom",age:2)).save(flush:true)
         given:
-        hibernateQuery.createAlias("pets","mascota")
-                        .order(new Query.Order("mascota.age", Query.Order.Direction.DESC))
+        hibernateQuery.join("pets")
+                        .order(new Query.Order("pets.age", Query.Order.Direction.DESC))
         when:
         def bobs = hibernateQuery.list()
         then:
@@ -619,8 +619,8 @@ class HibernateQuerySpec extends HibernateGormDatastoreSpec {
         fred.addToPets(new Pet(name:"Angel",age:2)).save(flush:true)
         walt.addToPets(new Pet(name:"angel",age:2)).save(flush:true)
         given:
-        hibernateQuery.createAlias("pets","mascota")
-                .order(new Query.Order("mascota.name", Query.Order.Direction.ASC).ignoreCase())
+        hibernateQuery.join("pets")
+                .order(new Query.Order("pets.name", Query.Order.Direction.ASC).ignoreCase())
         when:
         def bobs = hibernateQuery.list()
         then:
@@ -631,7 +631,7 @@ class HibernateQuerySpec extends HibernateGormDatastoreSpec {
     def projectionProperty() {
         given:
         oldBob.addToPets(new Pet(name:"Lucky")).save(flush:true)
-        hibernateQuery.createAlias("pets", "mascota").projections().property("mascota.name")
+        hibernateQuery.join("pets").projections().property("pets.name")
         when:
         def petName = hibernateQuery.singleResult()
         then:
@@ -703,10 +703,10 @@ class HibernateQuerySpec extends HibernateGormDatastoreSpec {
         oldBob.addToPets(new Pet(name:"Lucky",age:4)).save(flush:true)
         fred.addToPets(new Pet(name:"Lucky",age:2)).save(flush:true)
         given:
-        hibernateQuery.createAlias("pets","mascota")
+        hibernateQuery.join("pets")
                 .projections()
-                .groupProperty("mascota.name")
-                .avg("mascota.age")
+                .groupProperty("pets.name")
+                .avg("pets.age")
         when:
         def result = hibernateQuery.singleResult()
         then:

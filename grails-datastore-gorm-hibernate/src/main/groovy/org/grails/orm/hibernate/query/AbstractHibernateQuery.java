@@ -121,10 +121,6 @@ public abstract class AbstractHibernateQuery extends Query {
         return this;
     }
 
-    public Query createAlias(String associationPath, String alias) {
-        detachedCriteria.createAlias(associationPath, alias);
-        return this;
-    }
 
 
     @Override
@@ -459,15 +455,14 @@ public abstract class AbstractHibernateQuery extends Query {
 
     protected org.hibernate.query.Query createQuery() {
         HibernateCriteriaBuilder cb = getCriteriaBuilder();
-        Map<String, String> aliasMap = ((List<DetachedAssociationCriteria>) detachedCriteria.getCriteria()
-                .stream()
-                .filter(DetachedAssociationCriteria.class::isInstance)
-                .map(DetachedAssociationCriteria.class::cast)
-                .toList()).stream()
+        List<DetachedAssociationCriteria> detachedAssociationCriteria = getDetachedAssociationCriteria();
+
+        Map<String, DetachedAssociationCriteria> aliasMap = detachedAssociationCriteria.stream()
                 .collect(Collectors.toMap(
-                    DetachedAssociationCriteria::getAssociationPath,
-                    DetachedAssociationCriteria::getAlias)
+                        DetachedAssociationCriteria::getAssociationPath,
+                    criteria ->criteria)
                 );
+
 
         List<Projection> projections = collectProjections();
 
@@ -478,7 +473,13 @@ public abstract class AbstractHibernateQuery extends Query {
 
         CriteriaQuery cq = projections.size() > 1 ?  cb.createQuery(Object[].class) : cb.createQuery(Object.class);
         From root = cq.from(entity.getJavaClass());
-        Map<String, From> tablesByName = assignJoinTables(joinColumns, root,aliasMap);
+        Map<String, From> fromMap = detachedAssociationCriteria.stream()
+                .collect(Collectors.toMap(
+                        DetachedAssociationCriteria::getAssociationPath,
+                        criteria -> cq.from(criteria.getAssociation().getOwner().getJavaClass()))
+                );
+        fromMap.put("root", root);
+        Map<String, From> tablesByName = assignJoinTables(joinColumns, root,aliasMap, fromMap);
         assignProjections(projections, cb, root, cq, tablesByName);
         assignGroupBy(groupProjections, root, cq, tablesByName);
         assignOrderBy(cq, cb, root,tablesByName);
@@ -496,6 +497,28 @@ public abstract class AbstractHibernateQuery extends Query {
             query.setLockMode(lockResult);
         }
         return query;
+    }
+
+    private List<DetachedAssociationCriteria> getDetachedAssociationCriteria() {
+        List<DetachedAssociationCriteria> detachedAssociationCriteria = detachedCriteria.getCriteria()
+                .stream()
+                .map(o -> {
+                    if (o instanceof In c && Objects.nonNull(c.getSubquery()) ) {
+                        return c.getSubquery().getCriteria();
+                    } else if (o instanceof Exists c && Objects.nonNull(c.getSubquery()) ) {
+                        return c.getSubquery().getCriteria();
+                    } else if (o instanceof NotExists c && Objects.nonNull(c.getSubquery()) ) {
+                        return c.getSubquery().getCriteria();
+                    } else if (o instanceof SubqueryCriterion c && Objects.nonNull(c.getValue()) ) {
+                        return c.getValue().getCriteria();
+                    }
+                    return List.of(o);
+                })
+                .flatMap(list -> ((List) list).stream())
+                .filter(DetachedAssociationCriteria.class::isInstance)
+                .map(DetachedAssociationCriteria.class::cast)
+                .toList();
+        return detachedAssociationCriteria;
     }
 
     private List<String> collectJoinColumns() {
@@ -588,7 +611,7 @@ public abstract class AbstractHibernateQuery extends Query {
         }
     }
 
-    private Map<String, From> assignJoinTables(List<String> joinColumns, From root, Map<String,String> aliasMap) {
+    private Map<String, From> assignJoinTables(List<String> joinColumns, From root, Map<String,DetachedAssociationCriteria> aliasMap, Map<String, From> fromMap) {
         Map<String, JoinType> joinTypes = detachedCriteria.getJoinTypes();
         //The join column is column for joining from the root entity
         Map<String, From> tablesByName = joinColumns.stream().map(joinColumn -> {
@@ -598,9 +621,8 @@ public abstract class AbstractHibernateQuery extends Query {
                     .map(Map.Entry::getValue)
                     .findFirst()
                     .orElse(JoinType.INNER);
-
-
-            Join table = root.join(joinColumn, joinType);
+            From from = fromMap.computeIfAbsent(joinColumn, s -> fromMap.get("root"));
+            Join table = from.join(joinColumn, joinType);
             String column = aliasColumn(aliasMap, joinColumn, table);
             return new AbstractMap.SimpleEntry<>(column, table);
         }).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
@@ -608,10 +630,10 @@ public abstract class AbstractHibernateQuery extends Query {
         return tablesByName;
     }
 
-    private static String aliasColumn(Map<String, String> aliasMap, String associationPath, Join table) {
+    private static String aliasColumn(Map<String, DetachedAssociationCriteria> aliasMap, String associationPath, Join table) {
         String column = associationPath;
         if (aliasMap.containsKey(associationPath)) {
-            column = aliasMap.get(associationPath);
+            column = aliasMap.get(associationPath).getAlias();
             table.alias(column);
         }
         return column;
