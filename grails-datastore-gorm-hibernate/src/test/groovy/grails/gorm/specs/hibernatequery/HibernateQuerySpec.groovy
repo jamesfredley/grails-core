@@ -45,6 +45,17 @@ class HibernateQuerySpec extends HibernateGormDatastoreSpec {
         oldBob == newBob
     }
 
+    def equalsAlias() {
+        given:
+        new Person(firstName: "Fred", lastName: "Rogers", age: 51).save(flush: true)
+        oldBob.addToPets(new Pet(name: "Lucky")).save(flush:"true")
+        hibernateQuery.createAlias("pets","mascota").eq("mascota.name", "Lucky")
+        when:
+        def newBob = hibernateQuery.singleResult()
+        then:
+        oldBob == newBob
+    }
+
     def ne() {
         given:
         new Person(firstName: "Fred", lastName: "Rogers", age: 51).save(flush: true)
@@ -260,10 +271,8 @@ class HibernateQuerySpec extends HibernateGormDatastoreSpec {
     }
 
     def isNull() {
-        oldBob.lastName = null
-        oldBob.save(flush: true)
         given:
-        hibernateQuery.isNull("lastName")
+        hibernateQuery.isNull("face")
         when:
         def newBob = hibernateQuery.singleResult()
         then:
@@ -310,9 +319,9 @@ class HibernateQuerySpec extends HibernateGormDatastoreSpec {
         def oldPet = new Pet(name: "Lucky")
         oldBob.addToPets(oldPet)
         oldBob.save(flush: true)
-        petHibernateQuery.notIn("owner",
-                new DetachedCriteria(Person).eq("lastName", "Rogers")
-        )
+        DetachedCriteria detachedCriteria = new DetachedCriteria(Person)
+        detachedCriteria.eq("owner.lastName", "Rogers")
+        petHibernateQuery.createAlias("owner","owner").notIn("owner", detachedCriteria)
         when:
         def newPet = petHibernateQuery.singleResult()
         then:
@@ -395,105 +404,139 @@ class HibernateQuerySpec extends HibernateGormDatastoreSpec {
 
     def greaterThanAll() {
         new Person(firstName: "Fred", lastName: "Rogers", age: 48).save(flush: true)
+        oldBob.addToPets(new Pet(name: "Lucky", age:1)).save(flush:true)
+
+        def property = new DetachedCriteria(Pet)
+                .eq("age", 1)
+                .eq("name", "Lucky")
+                .property("age")
         given:
-        hibernateQuery.gtAll("age", new DetachedCriteria(Person).eq("age",48).property("age"))
+        hibernateQuery.gtAll("age", property)
         when:
-        def newBob = hibernateQuery.singleResult()
+        def bobs = hibernateQuery.list()
         then:
-        oldBob == newBob
+        bobs.size() == 2
     }
 
 
     def lessThanEqualsAll() {
         new Person(firstName: "Fred", lastName: "Rogers", age: 52).save(flush: true)
+        oldBob.addToPets(new Pet(name: "Lucky", age:52)).save(flush:true)
         given:
-        hibernateQuery.leAll("age", new DetachedCriteria(Person).eq("age",50).property("age"))
+        hibernateQuery.leAll("age", new DetachedCriteria(Pet)
+                .eq("age", 52)
+                .eq("name", "Lucky")
+                .property("age")
+        )
         when:
-        def newBob = hibernateQuery.singleResult()
+        def bobs = hibernateQuery.list()
         then:
-        oldBob == newBob
+        bobs.size() == 2
     }
 
     def lessThanAll() {
         new Person(firstName: "Fred", lastName: "Builder", age: 52).save(flush: true)
+        oldBob.addToPets(new Pet(name: "Lucky", age:100)).save(flush:true)
         given:
-        hibernateQuery.ltAll("age", new DetachedCriteria(Person).eq("age",52).property("age"))
+        hibernateQuery.ltAll("age",  new DetachedCriteria(Pet)
+                .eq("age", 100)
+                .eq("name", "Lucky")
+                .property("age")
+        )
         when:
-        def newBob = hibernateQuery.singleResult()
+        def bobs = hibernateQuery.list()
         then:
-        oldBob == newBob
+        bobs.size() == 2
     }
 
 
     def greaterThanEqualsAll() {
         new Person(firstName: "Fred", lastName: "Rogers", age: 48).save(flush: true)
+        oldBob.addToPets(new Pet(name: "Lucky", age:48)).save(flush:true)
         given:
-        hibernateQuery.geAll("age", new DetachedCriteria(Person).eq("age",50).property("age"))
+        hibernateQuery.geAll("age", new DetachedCriteria(Pet)
+                .eq("age", 48)
+                .eq("name", "Lucky")
+                .property("age")
+        )
         when:
-        def newBob = hibernateQuery.singleResult()
+        def bobs = hibernateQuery.list()
         then:
-        oldBob == newBob
+        bobs.size() == 2
     }
 
     def greaterThanSome() {
         new Person(firstName: "Fred", lastName: "Rogers", age: 48).save(flush: true)
+        oldBob.addToPets(new Pet(name: "Lucky", age:1)).save(flush:true)
         given:
-        hibernateQuery.gtSome("age", new DetachedCriteria(Person)
-                .eq("age",48)
-                .eq("firstName","Chuck")
-                .property("age"))
+        hibernateQuery.gtSome("age", new DetachedCriteria(Pet)
+                .eq("age", 1)
+                .eq("name", "Pluto")
+                .property("age")
+        )
         when:
-        def newBob = hibernateQuery.singleResult()
+        def bobs = hibernateQuery.list()
         then:
-        oldBob == newBob
+        bobs.size() == 2
     }
+
 
 
     def lessThanEqualsSome() {
         new Person(firstName: "Fred", lastName: "Rogers", age: 52).save(flush: true)
+        oldBob.addToPets(new Pet(name: "Lucky", age:52)).save(flush:true)
         given:
-        hibernateQuery.leSome("age",
-                new DetachedCriteria(Person)
-                        .eq("age",50)
-                        .eq("firstName","Chuck")
-                        .property("age"))
+        hibernateQuery.leSome("age", new DetachedCriteria(Pet)
+                .eq("age", 52)
+                .eq("name", "Pluto")
+                .property("age")
+        )
         when:
-        def newBob = hibernateQuery.singleResult()
+        def bobs = hibernateQuery.list()
         then:
-        oldBob == newBob
+        bobs.size() == 2
     }
 
     def lessThanSome() {
         new Person(firstName: "Fred", lastName: "Builder", age: 52).save(flush: true)
+        oldBob.addToPets(new Pet(name: "Lucky", age:100)).save(flush:true)
         given:
-        hibernateQuery.ltSome("age", new DetachedCriteria(Person)
-                .eq("age",52)
-                .eq("firstName","Chuck")
-                .property("age"))
+        hibernateQuery.ltSome( "age", new DetachedCriteria(Pet)
+                .eq("age", 100)
+                .eq("name", "Pluto")
+                .property("age")
+        )
         when:
-        def newBob = hibernateQuery.singleResult()
+        def bobs = hibernateQuery.list()
         then:
-        oldBob == newBob
+        bobs.size() == 2
     }
 
 
     def greaterThanEqualsSome() {
         new Person(firstName: "Fred", lastName: "Rogers", age: 48).save(flush: true)
+        oldBob.addToPets(new Pet(name: "Lucky", age:48)).save(flush:true)
         given:
-        hibernateQuery.geSome("age", new DetachedCriteria(Person)
-                .eq("age",50)
-                .eq("firstName","Chuck")
-                .property("age"))
+        hibernateQuery.geSome("age", new DetachedCriteria(Pet)
+                .eq("age", 48)
+                .eq("name", "Pluto")
+                .property("age")
+        )
         when:
-        def newBob = hibernateQuery.singleResult()
+        def bobs = hibernateQuery.list()
         then:
-        oldBob == newBob
+        bobs.size() == 2
     }
 
     def equalsAll() {
         new Person(firstName: "Fred", lastName: "Rogers", age: 48).save(flush: true)
+        oldBob.addToPets(new Pet(name: "Lucky", age:50)).save(flush:true)
         given:
-        hibernateQuery.eqAll("age", new DetachedCriteria(Person).eq("age",50).property("age"))
+        hibernateQuery.eqAll( "age", new DetachedCriteria(Pet)
+                .eq("age", 50)
+                .eq("name", "Lucky")
+                .property("age")
+        )
         when:
         def newBob = hibernateQuery.singleResult()
         then:

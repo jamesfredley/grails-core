@@ -123,7 +123,7 @@ public abstract class AbstractHibernateQuery extends Query {
 
     public Query createAlias(String associationPath, String alias) {
         detachedCriteria.createAlias(associationPath, alias);
-        return  this;
+        return this;
     }
 
 
@@ -482,7 +482,7 @@ public abstract class AbstractHibernateQuery extends Query {
         assignProjections(projections, cb, root, tablesByName, cq);
         assignGroupBy(groupProjections, root, cq);
         assignOrderBy(cq, cb, root);
-        assignCriteria(cq, cb, root);
+        assignCriteria(cq, cb, root,tablesByName);
 
         org.hibernate.query.Query query = getSessionFactory()
                 .getCurrentSession()
@@ -524,10 +524,10 @@ public abstract class AbstractHibernateQuery extends Query {
         return projections;
     }
 
-    private void assignCriteria(CriteriaQuery cq, HibernateCriteriaBuilder cb, From root) {
+    private void assignCriteria(CriteriaQuery cq, HibernateCriteriaBuilder cb, From root, Map<String, From> tablesByName) {
         List<Criterion>  criteriaList = (List<Criterion>)detachedCriteria.getCriteria();
         if (!criteriaList.isEmpty()) {
-            cq.where(cb.and(PredicateGenerator.getPredicates(cb, cq, root, criteriaList,getSessionFactory().getCurrentSession())));
+            cq.where(cb.and(PredicateGenerator.getPredicates(cb, cq, root, criteriaList,tablesByName)));
         }
     }
 
@@ -597,15 +597,20 @@ public abstract class AbstractHibernateQuery extends Query {
 
 
             Join table = root.join(joinColumn, joinType);
-            String column = joinColumn;
-            if (aliasMap.containsKey(joinColumn)) {
-                column = aliasMap.get(joinColumn);
-                table.alias(column);
-            }
+            String column = aliasColumn(aliasMap, joinColumn, table);
             return new AbstractMap.SimpleEntry<>(column, table);
         }).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
         tablesByName.put("root", root);
         return tablesByName;
+    }
+
+    private static String aliasColumn(Map<String, String> aliasMap, String associationPath, Join table) {
+        String column = associationPath;
+        if (aliasMap.containsKey(associationPath)) {
+            column = aliasMap.get(associationPath);
+            table.alias(column);
+        }
+        return column;
     }
 
     private Function<Projection, JpaExpression> projectionToJpaExpression(
@@ -620,10 +625,7 @@ public abstract class AbstractHibernateQuery extends Query {
                 return (JpaExpression) tablesByName.get("root").get("id");
             } else {
                 String propertyName = ((PropertyProjection) projection).getPropertyName();
-                String[] parsed = propertyName.split("\\.");
-                String tableName = parsed.length > 1 ? parsed[0] : "root";
-                String columnName = parsed.length > 1 ? parsed[1] :propertyName;
-                Path path = tablesByName.get(tableName).get(columnName);
+                Path path = getFullyQualifiedPath(tablesByName, propertyName);
                 if (maxProjectionPredicate.test(projection)) {
                     return cb.max(path);
                 } else if (minProjectionPredicate.test(projection)) {
@@ -638,6 +640,13 @@ public abstract class AbstractHibernateQuery extends Query {
             }
             return null;
         };
+    }
+
+    public static Path getFullyQualifiedPath(Map<String, From> tablesByName, String propertyName) {
+        String[] parsed = propertyName.split("\\.");
+        String tableName = parsed.length > 1 ? parsed[0] : "root";
+        String columnName = parsed.length > 1 ? parsed[1] : propertyName;
+        return tablesByName.get(tableName).get(columnName);
     }
 
     private SessionFactory getSessionFactory() {

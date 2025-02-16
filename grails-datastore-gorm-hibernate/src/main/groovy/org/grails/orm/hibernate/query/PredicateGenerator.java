@@ -25,116 +25,111 @@ import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZonedDateTime;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import static org.grails.orm.hibernate.query.AbstractHibernateQuery.getFullyQualifiedPath;
+
 
 @Slf4j
 public class PredicateGenerator {
     private static final Logger log = LoggerFactory.getLogger(PredicateGenerator.class);
 
-    public static Predicate[] getPredicates(HibernateCriteriaBuilder cb, CriteriaQuery criteriaQuery, From root_, List<Query.Criterion> criteriaList, EntityManager entityManager) {
+    public static Predicate[] getPredicates(HibernateCriteriaBuilder cb,
+                                            CriteriaQuery criteriaQuery,
+                                            From root_,
+                                            List<Query.Criterion> criteriaList, Map<String, From> tablesByName) {
 
 
-        return criteriaList.stream().
+        List<Predicate> list = criteriaList.stream().
                 map(criterion -> {
                     if (criterion instanceof Query.Disjunction) {
                         List<Query.Criterion> criterionList = ((Query.Disjunction) criterion).getCriteria();
-                        return cb.or(getPredicates(cb, criteriaQuery, root_, criterionList, entityManager));
+                        return cb.or(getPredicates(cb, criteriaQuery, root_, criterionList, tablesByName));
                     } else if (criterion instanceof Query.Conjunction) {
                         List<Query.Criterion> criterionList = ((Query.Conjunction) criterion).getCriteria();
-                        return cb.and(getPredicates(cb, criteriaQuery, root_, criterionList, entityManager));
+                        return cb.and(getPredicates(cb, criteriaQuery, root_, criterionList, tablesByName));
                     } else if (criterion instanceof Query.Negation) {
                         List<Query.Criterion> criterionList = ((Query.Negation) criterion).getCriteria();
-                        Predicate[] predicates = getPredicates(cb, criteriaQuery, root_, criterionList, entityManager);
+                        Predicate[] predicates = getPredicates(cb, criteriaQuery, root_, criterionList, tablesByName);
                         if (predicates.length != 1) {
                             log.error("Must have a single predicate behind a not");
                             throw new RuntimeException("Must have a single predicate behind a not");
                         }
                         return cb.not(predicates[0]);
                     } else if (criterion instanceof Query.IsNull c) {
-                        return cb.isNull(root_.get(c.getProperty()));
+                        return cb.isNull(getFullyQualifiedPath(tablesByName, c.getProperty()));
                     } else if (criterion instanceof Query.IsNotNull c) {
-                        return cb.isNotNull(root_.get(c.getProperty()));
+                        return cb.isNotNull(getFullyQualifiedPath(tablesByName, c.getProperty()));
                     } else if (criterion instanceof Query.IsEmpty c) {
-                        return cb.isEmpty(root_.get(c.getProperty()));
+                        return cb.isEmpty(getFullyQualifiedPath(tablesByName, c.getProperty()));
                     } else if (criterion instanceof Query.Equals c) {
-                        return cb.equal(root_.get(c.getProperty()), c.getValue());
+                        return cb.equal(getFullyQualifiedPath(tablesByName, c.getProperty()), c.getValue());
                     } else if (criterion instanceof Query.NotEquals c) {
-                        return cb.notEqual(root_.get(c.getProperty()), c.getValue());
+                        return cb.notEqual(getFullyQualifiedPath(tablesByName, c.getProperty()), c.getValue());
                     } else if (criterion instanceof Query.EqualsProperty c) {
-                        return cb.equal(root_.get(c.getProperty()), root_.get(c.getOtherProperty()));
+                        return cb.equal(getFullyQualifiedPath(tablesByName, c.getProperty()), root_.get(c.getOtherProperty()));
                     } else if (criterion instanceof Query.NotEqualsProperty c) {
-                        return cb.notEqual(root_.get(c.getProperty()), root_.get(c.getOtherProperty()));
+                        return cb.notEqual(getFullyQualifiedPath(tablesByName, c.getProperty()), root_.get(c.getOtherProperty()));
                     } else if (criterion instanceof Query.LessThanEqualsProperty c) {
-                        return cb.le(root_.get(c.getProperty()), root_.get(c.getOtherProperty()));
+                        return cb.le(getFullyQualifiedPath(tablesByName, c.getProperty()), root_.get(c.getOtherProperty()));
                     } else if (criterion instanceof Query.LessThanProperty c) {
-                        return cb.lt(root_.get(c.getProperty()), root_.get(c.getOtherProperty()));
+                        return cb.lt(getFullyQualifiedPath(tablesByName, c.getProperty()), root_.get(c.getOtherProperty()));
                     } else if (criterion instanceof Query.GreaterThanEqualsProperty c) {
-                        return cb.ge(root_.get(c.getProperty()), root_.get(c.getOtherProperty()));
+                        return cb.ge(getFullyQualifiedPath(tablesByName, c.getProperty()), root_.get(c.getOtherProperty()));
                     } else if (criterion instanceof Query.GreaterThanProperty c) {
-                        return cb.gt(root_.get(c.getProperty()), root_.get(c.getOtherProperty()));
+                        return cb.gt(getFullyQualifiedPath(tablesByName, c.getProperty()), root_.get(c.getOtherProperty()));
                     } else if (criterion instanceof Query.IdEquals c) {
                         return cb.equal(root_.get("id"), c.getValue());
                     } else if (criterion instanceof Query.GreaterThan c) {
-                        return cb.gt(root_.get(c.getProperty()), (Number) c.getValue());
+                        return cb.gt(getFullyQualifiedPath(tablesByName, c.getProperty()), (Number) c.getValue());
                     } else if (criterion instanceof Query.GreaterThanEquals c) {
-                        return cb.ge(root_.get(c.getProperty()), (Number) c.getValue());
+                        return cb.ge(getFullyQualifiedPath(tablesByName, c.getProperty()), (Number) c.getValue());
                     } else if (criterion instanceof Query.LessThan c) {
-                        return cb.lt(root_.get(c.getProperty()), (Number) c.getValue());
+                        return cb.lt(getFullyQualifiedPath(tablesByName, c.getProperty()), (Number) c.getValue());
                     } else if (criterion instanceof Query.LessThanEquals c) {
-                        return cb.le(root_.get(c.getProperty()), (Number) c.getValue());
+                        return cb.le(getFullyQualifiedPath(tablesByName, c.getProperty()), (Number) c.getValue());
                     } else if (criterion instanceof Query.Between c) {
                         if (c.getFrom() instanceof String && c.getTo() instanceof String) {
-                            return cb.between(root_.get(c.getProperty()), (String) c.getFrom(), (String) c.getTo());
+                            return cb.between(getFullyQualifiedPath(tablesByName, c.getProperty()), (String) c.getFrom(), (String) c.getTo());
                         } else if (c.getFrom() instanceof Short && c.getTo() instanceof Short) {
-                            return cb.between(root_.get(c.getProperty()), (Short) c.getFrom(), (Short) c.getTo());
+                            return cb.between(getFullyQualifiedPath(tablesByName, c.getProperty()), (Short) c.getFrom(), (Short) c.getTo());
                         } else if (c.getFrom() instanceof Integer && c.getTo() instanceof Integer) {
-                            return cb.between(root_.get(c.getProperty()), (Integer) c.getFrom(), (Integer) c.getTo());
+                            return cb.between(getFullyQualifiedPath(tablesByName, c.getProperty()), (Integer) c.getFrom(), (Integer) c.getTo());
                         } else if (c.getFrom() instanceof Long && c.getTo() instanceof Long) {
-                            return cb.between(root_.get(c.getProperty()), (Long) c.getFrom(), (Long) c.getTo());
+                            return cb.between(getFullyQualifiedPath(tablesByName, c.getProperty()), (Long) c.getFrom(), (Long) c.getTo());
                         } else if (c.getFrom() instanceof Date && c.getTo() instanceof Date) {
-                            return cb.between(root_.get(c.getProperty()), (Date) c.getFrom(), (Date) c.getTo());
+                            return cb.between(getFullyQualifiedPath(tablesByName, c.getProperty()), (Date) c.getFrom(), (Date) c.getTo());
                         } else if (c.getFrom() instanceof Instant && c.getTo() instanceof Instant) {
-                            return cb.between(root_.get(c.getProperty()), (Instant) c.getFrom(), (Instant) c.getTo());
+                            return cb.between(getFullyQualifiedPath(tablesByName, c.getProperty()), (Instant) c.getFrom(), (Instant) c.getTo());
                         } else if (c.getFrom() instanceof LocalDate && c.getTo() instanceof LocalDate) {
-                            return cb.between(root_.get(c.getProperty()), (LocalDate) c.getFrom(), (LocalDate) c.getTo());
+                            return cb.between(getFullyQualifiedPath(tablesByName, c.getProperty()), (LocalDate) c.getFrom(), (LocalDate) c.getTo());
                         } else if (c.getFrom() instanceof LocalDateTime && c.getTo() instanceof LocalDateTime) {
-                            return cb.between(root_.get(c.getProperty()), (LocalDateTime) c.getFrom(), (LocalDateTime) c.getTo());
+                            return cb.between(getFullyQualifiedPath(tablesByName, c.getProperty()), (LocalDateTime) c.getFrom(), (LocalDateTime) c.getTo());
                         } else if (c.getFrom() instanceof OffsetDateTime && c.getTo() instanceof OffsetDateTime) {
-                            return cb.between(root_.get(c.getProperty()), (OffsetDateTime) c.getFrom(), (OffsetDateTime) c.getTo());
+                            return cb.between(getFullyQualifiedPath(tablesByName, c.getProperty()), (OffsetDateTime) c.getFrom(), (OffsetDateTime) c.getTo());
                         } else if (c.getFrom() instanceof ZonedDateTime && c.getTo() instanceof ZonedDateTime) {
-                            return cb.between(root_.get(c.getProperty()), (ZonedDateTime) c.getFrom(), (ZonedDateTime) c.getTo());
+                            return cb.between(getFullyQualifiedPath(tablesByName, c.getProperty()), (ZonedDateTime) c.getFrom(), (ZonedDateTime) c.getTo());
                         }
                     } else if (criterion instanceof Query.ILike c) {
-                        return cb.ilike(root_.get(c.getProperty()), c.getValue().toString());
+                        return cb.ilike(getFullyQualifiedPath(tablesByName, c.getProperty()), c.getValue().toString());
                     } else if (criterion instanceof Query.RLike c) {
-                        return cb.like(root_.get(c.getProperty()), c.getPattern(), '\\');
+                        return cb.like(getFullyQualifiedPath(tablesByName, c.getProperty()), c.getPattern(), '\\');
                     } else if (criterion instanceof Query.Like c) {
-                        return cb.like(root_.get(c.getProperty()), c.getValue().toString());
+                        return cb.like(getFullyQualifiedPath(tablesByName, c.getProperty()), c.getValue().toString());
                     } else if (criterion instanceof Query.SizeEquals c) {
-                        return cb.equal(cb.size(root_.get(c.getProperty())),c.getValue());
+                        return cb.equal(cb.size(getFullyQualifiedPath(tablesByName, c.getProperty())), c.getValue());
                     } else if (criterion instanceof Query.SizeGreaterThan c) {
-                        return cb.gt(cb.size(root_.get(c.getProperty())),(Number) c.getValue());
+                        return cb.gt(cb.size(getFullyQualifiedPath(tablesByName, c.getProperty())), (Number) c.getValue());
                     } else if (criterion instanceof Query.SizeGreaterThanEquals c) {
-                        return cb.ge(cb.size(root_.get(c.getProperty())),(Number) c.getValue());
+                        return cb.ge(cb.size(getFullyQualifiedPath(tablesByName, c.getProperty())), (Number) c.getValue());
                     } else if (criterion instanceof Query.SizeLessThan c) {
-                        return cb.lt(cb.size(root_.get(c.getProperty())),(Number) c.getValue());
-                    } else if (criterion instanceof Query.LessThanEquals c) {
-                        return cb.le(root_.get(c.getProperty()), (Number) c.getValue());
-                    } else if (criterion instanceof DetachedAssociationCriteria c
-                    ) {
-
-//                        Subquery subquery = criteriaQuery.subquery(Object.class);
-//                        Root from = subquery.from(c.getPersistentEntity().getJavaClass());
-//                        Predicate[] predicates = getPredicates(cb, criteriaQuery, from, c.getCriteria(), entityManager);
-//
-//                        EntityType entity = entityManager.getMetamodel().entity(root_.getJavaType());
-//                        PluralAttribute pluralAttribute = (PluralAttribute )entity.getPluralAttributes().stream().toList().get(0);
-////                        subquery.select(from.get(root_.)).where(cb.and(predicates)).alias(c.getAlias());
-//                        String associationPath = c.getAssociationPath();
-//                        return cb.isMember(Optional.ofNullable(root_.get(associationPath)), from.get(pluralAttribute));
+                        return cb.lt(cb.size(getFullyQualifiedPath(tablesByName, c.getProperty())), (Number) c.getValue());
+                    } else if (criterion instanceof Query.SizeLessThanEquals c) {
+                        return cb.le(cb.size(getFullyQualifiedPath(tablesByName, c.getProperty())), (Number) c.getValue());
                     } else if (criterion instanceof Query.In c
                             && Objects.nonNull(c.getSubquery())
                             && !c.getSubquery().getProjections().isEmpty()
@@ -145,7 +140,7 @@ public class PredicateGenerator {
                         boolean distinct = projection instanceof Query.DistinctPropertyProjection;
                         Subquery subquery = criteriaQuery.subquery(getJavaTypeOfInClause((SqmInListPredicate) in));
                         Root from = subquery.from(c.getSubquery().getPersistentEntity().getJavaClass());
-                        Predicate[] predicates = getPredicates(cb, criteriaQuery, from, c.getSubquery().getCriteria(), entityManager);
+                        Predicate[] predicates = getPredicates(cb, criteriaQuery, from, c.getSubquery().getCriteria(), tablesByName);
                         subquery.select(from.get(projection.getPropertyName())).distinct(distinct).where(cb.and(predicates));
                         return in.value(subquery);
                     } else if (criterion instanceof Query.In c
@@ -156,56 +151,62 @@ public class PredicateGenerator {
                         JpaInPredicate in = cb.in(root_.get("id"));
                         Subquery subquery = criteriaQuery.subquery(getJavaTypeOfInClause((SqmInListPredicate) in));
                         Root from = subquery.from(c.getSubquery().getPersistentEntity().getJavaClass());
-                        Predicate[] predicates = getPredicates(cb, criteriaQuery, from, c.getSubquery().getCriteria(), entityManager);
+                        Predicate[] predicates = getPredicates(cb, criteriaQuery, from, c.getSubquery().getCriteria(), tablesByName);
                         subquery.select(from).where(cb.and(predicates));
                         return in.value(subquery);
                     } else if (criterion instanceof Query.In c && !c.getValues().isEmpty()
                     ) {
-                        return cb.in(root_.get(c.getProperty()), c.getValues());
+                        return cb.in(getFullyQualifiedPath(tablesByName, c.getProperty()), c.getValues());
                     } else if (criterion instanceof Query.Exists c) {
                         Subquery subquery = criteriaQuery.subquery(Object.class);
                         Root from = subquery.from(c.getSubquery().getPersistentEntity().getJavaClass());
-                        Predicate[] predicates = getPredicates(cb, criteriaQuery, from, c.getSubquery().getCriteria(), entityManager);
+                        Predicate[] predicates = getPredicates(cb, criteriaQuery, from, c.getSubquery().getCriteria(), tablesByName);
                         subquery.select(cb.literal(1)).where(cb.and(predicates));
                         return cb.exists(subquery);
                     } else if (criterion instanceof Query.NotExists c) {
                         Subquery subquery = criteriaQuery.subquery(Object.class);
                         Root from = subquery.from(c.getSubquery().getPersistentEntity().getJavaClass());
-                        Predicate[] predicates = getPredicates(cb, criteriaQuery, from, c.getSubquery().getCriteria(), entityManager);
+                        Predicate[] predicates = getPredicates(cb, criteriaQuery, from, c.getSubquery().getCriteria(), tablesByName);
                         subquery.select(cb.literal(1)).where(cb.and(predicates));
                         return cb.not(cb.exists(subquery));
-                    }
-                    else if (criterion instanceof Query.SubqueryCriterion c) {
+                    } else if (criterion instanceof Query.SubqueryCriterion c) {
                         Subquery subquery = criteriaQuery.subquery(Number.class);
                         Root from = subquery.from(c.getValue().getPersistentEntity().getJavaClass());
-                        Predicate[] predicates = getPredicates(cb, criteriaQuery, from, c.getValue().getCriteria(), entityManager);
-                        if (c instanceof Query.GreaterThanEqualsAll sc ) {
+                        Predicate[] predicates;
+                        if (tablesByName.size() == 1 && tablesByName.containsKey("root")) {
+                            Map<String,From> newMap = new HashMap<>();
+                            newMap.put("root", from);
+                            predicates = getPredicates(cb, criteriaQuery, from, c.getValue().getCriteria(), newMap);
+                        } else {
+                            predicates = getPredicates(cb, criteriaQuery, from, c.getValue().getCriteria(), tablesByName);
+                        }
+                        if (c instanceof Query.GreaterThanEqualsAll sc) {
                             subquery.select(cb.max(from.get(c.getProperty()))).where(cb.and(predicates));
-                            return cb.greaterThanOrEqualTo(root_.get(sc.getProperty()),subquery);
-                        } else if (c instanceof Query.GreaterThanAll sc ) {
+                            return cb.greaterThanOrEqualTo(getFullyQualifiedPath(tablesByName, sc.getProperty()), subquery);
+                        } else if (c instanceof Query.GreaterThanAll sc) {
                             subquery.select(cb.max(from.get(c.getProperty()))).where(cb.and(predicates));
-                            return cb.greaterThan(root_.get(sc.getProperty()),subquery);
-                        } else if (c instanceof Query.LessThanEqualsAll sc ) {
+                            return cb.greaterThan(getFullyQualifiedPath(tablesByName, sc.getProperty()), subquery);
+                        } else if (c instanceof Query.LessThanEqualsAll sc) {
                             subquery.select(cb.min(from.get(c.getProperty()))).where(cb.and(predicates));
-                            return cb.lessThanOrEqualTo(root_.get(sc.getProperty()),subquery);
-                        } else if (c instanceof Query.LessThanAll sc ) {
+                            return cb.lessThanOrEqualTo(getFullyQualifiedPath(tablesByName, sc.getProperty()), subquery);
+                        } else if (c instanceof Query.LessThanAll sc) {
                             subquery.select(cb.min(from.get(c.getProperty()))).where(cb.and(predicates));
-                            return cb.lessThan(root_.get(sc.getProperty()),subquery);
+                            return cb.lessThan(getFullyQualifiedPath(tablesByName, sc.getProperty()), subquery);
                         } else if (c instanceof Query.EqualsAll sc) {
                             subquery.select(from.get(c.getProperty())).where(cb.and(predicates));
-                            return cb.equal(root_.get(sc.getProperty()),subquery);
-                        } else if (c instanceof Query.GreaterThanEqualsSome sc ) {
+                            return cb.equal(getFullyQualifiedPath(tablesByName, sc.getProperty()), subquery);
+                        } else if (c instanceof Query.GreaterThanEqualsSome sc) {
                             subquery.select(cb.max(from.get(c.getProperty()))).where(cb.or(predicates));
-                            return cb.greaterThanOrEqualTo(root_.get(sc.getProperty()),subquery);
-                        } else if (c instanceof Query.GreaterThanSome sc ) {
+                            return cb.greaterThanOrEqualTo(getFullyQualifiedPath(tablesByName, sc.getProperty()), subquery);
+                        } else if (c instanceof Query.GreaterThanSome sc) {
                             subquery.select(cb.max(from.get(c.getProperty()))).where(cb.or(predicates));
-                            return cb.greaterThan(root_.get(sc.getProperty()),subquery);
-                        } else if (c instanceof Query.LessThanEqualsSome sc ) {
+                            return cb.greaterThan(getFullyQualifiedPath(tablesByName, sc.getProperty()), subquery);
+                        } else if (c instanceof Query.LessThanEqualsSome sc) {
                             subquery.select(cb.min(from.get(c.getProperty()))).where(cb.or(predicates));
-                            return cb.lessThanOrEqualTo(root_.get(sc.getProperty()),subquery);
-                        } else if (c instanceof Query.LessThanSome sc ) {
+                            return cb.lessThanOrEqualTo(getFullyQualifiedPath(tablesByName, sc.getProperty()), subquery);
+                        } else if (c instanceof Query.LessThanSome sc) {
                             subquery.select(cb.min(from.get(c.getProperty()))).where(cb.or(predicates));
-                            return cb.lessThan(root_.get(sc.getProperty()), subquery);
+                            return cb.lessThan(getFullyQualifiedPath(tablesByName, sc.getProperty()), subquery);
                         } else if (criterion instanceof Query.NotIn sc
                                 && Objects.nonNull(sc.getSubquery())
                                 && !sc.getSubquery().getProjections().isEmpty()
@@ -214,7 +215,7 @@ public class PredicateGenerator {
                             Query.PropertyProjection projection = (Query.PropertyProjection) sc.getSubquery().getProjections().get(0);
                             boolean distinct = projection instanceof Query.DistinctPropertyProjection;
                             subquery.select(from.get(projection.getPropertyName())).distinct(distinct).where(cb.and(predicates));
-                            return cb.in(root_.get(sc.getProperty())).value(subquery);
+                            return cb.in(getFullyQualifiedPath(tablesByName, sc.getProperty())).value(subquery);
                         } else if (criterion instanceof Query.NotIn sc
                                 && Objects.nonNull(sc.getSubquery())
                                 && !sc.getSubquery().getProjections().isEmpty()
@@ -225,7 +226,15 @@ public class PredicateGenerator {
                         }
                     }
                     return null;
-                }).filter(Objects::nonNull).toList().toArray(new Predicate[0]);
+                }).filter(Objects::nonNull).toList();
+        if (list.isEmpty()) {
+            list = List.of(cb.equal(cb.literal(1),cb.literal(1)));
+        }
+        return list.toArray(new Predicate[0]);
+    }
+
+    private static String getAlias(Map<String, String> aliasMap, Query.Equals c) {
+        return aliasMap.computeIfAbsent(c.getProperty(), s -> "root." + s);
     }
 
     private static Class getJavaTypeOfInClause(SqmInListPredicate in) {
