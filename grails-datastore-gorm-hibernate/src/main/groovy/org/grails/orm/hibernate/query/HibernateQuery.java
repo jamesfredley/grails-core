@@ -19,10 +19,8 @@ package org.grails.orm.hibernate.query;
 
 import grails.gorm.DetachedCriteria;
 import groovy.lang.Closure;
-import jakarta.persistence.criteria.CriteriaQuery;
 import org.grails.datastore.mapping.query.Query;
 import org.grails.datastore.mapping.query.Restrictions;
-import org.grails.datastore.mapping.query.api.Criteria;
 import org.grails.datastore.mapping.query.api.QueryableCriteria;
 import org.grails.orm.hibernate.AbstractHibernateSession;
 
@@ -32,9 +30,6 @@ import org.grails.orm.hibernate.HibernateSession;
 import org.hibernate.SessionFactory;
 import org.hibernate.engine.spi.SharedSessionContractImplementor;
 import org.hibernate.persister.entity.PropertyMapping;
-import org.hibernate.query.criteria.JpaCriteriaQuery;
-
-import java.util.List;
 
 /**
  * Bridges the Query API with the Hibernate Criteria API
@@ -59,11 +54,6 @@ public class HibernateQuery extends AbstractHibernateQuery {
      */
     public DetachedCriteria getHibernateCriteria() {
         return detachedCriteria;
-    }
-
-    public Query inList(String propertyName, QueryableCriteria<?> subquery) {
-        detachedCriteria.inList(propertyName,subquery);
-        return this;
     }
 
     public Query notIn(String propertyName, QueryableCriteria<?> subquery) {

@@ -16,7 +16,6 @@ import jakarta.persistence.criteria.Subquery;
 import jakarta.persistence.metamodel.Attribute;
 import org.grails.datastore.mapping.multitenancy.MultiTenancySettings;
 import org.grails.datastore.mapping.query.Query;
-import org.grails.datastore.mapping.query.Restrictions;
 import org.grails.datastore.mapping.query.api.BuildableCriteria;
 import org.grails.datastore.mapping.query.api.Criteria;
 import org.grails.datastore.mapping.query.api.QueryableCriteria;
@@ -645,7 +644,7 @@ public abstract class AbstractHibernateCriteriaBuilder extends GroovyObjectSuppo
 
     @Override
     public Criteria inList(String propertyName, QueryableCriteria<?> subquery) {
-        hibernateQuery.inList(propertyName,subquery);
+        hibernateQuery.in(propertyName,subquery);
         return this;
     }
 

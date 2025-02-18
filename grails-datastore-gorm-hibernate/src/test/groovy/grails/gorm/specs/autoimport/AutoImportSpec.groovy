@@ -14,7 +14,7 @@ class AutoImportSpec extends GormSpec {
     }
     @Override
     List getDomainClasses() {
-        [A, grails.gorm.tests.autoimport.other.A]
+        [A, grails.gorm.specs.autoimport.other.A]
     }
 }
 

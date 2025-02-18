@@ -31,6 +31,7 @@ import org.grails.datastore.mapping.model.types.Association;
 import org.grails.datastore.mapping.query.AssociationQuery;
 import org.grails.datastore.mapping.query.Query;
 import org.grails.datastore.mapping.query.Restrictions;
+import org.grails.datastore.mapping.query.api.QueryableCriteria;
 import org.grails.orm.hibernate.AbstractHibernateSession;
 import org.grails.orm.hibernate.IHibernateTemplate;
 import org.hibernate.SessionFactory;
@@ -162,7 +163,11 @@ public abstract class AbstractHibernateQuery extends Query {
         } else if (criterion instanceof ILike c) {
             ilike(c.getProperty(), c.getValue().toString());
         } else if (criterion instanceof In c) {
-            in(c.getProperty(), c.getValues().stream().toList());
+            if (Objects.nonNull(c.getSubquery())) {
+                in(c.getProperty(),c.getSubquery());
+            } else {
+                in(c.getProperty(), c.getValues().stream().toList());
+            }
         } else if (criterion instanceof IsEmpty c) {
             isEmpty(c.getProperty());
         } else if (criterion instanceof IsNotEmpty c) {
@@ -180,18 +185,6 @@ public abstract class AbstractHibernateQuery extends Query {
         } else if (criterion instanceof LessThan c) {
             lt(c.getProperty(),c.getValue());
         }
-    }
-
-
-
-    @Override
-    public Junction disjunction() {
-        return null;
-    }
-
-    @Override
-    public Junction negation() {
-        return null;
     }
 
     @Override
@@ -232,7 +225,7 @@ public abstract class AbstractHibernateQuery extends Query {
                 owner.add(Restrictions.or(a,b));
             }
         };
-        detachedCriteria.and(orClosure);
+        detachedCriteria.or(orClosure);
            return this;
     }
 
@@ -550,7 +543,8 @@ public abstract class AbstractHibernateQuery extends Query {
     private void assignCriteria(CriteriaQuery cq, HibernateCriteriaBuilder cb, From root, Map<String, From> tablesByName) {
         List<Criterion>  criteriaList = (List<Criterion>)detachedCriteria.getCriteria();
         if (!criteriaList.isEmpty()) {
-            cq.where(cb.and(PredicateGenerator.getPredicates(cb, cq, root, criteriaList,tablesByName)));
+            jakarta.persistence.criteria.Predicate[] predicates = PredicateGenerator.getPredicates(cb, cq, root, criteriaList, tablesByName);
+            cq.where(cb.and(predicates));
         }
     }
 
@@ -698,6 +692,11 @@ public abstract class AbstractHibernateQuery extends Query {
 
     protected String generateAlias(String associationName) {
         return calculatePropertyName(associationName) + calculatePropertyName(ALIAS) + aliasCount++;
+    }
+
+    public Query in(String propertyName, QueryableCriteria<?> subquery) {
+        detachedCriteria.inList(propertyName,subquery);
+        return this;
     }
 
 

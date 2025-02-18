@@ -305,7 +305,7 @@ class HibernateQuerySpec extends HibernateGormDatastoreSpec {
         def oldPet = new Pet(name: "Lucky")
         oldBob.addToPets(oldPet)
         oldBob.save(flush: true)
-        petHibernateQuery.inList("owner",
+        petHibernateQuery.in("owner",
             new DetachedCriteria(Person).eq("lastName", "Builder")
         )
         when:

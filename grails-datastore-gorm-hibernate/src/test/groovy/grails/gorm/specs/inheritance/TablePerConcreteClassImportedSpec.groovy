@@ -7,8 +7,9 @@ import spock.lang.Issue
 class TablePerConcreteClassImportedSpec extends GormSpec {
     void "test that subclasses are added to the imports on the metamodel"() {
         expect:
-        sessionFactory.getMetamodel().getImportedClassName('Vehicle')
-        sessionFactory.getMetamodel().getImportedClassName('Spaceship')
+        sessionFactory.getMetamodel().entities
+                .collect {it.javaType}
+                .containsAll( [Vehicle, Spaceship])
     }
 
     @Override
