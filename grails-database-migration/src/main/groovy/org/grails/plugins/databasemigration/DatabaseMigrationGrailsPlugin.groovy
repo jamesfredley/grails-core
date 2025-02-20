@@ -19,6 +19,7 @@ import grails.plugins.Plugin
 import liquibase.parser.ChangeLogParser
 import liquibase.parser.ChangeLogParserFactory
 import org.grails.plugins.databasemigration.liquibase.GrailsLiquibase
+import org.grails.plugins.databasemigration.liquibase.GrailsLiquibaseFactory
 import org.grails.plugins.databasemigration.liquibase.GroovyChangeLogParser
 import org.springframework.context.ApplicationContext
 
@@ -45,7 +46,9 @@ class DatabaseMigrationGrailsPlugin extends Plugin {
     @Override
     Closure doWithSpring() {
         configureLiquibase()
-        return { -> }
+        return { ->
+            grailsLiquibaseFactory(GrailsLiquibaseFactory, applicationContext)
+        }
     }
 
     @Override
@@ -71,7 +74,7 @@ class DatabaseMigrationGrailsPlugin extends Plugin {
             }
 
             new DatabaseMigrationTransactionManager(applicationContext, dataSourceName).withTransaction {
-                GrailsLiquibase gl = new GrailsLiquibase(applicationContext)
+                GrailsLiquibase gl = applicationContext.getBean('grailsLiquibaseFactory', GrailsLiquibase)
                 gl.dataSource = getDataSourceBean(applicationContext, dataSourceName)
                 gl.dropFirst = config.getProperty("${configPrefix}.dropOnStart", Boolean, false)
                 gl.changeLog = config.getProperty("${configPrefix}.updateOnStartFileName", String, isDefaultDataSource(dataSourceName) ? 'changelog.groovy' : "changelog-${dataSourceName}.groovy")
