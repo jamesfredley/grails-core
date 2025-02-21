@@ -17,6 +17,7 @@ allprojects {
 
 
 subprojects { Project subproject ->
+    apply plugin: "groovy"
     apply plugin: "org.grails.grails-profile"
 
     apply plugin: "org.grails.grails-profile-publish"
@@ -36,4 +37,9 @@ subprojects { Project subproject ->
         desc = "A profile"
         developers = [graemerocher:'Graeme Rocher']
     }
+
+    if ( subproject.name != "base" ) {
+        compileProfile.dependsOn(':base:jarProfile')
+    }
+
 }
