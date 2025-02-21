@@ -8,3 +8,5 @@ dependencies {
     profileRuntimeOnly project(":plugin")
     profileRuntimeOnly project(":rest-api")
 }
+
+compileProfile.dependsOn(':plugin:profileJar', ':rest-api:profileJar')
