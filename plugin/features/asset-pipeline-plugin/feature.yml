@@ -5,5 +5,5 @@ build:
 dependencies:
     - scope: build
       coords: 'com.bertramlabs.plugins:asset-pipeline-gradle'
-    - scope: runtime
+    - scope: runtimeOnly
       coords: "com.bertramlabs.plugins:asset-pipeline-grails"

@@ -4,7 +4,7 @@ dependencies:
       coords: 'org.grails.plugins:hibernate5'
     - scope: implementation
       coords: "org.grails.plugins:hibernate5"
-    - scope: runtime
+    - scope: runtimeOnly
       coords: "com.h2database:h2"
-    - scope: runtime
       coords: "org.apache.tomcat:tomcat-jdbc"
+    - scope: runtimeOnly
