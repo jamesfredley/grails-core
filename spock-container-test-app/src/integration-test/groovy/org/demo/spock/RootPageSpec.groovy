@@ -3,7 +3,6 @@ package org.demo.spock
 import geb.report.CompositeReporter
 import geb.report.PageSourceReporter
 import geb.report.Reporter
-import geb.report.ScreenshotReporter
 import grails.plugin.geb.ContainerGebConfiguration
 import grails.plugin.geb.ContainerGebSpec
 import grails.testing.mixin.integration.Integration
