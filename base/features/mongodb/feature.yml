@@ -1,6 +1,6 @@
 description: Adds GORM for MongoDB to the project
 dependencies:
-    - scope: compile
+    - scope: implementation
       coords: 'org.grails.plugins:mongodb'
     - scope: compileOnly
       coords: 'org.grails.plugins:embedded-mongodb:2.0.1'

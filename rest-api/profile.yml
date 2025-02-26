@@ -12,39 +12,39 @@ build:
     excludes:
         - org.grails.grails-core
 dependencies:
-    - scope: compile
+    - scope: implementation
       coords: "org.springframework.boot:spring-boot-starter-actuator"
-    - scope: compile
+    - scope: implementation
       coords: "org.springframework.boot:spring-boot-starter-tomcat"
-    - scope: compile
+    - scope: implementation
       coords: "org.grails:grails-plugin-url-mappings"
-    - scope: compile
+    - scope: implementation
       coords: "org.grails:grails-plugin-rest"
-    - scope: compile
+    - scope: implementation
       coords: "org.grails:grails-plugin-codecs"
-    - scope: compile
+    - scope: implementation
       coords: "org.grails:grails-plugin-interceptors"
-    - scope: compile
+    - scope: implementation
       coords: "org.grails:grails-plugin-services"
-    - scope: compile
+    - scope: implementation
       coords: "org.grails:grails-plugin-datasource"
-    - scope: compile
+    - scope: implementation
       coords: "org.grails:grails-plugin-databinding"
-    - scope: compile
+    - scope: implementation
       coords: "org.grails:grails-web-boot"
-    - scope: compile
+    - scope: implementation
       coords: "org.grails:grails-logging"
-    - scope: compile
+    - scope: implementation
       coords: "org.grails.plugins:cache"
-    - scope: compile
+    - scope: implementation
       coords: "org.grails.plugins:async"
-    - scope: testCompile
+    - scope: testImplementation
       coords: "io.micronaut:micronaut-http-client"
-    - scope: testCompile
+    - scope: testImplementation
       coords: "org.grails:grails-web-testing-support"
-    - scope: testCompile
+    - scope: testImplementation
       coords: "org.grails:grails-gorm-testing-support"
-    - scope: testCompile
+    - scope: testImplementation
       coords: "org.grails:views-json-testing-support"
-    - scope: testCompile
+    - scope: testImplementation
       coords: "org.hibernate.validator:hibernate-validator:6.1.7.Final"

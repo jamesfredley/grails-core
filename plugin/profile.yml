@@ -5,7 +5,7 @@ build:
     excludes:
         - org.grails.grails-core
 dependencies:
-    - scope: compile
+    - scope: implementation
       coords: "org.grails:grails-core"
 
 

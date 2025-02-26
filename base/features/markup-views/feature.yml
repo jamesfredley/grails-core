@@ -5,5 +5,5 @@ build:
 dependencies:
     - scope: build
       coords: "org.grails.plugins:views-gradle:2.3.2"
-    - scope: compile
+    - scope: implementation
       coords: "org.grails.plugins:views-markup"
