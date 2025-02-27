@@ -64,11 +64,9 @@ import java.lang.annotation.Target
      *
      * <p> Must have a zero-argument constructor.
      *
-     * @since 4.1
+     * @since 4.2
      * @see org.openqa.selenium.remote.LocalFileDetector LocalFileDetector (grails.geb default)
      * @see org.openqa.selenium.remote.UselessFileDetector UselessFileDetector (null/unset value)
-     * @see
      */
-    @NotNull(message="You may not set a file detector that is null.")
     Class<? extends FileDetector> fileDetector() default LocalFileDetector
 }

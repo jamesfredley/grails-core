@@ -20,7 +20,7 @@ class LocalUploadSpec extends ContainerGebSpec {
         def uploadPage = to UploadPage
 
         when:
-        uploadPage.fileInput.file = new File("src/integration-test/resources/assets/upload-test.txt")
+        uploadPage.fileInput.file = new File('src/integration-test/resources/assets/upload-test.txt')
 
         and:
         uploadPage.submitBtn.click()
@@ -36,7 +36,7 @@ class LocalUploadSpec extends ContainerGebSpec {
         def uploadPage = to UploadPage
 
         when:
-        uploadPage.fileInput.file = new File("src/integration-test/resources/assets/upload-test.txt")
+        uploadPage.fileInput.file = new File('src/integration-test/resources/assets/upload-test.txt')
 
         and:
         uploadPage.submitBtn.click()

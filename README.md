@@ -78,7 +78,9 @@ By default, no test recording will be performed.  Here are the system properties
 
 #### Uploads
 
-Uploading a file is more complicated for Remote WebDriver sessions because the file you want to upload is likely on the computer executing the code.
+Uploading a file is more complicated for Remote WebDriver sessions because the file you want to upload
+is likely on the host executing the tests and not in the container running the browser.
+
 By default, this plugin will set a Local File Detector.
 
 Alternatively, you can access the `container` from within your ContainerGebSpec to for example call `.copyFileToContainer`,

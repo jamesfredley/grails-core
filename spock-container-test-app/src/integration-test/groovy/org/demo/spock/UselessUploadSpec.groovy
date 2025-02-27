@@ -22,14 +22,14 @@ class UselessUploadSpec extends ContainerGebSpec {
         def uploadPage = to UploadPage
 
         when:
-        uploadPage.fileInput.file = new File("src/integration-test/resources/assets/upload-test.txt")
+        uploadPage.fileInput.file = new File('src/integration-test/resources/assets/upload-test.txt')
 
         and:
         uploadPage.submitBtn.click()
 
         then:
         def e = thrown(WebDriverException)
-        e.message.contains("File not found")
+        e.message.contains('File not found')
     }
 
     @IgnoreIf({ os.windows })
@@ -38,13 +38,13 @@ class UselessUploadSpec extends ContainerGebSpec {
         def uploadPage = to UploadPage
 
         when:
-        uploadPage.fileInput.file = new File("src/integration-test/resources/assets/upload-test.txt")
+        uploadPage.fileInput.file = new File('src/integration-test/resources/assets/upload-test.txt')
 
         and:
         uploadPage.submitBtn.click()
 
         then:
         def e = thrown(WebDriverException)
-        e.message.contains("File not found")
+        e.message.contains('File not found')
     }
 }
