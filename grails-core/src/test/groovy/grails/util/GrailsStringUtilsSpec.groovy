@@ -23,7 +23,7 @@ import spock.lang.Specification
  */
 class GrailsStringUtilsSpec extends Specification{
 
-    private static final String FOO = "foo";
+    static final String FOO = "foo";
     static final String WHITESPACE;
     static final String NON_WHITESPACE;
     static final String HARD_SPACE;
