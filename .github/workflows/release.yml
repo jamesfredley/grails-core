@@ -355,6 +355,7 @@ jobs:
           publishToSonatype 
           closeSonatypeStagingRepository
   release:
+    environment: release
     needs: publish
     runs-on: ubuntu-latest
     permissions:
@@ -390,6 +391,7 @@ jobs:
         if: success()
         uses: ./.github/actions/post-release
   docs:
+    environment: release
     needs: publish
     runs-on: ubuntu-latest
     permissions:
@@ -410,7 +412,7 @@ jobs:
           token: ${{ secrets.GH_TOKEN }}
           inputs: ${{ steps.prep_inputs.outputs.value }}
   website:
-    if: false # disable for 7.0.0-M1 release
+    environment: website
     needs: publish
     runs-on: ubuntu-latest
     permissions:
