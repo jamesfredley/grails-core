@@ -99,6 +99,8 @@ allDependencies.each {
 
 dependencies {
     api platform("org.springframework.boot:spring-boot-dependencies:${project['spring-boot.version']}")
+    api platform("org.apache.groovy:groovy-bom:${project['groovy.version']}")
+    api platform("com.fasterxml.jackson:jackson-bom:${project['jackson.version']}")
 
     constraints {
         allDependencies.each {
