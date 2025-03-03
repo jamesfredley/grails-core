@@ -129,7 +129,7 @@ publishing {
 
                 appendNodes(deps.appendNode('dependency'), [
                         groupId: 'org.apache.groovy',
-                        artifactId: 'groovy:bom',
+                        artifactId: 'groovy-bom',
                         version: '${groovy.version}',
                         type: 'pom',
                         scope: 'import'
