@@ -101,6 +101,8 @@ allDependencies.each {
 
 dependencies {
     api platform("org.springframework.boot:spring-boot-dependencies:${project['spring-boot.version']}")
+    api platform("org.apache.groovy:groovy-bom:${project['groovy.version']}")
+    api platform("com.fasterxml.jackson:jackson-bom:${project['jackson.version']}")
 
     constraints {
         allDependencies.each {
@@ -128,6 +130,23 @@ publishing {
 
                 def dpm = root.appendNode('dependencyManagement')
                 def deps = dpm.appendNode('dependencies')
+
+                appendNodes(deps.appendNode('dependency'), [
+                        groupId: 'org.apache.groovy',
+                        artifactId: 'groovy-bom',
+                        version: '${groovy.version}',
+                        type: 'pom',
+                        scope: 'import'
+                ])
+
+                appendNodes(deps.appendNode('dependency'), [
+                        groupId: 'com.fasterxml.jackson',
+                        artifactId: 'jackson-bom',
+                        version: '${jackson.version}',
+                        type: 'pom',
+                        scope: 'import'
+                ])
+
                 appendNodes(deps.appendNode('dependency'), [
                     groupId: 'org.springframework.boot',
                     artifactId: 'spring-boot-dependencies',
@@ -148,7 +167,9 @@ publishing {
                 allDependencies.collect { def m = it.subMap('groupId', 'artifactId', 'version')
                     m + [version: "\${${m.version}}"]
                 }.each {
-                    appendNodes(deps.appendNode('dependency'), it)
+                    if(it.artifactId !in ['groovy-bom', 'jackson-bom']) {
+                        appendNodes(deps.appendNode('dependency'), it)
+                    }
                 }
             }
         }
