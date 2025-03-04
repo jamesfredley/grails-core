@@ -11,7 +11,7 @@ develocity {
     server = 'https://ge.grails.org'
     buildScan {
         tag('grails')
-        tag('grails-gsp')
+        tag('grails-profiles')
         publishing.onlyIf { isAuthenticated }
         uploadInBackground = isLocal
     }

@@ -13,6 +13,7 @@ jobs:
       matrix:
         java: ['17']
     env:
+      GRAILS_PUBLISH_RELEASE: 'false'
       WORKSPACE: ${{ github.workspace }}
       GRADLE_OPTS: -Xmx1500m -Dfile.encoding=UTF-8
       GRADLE_ENTERPRISE_ACCESS_KEY: ${{ secrets.GRADLE_ENTERPRISE_ACCESS_KEY }}
