@@ -1,6 +1,6 @@
 plugins {
     id 'base'
-    id 'org.asciidoctor.jvm.convert' version '4.0.3'
+    id 'org.asciidoctor.jvm.convert' version "$asciidoctorJvmVersion"
     id 'groovy'
 }
 
@@ -19,7 +19,7 @@ ext.grailsCheckOutDir = project.layout.buildDirectory.dir('grails-core/checkout'
 ext.grailsTestsCheckOutDir = project.layout.buildDirectory.dir('grails-functional-tests/checkout').get().asFile.absolutePath
 ext.outputDir = layout.buildDirectory.file("docs").get().asFile.absolutePath
 ext.githubSlug = "grails/grails-doc"
-ext.githubBranch = project.findProperty("githubBranch") ?: "7.0.x"
+ext.githubBranch = project.findProperty("githubBranch")
 ext.guidePage = "/docs/guide/single.html"
 ext.indexPage = "/docs/index.html"
 
@@ -33,6 +33,11 @@ dependencies {
     implementation platform("org.grails:grails-bom:${project['grails.version']}")
     implementation "org.grails:grails-docs"
     implementation "org.apache.groovy:groovy"
+
+    // Used to surface versions for AsciiDoc
+    implementation "org.grails:grails-dependencies"
+    implementation "org.grails:grails-testing-support"
+    implementation "org.grails:grails-gradle-plugin"
 }
 
 task buildscriptDependencies(type: DependencyReportTask) {
@@ -140,6 +145,15 @@ tasks.register('resolveGroovyVersion') {
     logger.lifecycle('Resolved Groovy version for Guide links: {}', resolved)
 }
 
+String getVersion(String artifact) {
+    configurations.runtimeClasspath
+            .resolvedConfiguration
+            .resolvedArtifacts
+            .find {
+                it.moduleVersion.id.name == artifact
+            }?.moduleVersion?.id?.version
+}
+
 tasks.register('publishGuide', grails.doc.gradle.PublishGuide) {
     dependsOn(['apiDocs', 'extractPomVersions', 'jar', 'resolveGroovyVersion'])
     targetDir = project.layout.buildDirectory.dir("manual").get().asFile
@@ -158,11 +172,18 @@ tasks.register('publishGuide', grails.doc.gradle.PublishGuide) {
         sourceDir = new File(projectDir, "src/en")
         propertiesFiles = [new File(projectDir, "gradle.properties")]
         asciidoc = true
+
+        ext.springVersion = getVersion("spring-core")
+        ext.springBootVersion = getVersion("spring-boot")
+        ext.gspVersion = getVersion("gsp")
+        ext.gormVersion = getVersion("grails-datastore-gorm")
+
         properties = [
                 'safe'     : 'UNSAFE',
                 'jakartaee'          : "https://jakarta.ee/specifications/platform/10/apidocs/",
                 'javase'             : "https://docs.oracle.com/en/java/javase/17/docs/api/",
                 'groovyapi'          : "https://docs.groovy-lang.org/${resolveGroovyVersion.resolved}/html/gapi/",
+                'groovyVersion'      : resolveGroovyVersion.resolved,
                 'springapi'          : "https://docs.spring.io/spring/docs/${springVersion}/javadoc-api/",
                 'springdocs'         : "https://docs.spring.io/spring/docs/${springVersion}/",
                 'gspdocs'            : "https://gsp.grails.org/${gspVersion}",
@@ -171,13 +192,20 @@ tasks.register('publishGuide', grails.doc.gradle.PublishGuide) {
                 'hibernateReference' : 'https://docs.jboss.org/hibernate/orm/5.6/userguide/html_single/Hibernate_User_Guide.html',
                 'springbootapi'      : "https://docs.spring.io/spring-boot/docs/${springBootVersion}/api",
                 'springBootReference': "https://docs.spring.io/spring-boot/docs/${springBootVersion}/reference",
-                'springBootVersion'  : project.springBootVersion,
-                'springVersion'      : project.springVersion,
-                'gradleVersion'      : project.gradleVersion,
+                'springBootVersion'  : springBootVersion,
+                'springVersion'      : springVersion,
+                'gradleVersion'      : gradle.gradleVersion,
                 'GrailsVersion'      : project['grails.version'],
-                'version'      : project['grails.version'],
+                'version'            : project['grails.version'],
+                'gormVersion'        : gormVersion,
+                'spockVersion'       : getVersion("spock-core"),
+                'testingSupportVersion'       : getVersion("grails-testing-support"),
+                'grailsGradlePluginVersion'       : getVersion("grails-gradle-plugin"),
                 'sourcedir'          : grailsHome,
                 'functionalSourceDir': grailsTestsHome,
+                'gparsdocs': 'https://gpars.org/1.2.1/groovydoc',
+                'rxjavadocs': 'https://reactivex.io/RxJava/1.x/javadoc',
+                'rxjava2docs': 'https://reactivex.io/RxJava/2.x/javadoc'
         ]
         // Parse the string content into Properties object
         def props = new Properties()
