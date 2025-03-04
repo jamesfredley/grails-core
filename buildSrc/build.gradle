@@ -26,7 +26,7 @@ file("../gradle.properties").withReader {
 
 dependencies {
     // Needs to be implementation, as Asciidoctor task is referenced in docs/build.gradle
-    implementation "org.grails:grails-bom:${gradleProperties.grailsVersion}"
+    implementation platform("org.grails:grails-bom:${gradleProperties.grailsVersion}")
     implementation "org.asciidoctor:asciidoctor-gradle-jvm:${gradleProperties.asciidoctorVersion}"
     runtimeOnly "org.grails:grails-gradle-plugin"
     runtimeOnly "org.grails.plugins:views-gradle:${gradleProperties.projectVersion}"
