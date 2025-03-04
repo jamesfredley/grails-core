@@ -13,9 +13,9 @@ import java.util.concurrent.ConcurrentHashMap
  * </p>
  * <p>
  * Usage example:
- * <pre>
+ * <pre><code>
  * MyService service = ServiceRegistry.getInstance(MyService, DefaultMyService)
- * </pre>
+ * </code></pre>
  * </p>
  *
  * @since 4.2
@@ -24,8 +24,8 @@ import java.util.concurrent.ConcurrentHashMap
 @CompileStatic
 class ServiceRegistry {
 
-    private static final ThreadLocal<ConcurrentHashMap<Class<?>, Object>> INSTANCES = ThreadLocal.withInitial {
-        new ConcurrentHashMap<Class<?>, Object>()
+    private static final ThreadLocal<HashMap<Class<?>, Object>> INSTANCES = ThreadLocal.withInitial {
+        new HashMap<Class<?>, Object>()
     }
 
     /**
