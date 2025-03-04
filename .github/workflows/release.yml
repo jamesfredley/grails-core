@@ -12,6 +12,9 @@ jobs:
       release_version: ${{ steps.release_version.outputs.value }}
       target_branch: ${{ steps.extract_branch.outputs.value }}
     runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+      packages: read
     steps:
       - name: "📥 Checkout repository"
         uses: actions/checkout@v4
@@ -69,11 +72,12 @@ jobs:
           publishToSonatype
           closeSonatypeStagingRepository
   release:
+    environment: release
     name: "Release Sonatype Staging Repository"
     needs: publish
     runs-on: ubuntu-24.04
     permissions:
-      contents: read
+      contents: write
       packages: read
     steps:
       - name: "📥 Checkout repository"
@@ -105,6 +109,7 @@ jobs:
         if: success()
         uses: grails/github-actions/post-release@main
   docs:
+    environment: release
     name: "Publish Documentation"
     needs: publish
     runs-on: ubuntu-24.04
