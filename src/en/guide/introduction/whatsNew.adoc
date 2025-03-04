@@ -2,11 +2,11 @@ This section covers all the new features introduced in Grails 7
 
 === Overview
 
-Grails framework 7 updates Spring Boot to version 3.4. We recommend checking the following Spring technologies release notes for more information.
+Grails framework {GrailsVersion} updates Spring Boot to version {springBootVersion}. We recommend checking the following Spring technologies release notes for more information.
 
 * https://github.com/spring-projects/spring-boot/wiki/Spring-Boot-3.4-Release-Notes[Spring Boot 3.4]
 
-The minimum Java version required to run Grails 7 has been updated to Java 17.
+The minimum Java version required to run Grails {GrailsVersion} has been updated to Java 17.
 
 === Ubiquitous Containerized Browser Testing with Geb
 
