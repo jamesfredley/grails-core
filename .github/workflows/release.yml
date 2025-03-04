@@ -53,6 +53,7 @@ jobs:
           publishToSonatype 
           closeSonatypeStagingRepository
   release:
+    environment: release
     needs: publish
     runs-on: ubuntu-latest
     permissions:
@@ -90,6 +91,7 @@ jobs:
         env:
           SNAPSHOT_SUFFIX: -SNAPSHOT
   docs:
+    environment: release
     needs: publish
     runs-on: ubuntu-latest
     permissions:
