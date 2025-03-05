@@ -8,6 +8,7 @@ import grails.plugin.geb.serviceloader.ServiceRegistry
 import grails.testing.mixin.integration.Integration
 import org.demo.spock.pages.UploadPage
 import org.openqa.selenium.WebDriverException
+import spock.lang.Ignore
 import spock.lang.IgnoreIf
 import spock.lang.Requires
 
@@ -15,6 +16,7 @@ import spock.lang.Requires
  * Altered copy of {@link ContainerFileDetectorAnnotationSpec}
  */
 @Integration
+@Ignore("https://github.com/grails/geb/pull/146#issuecomment-2691433277")
 class ContainerFileDetectorSpockSpec extends ContainerGebSpec {
 
     def setupSpec(){

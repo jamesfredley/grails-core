@@ -87,13 +87,14 @@ To customize the default, either:
 1. Create a class that implements [`ContainerFileDetector`](./src/testFixtures/groovy/grails/plugin/geb/ContainerFileDetector.groovy)
    and specify its fully qualified class name in a `META-INF/services/grails.plugin.geb.ContainerFileDetector` file
    on the classpath (e.g., `src/integration-test/resources`).
-2. Call [`ServiceRegistry.setInstance()`](./src/testFixtures/groovy/grails/plugin/geb/serviceloader/ServiceRegistry.groovy)
-   in a Spock `setupSpec()` method to apply your naming convention (And use a `cleanupSpec()` to limit this to one class).
-3. Use the `ContainerGebConfiguration` annotation and set its `fileDetector` property to your `ContainerFileDetector` implementation class.
+2. Use the `ContainerGebConfiguration` annotation and set its `fileDetector` property to your `ContainerFileDetector` implementation class.
+
+[//]: # (3. Call [`ServiceRegistry.setInstance&#40;&#41;`]&#40;./src/testFixtures/groovy/grails/plugin/geb/serviceloader/ServiceRegistry.groovy&#41;)
+[//]: # (   in a Spock `setupSpec&#40;&#41;` method to apply your naming convention &#40;And use a `cleanupSpec&#40;&#41;` to limit this to one class&#41;.)
 
 Alternatively, you can access the `BrowserWebDriverContainer` instance via
-the `container` from within your `ContainerGebSpec` to for example call `.copyFileToContainer()`,
-as done in [ContainerSupport#createFileInputSource utility method](./src/testFixtures/groovy/grails/plugin/geb/support/ContainerSupport.groovy).
+the `container` from within your `ContainerGebSpec` to, for example, call `.copyFileToContainer()`.
+An Example of this can be seen in [ContainerSupport#createFileInputSource utility method](./src/testFixtures/groovy/grails/plugin/geb/support/ContainerSupport.groovy).
 
 #### Timeouts
 
