@@ -61,7 +61,8 @@ jobs:
           -PgithubBranch=${{ steps.extract_branch.outputs.value }}
           --info --stacktrace
       - name: "📤 Upload Asset to the Github Release page"
-        if: success() && github.event_name == 'workflow_dispatch'
+        # if: success() && github.event_name == 'workflow_dispatch' skip for now as this is not working and manually upload zip
+        if: false
         id: upload_artifact
         uses: Roang-zero1/github-upload-release-artifacts-action@c15e0b65ce2ae1c8d52bfbc75d017d21e1da77d7 # v3.0.0 (Use commit sha as this is a 3rd party action)
         with:
