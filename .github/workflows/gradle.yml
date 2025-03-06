@@ -57,6 +57,11 @@ jobs:
         env:
           GITHUB_MAVEN_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
         run: ./gradlew build --continue
+      - name: "🔨 Test Views Gradle Plugin"
+        env:
+          GITHUB_MAVEN_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
+        working-directory: examples/functional-tests-plugin
+        run: ../../gradlew compileGsonViews --rerun-tasks
       - name: "📤 Publish Snapshot Artifacts to Artifactory (repo.grails.org)"
         if: success()
         env:

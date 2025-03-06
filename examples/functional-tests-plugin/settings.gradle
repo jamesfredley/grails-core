@@ -1,0 +1,11 @@
+pluginManagement {
+    includeBuild("../..")
+}
+
+rootProject.name="functional-tests-plugin"
+
+includeBuild("../..") {
+    dependencySubstitution {
+        substitute(module('org.grails.plugins:views-json')).using(project('views-json'))
+    }
+}
