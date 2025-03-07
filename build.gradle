@@ -1,7 +1,6 @@
 ext {
     isCiBuild = System.getenv('CI')
     isSnapshot = projectVersion.endsWith('SNAPSHOT')
-    isReleaseVersion = !isSnapshot
     excludeUnusedTransDeps = findProperty('excludeUnusedTransDeps')
 }
 
@@ -48,32 +47,29 @@ allprojects {
     }
 }
 
-if (isReleaseVersion) {
+// Workaround needed for nexus publishing bug
+// version and group must be specified in the root project
+// https://github.com/gradle-nexus/publish-plugin/issues/310
+version = projectVersion
+group = 'this.will.be.overridden'
 
-    // Workaround needed for nexus publishing bug
-    // version and group must be specified in the root project
-    // https://github.com/gradle-nexus/publish-plugin/issues/310
-    version = projectVersion
-    group = 'this.will.be.overridden'
-
-    def publishedProjects = [
-            'grails-datastore-async',
-            'grails-datastore-core',
-            'grails-datastore-gorm',
-            'grails-datastore-gorm-async',
-            //'grails-datastore-gorm-rx',
-            'grails-datastore-gorm-support',
-            'grails-datastore-gorm-tck',
-            'grails-datastore-gorm-test',
-            'grails-datastore-gorm-validation',
-            'grails-datastore-web',
-            'grails-gorm-testing-support',
-    ]
-    subprojects {
-        if (name in publishedProjects) {
-            // This has to be applied here
-            apply plugin: 'org.grails.grails-publish'
-        }
+def publishedProjects = [
+        'grails-datastore-async',
+        'grails-datastore-core',
+        'grails-datastore-gorm',
+        'grails-datastore-gorm-async',
+        //'grails-datastore-gorm-rx',
+        'grails-datastore-gorm-support',
+        'grails-datastore-gorm-tck',
+        'grails-datastore-gorm-test',
+        'grails-datastore-gorm-validation',
+        'grails-datastore-web',
+        'grails-gorm-testing-support',
+]
+subprojects {
+    if (name in publishedProjects) {
+        // This has to be applied here
+        apply plugin: 'org.grails.grails-publish'
     }
 }
 
