@@ -12,6 +12,7 @@ develocity {
     buildScan {
         tag('grails')
         tag('gorm-hibernate5')
+        tag('grails-database-migration')
         publishing.onlyIf { isAuthenticated }
         uploadInBackground = isLocal
     }

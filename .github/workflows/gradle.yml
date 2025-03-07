@@ -13,6 +13,8 @@ env:
 jobs:
   build:
     runs-on: ubuntu-24.04
+    permissions:
+      packages: read
     env:
       GRADLE_OPTS: -Xmx1500m -Dfile.encoding=UTF-8
     steps:
