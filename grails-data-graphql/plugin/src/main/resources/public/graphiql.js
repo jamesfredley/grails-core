@@ -6036,7 +6036,7 @@ exports.default = getTypeInfo;
 
 var _graphql = require('graphql');
 
-var _introspection = require('graphql/type/introspection');
+var _introspection = require('grails-data-graphql/type/introspection');
 
 var _forEachState = require('./forEachState');
 
@@ -20009,7 +20009,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.GraphQLLanguageService = undefined;
 
-var _kinds = require('graphql/language/kinds');
+var _kinds = require('grails-data-graphql/language/kinds');
 
 var _graphql = require('graphql');
 
@@ -20245,7 +20245,7 @@ exports.hintList = hintList;
 
 var _graphql = require('graphql');
 
-var _introspection = require('graphql/type/introspection');
+var _introspection = require('grails-data-graphql/type/introspection');
 
 // Utility for returning the state representing the Definition this token state
 // is within, if any.
@@ -21220,7 +21220,7 @@ exports.getOutline = getOutline;
 
 var _graphql = require('graphql');
 
-var _kinds = require('graphql/language/kinds');
+var _kinds = require('grails-data-graphql/language/kinds');
 
 var _graphqlLanguageServiceUtils = require('graphql-language-service-utils');
 
@@ -22476,7 +22476,7 @@ function validateWithCustomRules(schema, ast, customRules) {
   // Because every fragment is considered for determing model subsets that may
   // be used anywhere in the codebase they're all technically "used" by clients
   // of graphql-data. So we remove this rule from the validators.
-  var _require = require('graphql/validation/rules/NoUnusedFragments'),
+  var _require = require('grails-data-graphql/validation/rules/NoUnusedFragments'),
       NoUnusedFragments = _require.NoUnusedFragments;
 
   var rules = _graphql.specifiedRules.filter(function (rule) {
