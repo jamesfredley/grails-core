@@ -1,3 +1,7 @@
+dependencies {
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
 tasks.named('compileTestGroovy', GroovyCompile) {
     groovyOptions.forkOptions.jvmArgs = ['-Xmx768m']
 }

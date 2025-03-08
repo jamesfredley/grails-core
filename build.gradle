@@ -65,6 +65,10 @@ def publishedProjects = [
         'grails-datastore-gorm-validation',
         'grails-datastore-web',
         'grails-gorm-testing-support',
+        'database-migration',
+        'gorm-hibernate5-spring-boot',
+        'grails-datastore-gorm-hibernate5',
+        'hibernate5-grails-plugin',
 ]
 subprojects {
     if (name in publishedProjects) {

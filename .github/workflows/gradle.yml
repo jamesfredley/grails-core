@@ -116,14 +116,6 @@ jobs:
       - name: "📝 Create Snapshot Message for the Workflow Dispatch"
         id: dispatch_message
         run: echo "value={\"message\":\"New Data Mapping Snapshots $(date) - $GITHUB_SHA\"}" >> $GITHUB_OUTPUT
-      - name: "📡 Invoke the Java CI workflow in GORM Hibernate5"
-        uses: benc-uk/workflow-dispatch@e2e5e9a103e331dad343f381a29e654aea3cf8fc # v1.2.4 (Use commit sha as this is a 3rd party action)
-        continue-on-error: true
-        with:
-          workflow: Java CI
-          repo: grails/gorm-hibernate5
-          ref: ${{ steps.extract_branch.outputs.value }}
-          token: ${{ secrets.GH_TOKEN }}
       - name: "📡 Invoke the Java CI workflow in GORM Hibernate6"
         continue-on-error: true
         uses: benc-uk/workflow-dispatch@e2e5e9a103e331dad343f381a29e654aea3cf8fc # v1.2.4 (Use commit sha as this is a 3rd party action)
@@ -141,12 +133,3 @@ jobs:
           ref: ${{ steps.extract_branch.outputs.value }}
           token: ${{ secrets.GH_TOKEN }}
           inputs: ${{ steps.dispatch_message.outputs.value }}
-      - name: "📡 Invoke the Java CI workflow in GORM Neo4j"
-        if: false # Skip until neo4j is ported to grails 7
-        continue-on-error: true
-        uses: benc-uk/workflow-dispatch@e2e5e9a103e331dad343f381a29e654aea3cf8fc # v1.2.4 (Use commit sha as this is a 3rd party action)
-        with:
-          workflow: Java CI
-          repo: grails/gorm-neo4j
-          ref: ${{ steps.extract_branch.outputs.value }}
-          token: ${{ secrets.GH_TOKEN }}

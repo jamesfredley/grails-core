@@ -61,3 +61,52 @@ project(':docs-guide-developer').projectDir = file('docs/guide-developer')
 
 include 'docs-guide-whats-new'
 project(':docs-guide-whats-new').projectDir = file('docs/guide-whats-new')
+
+
+// Core
+include "grails-datastore-gorm-hibernate5"
+findProject(':grails-datastore-gorm-hibernate5').projectDir = file('hibernate5/grails-datastore-gorm-hibernate')
+
+// Documentation
+include 'hibernate5-docs'
+findProject(':hibernate5-docs').projectDir = new File(settingsDir, 'hibernate5/docs')
+
+// Plugins
+include 'hibernate5-grails-plugin'
+findProject(':hibernate5-grails-plugin').projectDir = new File(settingsDir, 'hibernate5/grails-plugin')
+
+include 'database-migration'
+findProject(':database-migration').projectDir = new File(settingsDir, 'hibernate5/grails-database-migration')
+
+include 'gorm-hibernate5-spring-boot'
+findProject(':gorm-hibernate5-spring-boot').projectDir = new File(settingsDir, 'hibernate5/boot-plugin')
+
+include "examples-grails-hibernate"
+project(":examples-grails-hibernate").projectDir = new File(settingsDir, "hibernate5/examples/grails-hibernate")
+
+include "examples-grails-multiple-datasources"
+project(":examples-grails-multiple-datasources").projectDir = new File(settingsDir, "hibernate5/examples/grails-multiple-datasources")
+
+include "examples-grails-database-per-tenant"
+project(":examples-grails-database-per-tenant").projectDir = new File(settingsDir, "hibernate5/examples/grails-database-per-tenant")
+
+include "examples-grails-schema-per-tenant"
+project(":examples-grails-schema-per-tenant").projectDir = new File(settingsDir, "hibernate5/examples/grails-schema-per-tenant")
+
+include "examples-grails-partitioned-multi-tenancy"
+project(":examples-grails-partitioned-multi-tenancy").projectDir = new File(settingsDir, "hibernate5/examples/grails-partitioned-multi-tenancy")
+
+include "examples-standalone-hibernate"
+project(":examples-standalone-hibernate").projectDir = new File(settingsDir, "hibernate5/examples/standalone-hibernate")
+
+include "examples-spring-boot-hibernate"
+project(":examples-spring-boot-hibernate").projectDir = new File(settingsDir, "hibernate5/examples/spring-boot-hibernate")
+
+include "examples-grails-data-service"
+project(":examples-grails-data-service").projectDir = new File(settingsDir, "hibernate5/examples/grails-data-service")
+
+include "examples-grails-hibernate-groovy-proxy"
+project(":examples-grails-hibernate-groovy-proxy").projectDir = new File(settingsDir, "hibernate5/examples/grails-hibernate-groovy-proxy")
+
+include 'examples-issue450'
+project(':examples-issue450').projectDir = new File(settingsDir, 'hibernate5/examples/issue450')

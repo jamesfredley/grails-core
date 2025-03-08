@@ -2,17 +2,13 @@ import org.asciidoctor.gradle.jvm.AsciidoctorTask
 
 plugins {
     id 'groovy'
-    id 'org.asciidoctor.jvm.convert'
+    id 'org.asciidoctor.jvm.convert' version "${asciidoctorVersion}"
 }
 
 version = projectVersion
 
 ext {
     isReleaseVersion = !projectVersion.endsWith('-SNAPSHOT')
-    checkoutDirName = 'checkout'
-    explicitGormSrc = System.getProperty('gorm.src') ?: project.findProperty('gorm.src')
-    gormSrc = (explicitGormSrc ? file(explicitGormSrc) : "$checkoutDirName/gorm-src") as String
-    zipFile = 'build/source.zip'
     coreProjects = ['grails-datastore-core', 'grails-datastore-gorm']
 }
 
@@ -72,30 +68,6 @@ tasks.named('asciidoctor', AsciidoctorTask) {
     }
 }
 
-tasks.register('fetchGormSource') {
-    group = 'documentation'
-    outputs.dir(layout.buildDirectory.dir(checkoutDirName))
-    inputs.property('branch', datastoreGithubBranch)
-
-    onlyIf {
-        // Only download if no local GORM source is provided
-        return !explicitGormSrc
-    }
-
-    doLast {
-        def checkoutDir = layout.buildDirectory.dir(checkoutDirName).get().asFile
-        ant.mkdir(dir: layout.buildDirectory.get().asFile)
-        ant.mkdir(dir: checkoutDir)
-        logger.lifecycle('Downloading GORM source code...')
-        def ref = isReleaseVersion ? "tags/v$datastoreVersion" : "heads/$datastoreGithubBranch"
-        ant.get(src: "https://github.com/grails/grails-data-mapping/archive/refs/${ref}.zip", dest: zipFile, verbose: true)
-        ant.unzip(src: zipFile, dest: checkoutDir) {
-            mapper(type: 'regexp', from: '(grails-\\S*?/)(.*)', to: "gorm-src/\\2")
-        }
-        logger.lifecycle('GORM source code downloaded!')
-    }
-}
-
 tasks.register('copyDocs', Copy) {
     group = 'documentation'
     dependsOn('asciidoctor')
@@ -111,11 +83,10 @@ tasks.register('cleanAsciidoc', Delete) {
 }
 
 tasks.withType(Groovydoc).configureEach {
-    dependsOn('fetchGormSource')
     docTitle = "GORM for Hibernate 5 - $project.version"
 
     def sourceFiles = coreProjects.collect {
-        layout.buildDirectory.files("$checkoutDirName/gorm-src/$it/src/main/groovy")
+        rootProject.layout.projectDirectory.files("$it/src/main/groovy")
     }.sum()
 
     rootProject.subprojects

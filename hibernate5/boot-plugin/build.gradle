@@ -9,6 +9,12 @@ group = 'org.grails'
 ext {
     apiDocs = true
     snapshotPublishUrl = 'https://repo.grails.org/grails/libs-snapshots-local'
+    pomDevelopers =  [
+            'graemerocher': 'Graeme Rocher',
+            'jeffscottbrown': 'Jeff Brown',
+            'burtbeckwith': 'Burt Beckwith',
+            'puneetbehl': 'Puneet Behl',
+    ]
 }
 
 dependencies {
@@ -33,6 +39,6 @@ dependencies {
 
 apply {
     from rootProject.layout.projectDirectory.file('gradle/java-config.gradle')
-    from rootProject.layout.projectDirectory.file('gradle/test-config.gradle')
+    from rootProject.layout.projectDirectory.file('gradle/hibernate5-test-config.gradle')
     from rootProject.layout.projectDirectory.file('gradle/publish-config.gradle')
 }
