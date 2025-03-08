@@ -8,7 +8,7 @@ dependencies {
 
     implementation platform("org.grails:grails-bom:$grailsVersion")
 
-    implementation project(':grails-plugin')
+    implementation project(':mongodb-grails-plugin')
     implementation 'org.grails:grails-core'
     implementation 'org.grails:grails-plugin-rest'
     implementation 'org.grails:grails-web-boot'
@@ -23,7 +23,7 @@ dependencies {
     runtimeOnly 'org.springframework.boot:spring-boot-starter-logging'
     runtimeOnly 'org.springframework.boot:spring-boot-starter-tomcat'
 
-    testImplementation testFixtures(project(':grails-plugin'))
+    testImplementation testFixtures(project(':mongodb-grails-plugin'))
     testImplementation 'org.spockframework:spock-core'
     testImplementation "org.testcontainers:mongodb:$testcontainersMongodbVersion"
 

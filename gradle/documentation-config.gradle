@@ -56,17 +56,18 @@ tasks.register('data-mapping-groovydoc', Groovydoc) {
     }
 }
 
-
 tasks.register('copyGormImplementationDocs', Copy) {
-    dependsOn(':hibernate5-docs:docs')
+    dependsOn(':hibernate5-docs:docs', ':mongodb-docs:docs')
 
-    def sourceDir =  project(':hibernate5-docs').layout.buildDirectory.dir('docs')
+    def hibernate5SourceDir =  project(':hibernate5-docs').layout.buildDirectory.dir('docs')
+    def mongodbSourceDir =  project(':mongodb-docs').layout.buildDirectory.dir('docs')
     def targetDir = rootProject.layout.buildDirectory.dir('docs')
 
-    from(sourceDir)
+    from(hibernate5SourceDir, mongodbSourceDir)
     into(targetDir)
 
-    inputs.dir(sourceDir)
+    inputs.dir(hibernate5SourceDir)
+    inputs.dir(mongodbSourceDir)
     outputs.dir(targetDir)
 }
 

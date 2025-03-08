@@ -2,18 +2,13 @@ import org.asciidoctor.gradle.jvm.AsciidoctorTask
 
 plugins {
     id 'groovy'
-    id 'org.asciidoctor.jvm.convert' version "$asciidoctorGradleVersion"
+    id 'org.asciidoctor.jvm.convert' version "$asciidoctorVersion"
 }
 
 version = projectVersion
 
 ext {
     isReleaseVersion = !version.endsWith('SNAPSHOT')
-    datastoreGithubBranch = '9.0.x'
-    checkoutDirName = 'checkout'
-    explicitGormSrc = System.getProperty('gorm.src') ?: findProperty('gorm.src')
-    gormSrc = (explicitGormSrc ? file(explicitGormSrc) : "$checkoutDirName/gorm-src") as String
-    zipFile = 'build/source.zip'
     coreProjects = ['grails-datastore-core', 'grails-datastore-gorm']
 }
 
@@ -85,31 +80,6 @@ tasks.named('asciidoctor', AsciidoctorTask) { AsciidoctorTask it ->
     ]
 }
 
-tasks.register('fetchSource') {
-
-    // These are used to determine if the task is UP-TO-DATE
-    outputs.dir(layout.buildDirectory.dir(checkoutDirName))
-    inputs.property('branch', datastoreGithubBranch)
-
-    onlyIf {
-        // Only download if no local GORM source is provided
-        return !explicitGormSrc
-    }
-
-    doLast {
-        def checkoutDir = layout.buildDirectory.dir(checkoutDirName).get().asFile
-        ant.mkdir(dir: layout.buildDirectory.get().asFile)
-        ant.mkdir(dir: checkoutDir)
-        logger.lifecycle('Downloading GORM source code...')
-        def ref = isReleaseVersion ? "tags/v$datastoreVersion" : "heads/$datastoreGithubBranch"
-        ant.get(src: "https://github.com/grails/grails-data-mapping/archive/refs/${ref}.zip", dest: zipFile, verbose: true)
-        ant.unzip(src: zipFile, dest: checkoutDir) {
-            mapper(type: 'regexp', from: '(grails-\\S*?/)(.*)', to: "gorm-src/\\2")
-        }
-        logger.lifecycle('GORM source code downloaded!')
-    }
-}
-
 tasks.register('copyDocs', Copy) {
     dependsOn('asciidoctor')
     mustRunAfter('asciidoctor', 'groovydoc', 'copyResources')
@@ -123,11 +93,10 @@ tasks.register('cleanAsciidoc', Delete) {
 }
 
 tasks.withType(Groovydoc).configureEach {
-    dependsOn('fetchSource')
     docTitle = "GORM for MongoDB - $project.version"
 
     def sourceFiles = coreProjects.collect {
-        layout.buildDirectory.files("$checkoutDirName/gorm-src/$it/src/main/groovy")
+        layout.projectDirectory.files("$it/src/main/groovy")
     }.sum()
 
     rootProject.subprojects

@@ -9,6 +9,13 @@ group = 'org.grails'
 ext {
     apiDocs = true
     mavenSnapshotPublishUrl = 'https://repo.grails.org/grails/libs-snapshots-local'
+    pomTitle = 'GORM for MongoDB'
+    pomDescription = 'Provides a GORM Object Mapping implementations for the MongoDB Document Database'
+    pomDevelopers =  [
+            'graemerocher': 'Graeme Rocher',
+            'jeffscottbrown': 'Jeff Brown',
+            'burtbeckwith': 'Burt Beckwith'
+    ]
 }
 
 dependencies {
@@ -25,7 +32,7 @@ dependencies {
             exclude group: 'org.grails', module: 'grails-datastore-gorm'
         }
     }
-    api 'org.grails:grails-datastore-core', {
+    api project(':grails-datastore-core'), {
         // api: AbstractSession, Criteria, DocumentMappingContext, EntityPersister, Junction, MappingContext,
         //      PendingOperation, PersistentEntity, PersistentProperty, Query, QueryArgumentsAware, Session
         // impl: AssociationQuery, CustomTypeMarshaller, EmbeddedPersistentEntity, EntityAccess, ManualProjections,
@@ -46,7 +53,7 @@ dependencies {
             exclude group: 'org.springframework.boot', module: 'spring-boot-autoconfigure'
         }
     }
-    api 'org.grails:grails-datastore-gorm', {
+    api project(':grails-datastore-gorm'), {
         // api: CriteriaBuilder, AbstractResultList
         if (excludeUnusedTransDeps) {
             // API dependencies in grails-datastore-gorm
@@ -59,7 +66,7 @@ dependencies {
             exclude group: 'org.springframework', module: 'spring-tx'
         }
     }
-    api 'org.grails:grails-datastore-gorm-support', {
+    api project(':grails-datastore-gorm-support'), {
         // api: AbstractDatastorePersistenceContextInterceptor
         // impl: DatastorePersistenceContextInterceptor
         if (excludeUnusedTransDeps) {
@@ -125,5 +132,5 @@ dependencies {
 
 apply from: rootProject.layout.projectDirectory.file('gradle/java-config.gradle')
 apply from: rootProject.layout.projectDirectory.file('gradle/test-config.gradle')
-apply from: rootProject.layout.projectDirectory.file('gradle/tck-config.gradle')
+apply from: rootProject.layout.projectDirectory.file('gradle/mongodb-tck-config.gradle')
 apply from: rootProject.layout.projectDirectory.file('gradle/publish-config.gradle')

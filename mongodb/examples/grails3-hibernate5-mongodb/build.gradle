@@ -8,12 +8,12 @@ dependencies {
 
     implementation platform("org.grails:grails-bom:$grailsVersion")
 
-    implementation project(':grails-plugin')
+    implementation project(':mongodb-grails-plugin')
     implementation 'org.grails:grails-core'
     implementation 'org.grails:grails-plugin-rest'
     implementation 'org.grails:grails-web-boot'
     implementation 'org.grails.plugins:gsp'
-    implementation 'org.grails.plugins:hibernate5'
+    implementation project(':hibernate5-grails-plugin')
 
     runtimeOnly 'com.bertramlabs.plugins:asset-pipeline-grails'
     runtimeOnly 'com.h2database:h2'
@@ -33,7 +33,7 @@ dependencies {
     runtimeOnly 'org.springframework.boot:spring-boot-starter-logging'
     runtimeOnly 'org.springframework.boot:spring-boot-starter-tomcat'
 
-    testImplementation testFixtures(project(':grails-plugin'))
+    testImplementation testFixtures(project(':mongodb-grails-plugin'))
     testImplementation 'org.grails:grails-testing-support'
     testImplementation 'org.spockframework:spock-core'
     testImplementation "org.testcontainers:mongodb:$testcontainersMongodbVersion"

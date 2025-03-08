@@ -69,6 +69,12 @@ def publishedProjects = [
         'gorm-hibernate5-spring-boot',
         'grails-datastore-gorm-hibernate5',
         'hibernate5-grails-plugin',
+        'gorm-mongodb-spring-boot',
+        'grails-datastore-gorm-bson',
+        'grails-datastore-gorm-mongodb',
+        'grails-datastore-gorm-mongodb-ext',
+        'mongodb-grails-plugin',
+        'views-json-templates'
 ]
 subprojects {
     if (name in publishedProjects) {

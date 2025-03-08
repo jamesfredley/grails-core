@@ -9,6 +9,13 @@ group = 'org.grails'
 ext {
     apiDocs = true
     mavenSnapshotPublishUrl = 'https://repo.grails.org/grails/libs-snapshots-local'
+    pomTitle = 'GORM for MongoDB'
+    pomDescription = 'Provides a GORM Object Mapping implementations for the MongoDB Document Database'
+    pomDevelopers =  [
+            'graemerocher': 'Graeme Rocher',
+            'jeffscottbrown': 'Jeff Brown',
+            'burtbeckwith': 'Burt Beckwith'
+    ]
 }
 
 dependencies {
@@ -21,7 +28,7 @@ dependencies {
         //      EncoderContext, JsonWriterSettings, ObjectId
         // impl: JsonParseException
     }
-    api 'org.grails:grails-datastore-core', {
+    api project(':grails-datastore-core'), {
         // api: Criterion, Embedded, In, Junction, Like, PersistentEntity, Projection, PropertyCriterion,
         //      PropertyNameCriterion, Query, Session
         // impl: Custom, CustomTypeMarshaller, EntityReflector, MappingContext, MappingUtils, PersistentProperty,
@@ -42,7 +49,7 @@ dependencies {
             exclude group: 'org.springframework.boot', module: 'spring-boot-autoconfigure'
         }
     }
-    api 'org.grails:grails-datastore-gorm', {
+    api project(':grails-datastore-gorm'), {
         // api: DetachedCriteria
         if (excludeUnusedTransDeps) {
             // API dependencies in grails-datastore-gorm
