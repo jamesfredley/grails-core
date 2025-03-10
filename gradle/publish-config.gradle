@@ -1,0 +1,19 @@
+import org.grails.gradle.plugin.publishing.GrailsPublishExtension
+
+if (project.hasProperty('snapshotPublishUrl')) {
+    ext.set('mavenPublishUrl', property('snapshotPublishUrl'))
+    logger.lifecycle('Configuring {}:{} snapshot publish repo: {}', group, findProperty('pomArtifactId') ?: name, mavenPublishUrl)
+}
+
+extensions.configure(GrailsPublishExtension) {
+    // Explicit `it` is required here
+    it.artifactId = findProperty('pomArtifactId') ?: project.name
+    it.githubSlug = 'grails/grails-views'
+    it.license.name = 'Apache-2.0'
+    it.title = findProperty('pomTitle') ?: 'Grails Views'
+    it.desc = findProperty('pomDescription') ?: 'Provides additional view technologies to the Grails framework, including JSON and Markup views.'
+    it.developers = findProperty('pomDevelopers') as Map<String,String> ?: [
+            'graemerocher': 'Graeme Rocher',
+            'puneetbehl': 'Puneet Behl',
+    ]
+}

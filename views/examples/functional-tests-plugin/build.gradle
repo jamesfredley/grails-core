@@ -1,0 +1,29 @@
+plugins {
+    id 'groovy'
+    id 'java-library'
+    id 'org.grails.grails-plugin'
+    id 'org.grails.plugins.views-json'
+}
+
+version = "0.0.1"
+group = 'functional.tests.plugin'
+
+dependencies {
+    implementation platform("org.grails:grails-bom:${grailsVersion}"), {
+        // as a safeguard, exclude projects in this repo that included transitively to ensure we pick the right version
+        exclude group: 'org.grails', module: 'views-core'
+    }
+
+    implementation project(':views-json')
+    implementation 'org.grails:grails-plugin-rest'
+    compileOnly 'org.slf4j:slf4j-nop' // Used for getting rid of warning about missing slf4j implementation during compileGsonViews task
+}
+
+java  {
+    sourceCompatibility = JavaVersion.toVersion(javaVersion)
+}
+
+tasks.withType(Test).configureEach {
+    useJUnitPlatform()
+    testLogging { events 'passed', 'skipped', 'failed', 'standardOut', 'standardError' }
+}

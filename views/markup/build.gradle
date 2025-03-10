@@ -1,0 +1,42 @@
+plugins {
+    id 'groovy'
+    id 'java-library'
+    id 'org.grails.grails-plugin'
+}
+
+version = projectVersion
+group = 'org.grails'
+
+ext {
+    pomDescription = 'Grails Markup Views'
+    snapshotPublishUrl = 'https://repo.grails.org/grails/plugins3-snapshots-local'
+}
+
+dependencies {
+    implementation platform("org.grails:grails-bom:$grailsVersion"), {
+        // as a safeguard, exclude projects in this repo that included transitively to ensure we pick the right version
+        exclude group: 'org.grails', module: 'views-core'
+        exclude group: 'org.grails', module: 'views-json-testing-support'
+        exclude group: 'org.grails.plugins', module: 'scaffolding'
+    }
+
+    api project(':views-core') // Used in public API
+    api 'org.grails:grails-core' // Used in public API
+    api 'org.grails:grails-plugin-mimetypes' // Used in public API
+    api 'org.grails:grails-plugin-rest' // Used in public API
+
+    implementation 'org.apache.groovy:groovy'
+    implementation 'org.springframework:spring-beans'
+    implementation 'org.springframework.boot:spring-boot' // For @ConfigurationProperties
+
+    compileOnly 'jakarta.annotation:jakarta.annotation-api' // Provided
+
+    testImplementation 'org.grails:grails-web-url-mappings'
+    testImplementation 'org.spockframework:spock-core'
+    testImplementation 'jakarta.servlet:jakarta.servlet-api'
+    testRuntimeOnly 'org.slf4j:slf4j-nop' // Get rid of warning about missing slf4j implementation during test task
+}
+
+apply from: rootProject.layout.projectDirectory.file('gradle/java-config.gradle')
+apply from: rootProject.layout.projectDirectory.file('gradle/test-config.gradle')
+apply from: rootProject.layout.projectDirectory.file('gradle/publish-config.gradle')
