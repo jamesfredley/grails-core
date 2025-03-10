@@ -18,7 +18,7 @@ ext {
 
 dependencies {
     implementation platform("org.grails:grails-bom:${grailsVersion}"), {
-        exclude group: 'org.grails.plugins', module: 'gsp'
+        exclude group: 'org.grails.plugins', module: 'gsp' // as a safeguard, exclude projects in this repo to ensure we pick the right version
     }
 
     implementation project(':grails-plugin-gsp')
