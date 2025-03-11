@@ -138,4 +138,3 @@ jobs:
           ./gradlew build --continue
           -PgroovyVersion=${{needs.build_groovy.outputs.groovyVersion}}
           -x groovydoc
-          --refresh-dependencies
