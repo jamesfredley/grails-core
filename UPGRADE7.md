@@ -1,7 +1,10 @@
 # Common 7.0 Upgrade Gotchas - DRAFT -
 
 Experienced while upgrading modules for Grails 7
-
+- the following deprecated classes were removed, please use the suggested replacement
+  * grails.core.GrailsTagLibClass -> grails.core.gsp.GrailsTagLibClass
+  * org.grails.core.artefact.TagLibArtefactHandler -> org.grails.core.artefact.gsp.TagLibArtefactHandler
+  * org.grails.core.DefaultGrailsTagLibClass -> org.grails.core.gsp.DefaultGrailsTagLibClass 
 - h2 2.x is stricter about reserved words
   - https://github.com/grails/gorm-hibernate5/pull/910/commits/c8de45df204966ccc228b46b94beeb2142ae0f59 
 - [GROOVY-10621](https://issues.apache.org/jira/browse/GROOVY-10621) 
