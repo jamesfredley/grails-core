@@ -10,8 +10,8 @@ env:
   GIT_USER_NAME: grails-build
   GIT_USER_EMAIL: grails-build@users.noreply.github.com
 jobs:
-  build:
-    name: "Build Project"
+  datastore-build:
+    name: "Build Datastore Project"
     runs-on: ubuntu-24.04
     permissions:
       contents: read
@@ -32,6 +32,33 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
         with:
           develocity-access-key: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
+      - name: "🔨 Run Build"
+        id: build
+        env:
+          GITHUB_MAVEN_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
+        run: ./gradlew build --continue -PonlyDatatstoreTests
+  mongodb-build:
+    name: "Build Mongodb Project"
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      packages: read
+    strategy:
+      fail-fast: false
+      matrix:
+        java: [ 17, 21 ]
+    steps:
+      - name: "📥 Checkout the repository"
+        uses: actions/checkout@v4
+      - name: "☕️ Setup JDK"
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ matrix.java }}
+          distribution: liberica
+      - name: "🐘 Setup Gradle"
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          develocity-access-key: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
       - name: "▶️ Start MongoDB (needed for some tests)"
         uses: supercharge/mongodb-github-action@90004df786821b6308fb02299e5835d0dae05d0d # v1.12.0 (Use commit sha as this is a 3rd party action)
         with:
@@ -40,11 +67,38 @@ jobs:
         id: build
         env:
           GITHUB_MAVEN_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
-        run: ./gradlew build --continue
+        run: ./gradlew build --continue -PonlyMongodbTests
+  hibernate5-build:
+    name: "Build Hibernate5 Project"
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      packages: read
+    strategy:
+      fail-fast: false
+      matrix:
+        java: [ 17, 21 ]
+    steps:
+      - name: "📥 Checkout the repository"
+        uses: actions/checkout@v4
+      - name: "☕️ Setup JDK"
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ matrix.java }}
+          distribution: liberica
+      - name: "🐘 Setup Gradle"
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          develocity-access-key: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
+      - name: "🔨 Run Build"
+        id: build
+        env:
+          GITHUB_MAVEN_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
+        run: ./gradlew build --continue -PonlyHibernate5Tests
   publish:
     if: github.event_name == 'push'
     name: "Publish Snapshot"
-    needs: build
+    needs: [datastore-build, hibernate5-build, mongodb-build]
     runs-on: ubuntu-24.04
     permissions:
       contents: read

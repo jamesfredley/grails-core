@@ -1,0 +1,48 @@
+dependencies {
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+tasks.named('compileTestGroovy', GroovyCompile) {
+    groovyOptions.forkOptions.jvmArgs = ['-Xmx768m']
+}
+
+tasks.withType(Test).configureEach {
+    onlyIf {
+        if(project.hasProperty('skipMongodbTests')) {
+            return false
+        }
+
+        if(project.hasProperty('onlyHibernate5Tests')) {
+            return false
+        }
+
+        if(project.hasProperty('onlyDatastoreTests')) {
+            return false
+        }
+
+        true
+    }
+
+    useJUnitPlatform()
+    if (isCiBuild) {
+        maxParallelForks = 1
+        forkEvery = 10
+    } else {
+        maxParallelForks = 1
+        forkEvery = 30
+    }
+    jvmArgs = ['-Xmx1028M']
+    afterSuite {
+        System.out.print('.')
+        System.out.flush()
+    }
+    testLogging {
+        events('passed', 'skipped', 'failed')
+        exceptionFormat = 'full'
+        showCauses = true
+        showExceptions = true
+        showStackTraces = true
+    }
+    // Used in the TCK test to selectively enable/disable tests
+    systemProperty('mongodb.gorm.suite', 'true')
+}

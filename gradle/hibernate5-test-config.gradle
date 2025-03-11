@@ -3,6 +3,22 @@ dependencies {
 }
 
 tasks.withType(Test).configureEach {
+    onlyIf {
+        if(project.hasProperty('skipHibernate5Tests')) {
+            return false
+        }
+
+        if(project.hasProperty('onlyMongodbTests')) {
+            return false
+        }
+
+        if(project.hasProperty('onlyDatastoreTests')) {
+            return false
+        }
+
+        true
+    }
+
     useJUnitPlatform()
     systemProperty('hibernate5.gorm.suite', System.getProperty('hibernate5.gorm.suite') ?: true)
     reports.html.required = !System.getenv('CI')
