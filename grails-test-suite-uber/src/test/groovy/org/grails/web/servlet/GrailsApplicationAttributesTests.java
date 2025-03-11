@@ -2,15 +2,13 @@ package org.grails.web.servlet;
 
 import org.grails.web.util.GrailsApplicationAttributes;
 import groovy.lang.GroovyClassLoader;
-import junit.framework.TestCase;
 
 import org.grails.core.artefact.ControllerArtefactHandler;
 import grails.core.DefaultGrailsApplication;
 import grails.core.GrailsApplication;
 import grails.core.GrailsClass;
-import org.grails.core.artefact.TagLibArtefactHandler;
+import org.grails.core.artefact.gsp.TagLibArtefactHandler;
 import org.grails.support.MockApplicationContext;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockServletContext;
