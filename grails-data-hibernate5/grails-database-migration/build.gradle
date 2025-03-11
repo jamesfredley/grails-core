@@ -8,6 +8,7 @@ group = 'org.grails.plugins'
 
 ext {
     apiDocs = true
+    pomArtifactId = 'database-migration'
     pomTitle = 'Grails Database Migration Plugin'
     pomDescription = 'The Database Migration plugin helps you manage database changes, via Liquibase, while developing Grails applications'
     pomDevelopers = [
