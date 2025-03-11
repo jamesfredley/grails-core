@@ -7,16 +7,17 @@ on:
     branches:
       - '[7-9]+.[0-9]+.x'
 jobs:
+  strategy:
+    fail-fast: false
+    matrix:
+      java: [ 17, 21 ]
+      mongodb-version: [ '4', '5', '6', '7', '8' ]
   datastore-build:
     name: "Build Datastore Project"
     runs-on: ubuntu-24.04
     permissions:
       contents: read
       packages: read
-    strategy:
-      fail-fast: false
-      matrix:
-        java: [17, 21]
     steps:
       - name: "📥 Checkout the repository"
         uses: actions/checkout@v4
@@ -29,6 +30,10 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
         with:
           develocity-access-key: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
+      - name: "▶️ Start MongoDB (needed for some tests)"
+        uses: supercharge/mongodb-github-action@90004df786821b6308fb02299e5835d0dae05d0d # v1.12.0 (Use commit sha as this is a 3rd party action)
+        with:
+          mongodb-version: ${{ matrix.mongodb-version }}
       - name: "🔨 Run Build"
         id: build
         env:
@@ -40,11 +45,6 @@ jobs:
     permissions:
       contents: read
       packages: read
-    strategy:
-      fail-fast: false
-      matrix:
-        java: [ 17, 21 ]
-        mongodb-version: [ '4', '5', '6', '7', '8' ]
     steps:
       - name: "📥 Checkout the repository"
         uses: actions/checkout@v4
@@ -72,10 +72,6 @@ jobs:
     permissions:
       contents: read
       packages: read
-    strategy:
-      fail-fast: false
-      matrix:
-        java: [ 17, 21 ]
     steps:
       - name: "📥 Checkout the repository"
         uses: actions/checkout@v4
