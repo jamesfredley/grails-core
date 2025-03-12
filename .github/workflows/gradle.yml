@@ -6,13 +6,13 @@ on:
   pull_request:
     branches:
       - '[7-9]+.[0-9]+.x'
+permissions:
+  contents: read
+  packages: read
 jobs:
   datastore-build:
     name: "Build Datastore Project"
     runs-on: ubuntu-24.04
-    permissions:
-      contents: read
-      packages: read
     strategy:
       fail-fast: false
       matrix:
@@ -37,9 +37,6 @@ jobs:
   mongodb-build:
     name: "Build Mongodb Project"
     runs-on: ubuntu-24.04
-    permissions:
-      contents: read
-      packages: read
     strategy:
       fail-fast: false
       matrix:
@@ -69,9 +66,6 @@ jobs:
   hibernate5-build:
     name: "Build Hibernate5 Project"
     runs-on: ubuntu-24.04
-    permissions:
-      contents: read
-      packages: read
     strategy:
       fail-fast: false
       matrix:
@@ -98,9 +92,6 @@ jobs:
     name: "Publish Snapshot"
     needs: [datastore-build, hibernate5-build, mongodb-build]
     runs-on: ubuntu-24.04
-    permissions:
-      contents: read
-      packages: read
     steps:
       - name: "📥 Checkout the repository"
         uses: actions/checkout@v4
@@ -127,8 +118,7 @@ jobs:
     needs: publish
     runs-on: ubuntu-24.04
     permissions:
-      contents: write
-      packages: read
+      contents: write # so gh-pages can be updated
     steps:
       - name: "📥 Checkout the repository"
         uses: actions/checkout@v4
