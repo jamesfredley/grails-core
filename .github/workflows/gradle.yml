@@ -17,7 +17,6 @@ jobs:
       fail-fast: false
       matrix:
         java: [ 17, 21 ]
-        mongodb-version: [ '4', '5', '6', '7', '8' ]
     steps:
       - name: "📥 Checkout the repository"
         uses: actions/checkout@v4
@@ -30,15 +29,11 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
         with:
           develocity-access-key: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
-      - name: "▶️ Start MongoDB (needed for some tests)"
-        uses: supercharge/mongodb-github-action@90004df786821b6308fb02299e5835d0dae05d0d # v1.12.0 (Use commit sha as this is a 3rd party action)
-        with:
-          mongodb-version: ${{ matrix.mongodb-version }}
       - name: "🔨 Run Build"
         id: build
         env:
           GITHUB_MAVEN_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
-        run: ./gradlew build --continue -PonlyDatatstoreTests
+        run: ./gradlew build --continue -PonlyDatastoreTests
   mongodb-build:
     name: "Build Mongodb Project"
     runs-on: ubuntu-24.04
@@ -161,7 +156,7 @@ jobs:
   trigger-build-gorm-impls:
     if: github.event_name == 'push'
     name: "Trigger Build in GORM Implementations"
-    needs: [datastore-build, mongodb-build, hibernate5-build, publish]
+    needs: [publish]
     runs-on: ubuntu-24.04
     continue-on-error: true
     steps:
@@ -183,12 +178,3 @@ jobs:
           repo: grails/gorm-hibernate6
           ref: ${{ steps.extract_branch.outputs.value }}
           token: ${{ secrets.GH_TOKEN }}
-      - name: "📡 Invoke the Java CI workflow in GORM MongoDB"
-        continue-on-error: true
-        uses: benc-uk/workflow-dispatch@e2e5e9a103e331dad343f381a29e654aea3cf8fc # v1.2.4 (Use commit sha as this is a 3rd party action)
-        with:
-          workflow: Java CI
-          repo: grails/gorm-mongodb
-          ref: ${{ steps.extract_branch.outputs.value }}
-          token: ${{ secrets.GH_TOKEN }}
-          inputs: ${{ steps.dispatch_message.outputs.value }}

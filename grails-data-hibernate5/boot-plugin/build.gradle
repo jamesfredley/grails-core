@@ -9,6 +9,7 @@ group = 'org.grails'
 ext {
     apiDocs = true
     snapshotPublishUrl = 'https://repo.grails.org/grails/libs-snapshots-local'
+    pomArtifactId = 'gorm-hibernate5-spring-boot'
     pomDevelopers =  [
             'graemerocher': 'Graeme Rocher',
             'jeffscottbrown': 'Jeff Brown',
@@ -26,7 +27,7 @@ dependencies {
     }
     api "org.apache.groovy:groovy"
     api "org.springframework.boot:spring-boot-autoconfigure"
-    api project(":grails-datastore-gorm-hibernate5")
+    api project(":hibernate5-gorm")
 
     testImplementation "org.grails:grails-shell", {
         exclude group:'org.apache.groovy', module:'groovy'

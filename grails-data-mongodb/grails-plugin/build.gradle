@@ -11,8 +11,8 @@ apply plugin: 'org.grails.grails-plugin'
 
 ext {
     apiDocs = true
+    snapshotPublishUrl = 'https://repo.grails.org/grails/plugins3-snapshots-local'
     pomArtifactId = 'mongodb'
-    mavenSnapshotPublishUrl = 'https://repo.grails.org/grails/plugins3-snapshots-local'
     pomTitle = 'GORM for MongoDB'
     pomDescription = 'Provides a GORM Object Mapping implementations for the MongoDB Document Database'
     pomDevelopers =  [
@@ -26,7 +26,7 @@ dependencies {
 
     implementation platform("org.grails:grails-bom:$grailsVersion")
 
-    api project(':grails-datastore-gorm-mongodb'), {
+    api project(':mongodb-gorm'), {
         // api: needed as classes should also be available when compiling apps. eg. MongoEntity
         // impl: MongoDatastore, MongoDbDataStoreSpringInitializer
         if (excludeUnusedTransDeps) {
@@ -72,7 +72,7 @@ dependencies {
         // impl: DomainClassArtefactHandler, GrailsClass, GrailsPlugin, Metadata
     }
 
-    runtimeOnly project(':grails-datastore-gorm-mongodb-ext'), {
+    runtimeOnly project(':mongodb-gorm-ext'), {
         // Include MongoDB groovy extensions for applications
     }
 
@@ -80,7 +80,7 @@ dependencies {
         // api: Config
         // impl: PropertySourcesConfig
     }
-    testFixturesApi project(':grails-datastore-gorm-mongodb'), {
+    testFixturesApi project(':mongodb-gorm'), {
         // api: MongoDatastore
     }
     testFixturesApi 'org.mongodb:mongodb-driver-sync', {

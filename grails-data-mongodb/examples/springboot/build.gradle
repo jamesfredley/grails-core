@@ -5,7 +5,7 @@ dependencies {
 
     implementation platform("org.grails:grails-bom:$grailsVersion")
 
-    implementation project(':gorm-mongodb-spring-boot')
+    implementation project(':mongodb-boot-plugin')
     implementation 'org.apache.groovy:groovy'
     implementation 'org.springframework.boot:spring-boot-starter-web'
 

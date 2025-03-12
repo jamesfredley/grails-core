@@ -3,7 +3,7 @@ package org.grails.datastore.gorm.mongo
 import grails.gorm.tests.GormDatastoreSpec
 import spock.lang.Ignore
 
-@Ignore // moved to 'grails-datastore-gorm-mongodb-ex
+@Ignore // moved to 'gorm-ex
 class DBObjectConversionSpec extends GormDatastoreSpec {
 
     @Override

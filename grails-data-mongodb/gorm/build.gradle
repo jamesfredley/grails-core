@@ -8,7 +8,8 @@ group = 'org.grails'
 
 ext {
     apiDocs = true
-    mavenSnapshotPublishUrl = 'https://repo.grails.org/grails/libs-snapshots-local'
+    snapshotPublishUrl = 'https://repo.grails.org/grails/libs-snapshots-local'
+    pomArtifactId = 'grails-datastore-gorm-mongodb'
     pomTitle = 'GORM for MongoDB'
     pomDescription = 'Provides a GORM Object Mapping implementations for the MongoDB Document Database'
     pomDevelopers =  [
@@ -22,7 +23,7 @@ dependencies {
 
     implementation platform("org.grails:grails-bom:$grailsVersion")
 
-    api project(':grails-datastore-gorm-bson'), {
+    api project(':mongodb-gorm-bson'), {
         // api: BsonQuery, EmbeddedQueryEncoder
         // impl: CodecCustomTypeMarshaller
         if (excludeUnusedTransDeps) {

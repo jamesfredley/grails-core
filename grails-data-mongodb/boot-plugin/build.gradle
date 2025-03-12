@@ -8,7 +8,8 @@ group = 'org.grails'
 
 ext {
     apiDocs = true
-    mavenSnapshotPublishUrl = 'https://repo.grails.org/grails/libs-snapshots-local'
+    snapshotPublishUrl = 'https://repo.grails.org/grails/libs-snapshots-local'
+    pomArtifactId = 'gorm-mongodb-spring-boot'
     pomTitle = 'GORM for MongoDB'
     pomDescription = 'Provides a GORM Object Mapping implementations for the MongoDB Document Database'
     pomDevelopers =  [
@@ -22,7 +23,7 @@ dependencies {
 
     implementation platform("org.grails:grails-bom:$grailsVersion")
 
-    api project(':grails-datastore-gorm-mongodb'), {
+    api project(':mongodb-gorm'), {
         // api: MongoDatastore
         if (excludeUnusedTransDeps) {
             // API dependencies in grails-datastore-gorm-mongodb

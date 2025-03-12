@@ -9,6 +9,7 @@ group = 'org.grails'
 ext {
     apiDocs = true
     snapshotPublishUrl = 'https://repo.grails.org/grails/libs-snapshots-local'
+    pomArtifactId = 'grails-datastore-gorm-hibernate5'
     pomDevelopers =  [
             'graemerocher': 'Graeme Rocher',
             'jeffscottbrown': 'Jeff Brown',

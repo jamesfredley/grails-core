@@ -15,13 +15,13 @@ dependencies {
     implementation 'org.grails:grails-plugin-databinding'
     implementation 'org.grails:grails-plugin-rest'
     implementation 'org.grails:grails-plugin-url-mappings'
-    implementation project(':grails-datastore-gorm-mongodb')
+    implementation project(':mongodb-gorm')
 
     runtimeOnly 'org.springframework.boot:spring-boot-autoconfigure'
     runtimeOnly 'org.springframework.boot:spring-boot-starter-logging'
     runtimeOnly 'org.springframework.boot:spring-boot-starter-tomcat'
 
-    runtimeOnly project(':views-json-templates')
+    runtimeOnly project(':mongodb-views-json-templates')
     runtimeOnly 'com.bertramlabs.plugins:asset-pipeline-grails'
 
     integrationTestImplementation 'org.grails:grails-testing-support'

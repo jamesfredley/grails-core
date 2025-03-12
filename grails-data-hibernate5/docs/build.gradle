@@ -59,8 +59,8 @@ tasks.named('asciidoctor', AsciidoctorTask) {
             'artifactId'    : project.name,
             'sourcedir'     : "$project.rootDir",
             'migrationPluginExamplesDir' : rootProject.layout.projectDirectory.dir('grails-database-migration/src/integration-test/resources').asFile.absolutePath,
-            'migrationPluginGroupId' : rootProject.findProject(':database-migration').group,
-            'migrationPluginArtifactId' : rootProject.findProject(':database-migration').name,
+            'migrationPluginGroupId' : rootProject.findProject(':hibernate5-database-migration').group,
+            'migrationPluginArtifactId' : rootProject.findProject(':hibernate5-database-migration').name,
             'liquibaseHibernate5Version': liquibaseHibernate5Version
     )
     jvm {

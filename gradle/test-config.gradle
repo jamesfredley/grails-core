@@ -8,15 +8,15 @@ tasks.named('compileTestGroovy', GroovyCompile) {
 
 tasks.withType(Test).configureEach {
     onlyIf {
-        if(project.hasProperty('skipDatatstoreTests')) {
+        if (project.hasProperty('skipDatastoreTests')) {
             return false
         }
 
-        if(project.hasProperty('onlyMongodbTests')) {
+        if (project.hasProperty('onlyMongodbTests')) {
             return false
         }
 
-        if(project.hasProperty('onlyHibernate5Tests')) {
+        if (project.hasProperty('onlyHibernate5Tests')) {
             return false
         }
 

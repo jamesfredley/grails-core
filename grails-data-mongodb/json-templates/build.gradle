@@ -7,10 +7,11 @@ version = projectVersion
 group = 'org.grails.plugins'
 
 ext {
+    pomArtifactId = 'views-json-templates'
     pomTitle = 'Grails MongoDB JSON Views'
     pomDescription = 'Provides JSON Views for MongoDB to the Grails framework.'
     pomDevelopers = ['puneetbehl': 'Puneet Behl']
-    mavenSnapshotPublishUrl = 'https://repo.grails.org/grails/plugins3-snapshots-local'
+    snapshotPublishUrl = 'https://repo.grails.org/grails/plugins3-snapshots-local'
 }
 
 dependencies {
@@ -19,8 +20,8 @@ dependencies {
 
     api 'org.grails.plugins:views-json'
 
-    implementation project(':grails-datastore-gorm-mongodb')
-    implementation project(':grails-datastore-gorm-bson')
+    implementation project(':mongodb-gorm')
+    implementation project(':mongodb-gorm-bson')
 
     compileOnly 'org.slf4j:slf4j-nop' // Get rid of warning about missing slf4j implementation during compileGsonViews task
 }

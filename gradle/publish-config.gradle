@@ -19,7 +19,5 @@ extensions.configure(GrailsPublishExtension) {
             'puneetbehl': 'Puneet Behl',
             'jamesfredley': 'James Fredley'
     ]
-    if (findProperty('pomArtifactId')) {
-        it.artifactId = findProperty('pomArtifactId')
-    }
+    it.artifactId = findProperty('pomArtifactId') ?: name
 }

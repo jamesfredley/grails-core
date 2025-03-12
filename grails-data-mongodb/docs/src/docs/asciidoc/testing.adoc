@@ -9,19 +9,19 @@ It is preferable to use testcontainers to automatically run MongoDB in a contain
 
 [source,groovy]
 ----
-include::{sourcedir}/examples/grails3-mongodb/src/test/groovy/functional/tests/EmbeddedMongoClient.groovy[]
+include::{sourcedir}/examples/base/src/test/groovy/functional/tests/EmbeddedMongoClient.groovy[]
 ----
 
 [source,groovy]
 ----
-include::{sourcedir}/examples/grails3-mongodb/src/test/groovy/functional/tests/LocalMongoUnitSpec.groovy[tags=structure]
+include::{sourcedir}/examples/base/src/test/groovy/functional/tests/LocalMongoUnitSpec.groovy[tags=structure]
 ----
 
 You can also use your own low-level `MongoClient` instance, as shown in the following example:
 
 [source,groovy]
 ----
-include::{sourcedir}/examples/grails3-mongodb/src/test/groovy/functional/tests/BookUnitSpec.groovy[]
+include::{sourcedir}/examples/base/src/test/groovy/functional/tests/BookUnitSpec.groovy[]
 ----
 
 Note that the default implementation is to scan your classpath searching for domain classes, from the package defined
@@ -30,5 +30,5 @@ is large, classpath scanning may be slow, so it's better to override the method 
 
 [source,groovy]
 ----
-include::{sourcedir}/examples/grails3-hibernate5-mongodb/src/test/groovy/functional/tests/BookFongoSpec.groovy[tags=getDomainClasses,indent=0]
+include::{sourcedir}/examples/hibernate5/src/test/groovy/functional/tests/BookFongoSpec.groovy[tags=getDomainClasses,indent=0]
 ----

@@ -25,6 +25,7 @@ repositories {
 dependencies {
     implementation platform("org.grails:grails-bom:${versions.getProperty('grailsVersion')}")
     implementation 'org.grails:grails-gradle-plugin'
-    runtimeOnly 'com.bertramlabs.plugins:asset-pipeline-gradle'
-    runtimeOnly 'org.grails.plugins:views-gradle'
+    implementation 'com.bertramlabs.plugins:asset-pipeline-gradle'
+    implementation 'org.grails.plugins:views-gradle'
+    implementation 'org.springframework.boot:spring-boot-gradle-plugin'
 }

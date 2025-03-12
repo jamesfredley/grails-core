@@ -54,6 +54,7 @@ version = projectVersion
 group = 'this.will.be.overridden'
 
 def publishedProjects = [
+        // datastore
         'grails-datastore-async',
         'grails-datastore-core',
         'grails-datastore-gorm',
@@ -65,29 +66,23 @@ def publishedProjects = [
         'grails-datastore-gorm-validation',
         'grails-datastore-web',
         'grails-gorm-testing-support',
-        'database-migration-hibernate5',
-        'gorm-hibernate5-spring-boot',
-        'grails-datastore-gorm-hibernate5',
+        // hibernate5
+        'hibernate5-boot-plugin',
+        'hibernate5-database-migration',
+        'hibernate5-gorm',
         'hibernate5-grails-plugin',
-        'gorm-mongodb-spring-boot',
-        'grails-datastore-gorm-bson',
-        'grails-datastore-gorm-mongodb',
-        'grails-datastore-gorm-mongodb-ext',
+        // mongodb
+        'mongodb-boot-plugin',
+        'mongodb-gorm',
+        'mongodb-gorm-bson',
+        'mongodb-gorm-ext',
         'mongodb-grails-plugin',
-        'views-json-templates'
+        'mongodb-views-json-templates'
 ]
-subprojects { Project subproject ->
+subprojects {
     if (name in publishedProjects) {
         // This has to be applied here
         apply plugin: 'org.grails.grails-publish'
-    }
-
-    // asset-pipeline #177 work around for parallel builds
-    subproject.afterEvaluate {
-        Task assetTask = subproject.tasks.findByName('assetCompile')
-        if(assetTask) {
-            assetTask.outputs.dir rootProject.layout.buildDirectory.dir("asset-serialize")
-        }
     }
 }
 
