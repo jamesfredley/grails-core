@@ -8,6 +8,7 @@ group = 'org.grails'
 
 ext {
     includeBaseTckClass = true
+    //TODO: We could publish the test classes once https://github.com/grails/grails-gradle-plugin/pull/425 is merged
 }
 
 dependencies {
@@ -92,7 +93,7 @@ dependencies {
     //testImplementation project(":grails-datastore-gorm-rx")
 
     // Use the simple datastore to ensure the base implementation works correctly
-    api project(':grails-datastore-gorm-simple')
+    api project(':simple-gorm')
 
     testRuntimeOnly 'org.slf4j:slf4j-nop' // Get rid of warning about missing slf4j implementation during tests
 
