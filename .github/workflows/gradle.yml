@@ -33,7 +33,7 @@ jobs:
         id: build
         env:
           GITHUB_MAVEN_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
-        run: ./gradlew build --continue -PonlyDatastoreTests
+        run: ./gradlew cleanTest build --continue -PonlyDatastoreTests
   mongodb-build:
     name: "Build Mongodb Project"
     runs-on: ubuntu-24.04
@@ -62,7 +62,7 @@ jobs:
         id: build
         env:
           GITHUB_MAVEN_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
-        run: ./gradlew build --continue -PonlyMongodbTests
+        run: ./gradlew cleanTest build --continue -PonlyMongodbTests
   hibernate5-build:
     name: "Build Hibernate5 Project"
     runs-on: ubuntu-24.04
@@ -86,7 +86,7 @@ jobs:
         id: build
         env:
           GITHUB_MAVEN_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
-        run: ./gradlew build --continue -PonlyHibernate5Tests
+        run: ./gradlew cleanTest build --continue -PonlyHibernate5Tests
   publish:
     if: github.event_name == 'push'
     name: "Publish Snapshot"
