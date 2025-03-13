@@ -8,7 +8,6 @@ import spock.lang.PendingFeature
 @Integration(applicationClass = Application)
 class HomeSpec extends ContainerGebSpec {
 
-    @PendingFeature(reason = 'Pending fix for https://github.com/grails/grails-core/issues/13846')
     void "Test the home page renders correctly"() {
         when:"The home page is visited"
             go '/'
