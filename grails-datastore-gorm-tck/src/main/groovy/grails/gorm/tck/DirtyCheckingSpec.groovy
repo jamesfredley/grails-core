@@ -152,7 +152,7 @@ class DirtyCheckingSpec extends GormDatastoreSpec {
         TestAuthor.deleteAll()
     }
 
-    @PendingFeature // because one-to-one association loads eagerly in the Hibernate
+    @IgnoreIf({ !Boolean.getBoolean("mongodb.gorm.suite")})
     void "test initialized proxy is not marked as dirty"() {
 
         given:
