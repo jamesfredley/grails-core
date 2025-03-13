@@ -8,6 +8,11 @@ IntelliJ IDEA also provides powerful database tools that work with Grails' GORM 
 
 https://www.jetbrains.com/idea/[IntelliJ IDEA Website]
 
+To improve speed in IntelliJ IDEA you can adjust the following settings under Help -> Custom VM Options.  If your machine has less RAM, you will need to adjust these down to slightly lower values.
+
+  -Xmx6144m
+  -XX:ReservedCodeCacheSize=512m
+
 === 2. Visual Studio Code (VS Code)
 
 Visual Studio Code is a lightweight, open-source code editor developed by Microsoft. While it's not a full-fledged IDE, it offers powerful extensions for Grails and Groovy development. You can install extensions like https://marketplace.visualstudio.com/items?itemName=marlon407.code-groovy[code-groovy] and https://marketplace.visualstudio.com/items?itemName=GDOTecnologia.gfvscode[Grails for VS Code] to enhance your Grails developer experience.
