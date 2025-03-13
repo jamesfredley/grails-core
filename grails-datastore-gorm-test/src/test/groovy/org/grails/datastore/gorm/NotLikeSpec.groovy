@@ -8,12 +8,6 @@ import grails.gorm.tck.TestEntity
  */
 class NotLikeSpec extends GormDatastoreSpec {
 
-    def setup() {
-        System.out.println("********************************************************")
-        System.out.println(System.getProperty("java.class.path"))
-        System.out.println("********************************************************")
-    }
-
     void "test not like"() {
         when:
         new TestEntity(name:"Fred").save()

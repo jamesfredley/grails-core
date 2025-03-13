@@ -1,17 +1,16 @@
 dependencies {
-    if(!project.hasProperty('includeBaseTckClass') || project.findProperty('includeBaseTckClass')) {
+    if (!project.hasProperty('includeBaseTckClass') || project.findProperty('includeBaseTckClass')) {
         testImplementation project(':grails-datastore-gorm-tck-base')
     }
-//    testImplementation project(path: ':grails-datastore-gorm-tck', configuration: 'testArtifacts')
     testImplementation project(':grails-datastore-gorm-tck')
     testImplementation project(':grails-datastore-gorm-tck-domains')
 }
 
 // TODO: gradle will happily put the jar file on the classpath, but junit won't find the tests.  Dynamic test discovery also won't find them.
-tasks.register("extractTckJar", Copy) {
+tasks.register('extractTckJar', Copy) {
     dependsOn(configurations.testRuntimeClasspath)
 
-    Provider<Directory> extractTarget = layout.buildDirectory.dir("extracted-tck-classes")
+    Provider<Directory> extractTarget = layout.buildDirectory.dir('extracted-tck-classes')
 
     doFirst {
         extractTarget.get().asFile.deleteDir()
@@ -26,8 +25,8 @@ tasks.register("extractTckJar", Copy) {
 }
 
 tasks.withType(Test).configureEach {
-    dependsOn("extractTckJar")
+    dependsOn('extractTckJar')
     doFirst {
-        testClassesDirs += files(layout.buildDirectory.dir("extracted-tck-classes"))
+        testClassesDirs += files(layout.buildDirectory.dir('extracted-tck-classes'))
     }
 }
