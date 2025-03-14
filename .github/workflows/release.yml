@@ -27,8 +27,9 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
         with:
           develocity-access-key: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
-      - name: "⚙️ Run pre-release"
-        uses: grails/github-actions/pre-release@main
+      - name: '⚙️ Run pre-release'
+        id: release_version
+        uses: grails/grails-github-actions/pre-release@asf
       - name: "🔍 Determine Target Branch"
         id: extract_branch
         run: |
@@ -99,6 +100,6 @@ jobs:
           ./gradlew
           findSonatypeStagingRepository
           releaseSonatypeStagingRepository
-      - name: "⚙️ Run post-release"
-        if: success()
-        uses: grails/github-actions/post-release@main
+      - name: '⚙️ Run post-release'
+        id: post_release
+        uses: grails/grails-github-actions/post-release@asf
