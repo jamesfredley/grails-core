@@ -127,9 +127,21 @@ jobs:
           echo $TARGET_BRANCH
           echo "value=${TARGET_BRANCH}" >> $GITHUB_OUTPUT
       - name: "📡 Invoke the grails-doc release workflow"
-        uses: benc-uk/workflow-dispatch@e2e5e9a103e331dad343f381a29e654aea3cf8fc # v1.2.4 (Use commit sha as this is a 3rd party action)
+        if: success()
+        uses: actions/github-script@v6
         with:
-          workflow: Java CI
-          repo: grails/grails-doc
-          ref: ${{ steps.extract_branch.outputs.value }}
-          token: ${{ secrets.GH_TOKEN }}
+          debug: ${{ secrets.ACTIONS_RUNNER_DEBUG }}
+          github-token: ${{ secrets.GH_TOKEN }}
+          script: |
+            try {
+              const result = await github.rest.actions.createWorkflowDispatch({
+                owner: 'apache',
+                repo: 'grails-doc',
+                workflow_id: 'release.yml',
+                ref: '${{ steps.extract_branch.outputs.value }}'
+              });
+              console.log(result);
+            } catch(error) {
+              console.error(error);
+              core.setFailed(error);
+            }
