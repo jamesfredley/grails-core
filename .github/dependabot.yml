@@ -19,3 +19,7 @@ updates:
     target-branch: 7.0.x
     labels:
       - "type: dependency upgrade"
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
