@@ -137,7 +137,7 @@ jobs:
               const result = await github.rest.actions.createWorkflowDispatch({
                 owner: 'apache',
                 repo: 'grails-doc',
-                workflow_id: 'release.yml',
+                workflow_id: 'gradle.yml',
                 ref: '${{ steps.extract_branch.outputs.value }}'
               });
               console.log(result);
