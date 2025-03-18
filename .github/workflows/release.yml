@@ -13,9 +13,6 @@ jobs:
     outputs:
       release_version: ${{ steps.release_version.outputs.value }}
       target_branch: ${{ steps.extract_branch.outputs.value }}
-    env:
-      GIT_USER_NAME: 'grails-build'
-      GIT_USER_EMAIL: 'grails-build@users.noreply.github.com'
     steps:
       - name: "💥 Purge Existing Builds - org.grails.grails-bom"
         run: |
@@ -416,8 +413,8 @@ jobs:
           sed -i "s/^preventSnapshotPublish.*$/preventSnapshotPublish\=false/" gradle.properties
       - name: "📩 Commit flag to allow snapshot publishing"
         run: |
-          git config user.name "${{ env.GIT_USER_NAME }}"
-          git config user.email "${{ env.GIT_USER_EMAIL }}"
+          git config user.name "${{ github.actor }}"
+          git config user.email "${{ github.actor }}@users.noreply.github.com"
           git add gradle.properties
           if ! git diff --cached --quiet; then
             git commit -m "[skip ci] Restore Snapshot Publishing"
@@ -444,8 +441,11 @@ jobs:
       - name: "📝 Store the current release version"
         id: release_version
         run: echo "value=${GITHUB_REF:11}" >> $GITHUB_OUTPUT
-      - name: "⚙️ Run pre-release"
-        uses: ./.github/actions/pre-release
+      - name: '⚙️ Run pre-release'
+        uses: grails/grails-github-actions/pre-release@asf
+        env:
+          RELEASE_VERSION: ${{ steps.release_version.outputs.value }}
+          RELEASE_SCRIPT_PATH: '.github/scripts/setReleasedGrailsVersion.sh'
       - name: "🧩 Run Assemble"
         if: success()
         id: assemble
@@ -523,9 +523,11 @@ jobs:
           ./gradlew
           findSonatypeStagingRepository 
           releaseSonatypeStagingRepository
-      - name: "⚙️ Run post-release"
+      - name: '⚙️ Run post-release'
         if: success()
-        uses: ./.github/actions/post-release
+        uses: grails/grails-github-actions/post-release@asf
+        env:
+          RELEASE_SCRIPT_PATH: '.github/scripts/setSnapshotGrailsVersion.sh'
   docs:
     environment: docs
     needs: publish
