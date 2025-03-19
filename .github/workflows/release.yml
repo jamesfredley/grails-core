@@ -447,20 +447,17 @@ jobs:
           RELEASE_VERSION: ${{ steps.release_version.outputs.value }}
           RELEASE_SCRIPT_PATH: '.github/scripts/setReleasedGrailsVersion.sh'
       - name: "🧩 Run Assemble"
-        if: success()
         id: assemble
         env:
           DEVELOCITY_BUILD_CACHE_NODE_USER: ${{ secrets.GRADLE_ENTERPRISE_BUILD_CACHE_NODE_USER }}
           DEVELOCITY_BUILD_CACHE_NODE_KEY: ${{ secrets.GRADLE_ENTERPRISE_BUILD_CACHE_NODE_KEY }}
         run: ./gradlew assemble
       - name: "📤 Upload Distribution"
-        if: success()
         uses: actions/upload-artifact@50769540e7f4bd5e21e526ee35c689e35e0d6874 # v4.4.0
         with:
           name: grails-${{ steps.release_version.outputs.value }}.zip
           path: build/distributions/grails-${{ steps.release_version.outputs.value }}.zip
       - name: "📤 Upload artifacts to the Github release"
-        if: success()
         id: upload_artifact
         uses: Roang-zero1/github-upload-release-artifacts-action@c15e0b65ce2ae1c8d52bfbc75d017d21e1da77d7 # v3.0.0 (Use commit sha as this is a 3rd party action)
         with:
@@ -468,13 +465,11 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: "🔐 Generate secring file"
-        if: success()
         env:
           SECRING_FILE: ${{ secrets.SECRING_FILE }}
         run: echo $SECRING_FILE | base64 -d > ${{ github.workspace }}/secring.gpg
       - name: "📤 Publish to Sonatype OSSRH"
         id: publish
-        if: success()
         env:
           DEVELOCITY_BUILD_CACHE_NODE_USER: ${{ secrets.GRADLE_ENTERPRISE_BUILD_CACHE_NODE_USER }}
           DEVELOCITY_BUILD_CACHE_NODE_KEY: ${{ secrets.GRADLE_ENTERPRISE_BUILD_CACHE_NODE_KEY }}
@@ -523,8 +518,7 @@ jobs:
           ./gradlew
           findSonatypeStagingRepository 
           releaseSonatypeStagingRepository
-      - name: '⚙️ Run post-release'
-        if: success()
+      - name: "⚙️ Run post-release"
         uses: apache/grails-github-actions/post-release@asf
         env:
           RELEASE_SCRIPT_PATH: '.github/scripts/setSnapshotGrailsVersion.sh'
@@ -542,10 +536,8 @@ jobs:
         env:
           RELEASE_VERSION: ${{ needs.publish.outputs.release_version }}
       - name: "📡 Invoke grails-doc release workflow"
-        if: success()
-        uses: actions/github-script@v6
+        uses: actions/github-script@v7
         with:
-          debug: ${{ secrets.ACTIONS_RUNNER_DEBUG }}
           github-token: ${{ secrets.GH_TOKEN }}
           script: |
             try {
@@ -575,10 +567,8 @@ jobs:
         env:
           RELEASE_VERSION: ${{ needs.publish.outputs.release_version }}
       - name: "📡 Invoke grails-static-website release workflow"
-        if: success()
-        uses: actions/github-script@v6
+        uses: actions/github-script@v7
         with:
-          debug: ${{ secrets.ACTIONS_RUNNER_DEBUG }}
           github-token: ${{ secrets.GH_TOKEN }}
           script: |
             try {
