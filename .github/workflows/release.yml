@@ -13,9 +13,6 @@ jobs:
     outputs:
       release_version: ${{ steps.release_version.outputs.value }}
       target_branch: ${{ steps.extract_branch.outputs.value }}
-    env:
-      GIT_USER_NAME: 'grails-build'
-      GIT_USER_EMAIL: 'grails-build@users.noreply.github.com'
     steps:
       - name: "💥 Purge Existing Builds - org.grails.grails-bom"
         run: |
@@ -416,8 +413,8 @@ jobs:
           sed -i "s/^preventSnapshotPublish.*$/preventSnapshotPublish\=false/" gradle.properties
       - name: "📩 Commit flag to allow snapshot publishing"
         run: |
-          git config user.name "${{ env.GIT_USER_NAME }}"
-          git config user.email "${{ env.GIT_USER_EMAIL }}"
+          git config user.name "${{ github.actor }}"
+          git config user.email "${{ github.actor }}@users.noreply.github.com"
           git add gradle.properties
           if ! git diff --cached --quiet; then
             git commit -m "[skip ci] Restore Snapshot Publishing"
@@ -444,37 +441,35 @@ jobs:
       - name: "📝 Store the current release version"
         id: release_version
         run: echo "value=${GITHUB_REF:11}" >> $GITHUB_OUTPUT
-      - name: "⚙️ Run pre-release"
-        uses: ./.github/actions/pre-release
+      - name: '⚙️ Run pre-release'
+        uses: apache/grails-github-actions/pre-release@asf
+        env:
+          RELEASE_VERSION: ${{ steps.release_version.outputs.value }}
+          RELEASE_SCRIPT_PATH: '.github/scripts/setReleasedGrailsVersion.sh'
       - name: "🧩 Run Assemble"
-        if: success()
         id: assemble
         env:
           DEVELOCITY_BUILD_CACHE_NODE_USER: ${{ secrets.GRADLE_ENTERPRISE_BUILD_CACHE_NODE_USER }}
           DEVELOCITY_BUILD_CACHE_NODE_KEY: ${{ secrets.GRADLE_ENTERPRISE_BUILD_CACHE_NODE_KEY }}
         run: ./gradlew assemble
       - name: "📤 Upload Distribution"
-        if: success()
         uses: actions/upload-artifact@50769540e7f4bd5e21e526ee35c689e35e0d6874 # v4.4.0
         with:
           name: grails-${{ steps.release_version.outputs.value }}.zip
           path: build/distributions/grails-${{ steps.release_version.outputs.value }}.zip
       - name: "📤 Upload artifacts to the Github release"
-        if: success()
         id: upload_artifact
-        uses: Roang-zero1/github-upload-release-artifacts-action@c15e0b65ce2ae1c8d52bfbc75d017d21e1da77d7 # v3.0.0 (Use commit sha as this is a 3rd party action)
-        with:
-          args: build/distributions/grails-${{ steps.release_version.outputs.value }}.zip
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: >
+          gh release upload v${{ steps.release_version.outputs.value }}
+          build/distributions/grails-${{ steps.release_version.outputs.value }}.zip
       - name: "🔐 Generate secring file"
-        if: success()
         env:
           SECRING_FILE: ${{ secrets.SECRING_FILE }}
         run: echo $SECRING_FILE | base64 -d > ${{ github.workspace }}/secring.gpg
       - name: "📤 Publish to Sonatype OSSRH"
         id: publish
-        if: success()
         env:
           DEVELOCITY_BUILD_CACHE_NODE_USER: ${{ secrets.GRADLE_ENTERPRISE_BUILD_CACHE_NODE_USER }}
           DEVELOCITY_BUILD_CACHE_NODE_KEY: ${{ secrets.GRADLE_ENTERPRISE_BUILD_CACHE_NODE_KEY }}
@@ -524,8 +519,9 @@ jobs:
           findSonatypeStagingRepository 
           releaseSonatypeStagingRepository
       - name: "⚙️ Run post-release"
-        if: success()
-        uses: ./.github/actions/post-release
+        uses: apache/grails-github-actions/post-release@asf
+        env:
+          RELEASE_SCRIPT_PATH: '.github/scripts/setSnapshotGrailsVersion.sh'
   docs:
     environment: docs
     needs: publish
@@ -540,13 +536,23 @@ jobs:
         env:
           RELEASE_VERSION: ${{ needs.publish.outputs.release_version }}
       - name: "📡 Invoke grails-doc release workflow"
-        uses: benc-uk/workflow-dispatch@e2e5e9a103e331dad343f381a29e654aea3cf8fc # v1.2.4 (Use commit sha as this is a 3rd party action)
+        uses: actions/github-script@v7
         with:
-          workflow: Release
-          repo: grails/grails-doc
-          ref: ${{ needs.publish.outputs.target_branch }}
-          token: ${{ secrets.GH_TOKEN }}
-          inputs: ${{ steps.prep_inputs.outputs.value }}
+          github-token: ${{ secrets.GH_TOKEN }}
+          script: |
+            try {
+              const result = await github.rest.actions.createWorkflowDispatch({
+                owner: 'apache',
+                repo: 'grails-doc',
+                workflow_id: 'release.yml',
+                ref: '${{ needs.publish.outputs.target_branch }}',
+                inputs: ${{ steps.prep_inputs.outputs.value }}
+              });
+              console.log(result);
+            } catch(error) {
+              console.error(error);
+              core.setFailed(error);
+            }
   website:
     environment: website
     needs: publish
@@ -561,12 +567,20 @@ jobs:
         env:
           RELEASE_VERSION: ${{ needs.publish.outputs.release_version }}
       - name: "📡 Invoke grails-static-website release workflow"
-        if: success()
-        id: grails_static_website
-        uses: benc-uk/workflow-dispatch@e2e5e9a103e331dad343f381a29e654aea3cf8fc # v1.2.4 (Use commit sha as this is a 3rd party action)
+        uses: actions/github-script@v7
         with:
-          workflow: Release
-          repo: grails/grails-static-website
-          ref: master
-          token: ${{ secrets.GH_TOKEN }}
-          inputs: ${{ steps.prep_inputs.outputs.value }}
+          github-token: ${{ secrets.GH_TOKEN }}
+          script: |
+            try {
+              const result = await github.rest.actions.createWorkflowDispatch({
+                owner: 'apache',
+                repo: 'grails-static-website',
+                workflow_id: 'release.yml',
+                ref: 'master',
+                inputs: ${{ steps.prep_inputs.outputs.value }}
+              });
+              console.log(result);
+            } catch(error) {
+              console.error(error);
+              core.setFailed(error);
+            }
