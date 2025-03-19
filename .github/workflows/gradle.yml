@@ -62,7 +62,6 @@ jobs:
         working-directory: 'views/gradle-plugin'
         run: ./gradlew build --rerun-tasks --stacktrace
       - name: "📤 Publish Snapshot Artifacts to Artifactory (repo.grails.org)"
-        if: success()
         env:
           GRADLE_PUBLISH_RELEASE: 'false'
           MAVEN_PUBLISH_USERNAME: ${{ secrets.MAVEN_PUBLISH_USERNAME }}
@@ -72,10 +71,8 @@ jobs:
           cd views/gradle-plugin && 
           ./gradlew --no-build-cache publish
       - name: "📖 Generate Snapshot Documentation"
-        if: success()
         run: ./gradlew aggregateDocs
       - name: "🚀 Publish to Github Pages"
-        if: success()
         uses: apache/grails-github-actions/deploy-github-pages@asf
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
