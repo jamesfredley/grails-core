@@ -75,7 +75,7 @@ jobs:
           --target ${{ env.TARGET_BRANCH }}
           $PRE_RELEASE_FLAG
       - name: "🚀 Publish to Github Pages"
-        uses: grails/grails-github-actions/deploy-github-pages@main
+        uses: apache/grails-github-actions/deploy-github-pages@asf
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GRADLE_PUBLISH_RELEASE: 'true'
@@ -84,4 +84,4 @@ jobs:
       - name: "⚙️ Run post-release"
         env:
           RELEASE_VERSION: ${{ github.event.inputs.grails_version }}
-        uses: grails/github-actions/post-release@v3
+        uses: apache/grails-github-actions/post-release@v3
