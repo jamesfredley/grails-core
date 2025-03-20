@@ -46,7 +46,7 @@ jobs:
           compression-level: 0 # Already a zip
       - name: "🚀 Publish to Github Pages"
         if: github.event_name == 'push'
-        uses: grails/grails-github-actions/deploy-github-pages@main
+        uses: apache/grails-github-actions/deploy-github-pages@asf
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GRADLE_PUBLISH_RELEASE: 'false'
