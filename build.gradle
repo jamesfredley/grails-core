@@ -37,6 +37,7 @@ dependencies {
     implementation "org.grails:grails-dependencies"
     implementation "org.grails:grails-testing-support"
     implementation "org.grails:grails-gradle-plugin"
+    implementation "org.grails.plugins:hibernate5"
 }
 
 task buildscriptDependencies(type: DependencyReportTask) {
@@ -197,6 +198,7 @@ tasks.register('publishGuide', grails.doc.gradle.PublishGuide) {
                 'GrailsVersion'      : projectVersion,
                 'version'            : projectVersion,
                 'gormVersion'        : gormVersion,
+                'hibernateVersion'   : getVersion("hibernate-core-jakarta"),
                 'spockVersion'       : getVersion("spock-core"),
                 'testingSupportVersion'       : getVersion("grails-testing-support"),
                 'grailsGradlePluginVersion'       : getVersion("grails-gradle-plugin"),
