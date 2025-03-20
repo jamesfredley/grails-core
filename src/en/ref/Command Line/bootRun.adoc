@@ -34,7 +34,7 @@ Additional Arguments <<*args>>:
 For more args, see {springBootReference}/html/application-properties.html#appendix.application-properties.server[Spring Boot Application Properties].
 
 
-This command starts Grails in an embedded servlet container that can serve HTTP requests. The default container is http://tomcat.apache.org[Tomcat] but alternative containers are supported by altering the Spring boot starter in `build.gradle`.
+This command starts Grails in an embedded servlet container that can serve HTTP requests. The default container is https://tomcat.apache.org[Tomcat] but alternative containers are supported by altering the Spring boot starter in `build.gradle`.
 
 [source,groovy]
 .build.gradle

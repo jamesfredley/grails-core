@@ -52,9 +52,9 @@ abstract class FetchGrailsSourceTask extends DefaultTask {
 
             def zipFile = "${grailsCheckOutDir}/grails-src.zip"
             if (grailsVersion) {
-                ant.get(src: "https://github.com/grails/grails-core/archive/refs/tags/v${grailsVersion}.zip", dest: zipFile, verbose: true)
+                ant.get(src: "https://github.com/apache/grails-core/archive/refs/tags/v${grailsVersion}.zip", dest: zipFile, verbose: true)
             } else {
-                ant.get(src: "https://github.com/grails/grails-core/zipball/${project.githubBranch}", dest: zipFile, verbose: true)
+                ant.get(src: "https://github.com/apache/grails-core/zipball/${project.githubBranch}", dest: zipFile, verbose: true)
             }
 
             ant.unzip(src: zipFile, dest: grailsCheckOutDir) {

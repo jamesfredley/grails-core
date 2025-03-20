@@ -6,9 +6,9 @@
 === Purpose
 
 
-Creates and returns an instance of Grails' http://grails.github.io/grails-data-mapping/latest/api/grails/orm/HibernateCriteriaBuilder.html[HibernateCriteriaBuilder] that can be used to construct criteria queries.
+Creates and returns an instance of Grails' https://apache.github.io/grails-data-mapping/latest/api/grails/orm/HibernateCriteriaBuilder.html[HibernateCriteriaBuilder] that can be used to construct criteria queries.
 
-WARNING: Unit tests use an in-memory implementation of GORM without Hibernate, and as such, `createCriteria()` returns an instance of http://grails.github.io/grails-data-mapping/latest/api/grails/gorm/CriteriaBuilder.html[CriteriaBuilder], not HibernateCriteriaBuilder.
+WARNING: Unit tests use an in-memory implementation of GORM without Hibernate, and as such, `createCriteria()` returns an instance of https://apache.github.io/grails-data-mapping/latest/api/grails/gorm/CriteriaBuilder.html[CriteriaBuilder], not HibernateCriteriaBuilder.
 
 === Examples
 
@@ -44,7 +44,7 @@ def results = c.list (max: 10, offset: 10) {
 }
 ----
 
-Because that query includes pagination parameters (max and offset), this will return a http://grails.github.io/grails-data-mapping/latest/api/grails/orm/PagedResultList.html[PagedResultList] which has a `getTotalCount()` method to return the total number of matching records for pagination. Two queries are still run, but they are run for you and the results and total count are combined in the `PagedResultList`.
+Because that query includes pagination parameters (max and offset), this will return a https://gorm.grails.org/{gormVersion}/api/grails/orm/PagedResultList.html[PagedResultList] which has a `getTotalCount()` method to return the total number of matching records for pagination. Two queries are still run, but they are run for you and the results and total count are combined in the `PagedResultList`.
 
 [source,groovy]
 ----
@@ -55,7 +55,7 @@ println "Rendering ${results.size()} Accounts of ${results.totalCount}"
 === Description
 
 
-Criteria queries are a type-safe, advanced way to query that uses a Groovy builder to construct potentially complex queries. It is a much better alternative to using a StringBuilder to dynamically construct an HQL query. Refer to the user guide section on http://gorm.grails.org/6.0.x/hibernate/manual/index.html#criteria[Criteria] for usage instructions.
+Criteria queries are a type-safe, advanced way to query that uses a Groovy builder to construct potentially complex queries. It is a much better alternative to using a StringBuilder to dynamically construct an HQL query. Refer to the user guide section on https://gorm.grails.org/{gormVersion}/hibernate/manual/index.html#criteria[Criteria] for usage instructions.
 
 Method reference:
 
@@ -69,7 +69,7 @@ Method reference:
 |*listDistinct*|If subqueries or associations are used, one may end up with the same row multiple times in the result set. In Hibernate one would do a "CriteriaSpecification.DISTINCT_ROOT_ENTITY". In Grails one can do it by just using this method.
 |===
 
-WARNING: The `listDistinct()` method does not work well with the pagination options `maxResult` and `firstResult`. If you need distinct results with pagination, we currently recommend that you use HQL. You can find out more information from http://floledermann.blogspot.com/2007/10/solving-hibernate-criterias-distinct.html[this blog post].
+WARNING: The `listDistinct()` method does not work well with the pagination options `maxResult` and `firstResult`. If you need distinct results with pagination, we currently recommend that you use HQL. You can find out more information from https://floledermann.blogspot.com/2007/10/solving-hibernate-criterias-distinct.html[this blog post].
 
 If you invoke the builder with no method name
 

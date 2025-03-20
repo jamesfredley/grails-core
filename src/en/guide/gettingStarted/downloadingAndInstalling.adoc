@@ -20,7 +20,7 @@ You can find more information about SDKMAN usage on the https://sdkman.io/usage[
 
 For manual installation follow these steps:
 
-* https://github.com/grails/grails-core/releases[Download] a binary distribution of Grails and extract the resulting zip file to a location of your choice
+* https://github.com/apache/grails-core/releases[Download] a binary distribution of Grails and extract the resulting zip file to a location of your choice
 * Set the GRAILS_HOME environment variable to the location where you extracted the zip
 
 === Unix/Linux

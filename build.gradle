@@ -37,6 +37,7 @@ dependencies {
     implementation "org.grails:grails-dependencies"
     implementation "org.grails:grails-testing-support"
     implementation "org.grails:grails-gradle-plugin"
+    implementation "org.grails.plugins:hibernate5"
 }
 
 task buildscriptDependencies(type: DependencyReportTask) {
@@ -167,7 +168,7 @@ tasks.register('publishGuide', grails.doc.gradle.PublishGuide) {
         // No language setting because we want the English guide to be
         // generated with a 'en' in the path, but the source is in 'en'
         // so that it's easy to track with git.
-        sourceRepo = "https://github.com/grails/grails-doc/edit/$githubBranch/src/en"
+        sourceRepo = "https://github.com/apache/grails-doc/edit/$githubBranch/src/en"
         sourceDir = new File(projectDir, "src/en")
         propertiesFiles = [new File(projectDir, "gradle.properties")]
         asciidoc = true
@@ -197,6 +198,7 @@ tasks.register('publishGuide', grails.doc.gradle.PublishGuide) {
                 'GrailsVersion'      : projectVersion,
                 'version'            : projectVersion,
                 'gormVersion'        : gormVersion,
+                'hibernateVersion'   : getVersion("hibernate-core-jakarta"),
                 'spockVersion'       : getVersion("spock-core"),
                 'testingSupportVersion'       : getVersion("grails-testing-support"),
                 'grailsGradlePluginVersion'       : getVersion("grails-gradle-plugin"),

@@ -52,7 +52,7 @@ render(contentType: "text/xml") {
     }
 }
 
-// render a JSON ( http://www.json.org ) response with the builder attribute:
+// render a JSON ( https://www.json.org ) response with the builder attribute:
 render(contentType: "application/json") {
     book(title: b.title, author: b.author)
 }
