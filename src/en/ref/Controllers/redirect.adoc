@@ -28,7 +28,7 @@ redirect(controller: "book", action: "show", fragment: "profile")
 
 redirect(uri: "book/list")
 
-redirect(url: "http://www.blogjava.net/BlueSUN")
+redirect(url: "https://www.blogjava.net/BlueSUN")
 
 redirect(Book.get(1))
 ----

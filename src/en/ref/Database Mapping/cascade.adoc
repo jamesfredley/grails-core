@@ -83,4 +83,4 @@ class Author {
 
 Using this configuration a `Book` will also be deleted if it is removed (orphaned) from an `Author`'s `books` association.
 
-See the section on http://docs.jboss.org/hibernate/core/3.6/reference/en-US/html/objectstate.html#objectstate-transitive[transitive persistence] in the Hibernate user guide.
+See the section on https://docs.jboss.org/hibernate/core/3.6/reference/en-US/html/objectstate.html#objectstate-transitive[transitive persistence] in the Hibernate user guide.

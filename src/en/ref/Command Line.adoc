@@ -2,7 +2,7 @@
 === Command Line Usage
 
 
-Grails incorporates the powerful build system http://gradle.org[Gradle].
+Grails incorporates the powerful build system https://gradle.org[Gradle].
 
 The basic usage scenario is:
 

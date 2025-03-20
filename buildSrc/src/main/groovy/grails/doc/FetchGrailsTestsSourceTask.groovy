@@ -52,9 +52,9 @@ abstract class FetchGrailsTestsSourceTask extends DefaultTask {
 
             def zipFile = "${grailsTestsCheckOutDir}/grails-src.zip"
             if (grailsVersion) {
-                ant.get(src: "https://github.com/grails/grails-functional-tests/archive/refs/heads/${grailsVersion.replaceFirst(/^(\d+\.\d+)\..*/, '$1.x')}.zip", dest: zipFile, verbose: true)
+                ant.get(src: "https://github.com/apache/grails-functional-tests/archive/refs/heads/${grailsVersion.replaceFirst(/^(\d+\.\d+)\..*/, '$1.x')}.zip", dest: zipFile, verbose: true)
             } else {
-                ant.get(src: "https://github.com/grails/grails-functional-tests/zipball/${project.githubBranch}", dest: zipFile, verbose: true)
+                ant.get(src: "https://github.com/apache/grails-functional-tests/zipball/${project.githubBranch}", dest: zipFile, verbose: true)
             }
 
             ant.unzip(src: zipFile, dest: grailsTestsCheckOutDir) {
