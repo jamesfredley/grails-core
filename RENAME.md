@@ -1,24 +1,28 @@
 # Grails Repackaging
+
 As part of the move to the Apache Software Foundation, the grails artifacts must adhere to the apache namespace.
 
 ## Package Rules
-The Grails developers have decided on several rules regarding packaging.  These rules are enumerated here:
+
+The Grails developers have decided on several rules regarding packaging. These rules are enumerated here:
+
 1. For Grails applications, the group used should always be `org.apache.grails`.  
 2. Any group that is further nested is an implementation detail of Grails.  While users can choose to override them, they are typically not meant to be included in a Grails app directly.
 3. Testing artifacts for Grails applications / plugins, will have the prefix `grails-testing-` to remind developers these artifacts should not generally be included in the `implementation` scope of their application.
 4. Gradle plugins will be consolidated under a single [repository](https://github.com/apache/grails-gradle-plugin).
-5. As part of the gradle plugin consolidate, we adopt consistent names and remove `views-` from the views gradle plugins.  Instead they will match the existing pattern - i.e. `grails-gsp`, `grails-markup`, etc.
-5. There will be one artifact published that can be included in either a `buildSrc/build.gradle` or a `buildScript` to import all gradle plugins.  That plugin will be `org.apache.grails:grails-gradle-plugins`.
+5. As part of the gradle plugin consolidation, we adopt consistent names and remove `views-` from the views gradle plugins. Instead they will match the existing gradle plugin naming pattern - i.e. `grails-gsp`, `grails-markup`, etc.
+5. There will be one artifact published that can be included in either a `buildSrc/build.gradle` or a `buildScript` to import all Grails gradle plugins.  That plugin will be `org.apache.grails:grails-gradle-plugins`.
 6. Grails artifacts should be prefixed with `grails-` with the exception of profiles.  
 7. Profiles will not use a `grails-` prefix because they are distributed with an application.
 8. Because there are many modern JSON implementations, and Grails may choose to implement them in the future, we will refer to our existing `.gson` implementation as `gson` instead of `json`.
 9. We have appended `-cli` where a CLI is being provided.
-10. Several artifacts have been renamed for clarity.  In general we use `-core` suffix to signify a base project and drop the suffix on the package that the end user will use.  
-    * i.e. `grails-testing` is the Grails Plugin that registers testing support to a Grails application, while `grails-testing-core` is the library containing the supporting classes.  `grails-testing` will have an api dependency of `grails-testing-core`.
-11. Package names, artifact ids, and groupids will use the plural form.  Implementing classes will use the singular.
-    * For example: `org.apache.grails.events:grails-events` 
+10. Several artifacts have been renamed for clarity.  In general we use the suffix `-core` to signify a base project and drop the suffix on the package that the end user will use.  
+    * i.e. `grails-testing` is the Grails Plugin that registers testing support to a Grails application, while `grails-testing-core` is the library containing the supporting classes. `grails-testing` will have an api dependency of `grails-testing-core`.
+11. Package names, artifact ids, and group ids will use the plural form. Implementing classes will use the singular form.
+    * For example: `org.apache.grails.events:grails-events` with the `EventBusPlugin`
 
 ##  Reference Table
+
 Below is a reference of all migrated artifacts - both their old and new name.
 
 | old group id                      | old artifact id                                 | new group id                                    | new artifact id                                               | old gradle plugin name | new gradle plugin name | repository             |
