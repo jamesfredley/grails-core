@@ -553,16 +553,6 @@ tasks.register('buildscriptDependencies', org.gradle.api.tasks.diagnostics.Depen
     configurations = project.buildscript.configurations
 }
 
-[Javadoc, Groovydoc].each {
-    tasks.withType(it).all {
-        // exclude problematic jar file from javadoc classpath
-        // https://www.adam-bien.com/roller/abien/entry/trouble_with_crippled_java_ee
-        if (classpath) {
-            classpath -= classpath.filter { it.name == 'javaee-web-api-6.0.jar' }
-        }
-    }
-}
-
 // Ensure that no insecure HTTP-based Maven repositories are defined
 afterEvaluate {
     allprojects.repositories.each { handler ->
