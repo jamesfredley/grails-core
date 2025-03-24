@@ -9,8 +9,8 @@ ext {
 
     springLoadedCommonOptions = '-Xverify:none -Dspringloaded.synchronize=true -Djdk.reflect.allowGetCallerClass=true'
 
-    nexusUsername = System.getenv('SONATYPE_USERNAME') ?: hasProperty('sonatypeOssUsername') ? property('sonatypeOssUsername') : ''
-    nexusPassword = System.getenv('SONATYPE_PASSWORD') ?: hasProperty('sonatypeOssPassword') ? property('sonatypeOssPassword') : ''
+    nexusUsername = System.getenv('SONATYPE_USERNAME') ?: findProperty('sonatypeOssUsername') ?: ''
+    nexusPassword = System.getenv('SONATYPE_PASSWORD') ?: findProperty('sonatypeOssPassword') ?: ''
 
     // Directories created during the build which are related
     // to turning the workspace root into a GRAILS_HOME
@@ -32,9 +32,9 @@ group = 'org.grails'
 ext.jointBuildGroovyJarProperty = System.getProperty('groovy.jar')
 ext.groovyDependency = null
 
-ext.'signing.keyId' = System.getenv('SIGNING_KEY') ?: hasProperty('signing.keyId') ? getProperty('signing.keyId') : null
-ext.'signing.password' = System.getenv('SIGNING_PASSPHRASE') ?: hasProperty('signing.password') ? getProperty('signing.password') : null
-ext.'signing.secretKeyRingFile' = hasProperty('signing.secretKeyRingFile') ? getProperty('signing.secretKeyRingFile') : null
+ext.'signing.keyId' = System.getenv('SIGNING_KEY') ?: findProperty('signing.keyId')
+ext.'signing.password' = System.getenv('SIGNING_PASSPHRASE') ?: findProperty('signing.password')
+ext.'signing.secretKeyRingFile' = findProperty('signing.secretKeyRingFile')
 
 if (jointBuildGroovyJarProperty) {
     def jointBuildGroovyJar = file(jointBuildGroovyJarProperty)
@@ -54,9 +54,9 @@ if (isReleaseVersion) {
     nexusPublishing {
         repositories {
             sonatype {
-                def ossUser = System.getenv('SONATYPE_USERNAME') ?: hasProperty('sonatypeOssUsername') ? property('sonatypeOssUsername') : ''
-                def ossPass = System.getenv('SONATYPE_PASSWORD') ?: hasProperty('sonatypeOssPassword') ? property('sonatypeOssPassword') : ''
-                def ossStagingProfileId = System.getenv('SONATYPE_STAGING_PROFILE_ID') ?: hasProperty('sonatypeOssStagingProfileId') ? property('sonatypeOssStagingProfileId') : ''
+                def ossUser = System.getenv('SONATYPE_USERNAME') ?: findProperty('sonatypeOssUsername') ?: ''
+                def ossPass = System.getenv('SONATYPE_PASSWORD') ?: findProperty('sonatypeOssPassword') ?: ''
+                def ossStagingProfileId = System.getenv('SONATYPE_STAGING_PROFILE_ID') ?: findProperty('sonatypeOssStagingProfileId') ?: ''
                 nexusUrl = uri('https://s01.oss.sonatype.org/service/local/')
                 username = ossUser
                 password = ossPass
@@ -268,8 +268,8 @@ subprojects { subproject ->
                     maven {
                         credentials {
                             if (isGrailsRepoPublish) {
-                                def u = subproject.hasProperty('artifactoryPublishUsername') ? subproject.getProperty('artifactoryPublishUsername') : System.getenv('ARTIFACTORY_USERNAME')
-                                def p = subproject.hasProperty('artifactoryPublishPassword') ? subproject.getProperty('artifactoryPublishPassword') : System.getenv('ARTIFACTORY_PASSWORD')
+                                def u = subproject.findProperty('artifactoryPublishUsername') ?: System.getenv('ARTIFACTORY_USERNAME')
+                                def p = subproject.findProperty('artifactoryPublishPassword') ?: System.getenv('ARTIFACTORY_PASSWORD')
                                 username = u
                                 password = p
                             } else {
