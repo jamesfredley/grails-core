@@ -1,7 +1,7 @@
 apply plugin: 'idea'
 
 ext {
-    grailsVersion = project.projectVersion
+    grailsVersion = projectVersion
     isCiBuild = System.getenv().get('CI') as Boolean
     isGitHubRepoPublish = System.getenv('GITHUB_PUBLISH') == 'true'
     isGrailsRepoPublish = grailsVersion.endsWith('-SNAPSHOT') && !isGitHubRepoPublish
@@ -9,8 +9,8 @@ ext {
 
     springLoadedCommonOptions = '-Xverify:none -Dspringloaded.synchronize=true -Djdk.reflect.allowGetCallerClass=true'
 
-    nexusUsername = System.getenv('SONATYPE_USERNAME') ?: project.hasProperty('sonatypeOssUsername') ? project.sonatypeOssUsername : ''
-    nexusPassword = System.getenv('SONATYPE_PASSWORD') ?: project.hasProperty('sonatypeOssPassword') ? project.sonatypeOssPassword : ''
+    nexusUsername = System.getenv('SONATYPE_USERNAME') ?: hasProperty('sonatypeOssUsername') ? property('sonatypeOssUsername') : ''
+    nexusPassword = System.getenv('SONATYPE_PASSWORD') ?: hasProperty('sonatypeOssPassword') ? property('sonatypeOssPassword') : ''
 
     // Directories created during the build which are related
     // to turning the workspace root into a GRAILS_HOME
@@ -32,9 +32,9 @@ group = 'org.grails'
 ext.jointBuildGroovyJarProperty = System.getProperty('groovy.jar')
 ext.groovyDependency = null
 
-ext.'signing.keyId' = System.getenv('SIGNING_KEY') ?: project.hasProperty('signing.keyId') ? project.getProperty('signing.keyId') : null
-ext.'signing.password' = System.getenv('SIGNING_PASSPHRASE') ?: project.hasProperty('signing.password') ? project.getProperty('signing.password') : null
-ext.'signing.secretKeyRingFile' = project.hasProperty('signing.secretKeyRingFile') ? project.getProperty('signing.secretKeyRingFile') : null
+ext.'signing.keyId' = System.getenv('SIGNING_KEY') ?: hasProperty('signing.keyId') ? getProperty('signing.keyId') : null
+ext.'signing.password' = System.getenv('SIGNING_PASSPHRASE') ?: hasProperty('signing.password') ? getProperty('signing.password') : null
+ext.'signing.secretKeyRingFile' = hasProperty('signing.secretKeyRingFile') ? getProperty('signing.secretKeyRingFile') : null
 
 if (jointBuildGroovyJarProperty) {
     def jointBuildGroovyJar = file(jointBuildGroovyJarProperty)
@@ -54,9 +54,9 @@ if (isReleaseVersion) {
     nexusPublishing {
         repositories {
             sonatype {
-                def ossUser = System.getenv('SONATYPE_USERNAME') ?: project.hasProperty('sonatypeOssUsername') ? project.sonatypeOssUsername : ''
-                def ossPass = System.getenv('SONATYPE_PASSWORD') ?: project.hasProperty('sonatypeOssPassword') ? project.sonatypeOssPassword : ''
-                def ossStagingProfileId = System.getenv('SONATYPE_STAGING_PROFILE_ID') ?: project.hasProperty('sonatypeOssStagingProfileId') ? project.sonatypeOssStagingProfileId : ''
+                def ossUser = System.getenv('SONATYPE_USERNAME') ?: hasProperty('sonatypeOssUsername') ? property('sonatypeOssUsername') : ''
+                def ossPass = System.getenv('SONATYPE_PASSWORD') ?: hasProperty('sonatypeOssPassword') ? property('sonatypeOssPassword') : ''
+                def ossStagingProfileId = System.getenv('SONATYPE_STAGING_PROFILE_ID') ?: hasProperty('sonatypeOssStagingProfileId') ? property('sonatypeOssStagingProfileId') : ''
                 nexusUrl = uri('https://s01.oss.sonatype.org/service/local/')
                 username = ossUser
                 password = ossPass
@@ -72,7 +72,7 @@ if (isReleaseVersion) {
 }
 
 allprojects {
-    if (project.name == 'grails-bom') return
+    if (name == 'grails-bom') return
     // FORCE UPGRADE OF GROOVY IN DEPENDENCIES TO GROOVY 4
     // except in projects that will be run by Gradle during the build
     if (!compiledByGradleGroovyVersion(project)) {
@@ -423,7 +423,7 @@ subprojects { subproject ->
 
     tasks.withType(Test).configureEach {
         onlyIf {
-            if(project.hasProperty('onlyFunctionalTests')) {
+            if(hasProperty('onlyFunctionalTests')) {
                 return false
             }
             true
@@ -569,7 +569,7 @@ tasks.register('buildscriptDependencies', org.gradle.api.tasks.diagnostics.Depen
 }
 
 // Ensure that no insecure HTTP-based Maven repositories are defined
-project.afterEvaluate {
+afterEvaluate {
     allprojects.repositories.each { handler ->
         handler.each {
             if (it.url.toString().startsWith('http://')) {
