@@ -2,15 +2,15 @@ apply plugin: 'idea'
 
 ext {
     grailsVersion = project.projectVersion
-    isCiBuild = System.getenv().get("CI") as Boolean
-    isGitHubRepoPublish = System.getenv("GITHUB_PUBLISH") == 'true'
-    isGrailsRepoPublish = grailsVersion.endsWith("-SNAPSHOT") && !isGitHubRepoPublish
+    isCiBuild = System.getenv().get('CI') as Boolean
+    isGitHubRepoPublish = System.getenv('GITHUB_PUBLISH') == 'true'
+    isGrailsRepoPublish = grailsVersion.endsWith('-SNAPSHOT') && !isGitHubRepoPublish
     isReleaseVersion = !isGrailsRepoPublish && !isGitHubRepoPublish
 
-    springLoadedCommonOptions = "-Xverify:none -Dspringloaded.synchronize=true -Djdk.reflect.allowGetCallerClass=true"
+    springLoadedCommonOptions = '-Xverify:none -Dspringloaded.synchronize=true -Djdk.reflect.allowGetCallerClass=true'
 
-    nexusUsername = System.getenv("SONATYPE_USERNAME") ?: project.hasProperty("sonatypeOssUsername") ? project.sonatypeOssUsername : ''
-    nexusPassword = System.getenv("SONATYPE_PASSWORD") ?: project.hasProperty("sonatypeOssPassword") ? project.sonatypeOssPassword : ''
+    nexusUsername = System.getenv('SONATYPE_USERNAME') ?: project.hasProperty('sonatypeOssUsername') ? project.sonatypeOssUsername : ''
+    nexusPassword = System.getenv('SONATYPE_PASSWORD') ?: project.hasProperty('sonatypeOssPassword') ? project.sonatypeOssPassword : ''
 
     // Directories created during the build which are related
     // to turning the workspace root into a GRAILS_HOME
@@ -23,7 +23,7 @@ ext {
 }
 
 version = grailsVersion
-group = "org.grails"
+group = 'org.grails'
 
 // Groovy is added as a dependency to both the 'groovy' and 'compile'
 // configurations, so place the dependency in a shared variable. The
@@ -32,9 +32,9 @@ group = "org.grails"
 ext.jointBuildGroovyJarProperty = System.getProperty('groovy.jar')
 ext.groovyDependency = null
 
-ext."signing.keyId" = System.getenv("SIGNING_KEY") ?: project.hasProperty("signing.keyId") ? project.getProperty('signing.keyId') : null
-ext."signing.password" = System.getenv("SIGNING_PASSPHRASE") ?: project.hasProperty("signing.password") ? project.getProperty('signing.password') : null
-ext."signing.secretKeyRingFile" = project.hasProperty("signing.secretKeyRingFile") ? project.getProperty('signing.secretKeyRingFile') : null
+ext.'signing.keyId' = System.getenv('SIGNING_KEY') ?: project.hasProperty('signing.keyId') ? project.getProperty('signing.keyId') : null
+ext.'signing.password' = System.getenv('SIGNING_PASSPHRASE') ?: project.hasProperty('signing.password') ? project.getProperty('signing.password') : null
+ext.'signing.secretKeyRingFile' = project.hasProperty('signing.secretKeyRingFile') ? project.getProperty('signing.secretKeyRingFile') : null
 
 if (jointBuildGroovyJarProperty) {
     def jointBuildGroovyJar = file(jointBuildGroovyJarProperty)
@@ -49,15 +49,15 @@ if (jointBuildGroovyJarProperty) {
 
 if (isReleaseVersion) {
     apply plugin: 'maven-publish'
-    apply plugin: "io.github.gradle-nexus.publish-plugin"
+    apply plugin: 'io.github.gradle-nexus.publish-plugin'
 
     nexusPublishing {
         repositories {
             sonatype {
-                def ossUser = System.getenv("SONATYPE_USERNAME") ?: project.hasProperty("sonatypeOssUsername") ? project.sonatypeOssUsername : ''
-                def ossPass = System.getenv("SONATYPE_PASSWORD") ?: project.hasProperty("sonatypeOssPassword") ? project.sonatypeOssPassword : ''
-                def ossStagingProfileId = System.getenv("SONATYPE_STAGING_PROFILE_ID") ?: project.hasProperty("sonatypeOssStagingProfileId") ? project.sonatypeOssStagingProfileId : ''
-                nexusUrl = uri("https://s01.oss.sonatype.org/service/local/")
+                def ossUser = System.getenv('SONATYPE_USERNAME') ?: project.hasProperty('sonatypeOssUsername') ? project.sonatypeOssUsername : ''
+                def ossPass = System.getenv('SONATYPE_PASSWORD') ?: project.hasProperty('sonatypeOssPassword') ? project.sonatypeOssPassword : ''
+                def ossStagingProfileId = System.getenv('SONATYPE_STAGING_PROFILE_ID') ?: project.hasProperty('sonatypeOssStagingProfileId') ? project.sonatypeOssStagingProfileId : ''
+                nexusUrl = uri('https://s01.oss.sonatype.org/service/local/')
                 username = ossUser
                 password = ossPass
                 stagingProfileId = ossStagingProfileId
@@ -103,7 +103,7 @@ allprojects {
                     if (details.requested.group == 'org.apache.groovy') {
                         details.useVersion(groovyVersion)
                     }
-                    if (details.requested.group == "org.spockframework") {
+                    if (details.requested.group == 'org.spockframework') {
                         details.useVersion(project['spock.version'])
                     }
                 }
@@ -139,15 +139,15 @@ allprojects {
     normalization {
         runtimeClasspath {
             metaInf {
-                ignoreAttribute("Built-By")
-                ignoreAttribute("Created-By")
+                ignoreAttribute('Built-By')
+                ignoreAttribute('Created-By')
             }
         }
     }
     apply from: rootProject.layout.projectDirectory.file('gradle/dependency-licenses.gradle')
 }
 
-apply from: "gradle/idea.gradle"
+apply from: 'gradle/idea.gradle'
 
 subprojects { subproject ->
 
@@ -268,8 +268,8 @@ subprojects { subproject ->
                     maven {
                         credentials {
                             if (isGrailsRepoPublish) {
-                                def u = subproject.hasProperty("artifactoryPublishUsername") ? subproject.getProperty('artifactoryPublishUsername') : System.getenv("ARTIFACTORY_USERNAME")
-                                def p = subproject.hasProperty("artifactoryPublishPassword") ? subproject.getProperty('artifactoryPublishPassword') : System.getenv("ARTIFACTORY_PASSWORD")
+                                def u = subproject.hasProperty('artifactoryPublishUsername') ? subproject.getProperty('artifactoryPublishUsername') : System.getenv('ARTIFACTORY_USERNAME')
+                                def p = subproject.hasProperty('artifactoryPublishPassword') ? subproject.getProperty('artifactoryPublishPassword') : System.getenv('ARTIFACTORY_PASSWORD')
                                 username = u
                                 password = p
                             } else {
@@ -322,7 +322,7 @@ subprojects { subproject ->
 
         afterEvaluate {
             signing {
-                required { (isReleaseVersion || isGitHubRepoPublish) && gradle.taskGraph.hasTask("publish") }
+                required { (isReleaseVersion || isGitHubRepoPublish) && gradle.taskGraph.hasTask('publish') }
                 sign publishing.publications.maven
             }
         }
@@ -347,27 +347,27 @@ subprojects { subproject ->
 
     if (subproject.name =~ /^(grails-web|grails-plugin-|grails-test-suite|grails-test)/) {
         dependencies {
-            compileOnly "jakarta.servlet:jakarta.servlet-api"
-            testImplementation "jakarta.servlet:jakarta.servlet-api"
+            compileOnly 'jakarta.servlet:jakarta.servlet-api'
+            testImplementation 'jakarta.servlet:jakarta.servlet-api'
             // MockHttpServletRequest/Response/Context used in many classes
-            compileOnly "org.springframework:spring-test"
-            testImplementation "org.springframework:spring-test"
+            compileOnly 'org.springframework:spring-test'
+            testImplementation 'org.springframework:spring-test'
         }
     }
 
     if (subproject.name =~ /^(grails-plugin-datasource|grails-test-suite)/) {
         dependencies {
-            testImplementation "com.h2database:h2"
+            testImplementation 'com.h2database:h2'
         }
     }
 
     jar {
         manifest.mainAttributes(
-                "Built-By": System.properties['user.name'],
-                "Created-By": System.properties['java.vm.version'] + " (" + System.properties['java.vm.vendor'] + ")",
-                "Implementation-Title": "Grails",
-                "Implementation-Version": grailsVersion,
-                "Implementation-Vendor": 'grails.org')
+                'Built-By': System.properties['user.name'],
+                'Created-By': System.properties['java.vm.version'] + ' (' + System.properties['java.vm.vendor'] + ')',
+                'Implementation-Title': 'Grails',
+                'Implementation-Version': grailsVersion,
+                'Implementation-Vendor': 'grails.org')
     }
 
     configurations {
@@ -378,9 +378,9 @@ subprojects { subproject ->
 
     dependencies {
         documentation platform(project(':grails-bom'))
-        documentation "org.fusesource.jansi:jansi"
-        documentation "jline:jline"
-        documentation "com.github.javaparser:javaparser-core"
+        documentation 'org.fusesource.jansi:jansi'
+        documentation 'jline:jline'
+        documentation 'com.github.javaparser:javaparser-core'
 
         if (compiledByGradleGroovyVersion(subproject)) {
             documentation "org.codehaus.groovy:groovy:$GroovySystem.version"
@@ -388,27 +388,27 @@ subprojects { subproject ->
             documentation "org.codehaus.groovy:groovy-cli-picocli:$GroovySystem.version"
         } else {
             api groovyDependency
-            documentation "org.apache.groovy:groovy"
-            documentation "org.apache.groovy:groovy-ant"
-            documentation "org.apache.groovy:groovy-cli-picocli"
+            documentation 'org.apache.groovy:groovy'
+            documentation 'org.apache.groovy:groovy-ant'
+            documentation 'org.apache.groovy:groovy-cli-picocli'
         }
 
-        testImplementation "org.apache.groovy:groovy-test-junit5"
-        testImplementation "org.junit.jupiter:junit-jupiter-api"
-        testImplementation "org.junit.platform:junit-platform-runner"
-        testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine"
+        testImplementation 'org.apache.groovy:groovy-test-junit5'
+        testImplementation 'org.junit.jupiter:junit-jupiter-api'
+        testImplementation 'org.junit.platform:junit-platform-runner'
+        testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
 
-        if (subproject.name != "grails-docs") {
+        if (subproject.name != 'grails-docs') {
             // Logging
-            api "org.slf4j:slf4j-api"
-            api "org.slf4j:jcl-over-slf4j"
+            api 'org.slf4j:slf4j-api'
+            api 'org.slf4j:jcl-over-slf4j'
 
             // Testing
-            testImplementation "org.slf4j:slf4j-simple"
-            testImplementation("org.spockframework:spock-core") { transitive = false }
+            testImplementation 'org.slf4j:slf4j-simple'
+            testImplementation('org.spockframework:spock-core') { transitive = false }
             // Required by Spock's Mocking
-            testRuntimeOnly "net.bytebuddy:byte-buddy"
-            testImplementation "org.objenesis:objenesis"
+            testRuntimeOnly 'net.bytebuddy:byte-buddy'
+            testImplementation 'org.objenesis:objenesis'
         }
     }
 
@@ -439,8 +439,8 @@ subprojects { subproject ->
     // Add the Groovy compiler options
     tasks.withType(GroovyCompile).configureEach {
         groovyOptions.fork(memoryInitialSize: '128M', memoryMaximumSize: '1G')
-        groovyOptions.encoding = "UTF-8"
-        options.encoding = "UTF-8"
+        groovyOptions.encoding = 'UTF-8'
+        options.encoding = 'UTF-8'
     }
 
     tasks.withType(Groovydoc).configureEach {
@@ -456,25 +456,25 @@ subprojects { subproject ->
         onlyIf { !isTestSuite }
         classpath += configurations.documentation
         // Using options.jFlags instead of closure otherwise it fails with MinimalJavadocOptions
-        options.encoding "UTF-8"
-        options.docEncoding "UTF-8"
-        options.charSet "UTF-8"
-        options.jFlags "-Xms64M", "-Xmx512M"
+        options.encoding 'UTF-8'
+        options.docEncoding 'UTF-8'
+        options.charSet 'UTF-8'
+        options.jFlags '-Xms64M', '-Xmx512M'
     }
 
     configure(javadoc) {
         onlyIf { !isTestSuite }
         classpath += configurations.documentation
         // Using options.jFlags instead of closure otherwise it fails with MinimalJavadocOptions
-        options.encoding "UTF-8"
-        options.docEncoding "UTF-8"
-        options.charSet "UTF-8"
-        options.jFlags "-Xms64M", "-Xmx512M"
+        options.encoding 'UTF-8'
+        options.docEncoding 'UTF-8'
+        options.charSet 'UTF-8'
+        options.jFlags '-Xms64M', '-Xmx512M'
     }
 
     // task for running a single test with -DsingleTest.single=TestName singleTest
-    tasks.register("singleTest", Test) {
-        if (System.getProperty("debug.tests")) {
+    tasks.register('singleTest', Test) {
+        if (System.getProperty('debug.tests')) {
             jvmArgs += debugArguments
         }
     }
@@ -489,14 +489,14 @@ subprojects { subproject ->
         }
 
         testLogging {
-            events "passed", "skipped", "failed"
+            events 'passed', 'skipped', 'failed'
 
             showExceptions true
-            exceptionFormat "full"
+            exceptionFormat 'full'
             showCauses true
             showStackTraces true
         }
-        excludes = ["**/*TestCase.class", "**/*\$*.class"]
+        excludes = ['**/*TestCase.class', '**/*\$*.class']
 
         if (isCiBuild) {
             maxParallelForks = 2
@@ -509,7 +509,7 @@ subprojects { subproject ->
             maxHeapSize = '1024m'
         }
 
-        if (System.getProperty("debug.tests")) {
+        if (System.getProperty('debug.tests')) {
             jvmArgs += debugArguments
         }
     }
@@ -572,8 +572,8 @@ tasks.register('buildscriptDependencies', org.gradle.api.tasks.diagnostics.Depen
 project.afterEvaluate {
     allprojects.repositories.each { handler ->
         handler.each {
-            if (it.url.toString().startsWith("http://")) {
-                throw new RuntimeException("Build should not define insecure HTTP-based Maven repostories")
+            if (it.url.toString().startsWith('http://')) {
+                throw new RuntimeException('Build should not define insecure HTTP-based Maven repostories')
             }
         }
     }
