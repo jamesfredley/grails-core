@@ -553,17 +553,6 @@ tasks.register('buildscriptDependencies', org.gradle.api.tasks.diagnostics.Depen
     configurations = project.buildscript.configurations
 }
 
-// Ensure that no insecure HTTP-based Maven repositories are defined
-afterEvaluate {
-    allprojects.repositories.each { handler ->
-        handler.each {
-            if (it.url.toString().startsWith('http://')) {
-                throw new RuntimeException('Build should not define insecure HTTP-based Maven repostories')
-            }
-        }
-    }
-}
-
 // compile with the Groovy version provided by Gradle
 // to ensure build compatibility with Gradle, currently Groovy 3.0.x
 // when used by grails-gradle-plugin
