@@ -41,10 +41,10 @@ if (jointBuildGroovyJarProperty) {
     if (jointBuildGroovyJar.exists()) {
         groovyDependency = dependencies.create(files(jointBuildGroovyJar))
     } else {
-        throw new GradleException("The groovy.jar system property points to ${jointBuildGroovyJar.absolutePath} which does not exist.")
+        throw new GradleException("The groovy.jar system property points to $jointBuildGroovyJar.absolutePath which does not exist.")
     }
 } else {
-    groovyDependency = dependencies.create("org.apache.groovy:groovy:${groovyVersion}")
+    groovyDependency = dependencies.create("org.apache.groovy:groovy:$groovyVersion")
 }
 
 if (isReleaseVersion) {
@@ -179,12 +179,12 @@ subprojects { subproject ->
                         if(!possibleProject.name.startsWith('grails-test-suite') && !possibleProject.name.contains('grails-test-examples')) {
                             def artifactId = mappedArtifactIds[possibleProject.name] ?: possibleProject.name
 
-                            String substitutedArtifact = "${possibleProject.name in pluginProjects ? 'org.grails.plugins' : 'org.grails'}:${artifactId}"
+                            String substitutedArtifact = "${possibleProject.name in pluginProjects ? 'org.grails.plugins' : 'org.grails'}:$artifactId"
                             if(possibleProject.name == 'grails-bom') {
-                                substitute module(substitutedArtifact) using platform(project(":${possibleProject.name}"))
+                                substitute module(substitutedArtifact) using platform(project(":$possibleProject.name"))
                             }
                             else {
-                                substitute module(substitutedArtifact) using project(":${possibleProject.name}")
+                                substitute module(substitutedArtifact) using project(":$possibleProject.name")
                             }
                         }
                     }
