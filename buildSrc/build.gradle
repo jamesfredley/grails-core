@@ -1,0 +1,24 @@
+plugins {
+    id 'groovy-gradle-plugin'
+}
+
+file('../gradle.properties').withInputStream {
+    def gradleProperties = new Properties()
+    gradleProperties.load(it)
+    gradleProperties.each { k, v -> ext.set(k, v) }
+}
+
+repositories {
+    mavenCentral()
+    maven { url = 'https://repo.grails.org/grails/core' }
+}
+
+dependencies {
+    implementation "io.github.gradle-nexus:publish-plugin:$gradleNexusPublishPluginVersion"
+    implementation "com.netflix.nebula:gradle-extra-configurations-plugin:$gradleExtraConfigurationsPluginVersion"
+    implementation "com.bmuschko:gradle-nexus-plugin:$gradleNexusPluginVersion"
+    // Due to https://github.com/hierynomus/license-gradle-plugin/issues/161, spring must be excluded
+    implementation "gradle.plugin.com.hierynomus.gradle.plugins:license-gradle-plugin:$gradleLicensePluginVersion", {
+        exclude group: 'org.springframework', module: 'spring-core'
+    }
+}
