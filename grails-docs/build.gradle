@@ -23,6 +23,12 @@ dependencies {
 
     api "org.jsoup:jsoup"
     testImplementation("org.spockframework:spock-core") { transitive = false }
+
+    testImplementation 'org.apache.groovy:groovy-test-junit5'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api'
+    testImplementation 'org.junit.platform:junit-platform-runner'
+
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
 }
 
 sourceSets {

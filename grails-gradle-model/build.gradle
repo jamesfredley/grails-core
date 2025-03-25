@@ -7,4 +7,10 @@ dependencies {
     // when used by grails-gradle-plugin
     // see: https://docs.gradle.org/current/userguide/compatibility.html#groovy
     compileOnly "org.codehaus.groovy:groovy:$GroovySystem.version"
+
+    testImplementation 'org.apache.groovy:groovy-test-junit5'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api'
+    testImplementation 'org.junit.platform:junit-platform-runner'
+
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
 }

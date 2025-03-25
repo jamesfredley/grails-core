@@ -13,4 +13,11 @@ dependencies {
 
     testImplementation 'jakarta.servlet:jakarta.servlet-api'
     testImplementation 'org.springframework:spring-test'
+
+    testImplementation 'org.apache.groovy:groovy-test-junit5'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api'
+    testImplementation 'org.junit.platform:junit-platform-runner'
+
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
+
 }

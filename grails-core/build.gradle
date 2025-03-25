@@ -32,6 +32,12 @@ dependencies {
 
     testRuntimeOnly "com.h2database:h2"
     testRuntimeOnly "com.fasterxml.jackson.core:jackson-databind"
+
+    testImplementation 'org.apache.groovy:groovy-test-junit5'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api'
+    testImplementation 'org.junit.platform:junit-platform-runner'
+
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
 }
 
 def writeProps = tasks.register('writeGrailsProperties', WriteProperties) {

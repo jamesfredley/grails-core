@@ -15,4 +15,10 @@ dependencies {
     api "org.springframework:spring-web"
 
     api "jakarta.servlet:jakarta.servlet-api"
+
+    testImplementation 'org.apache.groovy:groovy-test-junit5'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api'
+    testImplementation 'org.junit.platform:junit-platform-runner'
+
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
 }

@@ -7,4 +7,10 @@ dependencies {
     api "org.apache.groovy:groovy-json"
     // HtmlUtils is used from spring-web
     api "org.springframework:spring-web"
+
+    testImplementation 'org.apache.groovy:groovy-test-junit5'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api'
+    testImplementation 'org.junit.platform:junit-platform-runner'
+
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
 }

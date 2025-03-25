@@ -4,4 +4,10 @@ dependencies {
 
     api "commons-codec:commons-codec"
     api "org.apache.groovy:groovy:$groovyVersion"
+
+    testImplementation 'org.apache.groovy:groovy-test-junit5'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api'
+    testImplementation 'org.junit.platform:junit-platform-runner'
+
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
 }
