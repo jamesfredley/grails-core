@@ -10,6 +10,7 @@ dependencies {
         project(':grails-plugin-domain-class')
 
     api project(":grails-plugin-converters")
+    api "org.apache.groovy:groovy:$groovyVersion"
 
     compileOnly 'jakarta.servlet:jakarta.servlet-api'
     compileOnly 'org.springframework:spring-test', {

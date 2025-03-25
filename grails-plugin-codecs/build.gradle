@@ -3,6 +3,7 @@ dependencies {
     implementation platform(project(':grails-bom'))
 
     api project(":grails-web"), project(":grails-encoder")
+    api "org.apache.groovy:groovy:$groovyVersion"
     runtimeOnly project(":grails-codecs")
 
     compileOnly 'jakarta.servlet:jakarta.servlet-api'

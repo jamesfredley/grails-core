@@ -12,6 +12,8 @@ dependencies {
 
     implementation platform(project(':grails-bom'))
 
+    api "org.apache.groovy:groovy:$groovyVersion"
+
     testImplementation project(':grails-test-suite-base'),
                 project(':grails-plugin-domain-class'),
                 project(':grails-plugin-codecs'),

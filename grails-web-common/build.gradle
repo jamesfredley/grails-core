@@ -9,6 +9,7 @@ dependencies {
     api project(":grails-encoder")
     compileOnly "org.grails:grails-gsp"
 
+    api "org.apache.groovy:groovy:$groovyVersion"
     api "org.apache.groovy:groovy-templates"
     compileOnly "jakarta.servlet:jakarta.servlet-api"
     testCompileOnly "org.springframework:spring-test"

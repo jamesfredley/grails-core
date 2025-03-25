@@ -8,6 +8,7 @@ dependencies {
     api "jakarta.annotation:jakarta.annotation-api"
 
     implementation "com.github.ben-manes.caffeine:caffeine"
+    api "org.apache.groovy:groovy:$groovyVersion"
     api("org.springframework.boot:spring-boot")
     api "org.springframework:spring-core"
     api "org.springframework:spring-tx"

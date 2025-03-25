@@ -4,6 +4,8 @@ dependencies {
 
     api project(":grails-databinding")
     api project(":grails-web-common")
+    api "org.apache.groovy:groovy:$groovyVersion"
+
     testRuntimeOnly "org.grails:grails-gsp"
 
     compileOnly 'jakarta.servlet:jakarta.servlet-api'

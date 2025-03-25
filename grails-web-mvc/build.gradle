@@ -4,6 +4,7 @@ dependencies {
 
     api project(":grails-web-common"),
         project(":grails-web-url-mappings")
+    api "org.apache.groovy:groovy:$groovyVersion"
 
     compileOnly 'jakarta.servlet:jakarta.servlet-api'
     compileOnly 'org.springframework:spring-test', {

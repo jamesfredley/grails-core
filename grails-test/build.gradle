@@ -15,6 +15,7 @@ dependencies {
     api project(":grails-plugin-mimetypes")
     api project(":grails-web")
     api project(":grails-plugin-converters")
+    api "org.apache.groovy:groovy:$groovyVersion"
 
     // command line requirements
     api  "jline:jline"

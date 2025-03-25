@@ -8,6 +8,7 @@ dependencies {
     implementation platform(project(':grails-bom'))
 
     gradleConf gradleApi()
+    api "org.apache.groovy:groovy:$groovyVersion"
     api "org.apache.commons:commons-text",
             "org.slf4j:jcl-over-slf4j",
             "org.apache.ant:ant",

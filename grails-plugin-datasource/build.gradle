@@ -2,6 +2,7 @@ dependencies {
 
     implementation platform(project(':grails-bom'))
 
+    api "org.apache.groovy:groovy:$groovyVersion"
     api "org.springframework:spring-jdbc"
     api "org.apache.groovy:groovy-sql"
     api "org.springframework:spring-context"

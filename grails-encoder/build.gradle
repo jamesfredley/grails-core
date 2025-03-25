@@ -3,7 +3,8 @@ dependencies {
     implementation platform(project(':grails-bom'))
 
     api project(":grails-core")
-    // HtmlUtils is used from spring-web
+    api "org.apache.groovy:groovy:$groovyVersion"
     api "org.apache.groovy:groovy-json"
+    // HtmlUtils is used from spring-web
     api "org.springframework:spring-web"
 }

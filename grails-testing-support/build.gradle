@@ -1,6 +1,7 @@
 dependencies {
     implementation platform(project(':grails-bom'))
 
+    api "org.apache.groovy:groovy:$groovyVersion"
     api "org.springframework:spring-test"
     api project(":grails-plugin-codecs"), {
         exclude module: 'grails-plugin-mimetypes'

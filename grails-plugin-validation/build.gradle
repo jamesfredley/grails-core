@@ -4,6 +4,7 @@ dependencies {
 
     api project(":grails-core"),
         project(':grails-web')
+    api "org.apache.groovy:groovy:$groovyVersion"
 
     compileOnly 'jakarta.servlet:jakarta.servlet-api'
     compileOnly 'org.springframework:spring-test', {

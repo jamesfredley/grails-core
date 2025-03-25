@@ -5,6 +5,7 @@ dependencies {
     api "org.springframework:spring-tx"
 
     api project(":grails-core"), project(":grails-plugin-datasource")
+    api "org.apache.groovy:groovy:$groovyVersion"
 
     compileOnly 'jakarta.servlet:jakarta.servlet-api'
     compileOnly 'org.springframework:spring-test', {

@@ -263,7 +263,6 @@ subprojects {
             documentation "org.codehaus.groovy:groovy-ant:$GroovySystem.version"
             documentation "org.codehaus.groovy:groovy-cli-picocli:$GroovySystem.version"
         } else {
-            api "org.apache.groovy:groovy:$groovyVersion"
             documentation 'org.apache.groovy:groovy'
             documentation 'org.apache.groovy:groovy-ant'
             documentation 'org.apache.groovy:groovy-cli-picocli'

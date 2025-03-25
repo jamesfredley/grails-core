@@ -3,4 +3,5 @@ dependencies {
     implementation platform(project(':grails-bom'))
 
     api "commons-codec:commons-codec"
+    api "org.apache.groovy:groovy:$groovyVersion"
 }

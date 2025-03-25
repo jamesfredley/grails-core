@@ -3,6 +3,7 @@ dependencies {
     implementation platform(project(':grails-bom'))
 
     api project(":grails-web-common")
+    api "org.apache.groovy:groovy:$groovyVersion"
 
     testImplementation project(":grails-plugin-controllers")
 

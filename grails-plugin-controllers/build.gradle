@@ -8,6 +8,7 @@ dependencies {
             project(':grails-plugin-validation'),
             project(':grails-plugin-domain-class')
 
+    api "org.apache.groovy:groovy:$groovyVersion"
     api("org.springframework.boot:spring-boot-autoconfigure")
     compileOnlyApi "jakarta.servlet:jakarta.servlet-api"
 

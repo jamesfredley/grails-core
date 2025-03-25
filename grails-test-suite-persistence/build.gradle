@@ -21,6 +21,7 @@ dependencies {
     testImplementation "org.grails:grails-datastore-gorm-hibernate5"
 
     api "org.apache.tomcat:tomcat-jdbc"
+    api "org.apache.groovy:groovy:$groovyVersion"
 
     testRuntimeOnly "com.h2database:h2"
 

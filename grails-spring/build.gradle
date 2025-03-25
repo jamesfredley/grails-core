@@ -6,5 +6,6 @@ dependencies {
     api "org.springframework:spring-web"
     api "org.springframework:spring-context"
     api project(":grails-bootstrap")
+    api "org.apache.groovy:groovy:$groovyVersion"
     api ( "org.apache.groovy:groovy-xml" )
 }

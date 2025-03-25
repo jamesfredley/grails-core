@@ -9,6 +9,7 @@ dependencies {
             project(":grails-plugin-datasource")
 
     api project(":grails-plugin-converters")
+    api "org.apache.groovy:groovy:$groovyVersion"
 
     implementation "com.github.ben-manes.caffeine:caffeine"
     testImplementation project(":grails-plugin-url-mappings"),

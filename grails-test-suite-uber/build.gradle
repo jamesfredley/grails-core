@@ -11,6 +11,7 @@ dependencies {
         project(':grails-plugin-controllers')
 
     api "org.apache.tomcat:tomcat-jdbc"
+    api "org.apache.groovy:groovy:$groovyVersion"
 
     testRuntimeOnly "com.h2database:h2"
     testRuntimeOnly "org.springframework:spring-aspects"

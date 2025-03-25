@@ -4,6 +4,7 @@ dependencies {
 
     api project(":grails-core"), project(":grails-spring")
     api project(":grails-plugin-validation")
+    api "org.apache.groovy:groovy:$groovyVersion"
 
     // Datastore APIs
     api "org.grails:grails-datastore-gorm-validation"

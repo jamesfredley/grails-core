@@ -3,6 +3,8 @@ dependencies {
     implementation platform(project(':grails-bom'))
 
     api project(":grails-web"), project(":grails-plugin-controllers")
+    api "org.apache.groovy:groovy:$groovyVersion"
+
     testCompileOnly "org.junit.jupiter:junit-jupiter-api"
 
     compileOnly 'jakarta.servlet:jakarta.servlet-api'
