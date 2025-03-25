@@ -17,6 +17,7 @@ dependencies {
         // MockHttpServletRequest/Response/Context used in many classes
     }
 
+    testImplementation 'com.h2database:h2'
     testImplementation 'jakarta.servlet:jakarta.servlet-api'
     testImplementation 'org.springframework:spring-test'
 }

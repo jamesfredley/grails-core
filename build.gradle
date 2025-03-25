@@ -236,12 +236,6 @@ subprojects {
 
     if (name in ['grails-dependencies', 'grails-bom']) return
 
-    if (name =~ /^(grails-plugin-datasource|grails-test-suite)/) {
-        dependencies {
-            testImplementation 'com.h2database:h2'
-        }
-    }
-
     tasks.withType(Jar).configureEach {
         manifest.attributes(
                 'Built-By': System.properties['user.name'],
