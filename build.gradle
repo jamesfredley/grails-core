@@ -118,7 +118,7 @@ allprojects {
     apply from: rootProject.layout.projectDirectory.file('gradle/dependency-licenses.gradle')
 }
 
-apply from: 'gradle/idea.gradle'
+apply from: layout.projectDirectory.file('gradle/idea.gradle')
 
 subprojects { subproject ->
 
@@ -509,9 +509,9 @@ tasks.register('clean', Delete) {
 }
 
 apply {
-    from 'gradle/docs.gradle' // tasks for building the documentation (e.g. user guide, javadocs)
-    from 'gradle/assemble.gradle' // tasks for creating an installation or distribution
-    from 'gradle/findbugs.gradle'
+    from layout.projectDirectory.file('gradle/docs.gradle') // tasks for building the documentation (e.g. user guide, javadocs)
+    from layout.projectDirectory.file('gradle/assemble.gradle') // tasks for creating an installation or distribution
+    from layout.projectDirectory.file('gradle/findbugs.gradle')
 }
 
 // compile with the Groovy version provided by Gradle
