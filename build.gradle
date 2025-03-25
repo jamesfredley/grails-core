@@ -66,10 +66,6 @@ allprojects {
         }
     }
 
-    tasks.withType(Javadoc).configureEach {
-        options.addStringOption('Xdoclint:none', '-quiet')
-    }
-
     // This is added to prevent a remote cache misses, because the project JAR include a manifest
     // file with Build-By and Created-By properties which might be different for CI vs Local.
     normalization {
@@ -384,7 +380,7 @@ subprojects {
         onlyIf { !isTestSuite }
         classpath += configurations.documentation
         options.encoding = 'UTF-8'
-        options.jFlags('-Xms64M', '-Xmx512M')
+        options.jFlags('-Xms64M', '-Xmx512M', 'Xdoclint:none', '-quiet')
     }
 
     // task for running a single test with -DsingleTest.single=TestName singleTest
