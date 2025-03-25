@@ -238,15 +238,11 @@ subprojects { subproject ->
                     maven {
                         credentials {
                             if (isGrailsRepoPublish) {
-                                def u = subproject.findProperty('artifactoryPublishUsername') ?: System.getenv('ARTIFACTORY_USERNAME')
-                                def p = subproject.findProperty('artifactoryPublishPassword') ?: System.getenv('ARTIFACTORY_PASSWORD')
-                                username = u
-                                password = p
+                                username = subproject.findProperty('artifactoryPublishUsername') ?: System.getenv('ARTIFACTORY_USERNAME')
+                                password = subproject.findProperty('artifactoryPublishPassword') ?: System.getenv('ARTIFACTORY_PASSWORD')
                             } else {
-                                def u = System.getenv('GITHUB_USERNAME') ?: ''
-                                def p = System.getenv('GITHUB_PASSWORD') ?: ''
-                                username = u
-                                password = p
+                                username = System.getenv('GITHUB_USERNAME') ?: ''
+                                password = System.getenv('GITHUB_PASSWORD') ?: ''
                             }
                         }
                         if (isGrailsRepoPublish) {
