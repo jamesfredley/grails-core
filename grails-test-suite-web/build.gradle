@@ -10,6 +10,8 @@ configurations.testCompileClasspath {
 
 dependencies {
 
+    implementation platform(project(':grails-bom'))
+
     testImplementation project(':grails-test-suite-base'),
                 project(':grails-plugin-domain-class'),
                 project(':grails-plugin-codecs'),

@@ -14,6 +14,14 @@ dependencies {
     implementation "com.github.ben-manes.caffeine:caffeine"
 
     testImplementation project(":grails-test-suite-base")
+
+    compileOnly 'jakarta.servlet:jakarta.servlet-api'
+    compileOnly 'org.springframework:spring-test', {
+        // MockHttpServletRequest/Response/Context used in many classes
+    }
+
+    testImplementation 'jakarta.servlet:jakarta.servlet-api'
+    testImplementation 'org.springframework:spring-test'
 }
 tasks.withType(Test) {
     testLogging {

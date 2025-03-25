@@ -16,4 +16,12 @@ dependencies {
     api "org.springframework:spring-webmvc"
     api "org.springframework:spring-context-support"
     implementation "com.github.ben-manes.caffeine:caffeine"
+
+    compileOnly 'jakarta.servlet:jakarta.servlet-api'
+    compileOnly 'org.springframework:spring-test', {
+        // MockHttpServletRequest/Response/Context used in many classes
+    }
+
+    testImplementation 'jakarta.servlet:jakarta.servlet-api'
+    testImplementation 'org.springframework:spring-test'
 }

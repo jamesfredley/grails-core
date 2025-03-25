@@ -4,6 +4,8 @@ configurations.testCompileClasspath {
 
 dependencies {
 
+    implementation platform(project(':grails-bom'))
+
     api project(':grails-test-suite-base'),
         project(':grails-plugin-interceptors'),
         project(':grails-plugin-controllers')
