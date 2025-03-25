@@ -374,7 +374,8 @@ subprojects {
         onlyIf { !isTestSuite }
         classpath += configurations.documentation
         options.encoding = 'UTF-8'
-        options.jFlags('-Xms64M', '-Xmx512M', 'Xdoclint:none', '-quiet')
+        options.jFlags('-Xms64M', '-Xmx512M')
+        (options as StandardJavadocDocletOptions).addBooleanOption('Xdoclint:none', true)
     }
 
     // task for running a single test with -DsingleTest.single=TestName singleTest
