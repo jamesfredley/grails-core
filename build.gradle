@@ -66,20 +66,6 @@ allprojects {
         }
     }
 
-    [Javadoc, Groovydoc].each {
-        tasks.withType(it).configureEach {
-            // this will apply the javadoc fix tool to all generated javadocs
-            // we use it to make sure that the javadocs are not vulnerable independently of the JDK used to build
-            doLast {
-                def javadocFix = new JavadocFixTool()
-                javadocFix.recursive = true
-                javadocFix.doPatch = true
-                javadocFix.searchAndPatch(destinationDir)
-            }
-        }
-
-    }
-
     tasks.withType(Javadoc).configureEach {
         options.addStringOption('Xdoclint:none', '-quiet')
     }
