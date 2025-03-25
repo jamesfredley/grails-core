@@ -9,8 +9,6 @@ ext {
     isGrailsRepoPublish = grailsVersion.endsWith('-SNAPSHOT') && !isGitHubRepoPublish
     isReleaseVersion = !isGrailsRepoPublish && !isGitHubRepoPublish
 
-    springLoadedCommonOptions = '-Xverify:none -Dspringloaded.synchronize=true -Djdk.reflect.allowGetCallerClass=true'
-
     nexusUsername = System.getenv('SONATYPE_USERNAME') ?: findProperty('sonatypeOssUsername') ?: ''
     nexusPassword = System.getenv('SONATYPE_PASSWORD') ?: findProperty('sonatypeOssPassword') ?: ''
 
