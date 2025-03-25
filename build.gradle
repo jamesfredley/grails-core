@@ -129,7 +129,6 @@ subprojects { subproject ->
     ext.pluginProjects = ['grails-async-plugin', 'grails-events-plugin', 'grails-plugin-converters']
     ext.isPlugin = subproject.name in pluginProjects
     ext.isCiBuild = subproject.hasProperty('isCiBuild') || System.getenv().get('CI') as Boolean
-    ext.isAsyncProject = subproject.name.startsWith('grails-async') || subproject.name.startsWith('grails-events')
 
     // Historically async mapped the core libraries to different artifact ids
     ext.mappedArtifactIds = [
@@ -279,13 +278,6 @@ subprojects { subproject ->
 
                     if (subproject.name != 'grails-bom') {
                         from components.java
-                    }
-
-                    if(isAsyncProject) {
-                        versionMapping {
-                            usage('java-api') { fromResolutionOf('runtimeClasspath') }
-                            usage('java-runtime') { fromResolutionResult() }
-                        }
                     }
                 }
             }
