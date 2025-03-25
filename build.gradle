@@ -57,7 +57,7 @@ if (isReleaseVersion) {
                 def ossUser = System.getenv('SONATYPE_USERNAME') ?: findProperty('sonatypeOssUsername') ?: ''
                 def ossPass = System.getenv('SONATYPE_PASSWORD') ?: findProperty('sonatypeOssPassword') ?: ''
                 def ossStagingProfileId = System.getenv('SONATYPE_STAGING_PROFILE_ID') ?: findProperty('sonatypeOssStagingProfileId') ?: ''
-                nexusUrl = uri('https://s01.oss.sonatype.org/service/local/')
+                nexusUrl = uri('https://s01.oss.sonatype.org/service/local')
                 username = ossUser
                 password = ossPass
                 stagingProfileId = ossStagingProfileId
