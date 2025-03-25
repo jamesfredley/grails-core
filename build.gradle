@@ -151,7 +151,7 @@ subprojects { subproject ->
 
                             String substitutedArtifact = "${possibleProject.name in pluginProjects ? 'org.grails.plugins' : 'org.grails'}:$artifactId"
                             if(possibleProject.name == 'grails-bom') {
-                                substitute module(substitutedArtifact) using platform(project(":$possibleProject.name"))
+                                substitute module(substitutedArtifact) using platform(project(':grails-bom'))
                             }
                             else {
                                 substitute module(substitutedArtifact) using project(":$possibleProject.name")
