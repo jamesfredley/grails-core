@@ -33,7 +33,6 @@ group = 'org.grails'
 if (isReleaseVersion) {
     apply plugin: 'maven-publish'
     apply plugin: 'io.github.gradle-nexus.publish-plugin'
-
     nexusPublishing {
         repositories {
             sonatype {
@@ -139,7 +138,7 @@ subprojects { subproject ->
             'grails-plugin-converters': 'converters'
     ]
 
-    if(isExample) {
+    if (isExample) {
         // Test projects will often include dependencies from grails-core. This will ensure any such dependencies
         // will be substituted with the local projects in this repository instead of pulling them from a repository.
         configurations.configureEach {
@@ -161,7 +160,6 @@ subprojects { subproject ->
                 }
             }
         }
-
         return
     }
 
@@ -222,7 +220,6 @@ subprojects { subproject ->
     }
 
     if (!isTestSuite) {
-
         apply plugin: 'maven-publish'
         apply plugin: 'signing'
 
@@ -267,7 +264,6 @@ subprojects { subproject ->
                     pom.withXml {
                         def pomNode = asNode()
                         pomNode.children().last() + pomInfo
-
                         // dependency management shouldn't be included
                         try { pomNode.dependencyManagement.replaceNode({}) } catch (Throwable ignore) {}
                     }
@@ -290,7 +286,7 @@ subprojects { subproject ->
             onlyIf { isReleaseVersion || isGitHubRepoPublish }
         }
 
-        //do not generate extra load on Nexus with new staging repository if signing fails
+        // do not generate extra load on Nexus with new staging repository if signing fails
         if (isReleaseVersion) {
             tasks.withType(InitializeNexusStagingRepository).configureEach {
                 shouldRunAfter(tasks.withType(Sign))
@@ -307,9 +303,11 @@ subprojects { subproject ->
     if (subproject.name =~ /^(grails-web|grails-plugin-|grails-test-suite|grails-test)/) {
         dependencies {
             compileOnly 'jakarta.servlet:jakarta.servlet-api'
+            compileOnly 'org.springframework:spring-test', {
+                // MockHttpServletRequest/Response/Context used in many classes
+            }
+
             testImplementation 'jakarta.servlet:jakarta.servlet-api'
-            // MockHttpServletRequest/Response/Context used in many classes
-            compileOnly 'org.springframework:spring-test'
             testImplementation 'org.springframework:spring-test'
         }
     }
@@ -357,6 +355,7 @@ subprojects { subproject ->
         testImplementation 'org.apache.groovy:groovy-test-junit5'
         testImplementation 'org.junit.jupiter:junit-jupiter-api'
         testImplementation 'org.junit.platform:junit-platform-runner'
+
         testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
 
         if (subproject.name != 'grails-docs') {
@@ -479,7 +478,6 @@ subprojects { subproject ->
             from layout.buildDirectory.dir('libs')
             into distInstallDir
         }
-
         tasks.withType(PublishToMavenLocal).configureEach {
             dependsOn 'installToHomeDist'
             doLast {
@@ -497,8 +495,8 @@ tasks.register('clean', Delete) {
 }
 
 apply {
-    from layout.projectDirectory.file('gradle/docs.gradle') // tasks for building the documentation (e.g. user guide, javadocs)
-    from layout.projectDirectory.file('gradle/assemble.gradle') // tasks for creating an installation or distribution
+    from layout.projectDirectory.file('gradle/docs.gradle')
+    from layout.projectDirectory.file('gradle/assemble.gradle')
     from layout.projectDirectory.file('gradle/findbugs.gradle')
 }
 
