@@ -67,7 +67,7 @@ allprojects {
     }
 
     // This is added to prevent a remote cache misses, because the project JAR include a manifest
-    // file with Build-By and Created-By properties which might be different for CI vs Local.
+    // file with Built-By and Created-By properties which might be different for CI vs Local.
     normalization {
         runtimeClasspath {
             metaInf {
@@ -83,7 +83,7 @@ apply from: layout.projectDirectory.file('gradle/idea.gradle')
 
 subprojects {
 
-    def activeProject = it
+    def activeProject = it // Used for referencing the active project in closures
     def pluginsGroupProjects = [
             // These projects use the 'org.grails.plugins' group
             'grails-async-plugin',
