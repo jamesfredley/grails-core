@@ -122,7 +122,8 @@ allprojects {
         options.addStringOption('Xdoclint:none', '-quiet')
     }
 
-    // This added to prevent remote cache miss, because project JAR include manifest file with Build-By and Created-By properties which might be different for CI vs Local.
+    // This is added to prevent a remote cache misses, because the project JAR include a manifest
+    // file with Build-By and Created-By properties which might be different for CI vs Local.
     normalization {
         runtimeClasspath {
             metaInf {
@@ -157,8 +158,8 @@ subprojects { subproject ->
     ]
 
     if(isExample) {
-        // Test projects will often include dependencies from grails-core, this file will ensure any dependencies included
-        // will be substituted with projects in this repository instead of pulling upstream
+        // Test projects will often include dependencies from grails-core. This will ensure any such dependencies
+        // will be substituted with the local projects in this repository instead of pulling them from a repository.
         configurations.configureEach {
             resolutionStrategy {
                 dependencySubstitution {
