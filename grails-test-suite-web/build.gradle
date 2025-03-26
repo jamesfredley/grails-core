@@ -1,3 +1,9 @@
+plugins {
+    id 'groovy'
+    id 'java-library'
+    id 'project-report'
+}
+
 configurations.all {
     resolutionStrategy {
         preferProjectModules()

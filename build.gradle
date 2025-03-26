@@ -157,12 +157,6 @@ subprojects {
         }
     }
 
-    if (name != 'grails-bom') {
-        apply plugin: 'java-library'
-        apply plugin: 'groovy'
-        apply plugin: 'project-report'
-    }
-
     if (!isTestSuite) {
         apply plugin: 'maven-publish'
         apply plugin: 'signing'

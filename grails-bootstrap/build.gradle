@@ -1,5 +1,11 @@
 import org.apache.tools.ant.filters.ReplaceTokens
 
+plugins {
+    id 'groovy'
+    id 'java-library'
+    id 'project-report'
+}
+
 dependencies {
     implementation platform(project(':grails-bom'))
 

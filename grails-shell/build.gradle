@@ -1,4 +1,9 @@
-apply plugin:'application'
+plugins {
+    id 'application'
+    id 'groovy'
+    id 'java-library'
+    id 'project-report'
+}
 
 mainClassName = "org.grails.cli.GrailsCli"
 
