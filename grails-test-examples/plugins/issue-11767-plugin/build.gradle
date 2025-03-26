@@ -14,7 +14,6 @@ apply plugin: 'groovy'
 apply plugin: 'org.grails.grails-plugin'
 
 apply plugin: 'java'
-compileJava.options.release = 17
 
 dependencies {
     implementation platform(project(':grails-bom'))
@@ -24,4 +23,7 @@ dependencies {
     compileOnly 'io.micronaut:micronaut-inject-groovy'
 }
 
-apply from: rootProject.file('gradle/functional-test-project.gradle')
+apply {
+    from rootProject.layout.projectDirectory.file('gradle/functional-test-project.gradle')
+    from rootProject.layout.projectDirectory.file('gradle/java-config.gradle')
+}

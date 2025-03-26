@@ -166,12 +166,6 @@ subprojects {
     if (!isTestSuite) {
         apply plugin: 'maven-publish'
         apply plugin: 'signing'
-        if (name != 'grails-bom') {
-            extensions.configure(JavaPluginExtension) {
-                it.withJavadocJar()
-                it.withSourcesJar()
-            }
-        }
         extensions.configure(PublishingExtension) {
             if (isGrailsRepoPublish || isGitHubRepoPublish) {
                 repositories {
@@ -342,8 +336,6 @@ subprojects {
             jvmArgs += debugArguments
         }
     }
-
-    compileJava.options.release = 17
 
     if (!isTestSuite) {
         tasks.register('installToHomeDist', Copy) {

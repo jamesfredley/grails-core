@@ -20,7 +20,6 @@ apply plugin:"org.grails.grails-gsp"
 apply plugin:"com.bertramlabs.asset-pipeline"
 
 apply plugin: 'java'
-compileJava.options.release = 17
 
 configurations {
     developmentOnly
@@ -80,4 +79,7 @@ assets {
     minifyCss = true
 }
 
-apply from: rootProject.file('gradle/functional-test-project.gradle')
+apply {
+    from rootProject.layout.projectDirectory.file('gradle/functional-test-project.gradle')
+    from rootProject.layout.projectDirectory.file('gradle/java-config.gradle')
+}

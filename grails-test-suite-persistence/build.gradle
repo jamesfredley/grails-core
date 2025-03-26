@@ -84,3 +84,7 @@ task testIsolatedPersistentOne(type: Test) {
 }
 
 test.dependsOn testGrailsDomainBinder, testIsolatedPersistentOne
+
+apply {
+    from rootProject.layout.projectDirectory.file('gradle/java-config.gradle')
+}

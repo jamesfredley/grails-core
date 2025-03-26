@@ -23,7 +23,6 @@ assets {
 }
 
 apply plugin: 'java'
-compileJava.options.release = 17
 
 dependencies {
     implementation platform(project(':grails-bom'))
@@ -72,4 +71,7 @@ test {
 //compileGroovy.groovyOptions.fork = true
 //compileGroovy.groovyOptions.forkOptions.jvmArgs = ['-Xdebug', '-Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=5005']
 
-apply from: rootProject.file('gradle/functional-test-project.gradle')
+apply {
+    from rootProject.layout.projectDirectory.file('gradle/functional-test-project.gradle')
+    from rootProject.layout.projectDirectory.file('gradle/java-config.gradle')
+}

@@ -123,3 +123,7 @@ test {
 }
 
 test.dependsOn execIsolatedTests
+
+apply {
+    from rootProject.layout.projectDirectory.file('gradle/java-config.gradle')
+}

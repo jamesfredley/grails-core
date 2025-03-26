@@ -7,3 +7,7 @@ dependencies {
     implementation 'org.slf4j:slf4j-api'
 
 }
+
+apply {
+    from rootProject.layout.projectDirectory.file('gradle/java-config.gradle')
+}

@@ -116,3 +116,7 @@ tasks.named('isolatedTestsTwo', Test) {
     maxParallelForks = 1
     forkEvery = 100
 }
+
+apply {
+    from rootProject.layout.projectDirectory.file('gradle/java-config.gradle')
+}

@@ -32,3 +32,7 @@ dependencies {
     testRuntimeOnly 'net.bytebuddy:byte-buddy'
     testImplementation 'org.objenesis:objenesis'
 }
+
+apply {
+    from rootProject.layout.projectDirectory.file('gradle/java-config.gradle')
+}

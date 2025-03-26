@@ -49,3 +49,7 @@ tasks.named('jar', Jar) {
 }
 
 jar.dependsOn docFilesJar
+
+apply {
+    from rootProject.layout.projectDirectory.file('gradle/java-config.gradle')
+}

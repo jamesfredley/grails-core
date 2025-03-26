@@ -14,7 +14,6 @@ apply plugin: "org.grails.grails-web"
 apply plugin: "org.grails.grails-gsp"
 
 apply plugin: 'java'
-compileJava.options.release = 17
 
 dependencies {
     implementation platform(project(':grails-bom'))
@@ -42,4 +41,7 @@ dependencies {
     integrationTestImplementation testFixtures("org.grails.plugins:geb")
 }
 
-apply from: rootProject.file('gradle/functional-test-project.gradle')
+apply {
+    from rootProject.layout.projectDirectory.file('gradle/functional-test-project.gradle')
+    from rootProject.layout.projectDirectory.file('gradle/java-config.gradle')
+}

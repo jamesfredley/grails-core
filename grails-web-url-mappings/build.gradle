@@ -51,3 +51,7 @@ tasks.withType(Test) {
         System.out.flush()
     }
 }
+
+apply {
+    from rootProject.layout.projectDirectory.file('gradle/java-config.gradle')
+}

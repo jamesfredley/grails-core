@@ -59,3 +59,7 @@ def writeProps = tasks.register('writeGrailsProperties', WriteProperties) {
 tasks.named('processResources') {
     from writeProps
 }
+
+apply {
+    from rootProject.layout.projectDirectory.file('gradle/java-config.gradle')
+}

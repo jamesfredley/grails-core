@@ -50,3 +50,7 @@ processResources {
     inputs.property "version", version
     filter(ReplaceTokens, tokens:[version:version])
 }
+
+apply {
+    from rootProject.layout.projectDirectory.file('gradle/java-config.gradle')
+}

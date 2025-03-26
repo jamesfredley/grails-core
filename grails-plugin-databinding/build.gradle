@@ -49,3 +49,7 @@
 tasks.named('compileTestGroovy').configure {
   dependsOn tasks.named('jar')
 }
+
+apply {
+    from rootProject.layout.projectDirectory.file('gradle/java-config.gradle')
+}
