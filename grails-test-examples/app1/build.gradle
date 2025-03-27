@@ -12,17 +12,8 @@ buildscript {
 version "0.1"
 group "functionaltests"
 
-apply plugin: "war"
 apply plugin: "asset-pipeline"
 apply plugin: "org.grails.grails-web"
-apply plugin: "org.grails.grails-gsp"
-
-assets {
-    minifyJs = true
-    minifyCss = true
-}
-
-apply plugin: 'java'
 
 dependencies {
     implementation platform(project(':grails-bom'))
@@ -57,7 +48,11 @@ dependencies {
     integrationTestImplementation testFixtures("org.grails.plugins:geb")
 }
 
-tasks.withType(org.gradle.api.tasks.JavaExec) {
+tasks.named('assetCompile') {
+    enabled = false
+}
+
+tasks.withType(JavaExec).configureEach {
     systemProperty('REPLACE_ME', 'test')
     systemProperty('foo.bar', 'test')
     // jvmArgs '-javaagent:agent.jar'

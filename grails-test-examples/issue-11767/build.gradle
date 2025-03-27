@@ -9,11 +9,7 @@ buildscript {
 
 group = 'issue11767.app'
 
-apply plugin: 'application'
-apply plugin: 'groovy'
 apply plugin: 'org.grails.grails-web'
-
-apply plugin: 'java'
 
 dependencies {
     implementation platform(project(':grails-bom'))

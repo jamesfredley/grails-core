@@ -4,7 +4,6 @@ buildscript {
     }
     dependencies {
         classpath "org.grails:grails-gradle-plugin:${project['grails-gradle-plugin.version']}"
-        classpath "org.grails.plugins:views-gradle:${project['plugins-views-gradle.version']}"
     }
 }
 
@@ -12,9 +11,6 @@ version "0.1"
 group "issueviews182"
 
 apply plugin:"org.grails.grails-web"
-apply plugin:"org.grails.plugins.views-json"
-
-apply plugin: 'java'
 
 dependencies {
     implementation platform(project(':grails-bom'))

@@ -13,10 +13,6 @@ group "org.grails.plugins"
 apply plugin: "java-library"
 apply plugin: "org.grails.grails-plugin"
 apply plugin: "org.grails.grails-gsp"
-apply plugin: 'eclipse'
-apply plugin: 'idea'
-
-apply plugin: 'java'
 
 dependencies {
     implementation platform(project(':grails-bom'))

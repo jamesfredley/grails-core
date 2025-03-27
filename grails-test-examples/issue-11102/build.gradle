@@ -11,17 +11,8 @@ buildscript {
 version "0.1"
 group "issue11102"
 
-apply plugin: "war"
 apply plugin: "asset-pipeline"
 apply plugin: "org.grails.grails-web"
-apply plugin: "org.grails.grails-gsp"
-
-apply plugin: 'java'
-
-assets {
-    minifyJs = true
-    minifyCss = true
-}
 
 dependencies {
     implementation platform(project(':grails-bom'))
@@ -57,6 +48,10 @@ dependencies {
     testImplementation "io.micronaut.serde:micronaut-serde-jackson:$micronautSerdeJacksonVersion"
 
     integrationTestImplementation testFixtures("org.grails.plugins:geb")
+}
+
+tasks.named('assetCompile') {
+    enabled = false
 }
 
 bootRun {

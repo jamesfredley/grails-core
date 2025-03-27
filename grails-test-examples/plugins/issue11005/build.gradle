@@ -11,8 +11,6 @@ apply plugin: "java-library"
 apply plugin: "org.grails.grails-plugin"
 apply plugin: "org.grails.grails-gsp"
 
-apply plugin: 'java'
-
 version "0.1-SNAPSHOT"
 group "org.grails.plugins"
 

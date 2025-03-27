@@ -11,9 +11,6 @@ version "0.1"
 group "gorm"
 
 apply plugin: "org.grails.grails-web"
-apply plugin: "org.grails.grails-gsp"
-
-apply plugin: 'java'
 
 dependencies {
     implementation platform(project(':grails-bom'))
