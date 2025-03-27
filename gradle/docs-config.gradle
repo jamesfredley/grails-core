@@ -1,0 +1,19 @@
+apply from: rootProject.layout.projectDirectory.file('gradle/docs-dependencies.gradle')
+
+ext {
+    includeInApiDocs = true
+}
+
+tasks.named('groovydoc', Groovydoc) {
+    classpath = configurations.documentation
+    groovyClasspath = configurations.documentation
+    access = GroovydocAccess.PRIVATE
+    includeAuthor = true
+    includeMainForScripts = false
+    processScripts = false
+}
+
+tasks.register('javadocJar', Jar) {
+    archiveClassifier = 'javadoc'
+    from(tasks.named('groovydoc').map { it.outputs.files })
+}

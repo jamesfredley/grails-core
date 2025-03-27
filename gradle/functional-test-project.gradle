@@ -1,7 +1,3 @@
-ext {
-    isFunctionalTestProject = true
-}
-
 tasks.withType(Test).configureEach {
     onlyIf {
         if(project.hasProperty('skipFunctionalTests')) {
@@ -21,7 +17,7 @@ tasks.withType(Test).configureEach {
     }
 }
 
-// Don't need groovydoc for example project
 tasks.named('groovydoc') {
+    // We don't need to generate docs for test projects
     enabled = false
 }

@@ -235,28 +235,6 @@ subprojects {
         duplicatesStrategy = DuplicatesStrategy.INCLUDE
     }
 
-    configurations {
-        documentation
-        meta
-        published.extendsFrom archives, meta
-    }
-
-    dependencies {
-        documentation platform(project(':grails-bom'))
-        documentation 'org.fusesource.jansi:jansi'
-        documentation 'jline:jline'
-        documentation 'com.github.javaparser:javaparser-core'
-        if (compiledByGradleGroovyVersion(activeProject)) {
-            documentation "org.codehaus.groovy:groovy:$GroovySystem.version"
-            documentation "org.codehaus.groovy:groovy-ant:$GroovySystem.version"
-            documentation "org.codehaus.groovy:groovy-cli-picocli:$GroovySystem.version"
-        } else {
-            documentation 'org.apache.groovy:groovy'
-            documentation 'org.apache.groovy:groovy-ant'
-            documentation 'org.apache.groovy:groovy-cli-picocli'
-        }
-    }
-
     def debugArguments = [
             '-Xmx2g', '-Xdebug', '-Xnoagent', '-Djava.compiler=NONE',
             '-Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=5005'
@@ -307,23 +285,6 @@ subprojects {
         options.encoding = 'UTF-8'
     }
 
-    tasks.withType(Groovydoc).configureEach {
-        onlyIf { !isTestSuite }
-        classpath += configurations.documentation
-        access = GroovydocAccess.PRIVATE
-        includeAuthor = true
-        includeMainForScripts = false
-        processScripts = false
-    }
-
-    tasks.withType(Javadoc).configureEach {
-        onlyIf { !isTestSuite }
-        classpath += configurations.documentation
-        options.encoding = 'UTF-8'
-        options.jFlags('-Xms64M', '-Xmx512M')
-        (options as StandardJavadocDocletOptions).addBooleanOption('Xdoclint:none', true)
-    }
-
     // task for running a single test with -DsingleTest.single=TestName singleTest
     tasks.register('singleTest', Test) {
         if (System.getProperty('debug.tests')) {
@@ -356,7 +317,7 @@ tasks.register('clean', Delete) {
 }
 
 apply {
-    from layout.projectDirectory.file('gradle/docs.gradle')
+    from layout.projectDirectory.file('gradle/docs-root-config.gradle')
     from layout.projectDirectory.file('gradle/assemble.gradle')
     from layout.projectDirectory.file('gradle/findbugs.gradle')
 }

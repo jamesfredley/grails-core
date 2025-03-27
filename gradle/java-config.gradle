@@ -4,3 +4,8 @@ extensions.configure(JavaPluginExtension) {
     it.withJavadocJar()
     it.withSourcesJar()
 }
+
+tasks.named('javadoc') {
+    // We only need groovydoc
+    enabled = false
+}
