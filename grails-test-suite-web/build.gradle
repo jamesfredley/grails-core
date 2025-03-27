@@ -4,6 +4,9 @@ plugins {
     id 'project-report'
 }
 
+version = projectVersion
+group = 'org.grails'
+
 configurations.all {
     resolutionStrategy {
         preferProjectModules()

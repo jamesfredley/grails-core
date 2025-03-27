@@ -4,6 +4,9 @@ plugins {
     id 'project-report'
 }
 
+version = projectVersion
+group = 'org.grails'
+
 configurations {
     // Required to keep Gradle classes off the test compile classpath.
     gradleConf.extendsFrom compileClasspath

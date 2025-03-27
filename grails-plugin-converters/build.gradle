@@ -4,8 +4,8 @@ plugins {
     id 'project-report'
 }
 
-group = 'org.grails.plugins'
 version = projectVersion
+group = 'org.grails.plugins'
 
 dependencies {
     implementation platform(project(':grails-bom'))

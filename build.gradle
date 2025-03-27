@@ -96,16 +96,12 @@ subprojects {
     ]
     def isTestSuite = name.startsWith('grails-test-suite')
     def isExample = name.contains('grails-test-examples')
-    def isPluginsGroupProject = name in pluginsGroupProjects
     def pomDescription = name == 'grails-testing-support' ?
             'Support for writing concise expressive tests for Grails artifacts' :
             'Grails Web Application Framework'
     def pomDevelopers = name == 'grails-testing-support' ?
             [jeffscottbrown: 'Jeff Brown', jameskleeh: 'James Kleeh'] :
             [graemerocher: 'Graeme Rocher']
-
-    version = grailsVersion
-    group = isPluginsGroupProject ? 'org.grails.plugins' : 'org.grails'
 
     if (isExample) {
         // Test projects will often include dependencies from grails-core. This will ensure any such dependencies

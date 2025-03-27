@@ -4,6 +4,9 @@ plugins {
     id 'java-platform'
 }
 
+version = projectVersion
+group = 'org.grails'
+
 javaPlatform {
     allowDependencies()
 }

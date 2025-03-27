@@ -4,6 +4,9 @@ plugins {
     id 'project-report'
 }
 
+version = projectVersion
+group = 'org.grails'
+
 dependencies {
     for (String exported : [
             "org.grails:grails-bootstrap:${project.version}",
