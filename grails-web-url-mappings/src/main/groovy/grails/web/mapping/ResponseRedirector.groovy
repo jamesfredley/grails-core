@@ -126,7 +126,16 @@ class ResponseRedirector {
         }
 
         String redirectUrl = useJessionId ? response.encodeRedirectURL(redirectURI) : redirectURI
-        int status = permanent ? HttpServletResponse.SC_MOVED_PERMANENTLY : HttpServletResponse.SC_MOVED_TEMPORARILY
+
+        // Add support for 307/308 status codes
+        Map statusConfig = request.getAttribute('statusConfig')
+        boolean tempRedirect = Boolean.valueOf(statusConfig?.tempRedirect)
+        int status
+        if (permanent) {
+            status = tempRedirect ? HttpServletResponse.SC_PERMANENT_REDIRECT : HttpServletResponse.SC_MOVED_PERMANENTLY 
+        } else {
+            status = tempRedirect ? HttpServletResponse.SC_TEMPORARY_REDIRECT : HttpServletResponse.SC_MOVED_TEMPORARILY
+        }
 
         response.status = status
         response.setHeader HttpHeaders.LOCATION, redirectUrl

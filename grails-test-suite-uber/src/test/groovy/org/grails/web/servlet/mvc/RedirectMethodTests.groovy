@@ -252,6 +252,28 @@ class RedirectMethodTests extends Specification implements UrlMappingsUnitTest<U
         "/little-brown-bottle/thankyou" ==  response.redirectedUrl
     }
 
+    void "test temporary redirect with status 307"() {
+        when:
+        def c = new RedirectController()
+        webRequest.controllerName = 'redirect'
+        c.toActionTemporaryRedirect()
+        
+        then:
+        307 == response.status
+        "/redirect/foo" == response.redirectedUrl
+    }
+
+    void "test permanent redirect with status 308"() {
+        when:
+        def c = new RedirectController() 
+        webRequest.controllerName = 'redirect'
+        c.toActionPermanentRedirect()
+        
+        then:
+        308 == response.status
+        "/redirect/foo" == response.redirectedUrl
+    }
+
     static class UrlMappings {
         static mappings = {
             "/"(controller:'default')
