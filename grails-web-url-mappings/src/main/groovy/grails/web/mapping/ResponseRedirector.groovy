@@ -39,6 +39,7 @@ class ResponseRedirector {
 
     public static final String ARGUMENT_PERMANENT = "permanent"
     public static final String ARGUMENT_ABSOLUTE = "absolute"
+    public static final String ARGUMENT_TEMPORARY = "temporary" // Add new constant
     public static final String GRAILS_REDIRECT_ISSUED = GrailsApplicationAttributes.REDIRECT_ISSUED
     private static final String BLANK = ""
     private static final String KEEP_PARAMS_WHEN_REDIRECT = 'keepParamsWhenRedirect'
@@ -104,13 +105,13 @@ class ResponseRedirector {
                 namedParameters.put(LinkGenerator.ATTRIBUTE_PARAMS, configuredParams + webRequest.originalParams)
             }
         }
-        redirectResponse(linkGenerator.getServerBaseURL(), linkGenerator.link(namedParameters), request, response, permanent, absolute)
+        redirectResponse(linkGenerator.getServerBaseURL(), linkGenerator.link(namedParameters), request, response, permanent, absolute, arguments)
     }
 
     /*
      * Redirects the response the the given URI
      */
-    private void redirectResponse(String serverBaseURL, String actualUri, HttpServletRequest request, HttpServletResponse response, boolean permanent, boolean absolute) {
+    private void redirectResponse(String serverBaseURL, String actualUri, HttpServletRequest request, HttpServletResponse response, boolean permanent, boolean absolute, Map arguments) {
         if(log.isDebugEnabled()) {
             log.debug "Method [redirect] forwarding request to [$actualUri]"
             log.debug "Executing redirect with response [$response]"
@@ -127,14 +128,13 @@ class ResponseRedirector {
 
         String redirectUrl = useJessionId ? response.encodeRedirectURL(redirectURI) : redirectURI
 
-        // Add support for 307/308 status codes
-        Map statusConfig = request.getAttribute('statusConfig')
-        boolean tempRedirect = Boolean.valueOf(statusConfig?.tempRedirect)
+        // Update to use arguments instead of request attributes
+        boolean temporary = Boolean.TRUE == arguments.get(ARGUMENT_TEMPORARY)
         int status
         if (permanent) {
-            status = tempRedirect ? HttpServletResponse.SC_PERMANENT_REDIRECT : HttpServletResponse.SC_MOVED_PERMANENTLY 
+            status = temporary ? HttpServletResponse.SC_PERMANENT_REDIRECT : HttpServletResponse.SC_MOVED_PERMANENTLY 
         } else {
-            status = tempRedirect ? HttpServletResponse.SC_TEMPORARY_REDIRECT : HttpServletResponse.SC_MOVED_TEMPORARILY
+            status = temporary ? HttpServletResponse.SC_TEMPORARY_REDIRECT : HttpServletResponse.SC_MOVED_TEMPORARILY
         }
 
         response.status = status

@@ -54,13 +54,11 @@ class RedirectController {
     }
 
     def toActionTemporaryRedirect() {
-        request.setAttribute('statusConfig', [tempRedirect: true])
-        redirect(action:'foo')
+        redirect(action:'foo', temporary:true)
     }
 
     def toActionPermanentRedirect() {
-        request.setAttribute('statusConfig', [tempRedirect: true])
-        redirect(action:'foo', permanent: true)
+        redirect(action:'foo', permanent:true, temporary:true)
     }
 
     def toRoot() {
