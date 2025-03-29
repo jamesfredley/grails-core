@@ -256,7 +256,7 @@ class RedirectMethodTests extends Specification implements UrlMappingsUnitTest<U
         when:
         def c = new RedirectController()
         webRequest.controllerName = 'redirect'
-        c.toActionTemporaryRedirect()
+        c.toActionMovedTemporary()
         
         then: "should use HTTP 307 Temporary Redirect"
         307 == response.status
@@ -267,7 +267,7 @@ class RedirectMethodTests extends Specification implements UrlMappingsUnitTest<U
         when:
         def c = new RedirectController() 
         webRequest.controllerName = 'redirect'
-        c.toActionPermanentRedirect()
+        c.toActionMovedPermanent()
         
         then: "should use HTTP 308 Permanent Redirect"
         308 == response.status

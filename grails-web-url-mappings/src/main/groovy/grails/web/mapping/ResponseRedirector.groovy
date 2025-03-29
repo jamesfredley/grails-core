@@ -39,7 +39,7 @@ class ResponseRedirector {
 
     public static final String ARGUMENT_PERMANENT = "permanent"
     public static final String ARGUMENT_ABSOLUTE = "absolute"
-    public static final String ARGUMENT_TEMPORARY = "temporary" // Add new constant
+    public static final String ARGUMENT_MOVED = "moved"  // Renamed from ARGUMENT_TEMPORARY
     public static final String GRAILS_REDIRECT_ISSUED = GrailsApplicationAttributes.REDIRECT_ISSUED
     private static final String BLANK = ""
     private static final String KEEP_PARAMS_WHEN_REDIRECT = 'keepParamsWhenRedirect'
@@ -105,50 +105,37 @@ class ResponseRedirector {
                 namedParameters.put(LinkGenerator.ATTRIBUTE_PARAMS, configuredParams + webRequest.originalParams)
             }
         }
-        redirectResponse(linkGenerator.getServerBaseURL(), linkGenerator.link(namedParameters), request, response, permanent, absolute, arguments)
+        redirectResponse(linkGenerator.getServerBaseURL(), linkGenerator.link(namedParameters), request, response, permanent, absolute)
     }
 
     /*
      * Redirects the response the the given URI
      */
-    private void redirectResponse(String serverBaseURL, String actualUri, HttpServletRequest request, HttpServletResponse response, boolean permanent, boolean absolute, Map arguments) {
-        if(log.isDebugEnabled()) {
-            log.debug "Method [redirect] forwarding request to [$actualUri]"
-            log.debug "Executing redirect with response [$response]"
-        }
-
-        String processedActualUri = processedUrl(actualUri, request)
-
-        String redirectURI
-        if (absolute) {
-            redirectURI = processedActualUri.contains("://") ? processedActualUri : serverBaseURL + processedActualUri
-        } else {
-            redirectURI = linkGenerator.contextPath + processedActualUri
-        }
-
-        String redirectUrl = useJessionId ? response.encodeRedirectURL(redirectURI) : redirectURI
-
-        // Update to use arguments instead of request attributes
-        boolean temporary = Boolean.TRUE == arguments.get(ARGUMENT_TEMPORARY)
-        int status
-        if (permanent) {
-            status = temporary ? HttpServletResponse.SC_PERMANENT_REDIRECT : HttpServletResponse.SC_MOVED_PERMANENTLY 
-        } else {
-            status = temporary ? HttpServletResponse.SC_TEMPORARY_REDIRECT : HttpServletResponse.SC_MOVED_TEMPORARILY
-        }
-
-        response.status = status
-        response.setHeader HttpHeaders.LOCATION, redirectUrl
-
-        if (redirectListeners) {
-            for (redirectEventListener in redirectListeners) {
-                redirectEventListener.responseRedirected redirectUrl
-            }
-        }
-
-        request.setAttribute GRAILS_REDIRECT_ISSUED, processedActualUri
+    protected void redirectResponse(String serverBaseURL, String actualUri, HttpServletRequest request, HttpServletResponse response, boolean permanent, boolean absolute) {
+        if(permanent == null) permanent = false
+        String url = absolute ? serverBaseURL + actualUri : actualUri
+        doRedirect(url, request, response, permanent)
     }
 
+    protected void doRedirect(String url, HttpServletRequest request, HttpServletResponse response, boolean permanent) {
+        boolean moved = establishMoved(request, permanent) 
+        int status
+        if (permanent) {
+            status = moved ? HttpServletResponse.SC_PERMANENT_REDIRECT : HttpServletResponse.SC_MOVED_PERMANENTLY
+        } else {
+            status = moved ? HttpServletResponse.SC_TEMPORARY_REDIRECT : HttpServletResponse.SC_MOVED_TEMPORARILY 
+        }
+        response.setStatus(status)
+        response.sendRedirect(url)
+    }
+
+    private boolean establishMoved(HttpServletRequest request, boolean permanent) {
+        def moved = arguments?.get(ARGUMENT_MOVED)
+        if (moved instanceof String) {
+            return Boolean.valueOf(moved)
+        }
+        return moved as boolean
+    }
 
     private String processedUrl(String link, HttpServletRequest request) {
         if (requestDataValueProcessor) {
