@@ -291,7 +291,6 @@ tasks.register('clean', Delete) {
 apply {
     from layout.projectDirectory.file('gradle/docs-root-config.gradle')
     from layout.projectDirectory.file('gradle/assemble.gradle')
-    from layout.projectDirectory.file('gradle/findbugs.gradle')
 }
 
 // compile with the Groovy version provided by Gradle
@@ -300,4 +299,5 @@ apply {
 // see: https://docs.gradle.org/current/userguide/compatibility.html#groovy
 static boolean compiledByGradleGroovyVersion(Project currentProject) {
     currentProject.name in ['grails-bootstrap', 'grails-gradle-model', 'grails-shell']
+    from layout.projectDirectory.file('gradle/assemble-root-config.gradle')
 }

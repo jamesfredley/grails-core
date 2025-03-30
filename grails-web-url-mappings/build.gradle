@@ -62,6 +62,7 @@ tasks.withType(Test) {
 }
 
 apply {
+    from rootProject.layout.projectDirectory.file('gradle/assemble-config.gradle')
     from rootProject.layout.projectDirectory.file('gradle/docs-config.gradle')
     from rootProject.layout.projectDirectory.file('gradle/java-config.gradle')
 }
