@@ -132,13 +132,5 @@ apply {
     from rootProject.layout.projectDirectory.file('gradle/assemble-config.gradle')
     from rootProject.layout.projectDirectory.file('gradle/docs-config.gradle')
     from rootProject.layout.projectDirectory.file('gradle/java-config.gradle')
-    from rootProject.layout.projectDirectory.file('gradle/integration-test.gradle')
-}
-
-integrationTest {
-    // jline doesn't use jline.terminal system property when TERM is dumb so use different TERM value for tests
-    // https://github.com/jline/jline2/blob/6a1b6bf/src/main/java/jline/TerminalFactory.java#L54-L57
-    environment 'TERM', 'xterm'
-    // execute in single thread
-    maxParallelForks = 1
+    from rootProject.layout.projectDirectory.file('gradle/test-config.gradle')
 }

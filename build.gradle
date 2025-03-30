@@ -94,7 +94,6 @@ subprojects {
             'grails-events-plugin'    : 'events',
             'grails-plugin-converters': 'converters'
     ]
-    def isTestSuite = name.startsWith('grails-test-suite')
     def pomDescription = name == 'grails-testing-support' ?
             'Support for writing concise expressive tests for Grails artifacts' :
             'Grails Web Application Framework'
@@ -194,77 +193,6 @@ subprojects {
         }
     }
 
-    if (name in ['grails-dependencies', 'grails-bom']) return
-
-
-    def debugArguments = [
-            '-Xmx2g', '-Xdebug', '-Xnoagent', '-Djava.compiler=NONE',
-            '-Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=5005'
-    ]
-    def java17moduleReflectionCompatibilityArguments = [
-            '--add-opens=java.base/java.lang=ALL-UNNAMED',
-            '--add-opens=java.base/java.util=ALL-UNNAMED'
-    ]
-
-    tasks.withType(Test).configureEach {
-        onlyIf { !activeProject.hasProperty('onlyFunctionalTests') }
-        useJUnitPlatform()
-        jvmArgs += java17moduleReflectionCompatibilityArguments
-        develocity {
-            testRetry {
-                maxRetries = 2
-                maxFailures = 20
-                failOnPassedAfterRetry = true
-            }
-        }
-        testLogging {
-            events('passed', 'skipped', 'failed')
-            showExceptions = true
-            exceptionFormat = 'full'
-            showCauses = true
-            showStackTraces = true
-        }
-        excludes = ['**/*TestCase.class', '**/*\$*.class']
-        if (isCiBuild) {
-            maxParallelForks = 2
-            maxHeapSize = '768m'
-            afterSuite {
-                System.out.print('.')
-                System.out.flush()
-            }
-        } else {
-            maxHeapSize = '1024m'
-        }
-        if (System.getProperty('debug.tests')) {
-            jvmArgs += debugArguments
-        }
-    }
-
-
-    // task for running a single test with -DsingleTest.single=TestName singleTest
-    tasks.register('singleTest', Test) {
-        if (System.getProperty('debug.tests')) {
-            jvmArgs += debugArguments
-        }
-    }
-
-    if (!isTestSuite) {
-        tasks.register('installToHomeDist', Copy) {
-            dependsOn 'jar', 'sourcesJar', 'javadocJar'
-            from layout.buildDirectory.dir('libs')
-            into distInstallDir
-        }
-        tasks.withType(PublishToMavenLocal).configureEach {
-            dependsOn 'installToHomeDist'
-            doLast {
-                sync {
-                    from distInstallDir
-                    into homeDistDir
-                    includeEmptyDirs = false
-                }
-            }
-        }
-    }
 }
 
 tasks.register('clean', Delete) {
