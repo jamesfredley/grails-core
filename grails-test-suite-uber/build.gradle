@@ -93,6 +93,7 @@ tasks.named('isolatedTestsTwo', Test) {
 }
 
 tasks.withType(Test).configureEach {
+    onlyIf { !project.hasProperty('onlyFunctionalTests') }
     useJUnitPlatform()
     maxParallelForks = isCiBuild ? 2 : Runtime.runtime.availableProcessors() * 3/4 as int ?: 1
     forkEvery = isCiBuild ? 25 : 100
