@@ -26,7 +26,9 @@ dependencies {
             "org.apache.groovy:groovy-ant"
 
     api "org.asciidoctor:asciidoctorj"
-    implementation "org.xhtmlrenderer:flying-saucer-pdf-openpdf"
+    implementation "org.xhtmlrenderer:flying-saucer-pdf-openpdf:${project['flying-saucer-pdf-openpdf.version']}", {
+        // TODO: For some reason, this version is not being resolved from grails-bom
+    }
 
     runtimeOnly "org.slf4j:slf4j-api"
 
@@ -63,5 +65,6 @@ apply {
     from rootProject.layout.projectDirectory.file('gradle/assemble-config.gradle')
     from rootProject.layout.projectDirectory.file('gradle/docs-config.gradle')
     from rootProject.layout.projectDirectory.file('gradle/java-config.gradle')
+    from rootProject.layout.projectDirectory.file('gradle/publish-config.gradle')
     from rootProject.layout.projectDirectory.file('gradle/test-config.gradle')
 }

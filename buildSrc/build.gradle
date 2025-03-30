@@ -3,9 +3,9 @@ plugins {
 }
 
 file('../gradle.properties').withInputStream {
-    def gradleProperties = new Properties()
-    gradleProperties.load(it)
-    gradleProperties.each { k, v -> ext.set(k, v) }
+    Properties props = new Properties()
+    props.load(it)
+    project.ext.gradleProperties = props
 }
 
 repositories {
@@ -14,11 +14,10 @@ repositories {
 }
 
 dependencies {
-    implementation "io.github.gradle-nexus:publish-plugin:$gradleNexusPublishPluginVersion"
-    implementation "com.netflix.nebula:gradle-extra-configurations-plugin:$gradleExtraConfigurationsPluginVersion"
-    implementation "com.bmuschko:gradle-nexus-plugin:$gradleNexusPluginVersion"
-    // Due to https://github.com/hierynomus/license-gradle-plugin/issues/161, spring must be excluded
-    implementation "gradle.plugin.com.hierynomus.gradle.plugins:license-gradle-plugin:$gradleLicensePluginVersion", {
+    implementation "gradle.plugin.com.hierynomus.gradle.plugins:license-gradle-plugin:$gradleProperties.gradleLicensePluginVersion", {
+        // Due to https://github.com/hierynomus/license-gradle-plugin/issues/161, spring must be excluded
         exclude group: 'org.springframework', module: 'spring-core'
     }
+    implementation "io.github.gradle-nexus:publish-plugin:$gradleProperties.gradleNexusPublishPluginVersion"
+    implementation "org.grails:grails-gradle-plugin:${gradleProperties['grails-gradle-plugin.version']}"
 }

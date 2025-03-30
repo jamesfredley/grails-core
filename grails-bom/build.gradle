@@ -2,6 +2,7 @@
 
 plugins {
     id 'java-platform'
+    id 'maven-publish'
 }
 
 version = projectVersion
@@ -18,6 +19,9 @@ def versions = new Properties()
 versions.load(new StringReader(new File("$projectDir.parentFile/gradle.properties").text))
 
 ext {
+    isGitHubRepoPublish = 'true' == System.getenv('GITHUB_PUBLISH')
+    isGrailsRepoPublish = !isGitHubRepoPublish && projectVersion.endsWith('-SNAPSHOT')
+
     // When making changes in the dependencyVersions, remember to also update the Grails BOM Documentation:
     // https://docs.grails.org/snapshot/ref/Dependency%20Versions/Grails%20BOM.html
     // Grails dependencies are listed in SCOTTL format:
