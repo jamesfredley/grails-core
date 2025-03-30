@@ -8,12 +8,5 @@ tasks.withType(GroovyCompile).configureEach {
 }
 
 tasks.withType(Jar).configureEach {
-    manifest.attributes(
-            'Built-By': System.properties['user.name'],
-            'Created-By': System.properties['java.vm.version'] + ' (' + System.properties['java.vm.vendor'] + ')',
-            'Implementation-Title': 'Grails',
-            'Implementation-Version': grailsVersion,
-            'Implementation-Vendor': 'grails.org'
-    )
     duplicatesStrategy = DuplicatesStrategy.INCLUDE
 }
