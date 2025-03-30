@@ -4,6 +4,11 @@ buildscript {
     }
     dependencies {
         classpath "org.grails:grails-gradle-plugin:${project['grails-gradle-plugin.version']}"
+        classpath "org.grails.plugins:views-gradle:${project['plugins-views-gradle.version']}", {
+            // This dependency is not needed for running the functional tests.
+            // It is added as an extra safe-guard to check that compiling gson-views
+            // for production does not fail during build task.
+        }
     }
 }
 
@@ -11,6 +16,12 @@ group "org.grails"
 version '0.0.1'
 
 apply plugin:"org.grails.grails-web"
+
+// These two plugins are not needed for running the functional tests.
+// They are added as an extra safe-guard to check that compiling gson-views and gsp
+// for production does not fail during build task.
+apply plugin: "org.grails.plugins.views-json"
+apply plugin: "org.grails.grails-gsp"
 
 dependencies {
     implementation platform("org.grails:grails-bom:$grailsVersion")
@@ -67,6 +78,10 @@ tasks.withType(GroovyCompile) {
 
 tasks.withType(Jar).configureEach {
     duplicatesStrategy = DuplicatesStrategy.INCLUDE
+}
+
+tasks.named('compileTestGroovy') {
+    dependsOn 'compileGsonViews'
 }
 
 apply {
