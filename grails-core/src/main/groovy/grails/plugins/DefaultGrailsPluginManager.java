@@ -244,8 +244,8 @@ public class DefaultGrailsPluginManager extends AbstractGrailsPluginManager {
     protected List<GrailsPlugin> sortPlugins(List<GrailsPlugin> toSort) {
         /* http://en.wikipedia.org/wiki/Topological_sorting
          *
-        * L ← Empty list that will contain the sorted nodes
-         S ← Set of all nodes
+        * L <- Empty list that will contain the sorted nodes
+         S <- Set of all nodes
 
         function visit(node n)
             if n has not been visited yet then
