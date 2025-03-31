@@ -1,5 +1,11 @@
 compileJava.options.release = javaVersion.toInteger()
 
+extensions.configure(JavaPluginExtension) {
+    // Explicit `it` is required here
+    it.withJavadocJar()
+    it.withJavadocJar()
+}
+
 tasks.withType(GroovyCompile).configureEach {
     groovyOptions.encoding = 'UTF-8'
     options.encoding = 'UTF-8'

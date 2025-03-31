@@ -12,8 +12,3 @@ tasks.named('groovydoc', Groovydoc) {
     includeMainForScripts = false
     processScripts = false
 }
-
-tasks.register('javadocJar', Jar) {
-    archiveClassifier = 'javadoc'
-    from(tasks.named('groovydoc').map { it.outputs.files })
-}
