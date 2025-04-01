@@ -10,15 +10,6 @@ ext {
     homeConfDir = layout.projectDirectory.dir('conf')
     homeLibDir = layout.projectDirectory.dir('lib')
 
-    mappedArtifactIds = [
-            // The artifactIds of these projects differ from their respective project names
-            'grails-async-core'       : 'grails-async',
-            'grails-async-plugin'     : 'async',
-            'grails-events-core'      : 'grails-events',
-            'grails-events-plugin'    : 'events',
-            'grails-plugin-converters': 'converters'
-    ]
-
     testProjectsStartWith = [
             'grails-test-suite',
             'grails-test-examples'
