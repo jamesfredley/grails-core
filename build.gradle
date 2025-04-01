@@ -9,7 +9,6 @@ ext {
     homeBinDir = layout.projectDirectory.dir('bin')
     homeConfDir = layout.projectDirectory.dir('conf')
     homeLibDir = layout.projectDirectory.dir('lib')
-    homeSrcDir = layout.projectDirectory.dir('src')
 
     mappedArtifactIds = [
             // The artifactIds of these projects differ from their respective project names
@@ -63,7 +62,7 @@ subprojects {
 
 tasks.register('clean', Delete) {
     group = 'build'
-    delete(layout.buildDirectory, homeBinDir, homeConfDir, homeDistDir, homeLibDir, homeSrcDir)
+    delete(layout.buildDirectory, homeBinDir, homeConfDir, homeDistDir, homeLibDir)
 }
 
 apply {
