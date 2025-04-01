@@ -43,9 +43,6 @@ subprojects {
                 if (details.requested.group == 'org.apache.groovy') {
                     details.useVersion(groovyVersion)
                 }
-                if (details.requested.group == 'org.spockframework') {
-                    details.useVersion(findProperty('spock.version') as String)
-                }
             }
         }
     }
