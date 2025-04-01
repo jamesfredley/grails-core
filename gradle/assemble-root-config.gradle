@@ -5,6 +5,11 @@ import org.grails.gradle.GrailsBuildPlugin
 
 apply plugin: GrailsBuildPlugin
 
+static boolean shouldBeInstalled(Project project) {
+    !project.name.startsWith('grails-test-examples') &&
+    !project.name.startsWith('grails-test-suite')
+}
+
 tasks.register('collectCliDependencies') {
     ext {
         baseCachesDir = "$gradle.gradleUserHomeDir/caches"
@@ -104,9 +109,9 @@ class GrailsCreateStartScripts extends CreateStartScripts {
 
 tasks.register('install') { task ->
     dependsOn 'syncCliDependencies', 'grailsCreateStartScripts'
-    subprojects { Project project ->
-        if(!project.name.startsWith('grails-test-suite') && !project.name.startsWith('grails-test-examples')) {
-            task.dependsOn("$project.name:publishToMavenLocal")
+    subprojects { Project subproject ->
+        if (shouldBeInstalled(subproject)) {
+            task.dependsOn("$subproject.name:publishToMavenLocal")
         }
     }
 }
