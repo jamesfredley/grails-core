@@ -99,6 +99,7 @@ jobs:
         id: publish
         env:
           GRADLE_PUBLISH_RELEASE: 'false'
+          MAVEN_PUBLISH_URL: 'https://repository.apache.org/content/repositories/snapshots'
           MAVEN_PUBLISH_USERNAME: ${{ secrets.NEXUS_PUBLISH_USERNAME }}
           MAVEN_PUBLISH_PASSWORD: ${{ secrets.NEXUS_PUBLISH_PASSWORD  }}
         run: >
