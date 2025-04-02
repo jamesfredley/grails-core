@@ -5,10 +5,10 @@ plugins {
 }
 
 version = projectVersion
-group = 'org.grails.plugins'
+group = 'org.apache.grails'
 
 ext {
-    pomArtifactId = 'async'
+    pomArtifactId = 'grails-async'
     snapshotPublishRepo = 'https://repo.grails.org/grails/plugins3-snapshots-local'
 }
 
@@ -25,7 +25,7 @@ dependencies {
     api 'org.springframework:spring-context'
     api 'org.springframework:spring-tx'
 
-    implementation project(':grails-plugin-controllers')
+    implementation project(':grails-controllers')
     implementation project(':grails-web-mvc')
     implementation 'org.springframework:spring-core'
     implementation 'org.springframework:spring-web'

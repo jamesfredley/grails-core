@@ -5,14 +5,17 @@ plugins {
 }
 
 version = projectVersion
-group = 'org.grails'
+group = 'org.apache.grails.web'
 
 dependencies {
 
     implementation platform(project(':grails-bom'))
 
     api project(":grails-web-common")
-    compileOnly "org.grails:grails-gsp"
+    compileOnly "org.grails:grails-gsp", {
+        exclude module: 'grails-encoder'
+        exclude module: 'grails-core'
+    }
 
     api "org.apache.groovy:groovy:$groovyVersion"
     api("org.grails:grails-datastore-gorm-validation")

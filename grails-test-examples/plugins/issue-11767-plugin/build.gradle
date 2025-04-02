@@ -16,7 +16,7 @@ dependencies {
     implementation platform(project(':grails-bom'))
 
     annotationProcessor 'io.micronaut:micronaut-inject-java'
-    implementation 'org.grails:grails-core'
+    implementation 'org.apache.grails:grails-core'
     compileOnly 'io.micronaut:micronaut-inject-groovy'
 }
 

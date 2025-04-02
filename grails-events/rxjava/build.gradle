@@ -5,7 +5,7 @@ plugins {
 }
 
 version = projectVersion
-group = 'org.grails'
+group = 'org.apache.grails.events'
 
 dependencies {
     implementation platform(project(':grails-bom'))
@@ -16,7 +16,7 @@ dependencies {
     implementation 'org.apache.groovy:groovy'
     implementation 'org.slf4j:slf4j-api'
 
-    testImplementation project(':grails-events-transform')
+    testImplementation project(':grails-events-transforms')
     testImplementation 'org.grails:grails-datastore-core'
     testImplementation 'org.grails:grails-datastore-gorm-test'
     testImplementation 'org.spockframework:spock-core'

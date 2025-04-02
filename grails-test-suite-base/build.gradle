@@ -5,7 +5,7 @@ plugins {
 }
 
 version = projectVersion
-group = 'org.grails'
+group = 'org.apache.grails.testing'
 
 dependencies {
 
@@ -14,11 +14,11 @@ dependencies {
     api project(':grails-bootstrap'),
         project(':grails-core'),
         project(':grails-spring'),
-        project(':grails-web'),
-        project(':grails-test'),
-        project(':grails-plugin-domain-class')
+        project(':grails-web-core'),
+        project(':grails-test-core'),
+        project(':grails-domain-class')
 
-    api project(":grails-plugin-converters")
+    api project(":grails-converters")
     api "org.apache.groovy:groovy:$groovyVersion"
 
     compileOnly 'jakarta.servlet:jakarta.servlet-api'

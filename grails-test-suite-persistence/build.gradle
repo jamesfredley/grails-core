@@ -5,24 +5,20 @@ plugins {
 }
 
 version = projectVersion
-group = 'org.grails'
-
-configurations.testCompileClasspath {
-    exclude module: "grails-plugin-testing"
-}
+group = 'org.apache.grails.testing'
 
 dependencies {
     testImplementation platform(project(':grails-bom'))
-    testImplementation project(':grails-plugin-codecs')
+    testImplementation project(':grails-codecs')
 
     testImplementation project(':grails-test-suite-base'),
-                project(':grails-plugin-domain-class'),
-                project(':grails-plugin-datasource'),
-                project(':grails-plugin-i18n'),
-                project(':grails-plugin-url-mappings'),
-                project(':grails-plugin-databinding'),
-                project(':grails-plugin-services'),
-                project(':grails-plugin-controllers'),
+                project(':grails-domain-class'),
+                project(':grails-datasource'),
+                project(':grails-i18n'),
+                project(':grails-url-mappings'),
+                project(':grails-databinding'),
+                project(':grails-services'),
+                project(':grails-controllers'),
                 project(':grails-bootstrap'),
                 project(':grails-spring')
 
@@ -40,9 +36,12 @@ dependencies {
 
     testImplementation project(':grails-async-plugin')
     testImplementation "org.grails:grails-gorm-testing-support", {
-        exclude module:'grails-testing-support'
+        exclude module:'grails-plugin-rest' // TODO: Remove after gorm is built
+        exclude module:'grails-rest-transforms' // TODO: Remove after gorm is built
+        exclude module:'grails-testing-support-core'
+        exclude module:'grails-testing-support' // TODO: Remove after gorm is built
     }
-    testImplementation project(':grails-testing-support')
+    testImplementation project(':grails-testing-support-core')
 
     compileOnly 'jakarta.servlet:jakarta.servlet-api'
     compileOnly 'org.springframework:spring-test', {

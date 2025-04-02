@@ -5,14 +5,24 @@ plugins {
 }
 
 version = projectVersion
-group = 'org.grails'
+group = 'org.apache.grails'
 
 dependencies {
 
     implementation platform(project(':grails-bom'))
 
-    api "commons-codec:commons-codec"
+    api project(":grails-web-core")
+    api project(":grails-encoder")
     api "org.apache.groovy:groovy:$groovyVersion"
+    runtimeOnly project(":grails-codecs")
+
+    compileOnly 'jakarta.servlet:jakarta.servlet-api'
+    compileOnly 'org.springframework:spring-test', {
+        // MockHttpServletRequest/Response/Context used in many classes
+    }
+
+    testImplementation 'jakarta.servlet:jakarta.servlet-api'
+    testImplementation 'org.springframework:spring-test'
 
     testImplementation 'org.apache.groovy:groovy-test-junit5'
     testImplementation 'org.junit.jupiter:junit-jupiter-api'

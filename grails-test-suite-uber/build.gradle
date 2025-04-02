@@ -4,25 +4,25 @@ plugins {
 }
 
 version = projectVersion
-group = 'org.grails'
+group = 'org.apache.grails.testing'
 
 dependencies {
     implementation platform(project(':grails-bom'))
 
     testImplementation project(':grails-async-plugin')
-    testImplementation project(':grails-plugin-codecs')
-    testImplementation project(':grails-plugin-controllers')
-    testImplementation project(':grails-plugin-databinding')
-    testImplementation project(':grails-plugin-datasource')
-    testImplementation project(':grails-plugin-domain-class')
-    testImplementation project(':grails-plugin-i18n')
-    testImplementation project(':grails-plugin-interceptors')
-    testImplementation project(':grails-plugin-rest')
-    testImplementation project(':grails-plugin-services')
-    testImplementation project(':grails-plugin-url-mappings')
+    testImplementation project(':grails-codecs')
+    testImplementation project(':grails-controllers')
+    testImplementation project(':grails-databinding')
+    testImplementation project(':grails-datasource')
+    testImplementation project(':grails-domain-class')
+    testImplementation project(':grails-i18n')
+    testImplementation project(':grails-interceptors')
+    testImplementation project(':grails-rest-transforms')
+    testImplementation project(':grails-services')
+    testImplementation project(':grails-url-mappings')
     testImplementation project(':grails-spring')
     testImplementation project(':grails-test-suite-base')
-    testImplementation project(':grails-testing-support')
+    testImplementation project(':grails-testing-support-core')
     testImplementation 'org.apache.groovy:groovy'
     testImplementation 'org.apache.groovy:groovy-test-junit5'
     testImplementation 'org.junit.jupiter:junit-jupiter-api'
@@ -30,11 +30,18 @@ dependencies {
     testImplementation "org.grails.plugins:gsp"
     testImplementation 'org.grails:grails-gorm-testing-support', {
         // This is a local project dependency
-        exclude module:'grails-testing-support'
+        exclude module: 'grails-testing-support-core'
+        exclude module: 'grails-testing-support'// TODO: remove after gorm is built
+        exclude module: 'grails-plugin-rest' // TODO: remove after gorm is built
+        exclude module: 'grails-rest-transforms'
     }
     testImplementation 'org.grails:grails-web-testing-support', {
         // This is a local project dependency
-        exclude module:'grails-testing-support'
+        exclude module: 'grails-testing-support-core'
+        exclude module: 'grails-plugin-interceptors' // TODO: remove after views is built
+        exclude module: 'grails-testing-support' // TODO: remove after views is built
+        exclude module: 'grails-plugin-rest' // TODO: remove after views is built
+        exclude module: 'grails-rest-transforms'
     }
     testImplementation 'org.objenesis:objenesis'
 

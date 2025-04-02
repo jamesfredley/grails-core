@@ -16,9 +16,9 @@ dependencies {
 
     implementation project(':issue-11767-plugin')
 
-    implementation 'org.grails:grails-core'
-    implementation 'org.grails:grails-logging'
-    implementation 'org.grails:grails-plugin-url-mappings'
+    implementation 'org.apache.grails:grails-core'
+    implementation 'org.apache.grails:grails-logging'
+    implementation 'org.apache.grails:grails-url-mappings'
     implementation 'org.springframework.boot:spring-boot-starter-tomcat'
 
     compileOnly 'io.micronaut:micronaut-inject-groovy'
