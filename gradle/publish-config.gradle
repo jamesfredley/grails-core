@@ -1,15 +1,6 @@
 import org.grails.gradle.plugin.publishing.GrailsPublishExtension
 
-if (project.hasProperty('mavenSnapshotPublishUrl')) {
-    ext.set('mavenPublishUrl', property('mavenSnapshotPublishUrl'))
-    logger.lifecycle(
-            'Configuring {}:{} snapshot publish repo: {}',
-            group,
-            findProperty('pomArtifactId') ?: name,
-            mavenPublishUrl
-    )
-}
-
+ext.set('mavenPublishUrl', 'https://repository.apache.org/content/repositories/snapshots')
 extensions.configure(GrailsPublishExtension) {
     // Explicit `it` is required here
     it.artifactId = findProperty('pomArtifactId') ?: project.name
