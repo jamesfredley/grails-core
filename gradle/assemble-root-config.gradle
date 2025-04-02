@@ -11,8 +11,7 @@ tasks.register('collectCliDependencies') {
     doLast {
         def projectNames = subprojects*.name
         def seen = []
-        project(':grails-shell').configurations.cli.with {
-            exclude(group: 'org.codehaus.groovy')
+        project(':grails-shell').configurations.runtimeClasspath.with {
             for (artifact in resolvedConfiguration.resolvedArtifacts) {
                 if (artifact in seen) continue
                 seen << artifact
