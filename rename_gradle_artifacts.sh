@@ -64,7 +64,7 @@ while getopts "pdvsqrtcfgl:" flag; do
     "org[.]grails:grails-events-compat|org.apache.grails.events:grails-events-compat"
     "org[.]grails:grails-events|org.apache.grails.events:grails-events-core"
     "org[.]grails:grails-encoder|org.apache.grails.web:grails-encoder"
-    "org[.]grails:grails-docs|org.apache.grails:grails-docs-task"
+    "org[.]grails:grails-docs|org.apache.grails:grails-docs-core"
     "org[.]grails:grails-dependencies|org.apache.grails:grails-dependencies"
     "org[.]grails:grails-databinding|org.apache.grails.databinding:grails-databinding-core"
     "org[.]grails:grails-core|org.apache.grails:grails-core"
