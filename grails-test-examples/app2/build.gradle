@@ -34,7 +34,7 @@ dependencies {
     runtimeOnly "org.grails.plugins:scaffolding"
     runtimeOnly "org.grails.plugins:fields"
 
-    testImplementation "org.apache.grails.web:grails-web-testing-support"
+    testImplementation "org.grails:grails-web-testing-support"
     testImplementation "org.grails:grails-gorm-testing-support"
 
     console "org.apache.grails:grails-console"

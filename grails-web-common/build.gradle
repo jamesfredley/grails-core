@@ -14,9 +14,12 @@ dependencies {
     api project(":grails-core"), {
         exclude group:'org.grails', module:'grails-spring'
     }
-    api project(":grails-databinding")
+    api project(":grails-databinding-core")
     api project(":grails-encoder")
-    compileOnly "org.grails:grails-gsp"
+    compileOnly "org.grails:grails-gsp", {
+        exclude module: 'grails-encoder'
+        exclude module: 'grails-core'
+    }
 
     api "org.apache.groovy:groovy:$groovyVersion"
     api "org.apache.groovy:groovy-templates"

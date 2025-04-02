@@ -48,7 +48,7 @@ def publishedProjects = [
         'grails-testing-support-core',
         'grails-url-mappings',
         'grails-validation',
-        'grails-web',
+        'grails-web-core',
         'grails-web-boot',
         'grails-web-common',
         'grails-web-databinding',

@@ -15,9 +15,14 @@ dependencies {
     api project(":grails-web-databinding")
     api project(":grails-web-url-mappings")
     api project(":grails-web-mvc")
+    api project(":grails-encoder")
     api "org.apache.groovy:groovy:$groovyVersion"
 
-    api "org.grails:grails-web"
+    api "org.grails:grails-web-gsp", {
+        exclude module: 'grails-encoder'
+        exclude module: 'grails-core'
+        exclude module: 'grails-web-common'
+    }
 
     compileOnly 'jakarta.servlet:jakarta.servlet-api'
     compileOnly 'org.springframework:spring-test', {

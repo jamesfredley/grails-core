@@ -14,8 +14,8 @@ dependencies {
     api project(':grails-bootstrap'),
         project(':grails-core'),
         project(':grails-spring'),
-        project(':grails-web'),
-        project(':grails-test'),
+        project(':grails-web-core'),
+        project(':grails-test-core'),
         project(':grails-domain-class')
 
     api project(":grails-converters")

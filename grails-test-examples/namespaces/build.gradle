@@ -35,7 +35,7 @@ dependencies {
     runtimeOnly "org.grails.plugins:fields"
     runtimeOnly "org.apache.tomcat:tomcat-jdbc"
 
-    testImplementation "org.apache.grails.web:grails-web-testing-support"
+    testImplementation "org.grails:grails-web-testing-support"
     testImplementation "org.grails:grails-gorm-testing-support"
 
     console "org.apache.grails:grails-console"

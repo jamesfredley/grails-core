@@ -56,7 +56,7 @@ dependencies {
     runtimeOnly "com.bertramlabs.plugins:asset-pipeline-grails"
     testImplementation "org.grails:grails-gorm-testing-support"
     testImplementation "org.mockito:mockito-core"
-    testImplementation "org.apache.grails.web:grails-web-testing-support"
+    testImplementation "org.grails:grails-web-testing-support"
 
     integrationTestImplementation testFixtures("org.grails.plugins:geb")
 }

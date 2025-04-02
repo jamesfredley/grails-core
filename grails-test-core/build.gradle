@@ -22,7 +22,7 @@ dependencies {
 
 
     api project(":grails-mimetypes")
-    api project(":grails-web")
+    api project(":grails-web-core")
     api project(":grails-converters")
     api "org.apache.groovy:groovy:$groovyVersion"
 

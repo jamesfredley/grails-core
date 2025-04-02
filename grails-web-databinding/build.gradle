@@ -11,11 +11,17 @@ dependencies {
 
     implementation platform(project(':grails-bom'))
 
-    api project(":grails-databinding")
-    api project(":grails-web-common")
+    api project(":grails-databinding-core")
+    api project(":grails-web-common"), {
+        exclude module: 'grails-encoder'
+    }
+    api project(':grails-encoder')
     api "org.apache.groovy:groovy:$groovyVersion"
 
-    testRuntimeOnly "org.grails:grails-gsp"
+    testRuntimeOnly "org.grails:grails-gsp", {
+        exclude module: 'grails-encoder'
+        exclude module: 'grails-core'
+    }
 
     compileOnly 'jakarta.servlet:jakarta.servlet-api'
     compileOnly 'org.springframework:spring-test', {

@@ -36,9 +36,12 @@ dependencies {
 
     testImplementation project(':grails-async-plugin')
     testImplementation "org.grails:grails-gorm-testing-support", {
+        exclude module:'grails-plugin-rest' // TODO: Remove after gorm is built
+        exclude module:'grails-rest-transforms' // TODO: Remove after gorm is built
         exclude module:'grails-testing-support-core'
+        exclude module:'grails-testing-support' // TODO: Remove after gorm is built
     }
-    testImplementation project(':grails-testing-support')
+    testImplementation project(':grails-testing-support-core')
 
     compileOnly 'jakarta.servlet:jakarta.servlet-api'
     compileOnly 'org.springframework:spring-test', {

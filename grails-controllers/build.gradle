@@ -11,11 +11,11 @@ dependencies {
 
     implementation platform(project(':grails-bom'))
 
-    api project(":grails-core"),
-            project(":grails-web"),
-            project(':grails-mimetypes'),
-            project(':grails-validation'),
-            project(':grails-domain-class')
+    api project(":grails-core")
+    api project(":grails-web-core")
+    api project(':grails-mimetypes')
+    api project(':grails-validation')
+    api project(':grails-domain-class')
 
     api "org.apache.groovy:groovy:$groovyVersion"
     api("org.springframework.boot:spring-boot-autoconfigure")

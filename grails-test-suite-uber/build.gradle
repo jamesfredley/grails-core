@@ -9,7 +9,7 @@ group = 'org.apache.grails.testing'
 dependencies {
     implementation platform(project(':grails-bom'))
 
-    testImplementation project(':grails-async')
+    testImplementation project(':grails-async-plugin')
     testImplementation project(':grails-codecs')
     testImplementation project(':grails-controllers')
     testImplementation project(':grails-databinding')
@@ -22,7 +22,7 @@ dependencies {
     testImplementation project(':grails-url-mappings')
     testImplementation project(':grails-spring')
     testImplementation project(':grails-test-suite-base')
-    testImplementation project(':grails-testing-support')
+    testImplementation project(':grails-testing-support-core')
     testImplementation 'org.apache.groovy:groovy'
     testImplementation 'org.apache.groovy:groovy-test-junit5'
     testImplementation 'org.junit.jupiter:junit-jupiter-api'
@@ -30,11 +30,18 @@ dependencies {
     testImplementation "org.grails.plugins:gsp"
     testImplementation 'org.grails:grails-gorm-testing-support', {
         // This is a local project dependency
-        exclude module:'grails-testing-support-core'
+        exclude module: 'grails-testing-support-core'
+        exclude module: 'grails-testing-support'// TODO: remove after gorm is built
+        exclude module: 'grails-plugin-rest' // TODO: remove after gorm is built
+        exclude module: 'grails-rest-transforms'
     }
-    testImplementation 'org.apache.grails.web:grails-web-testing-support', {
+    testImplementation 'org.grails:grails-web-testing-support', {
         // This is a local project dependency
-        exclude module:'grails-testing-support-core'
+        exclude module: 'grails-testing-support-core'
+        exclude module: 'grails-plugin-interceptors' // TODO: remove after views is built
+        exclude module: 'grails-testing-support' // TODO: remove after views is built
+        exclude module: 'grails-plugin-rest' // TODO: remove after views is built
+        exclude module: 'grails-rest-transforms'
     }
     testImplementation 'org.objenesis:objenesis'
 
