@@ -99,9 +99,9 @@ jobs:
         id: publish
         env:
           GRADLE_PUBLISH_RELEASE: 'false'
-          MAVEN_PUBLISH_URL: 'https://repository.apache.org/content/repositories/snapshots'
-          MAVEN_PUBLISH_USERNAME: ${{ secrets.NEXUS_PUBLISH_USERNAME }}
-          MAVEN_PUBLISH_PASSWORD: ${{ secrets.NEXUS_PUBLISH_PASSWORD  }}
+          MAVEN_PUBLISH_URL: ${{ secrets.GRAILS_NEXUS_PUBLISH_SNAPSHOT_URL }}
+          MAVEN_PUBLISH_USERNAME: ${{ secrets.GRAILS_NEXUS_USER }}
+          MAVEN_PUBLISH_PASSWORD: ${{ secrets.GRAILS_NEXUS_PW  }}
         run: >
           ./gradlew
           -Dorg.gradle.internal.publish.checksums.insecure=true
