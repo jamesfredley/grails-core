@@ -21,7 +21,7 @@ import groovy.transform.CompileStatic
 /**
  * Gradle ToolingModel class that is used to return Classpath to Grails cli
  *
- * this file is also in grails-shell project
+ * this file is also in grails-shell-cli project
  */
 @CompileStatic
 interface GrailsClasspath extends Serializable {

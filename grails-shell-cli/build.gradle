@@ -15,7 +15,7 @@ application {
 configurations {
     // This is a workaround that can optimize the performance of the Shell CLI by reducing the length of the CLASSPATH,
     // while also solving the problem of the length limit of command line parameters in the Windows environment
-    // This can be removed when we solve the dependencies of grails-bootstrap, grails-shell
+    // This can be removed when we solve the dependencies of grails-bootstrap, grails-shell-cli
     runtimeClasspath {
         exclude group: 'commons-codec', module: 'commons-codec'
         exclude group: 'com.github.ben-manes.caffeine', module: 'caffeine'
@@ -53,7 +53,7 @@ dependencies {
 
     implementation platform(project(':grails-bom'))
 
-    // compile grails-shell with the Groovy version provided by Gradle
+    // compile grails-shell-cli with the Groovy version provided by Gradle
     // to ensure build compatibility with Gradle, currently Groovy 3.0.x
     // when used by grails-gradle-plugin
     // see: https://docs.gradle.org/current/userguide/compatibility.html#groovy
