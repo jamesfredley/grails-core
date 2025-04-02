@@ -7,7 +7,7 @@ plugins {
 }
 
 version = projectVersion
-group = 'org.grails'
+group = 'org.apache.grails.bootstrap'
 
 dependencies {
     implementation platform(project(':grails-bom'))

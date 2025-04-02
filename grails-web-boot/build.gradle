@@ -5,7 +5,7 @@ plugins {
 }
 
 version = projectVersion
-group = 'org.grails'
+group = 'org.apache.grails.web'
 
 dependencies {
 
@@ -14,11 +14,11 @@ dependencies {
     api project(":grails-web-common")
     api "org.apache.groovy:groovy:$groovyVersion"
 
-    testImplementation project(":grails-plugin-controllers")
+    testImplementation project(":grails-controllers")
 
     testImplementation "org.apache.tomcat.embed:tomcat-embed-core"
-    testRuntimeOnly project(":grails-plugin-i18n")
-    testRuntimeOnly project(":grails-plugin-url-mappings")
+    testRuntimeOnly project(":grails-i18n")
+    testRuntimeOnly project(":grails-url-mappings")
 
     compileOnly 'jakarta.servlet:jakarta.servlet-api'
     compileOnly 'org.springframework:spring-test', {

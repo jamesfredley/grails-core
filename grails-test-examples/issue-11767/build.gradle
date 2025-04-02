@@ -16,9 +16,9 @@ dependencies {
 
     implementation project(':issue-11767-plugin')
 
-    implementation 'org.grails:grails-core'
-    implementation 'org.grails:grails-logging'
-    implementation 'org.grails:grails-plugin-url-mappings'
+    implementation 'org.apache.grails:grails-core'
+    implementation 'org.apache.grails:grails-logging'
+    implementation 'org.apache.grails:grails-url-mappings'
     implementation 'org.springframework.boot:spring-boot-starter-tomcat'
 
     compileOnly 'io.micronaut:micronaut-inject-groovy'
@@ -26,7 +26,7 @@ dependencies {
     testImplementation 'io.micronaut:micronaut-http-client'
     testImplementation "io.micronaut.serde:micronaut-serde-jackson:$micronautSerdeJacksonVersion"
     testImplementation 'io.micronaut:micronaut-inject-groovy'
-    testImplementation 'org.grails:grails-web-testing-support'
+    testImplementation 'org.apache.grails.web:grails-web-testing-support'
     testImplementation 'org.spockframework:spock-core'
 
 }

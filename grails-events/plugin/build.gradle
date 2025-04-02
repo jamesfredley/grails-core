@@ -5,10 +5,10 @@ plugins {
 }
 
 version = projectVersion
-group = 'org.grails.plugins'
+group = 'org.apache.grails'
 
 ext {
-    pomArtifactId = 'events'
+    pomArtifactId = 'grails-events'
     snapshotPublishRepo = 'https://repo.grails.org/grails/plugins3-snapshots-local'
 }
 
@@ -21,7 +21,7 @@ dependencies {
     // This dependency contains Groovy Ast transformations
     // that needs to be on the compile classpath of dependent projects.
     // https://github.com/gradle/gradle/issues/21539
-    api project(':grails-events-transform')
+    api project(':grails-events-transforms')
 
     // As this is a plugin these dependencies will be provided by the Grails application
     // This removes circular dependencies

@@ -29,16 +29,30 @@ rootProject.name = 'grails.core.ROOT'
 
 include (
         'grails-bootstrap',
+        'grails-codecs-core',
         'grails-codecs',
         'grails-console',
+        'grails-controllers',
+        'grails-converters',
         'grails-core',
+        'grails-databinding-core',
         'grails-databinding',
-        'grails-docs',
+        'grails-datasource',
+        'grails-docs-core',
+        'grails-domain-class',
         'grails-encoder',
+        'grails-i18n',
+        'grails-interceptors',
         'grails-logging',
-        'grails-shell',
+        'grails-mimetypes',
+        'grails-rest-transforms',
+        'grails-services',
+        'grails-shell-cli',
         'grails-spring',
-        'grails-test',
+        'grails-test-core',
+        'grails-testing-support-core',
+        'grails-url-mappings',
+        'grails-validation',
         'grails-web',
         'grails-web-common',
         'grails-web-boot',
@@ -46,27 +60,9 @@ include (
         'grails-web-mvc',
         'grails-web-url-mappings',
 
-        // test support
-        'grails-testing-support',
-
         // POM / BOMs
         'grails-dependencies',
         'grails-bom',
-
-        // Plugins
-        'grails-plugin-codecs',
-        'grails-plugin-controllers',
-        'grails-plugin-converters',
-        'grails-plugin-databinding',
-        'grails-plugin-datasource',
-        'grails-plugin-domain-class',
-        'grails-plugin-interceptors',
-        'grails-plugin-i18n',
-        'grails-plugin-mimetypes',
-        'grails-plugin-rest',
-        'grails-plugin-services',
-        'grails-plugin-url-mappings',
-        'grails-plugin-validation',
 
         // Test Suite
         'grails-test-suite-base',
@@ -80,7 +76,7 @@ include (
         // events
         'grails-events-core',
         'grails-events-compat',
-        'grails-events-transform',
+        'grails-events-transforms',
         'grails-events-gpars',
         'grails-events-spring',
         'grails-events-rxjava',
@@ -101,7 +97,7 @@ include (
 // (Preserve the parent directory name as part of the nested project name)
 project(':grails-events-core').projectDir = file('grails-events/core')
 project(':grails-events-compat').projectDir = file('grails-events/compat')
-project(':grails-events-transform').projectDir = file('grails-events/transform')
+project(':grails-events-transforms').projectDir = file('grails-events/transforms')
 project(':grails-events-gpars').projectDir = file('grails-events/gpars')
 project(':grails-events-spring').projectDir = file('grails-events/spring')
 project(':grails-events-rxjava').projectDir = file('grails-events/rxjava')

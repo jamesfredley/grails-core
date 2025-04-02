@@ -3,7 +3,7 @@ plugins {
 }
 
 version = projectVersion
-group = 'org.grails'
+group = 'org.apache.grails.testing'
 
 dependencies {
 
@@ -15,10 +15,10 @@ dependencies {
     }
     testImplementation project(':grails-test-suite-base')
     testImplementation project(':grails-testing-support')
-    testImplementation project(':grails-plugin-interceptors')
-    testImplementation project(':grails-plugin-rest')
+    testImplementation project(':grails-interceptors')
+    testImplementation project(':grails-rest-transforms')
     testImplementation 'org.apache.groovy:groovy'
-    testImplementation 'org.grails:grails-web-testing-support', {
+    testImplementation 'org.apache.grails.web:grails-web-testing-support', {
         // This is a local project dependency
         exclude group: 'org.grails', module: 'grails-testing-support'
     }

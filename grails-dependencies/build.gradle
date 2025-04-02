@@ -4,7 +4,7 @@ plugins {
 }
 
 version = projectVersion
-group = 'org.grails'
+group = 'org.apache.grails'
 
 ext {
     skipJavaComponent = true
@@ -12,15 +12,15 @@ ext {
 
 def configurations = [
         'api': [
-                "org.grails:grails-bootstrap:$version",
-                "org.grails:grails-plugin-rest:$version",
-                "org.grails:grails-plugin-databinding:$version",
-                "org.grails:grails-plugin-i18n:$version",
-                "org.grails:grails-plugin-services:$version",
-                "org.grails:grails-plugin-url-mappings:$version",
-                "org.grails:grails-plugin-interceptors:$version",
-                "org.grails.plugins:async:$version",
-                "org.grails.plugins:events:$version",
+                "org.apache.grails.bootstrap:grails-bootstrap:$version",
+                "org.apache.grails:grails-rest-transforms:$version",
+                "org.apache.grails:grails-databinding:$version",
+                "org.apache.grails:grails-i18n:$version",
+                "org.apache.grails:grails-services:$version",
+                "org.apache.grails:grails-url-mappings:$version",
+                "org.apache.grails:grails-interceptors:$version",
+                "org.apache.grails:grails-async:$version",
+                "org.apache.grails:grails-events:$version",
                 "org.grails.plugins:gsp:${property('gsp.version')}",
         ],
         'runtimeOnly': [

@@ -5,14 +5,37 @@ plugins {
 }
 
 version = projectVersion
-group = 'org.grails'
+group = 'org.apache.grails'
 
 dependencies {
 
     implementation platform(project(':grails-bom'))
 
+    api project(':grails-core'), project(':grails-web')
     api "org.apache.groovy:groovy:$groovyVersion"
-    api "org.apache.groovy:groovy-xml"
+    api "org.springframework.boot:spring-boot-autoconfigure"
+
+    testImplementation project(':grails-codecs')
+
+    testImplementation project(':grails-test-suite-base')
+    testImplementation "org.apache.grails.web:grails-web-testing-support", {
+        exclude module:'grails-rest-transforms'
+        exclude module:'grails-interceptors'
+        exclude module:'grails-test-core'
+        exclude module:'grails-core'
+        exclude module:'grails-async'
+        exclude module:'gsp'
+        exclude module:'grails-testing-support-core'
+    }
+    testImplementation project(':grails-testing-support-core')
+
+    compileOnly 'jakarta.servlet:jakarta.servlet-api'
+    compileOnly 'org.springframework:spring-test', {
+      // MockHttpServletRequest/Response/Context used in many classes
+    }
+
+    testImplementation 'jakarta.servlet:jakarta.servlet-api'
+    testImplementation 'org.springframework:spring-test'
 
     testImplementation 'org.apache.groovy:groovy-test-junit5'
     testImplementation 'org.junit.jupiter:junit-jupiter-api'
@@ -30,6 +53,10 @@ dependencies {
     // Required by Spock's Mocking
     testRuntimeOnly 'net.bytebuddy:byte-buddy'
     testImplementation 'org.objenesis:objenesis'
+  }
+
+tasks.named('compileTestGroovy').configure {
+  dependsOn tasks.named('jar')
 }
 
 apply {
