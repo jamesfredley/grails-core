@@ -39,8 +39,8 @@ tasks.register('grailsCreateStartScripts', GrailsCreateStartScripts) {
     applicationName = 'grails'
     defaultJvmOpts = ['-XX:+TieredCompilation', '-XX:TieredStopAtLevel=1', '-XX:CICompilerCount=3']
     outputDir = rootProject.layout.projectDirectory.dir('bin').asFile
-    classpath = rootProject.childProjects['grails-shell'].configurations.runtimeClasspath
-    projectArtifacts = rootProject.childProjects['grails-shell'].tasks.named('jar').get().outputs.files.collect { "dist/${it.name}" } as List<String>
+    classpath = rootProject.childProjects['grails-shell-cli'].configurations.runtimeClasspath
+    projectArtifacts = rootProject.childProjects['grails-shell-cli'].tasks.named('jar').get().outputs.files.collect { "dist/${it.name}" } as List<String>
     doLast {
         ant.replace(file: rootProject.layout.projectDirectory.file('bin/grails').asFile, token: 'media/gradle.icns', value: 'media/icons/grails.icns')
         ant.chmod(file: rootProject.layout.projectDirectory.file('bin/grails').asFile, perm: 'ugo+rx')
@@ -54,7 +54,7 @@ class GrailsCreateStartScripts extends CreateStartScripts {
 
     @TaskAction
     void generate() {
-        Project grailsShellProject = project.rootProject.childProjects['grails-shell']
+        Project grailsShellProject = project.rootProject.childProjects['grails-shell-cli']
         def unixStartScriptGenerator = new UnixStartScriptGenerator()
         unixStartScriptGenerator.template = grailsShellProject.resources.text.fromFile('src/main/resources/unixStartScript.txt')
         def generator = new StartScriptGenerator(unixStartScriptGenerator, new WindowsStartScriptGenerator())
