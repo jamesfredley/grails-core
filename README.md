@@ -10,3 +10,9 @@ With the removal of Criterion API in Hibernate 6, we wanted to continue to suppo
 For testing the following was done:
 * Used testcontainers of postgres instead of h2 because h2 does not support all the Java Types correctly.
 * A more opinionated and fluent HibernateGormDatastoreSpec is used for the specifications.
+
+### Largest Gaps
+* Multitenancy
+* Proxy support
+* AbstractHibernateCriteriaBuilder coverage. (In contrast to HibernateQuery which has good coverage)
+* AsbtractGormStaticApi coverage
