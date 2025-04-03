@@ -82,6 +82,11 @@ class GrailsPublishExtension {
      */
     Boolean publishTestSources
 
+    /**
+     * If the artifacts published by this project should be considered a javaPlatform (a bom)
+     */
+    Boolean javaPlatform
+
     License getLicense() {
         return license
     }

@@ -468,7 +468,7 @@ class GrailsPublishPluginSpec extends GradleSpecification {
                     maven { url = 'https://repo.grails.org/grails/core' }
                 }
                 dependencies {
-                    classpath "org.grails:grails-gradle-plugin:\$grailsGradlePluginVersion"
+                    classpath "org.apache.grails:grails-gradle-plugins:\$grailsGradlePluginVersion"
                 }
             }
             
@@ -486,9 +486,9 @@ class GrailsPublishPluginSpec extends GradleSpecification {
                 implementation "org.apache.groovy:groovy:\$groovyVersion"
             }
         
-            apply plugin: 'org.grails.grails-publish'
+            apply plugin: 'org.apache.grails.gradle.grails-publish'
             grailsPublish {
-                githubSlug = 'grails/grails-gradle-plugin'
+                githubSlug = 'apache/grails-gradle-plugins'
                 license {
                     name = 'Apache-2.0'
                 }
@@ -535,13 +535,13 @@ class GrailsPublishPluginSpec extends GradleSpecification {
                     maven { url = 'https://repo.grails.org/grails/core' }
                 }
                 dependencies {
-                    classpath "org.grails:grails-gradle-plugin:\$grailsGradlePluginVersion"
+                    classpath "org.apache.grails:grails-gradle-plugins:\$grailsGradlePluginVersion"
                 }
             }
             
             version "0.0.1"
             
-            apply plugin: 'org.grails.grails-publish'
+            apply plugin: 'org.apache.grails.gradle.grails-publish'
         """
 
         when:
@@ -569,14 +569,14 @@ class GrailsPublishPluginSpec extends GradleSpecification {
                     maven { url = 'https://repo.grails.org/grails/core' }
                 }
                 dependencies {
-                    classpath "org.grails:grails-gradle-plugin:\$grailsGradlePluginVersion"
+                    classpath "org.apache.grails:grails-gradle-plugins:\$grailsGradlePluginVersion"
                 }
             }
             
             version "0.0.1"
             
             apply plugin: 'java'
-            apply plugin: 'org.grails.grails-publish'
+            apply plugin: 'org.apache.grails.gradle.grails-publish'
         """
 
         when:

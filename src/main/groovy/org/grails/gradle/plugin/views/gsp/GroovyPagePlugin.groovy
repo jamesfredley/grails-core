@@ -13,23 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.grails.gradle.plugin.web.gsp
+package org.grails.gradle.plugin.views.gsp
 
-import groovy.transform.CompileDynamic
 import groovy.transform.CompileStatic
 import org.apache.tools.ant.taskdefs.condition.Os
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.gradle.api.artifacts.Configuration
+import org.gradle.api.file.ConfigurableFileCollection
+import org.gradle.api.file.Directory
 import org.gradle.api.file.DuplicatesStrategy
 import org.gradle.api.file.FileCollection
+import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.SourceSet
 import org.gradle.api.tasks.SourceSetOutput
+import org.gradle.api.tasks.TaskContainer
 import org.gradle.api.tasks.bundling.Jar
 import org.gradle.api.tasks.bundling.War
 import org.grails.gradle.plugin.core.GrailsExtension
 import org.grails.gradle.plugin.util.SourceSets
-
 /**
  * A plugin that adds support for compiling Groovy Server Pages (GSP)
  *
@@ -39,74 +40,77 @@ import org.grails.gradle.plugin.util.SourceSets
 @CompileStatic
 class GroovyPagePlugin implements Plugin<Project> {
 
-    @CompileDynamic
     @Override
     void apply(Project project) {
+        TaskContainer tasks = project.tasks
 
-        project.configurations {
-            gspCompile
-        }
-
-        project.dependencies {
-            gspCompile 'jakarta.servlet:jakarta.servlet-api:6.0.0'
-        }
+        project.configurations.register('gspCompile')
+        project.dependencies.add('gspCompile', 'jakarta.servlet:jakarta.servlet-api:6.0.0')
 
         SourceSet mainSourceSet = SourceSets.findMainSourceSet(project)
-
         SourceSetOutput output = mainSourceSet?.output
         FileCollection classesDirs = resolveClassesDirs(output, project)
-        File destDir = output?.dir("gsp-classes") ?: new File(project.buildDir, "gsp-classes/main")
+        Provider<Directory> destDir =  project.layout.buildDirectory.dir('gsp-classes/main')
+        output?.dir("gsp-classes")
 
-        Configuration providedConfig = project.configurations.findByName('providedCompile')
-        def allClasspath = project.configurations.compileClasspath + project.configurations.gspCompile + classesDirs
-        if(providedConfig) {
-            allClasspath += providedConfig
+        FileCollection allClasspath = project.getObjects().fileCollection().from(
+                project.configurations.named('compileClasspath'),
+                project.configurations.named('gspCompile'),
+                classesDirs,
+                project.configurations.named('providedCompile')
+        )
+
+        def compileGroovyPages = tasks.register("compileGroovyPages", GroovyPageForkCompileTask) {
+            it.destinationDirectory.set(destDir)
+            it.tmpDirPath = getTmpDirPath(project)
+            it.source = project.layout.projectDirectory.dir('grails-app/views')
+            it.serverpath.set("/WEB-INF/grails-app/views/")
+            it.classpath = allClasspath
         }
 
-        def allTasks = project.tasks
-
-        def compileGroovyPages = allTasks.create("compileGroovyPages", GroovyPageForkCompileTask) {
-            destinationDirectory = destDir
-            tmpDirPath = getTmpDirPath(project)
-            source = project.file("${project.projectDir}/grails-app/views")
-            serverpath = "/WEB-INF/grails-app/views/"
+        def compileWebappGroovyPages = tasks.register("compileWebappGroovyPages", GroovyPageForkCompileTask) {
+            it.destinationDirectory.set(destDir)
+            it.source = project.layout.projectDirectory.dir('src/main/webapp')
+            it.tmpDirPath = getTmpDirPath(project)
+            it.serverpath.set("/")
+            it.classpath = allClasspath
         }
-
-        compileGroovyPages.setClasspath( allClasspath )
-
-        def compileWebappGroovyPages = allTasks.create("compileWebappGroovyPages", GroovyPageForkCompileTask) {
-            destinationDirectory = destDir
-            source = project.file("${project.projectDir}/src/main/webapp")
-            tmpDirPath = getTmpDirPath(project)
-            serverpath = "/"
-        }
-
-        compileWebappGroovyPages.setClasspath( allClasspath )
 
         registerGrailsExtension(project)
-
         project.afterEvaluate {
             GrailsExtension grailsExt = project.extensions.getByType(GrailsExtension)
             if (grailsExt.pathingJar && Os.isFamily(Os.FAMILY_WINDOWS)) {
-                Jar pathingJar = (Jar) allTasks.findByName('pathingJar')
-                allClasspath = project.files("${project.buildDir}/classes/groovy/main", "${project.buildDir}/resources/main", pathingJar.archiveFile)
-                compileGroovyPages.dependsOn(pathingJar)
-                compileGroovyPages.setClasspath(allClasspath)
-                compileWebappGroovyPages.dependsOn(pathingJar)
-                compileWebappGroovyPages.setClasspath(allClasspath)
+                Jar pathingJar = tasks.named('pathingJar', Jar).get()
+                ConfigurableFileCollection withPathingJarClasspath = project.files(
+                        project.layout.buildDirectory.dir('classes/groovy/main'),
+                        project.layout.buildDirectory.dir('resources/main'),
+                        destDir,
+                        pathingJar.archiveFile
+                )
+                compileGroovyPages.configure {
+                    it.dependsOn(pathingJar)
+                    it.classpath = withPathingJarClasspath.asFileTree
+                }
+                compileWebappGroovyPages.configure {
+                    it.dependsOn(pathingJar)
+                    it.classpath = withPathingJarClasspath.asFileTree
+                }
             }
         }
 
-        compileGroovyPages.dependsOn( allTasks.findByName("classes") )
-        compileGroovyPages.dependsOn( compileWebappGroovyPages )
+        compileGroovyPages.configure {
+            it.dependsOn(
+                    tasks.named('classes'),
+                    compileWebappGroovyPages
+            )
+        }
 
-        allTasks.withType(War).configureEach { War war ->
+        tasks.withType(War).configureEach { War war ->
             war.dependsOn compileGroovyPages
             war.duplicatesStrategy = DuplicatesStrategy.EXCLUDE
             if (war.name == 'bootWar') {
-                war.from(destDir) {
-                    into("WEB-INF/classes")
-                }
+                war.from(destDir)
+                war.into("WEB-INF/classes")
             } else if (war.name == 'war') {
                 war.from destDir
             }
@@ -117,14 +121,14 @@ class GroovyPagePlugin implements Plugin<Project> {
                 war.classpath = project.files(destDir)
             }
         }
-        allTasks.withType(Jar).configureEach { Jar jar ->
+
+        tasks.withType(Jar).configureEach { Jar jar ->
             jar.dependsOn compileGroovyPages
             jar.duplicatesStrategy = DuplicatesStrategy.EXCLUDE
             if(!(jar instanceof War)) {
                 if (jar.name == 'bootJar') {
-                    jar.from(destDir) {
-                        into("BOOT-INF/classes")
-                    }
+                    jar.from(destDir)
+                    jar.into("BOOT-INF/classes")
                 } else if (jar.name == 'jar') {
                     jar.from destDir
                 }
@@ -139,11 +143,11 @@ class GroovyPagePlugin implements Plugin<Project> {
     }
 
     protected FileCollection resolveClassesDirs(SourceSetOutput output, Project project) {
-        output?.classesDirs ?: project.files(new File(project.buildDir, "classes/main"))
+        output?.classesDirs ?: project.files(project.layout.buildDirectory.dir('classes/main'))
     }
 
     protected String getTmpDirPath(Project project) {
-        def tmpdir = new File(project.buildDir as String, "gsptmp")
+        File tmpdir = project.layout.buildDirectory.dir('gsptmp').get().asFile
         return tmpdir.absolutePath
     }
 

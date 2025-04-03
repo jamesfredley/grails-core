@@ -7,13 +7,14 @@ buildscript {
     }
 }
 
-group "org.grails"
+group "org.apache.grails"
 version project.projectVersion
 
 repositories {
     mavenLocal()
     mavenCentral()
     maven { url "https://repo.grails.org/grails/core" }
+    maven { url = 'https://repository.apache.org/content/repositories/snapshots' }
     if (System.getenv("GITHUB_MAVEN_PASSWORD") && !grailsVersion.endsWith('-SNAPSHOT')) {
         System.out.println("Adding Grails Core Repo")
         maven {
@@ -33,7 +34,7 @@ ext."signing.password" = project.findProperty("signing.password") ?: System.gete
 ext."signing.secretKeyRingFile" = project.findProperty("signing.secretKeyRingFile") ?: "${System.properties['user.home']}${File.separator}.gnupg${File.separator}secring.gpg"
 
 ext.pomInfo = {
-    delegate.url 'https://github.com/grails/grails-gradle-plugin'
+    delegate.url 'https://github.com/apache/grails-gradle-plugin'
 
     delegate.licenses {
         delegate.license {
@@ -44,9 +45,9 @@ ext.pomInfo = {
     }
 
     delegate.scm {
-        delegate.url "scm:git@github.com:grails/grails-gradle-plugin.git"
-        delegate.connection "scm:git@github.com:grails/grails-gradle-plugin.git"
-        delegate.developerConnection "scm:git@github.com:grails/grails-gradle-plugin.git"
+        delegate.url "scm:git@github.com:apache/grails-gradle-plugin.git"
+        delegate.connection "scm:git@github.com:apache/grails-gradle-plugin.git"
+        delegate.developerConnection "scm:git@github.com:apache/grails-gradle-plugin.git"
     }
 
     delegate.developers {
@@ -122,49 +123,61 @@ gradlePlugin {
         grailsCore {
             displayName = "Grails Core Gradle Plugin"
             description = 'The main Grails gradle plugin implementation'
-            id = 'org.grails.grails-core'
+            id = 'org.apache.grails.gradle.grails-app'
             implementationClass = 'org.grails.gradle.plugin.core.GrailsGradlePlugin'
         }
         grailsDoc {
             displayName = "Grails Doc Gradle Plugin"
             description = 'Adds Grails doc publishing support'
-            id = 'org.grails.grails-doc'
+            id = 'org.apache.grails.gradle.grails-docs'
             implementationClass = 'org.grails.gradle.plugin.doc.GrailsDocGradlePlugin'
         }
         grailsGsp {
             displayName = "Grails GSP Gradle Plugin"
             description = 'A plugin that adds support for compiling Groovy Server Pages (GSP)'
-            id = 'org.grails.grails-gsp'
-            implementationClass = 'org.grails.gradle.plugin.web.gsp.GroovyPagePlugin'
+            id = 'org.apache.grails.gradle.grails-gsp'
+            implementationClass = 'org.grails.gradle.plugin.views.gsp.GroovyPagePlugin'
+        }
+        grailsGson {
+            displayName = "Grails GSON Gradle Plugin"
+            description = 'A plugin that adds support for compiling Groovy Json Views (GSON)'
+            id = 'org.apache.grails.gradle.grails-gson'
+            implementationClass = 'org.grails.gradle.plugin.views.GrailsGsonViewsPlugin'
+        }
+        grailsMarkup {
+            displayName = "Grails Markup Gradle Plugin"
+            description = 'A plugin that adds support for compiling Markup Views'
+            id = 'org.apache.grails.gradle.grails-markup'
+            implementationClass = 'org.grails.gradle.plugin.views.GrailsMarkupViewsPlugin'
         }
         grailsPlugin {
             displayName = "Grails-Plugin Gradle Plugin"
             description = 'A Gradle plugin for Grails plugins'
-            id = 'org.grails.grails-plugin'
+            id = 'org.apache.grails.gradle.grails-plugin'
             implementationClass = 'org.grails.gradle.plugin.core.GrailsPluginGradlePlugin'
         }
         grailsProfile {
             displayName = "Grails Profile Gradle Plugin"
             description = 'A plugin that is capable of compiling a Grails profile into a JAR file for distribution'
-            id = 'org.grails.grails-profile'
+            id = 'org.apache.grails.gradle.grails-profile'
             implementationClass = 'org.grails.gradle.plugin.profiles.GrailsProfileGradlePlugin'
         }
         grailsWeb {
             displayName = "Grails Web Gradle Plugin"
             description = 'Adds web specific extensions'
-            id = 'org.grails.grails-web'
+            id = 'org.apache.grails.gradle.grails-web'
             implementationClass = 'org.grails.gradle.plugin.web.GrailsWebGradlePlugin'
         }
         grailsPublish {
             displayName = "Grails Publish Gradle Plugin"
             description = 'A plugin to assist in publishing Grails related artifacts'
-            id = 'org.grails.grails-publish'
+            id = 'org.apache.grails.gradle.grails-publish'
             implementationClass = 'org.grails.gradle.plugin.publishing.GrailsPublishGradlePlugin'
         }
         grailsProfilePublish {
             displayName = "Grails Profile Publish Plugin"
             description = 'A plugin for publishing profiles'
-            id = 'org.grails.grails-profile-publish'
+            id = 'org.apache.grails.gradle.grails-profile-publish'
             implementationClass = 'org.grails.gradle.plugin.profiles.GrailsProfilePublishGradlePlugin'
         }
     }
@@ -247,12 +260,12 @@ publishing {
         repositories {
             maven {
                 credentials {
-                    def u = System.getenv("ARTIFACTORY_USERNAME") ?: project.hasProperty("artifactoryPublishUsername") ? project.artifactoryPublishUsername : ''
-                    def p = System.getenv("ARTIFACTORY_PASSWORD") ?: project.hasProperty("artifactoryPublishPassword") ? project.artifactoryPublishPassword : ''
+                    def u = System.getenv("NEXUS_USER") ?: ''
+                    def p = System.getenv("NEXUS_PW") ?: ''
                     username = u
                     password = p
                 }
-                url "https://repo.grails.org/grails/libs-snapshots-local"
+                url "https://repository.apache.org/content/repositories/snapshots"
             }
         }
     }
@@ -271,7 +284,7 @@ publishing {
                 name = "Grails Gradle Plugin"
                 description = "A Gradle plugin for Grails which provides a bunch of useful plugins"
 
-                url = 'https://github.com/grails/grails-gradle-plugin'
+                url = 'https://github.com/apache/grails-gradle-plugin'
 
                 licenses {
                     license {
@@ -282,9 +295,9 @@ publishing {
                 }
 
                 scm {
-                    url = "scm:git@github.com:grails/grails-gradle-plugin.git"
-                    connection = "scm:git@github.com:grails/grails-gradle-plugin.git"
-                    developerConnection = "scm:git@github.com:grails/grails-gradle-plugin.git"
+                    url = "scm:git@github.com:apache/grails-gradle-plugin.git"
+                    connection = "scm:git@github.com:apache/grails-gradle-plugin.git"
+                    developerConnection = "scm:git@github.com:apache/grails-gradle-plugin.git"
                 }
 
                 developers {

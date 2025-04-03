@@ -1,7 +1,7 @@
 plugins {
     id 'java-library'
     id 'groovy'
-    id 'org.grails.grails-publish'
+    id 'org.apache.grails.gradle.grails-publish'
 }
 
 dependencies {
@@ -9,7 +9,7 @@ dependencies {
 }
 
 grailsPublish {
-    githubSlug = 'grails/grails-gradle-plugin'
+    githubSlug = 'apache/grails-gradle-plugins'
     license {
         name = 'Apache-2.0'
     }
