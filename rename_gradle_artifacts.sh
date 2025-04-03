@@ -165,7 +165,7 @@ while getopts "pdvsqrtcfgl:" flag; do
       "org[.]grails[.]plugins:hibernate5|org.apache.grails:grails-data-hibernate5"
       "org[.]grails[.]plugins:database-migration|org.apache.grails:grails-data-hibernate6-dbmigration"
       "org[.]grails[.]plugins:database-migration|org.apache.grails:grails-data-hibernate5-dbmigration"
-      "org[.]grails[.]tck[.]tests:tck-tests|org.apache.grails.data:grails-datamapping-tck-tests"
+      "org[.]grails[.]tck[.]tests:tck|org.apache.grails.data:grails-datamapping-tck-tests"
       "org[.]grails[.]tck[.]domains:tck-domains|org.apache.grails.data:grails-datamapping-tck-domains"
       "org[.]grails[.]tck[.]base:tck-base|org.apache.grails.data:grails-datamapping-tck-base"
       "org[.]grails:grails-gorm-testing-support|org.apache.grails:grails-testing-support-datamapping"
