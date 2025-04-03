@@ -7,11 +7,6 @@ buildscript {
     }
     dependencies {
         classpath "org.apache.grails:grails-gradle-plugins:${project['grails-gradle-plugins.version']}"
-        classpath "org.grails.plugins:views-gradle:${project['plugins-views-gradle.version']}", {
-            // This dependency is not needed for running the functional tests.
-            // It is added as a smoke test to check that compiling gson-views
-            // for production does not fail during build task.
-        }
     }
 }
 

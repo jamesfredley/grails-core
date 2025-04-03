@@ -62,7 +62,6 @@ dependencies {
     api "org.grails.plugins:mongodb:${project['plugins-mongodb.version']}"
     api "org.grails.plugins:neo4j:${project['plugins-neo4j.version']}"
     api "org.grails.plugins:scaffolding:${project['plugins-scaffolding.version']}"
-    api "org.grails.plugins:views-gradle:${project['plugins-views-gradle.version']}"
     api "org.grails.plugins:views-json-templates:${project['plugins-views-json-templates.version']}"
     api "org.grails.plugins:views-json:${project['plugins-views-json.version']}"
     api "org.grails.plugins:views-markup:${project['plugins-views-markup.version']}"
