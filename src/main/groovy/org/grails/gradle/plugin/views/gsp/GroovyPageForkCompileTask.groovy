@@ -13,17 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.grails.gradle.plugin.web.gsp
+package org.grails.gradle.plugin.views.gsp
 
 import groovy.transform.CompileDynamic
 import groovy.transform.CompileStatic
 import org.gradle.api.Action
+import org.gradle.api.file.Directory
+import org.gradle.api.file.DirectoryProperty
+import org.gradle.api.file.FileCollection
 import org.gradle.api.file.FileTree
 import org.gradle.api.model.ObjectFactory
+import org.gradle.api.provider.Property
 import org.gradle.api.tasks.*
 import org.gradle.api.tasks.compile.AbstractCompile
+import org.gradle.process.ExecOperations
 import org.gradle.process.ExecResult
 import org.gradle.process.JavaExecSpec
+import org.grails.gradle.plugin.views.ViewCompileOptions
 
 import javax.inject.Inject
 import java.nio.file.Files
@@ -33,7 +39,7 @@ import java.nio.file.Paths
 /**
  * Abstract Gradle task for compiling templates, using GroovyPageCompilerForkTask
  * This Task is a Forked Java Task that is configurable with fork options provided
- * by {@link GspCompileOptions}
+ * by {@link ViewCompileOptions}
  *
  * @author David Estes
  * @since 4.0
@@ -43,33 +49,32 @@ abstract class GroovyPageForkCompileTask extends AbstractCompile {
 
     @Input
     @Optional
-    String packageName
+    final Property<String> packageName
 
-    @Internal
-    File srcDir
+    @InputDirectory
+    final DirectoryProperty srcDir
+
+    @Nested
+    final ViewCompileOptions compileOptions
 
     @LocalState
     String tmpDirPath
 
-    /**
-     * @deprecated Use {@link #tmpDirPath} instead.
-     */
-    @Deprecated
-    @Optional
-    @InputDirectory
-    File tmpDir
-
     @Input
     @Optional
-    String serverpath
+    final Property<String> serverpath
+
+    private ExecOperations execOperations
 
     @Inject
-    protected ObjectFactory getObjectFactory() {
-        throw new UnsupportedOperationException();
+    GroovyPageForkCompileTask(ExecOperations execOperations, ObjectFactory objectFactory) {
+        this.execOperations = execOperations
+        packageName = objectFactory.property(String).convention(project.name ?: project.projectDir.canonicalFile.name)
+        srcDir = objectFactory.directoryProperty()
+        compileOptions = objectFactory.newInstance(ViewCompileOptions.class)
+        serverpath = objectFactory.property(String)
     }
 
-    @Nested
-    GspCompileOptions compileOptions = getObjectFactory().newInstance(GspCompileOptions.class)
 
     @Override
     @PathSensitive(PathSensitivity.RELATIVE)
@@ -79,15 +84,22 @@ abstract class GroovyPageForkCompileTask extends AbstractCompile {
 
     @Override
     void setSource(Object source) {
-        try {
-            srcDir = project.file(source)
-            if(srcDir.exists() && !srcDir.isDirectory()) {
-                throw new IllegalArgumentException("The source for GSP compilation must be a single directory, but was $source")
-            }
-            super.setSource(source)
-        } catch (e) {
-            throw new IllegalArgumentException("The source for GSP compilation must be a single directory, but was $source")
+        if(Directory.isAssignableFrom(source.class)) {
+            this.srcDir.set(source as Directory)
         }
+        else if(File.isAssignableFrom(source.class)) {
+            this.srcDir.set(source as File)
+            if (!srcDir.getAsFile().get().isDirectory()) {
+                throw new IllegalArgumentException("The source for ${getFileExtension().toUpperCase()} compilation must be a single directory, but was $source")
+            }
+        }
+        else if(DirectoryProperty.isAssignableFrom(source.class)) {
+            this.srcDir.set(source as DirectoryProperty)
+        }
+        else {
+            throw new RuntimeException("Unsupported source type: ${source.class.name}")
+        }
+        super.setSource(source)
     }
 
     @TaskAction
@@ -96,15 +108,7 @@ abstract class GroovyPageForkCompileTask extends AbstractCompile {
     }
 
     protected void compile() {
-
-        if(packageName == null) {
-            packageName = project.name
-            if(!packageName) {
-                packageName = project.projectDir.canonicalFile.name
-            }
-        }
-
-        ExecResult result = project.javaexec(
+        ExecResult result = execOperations.javaexec(
                 new Action<JavaExecSpec>() {
                     @Override
                     @CompileDynamic
@@ -113,35 +117,30 @@ abstract class GroovyPageForkCompileTask extends AbstractCompile {
                         javaExecSpec.setClasspath(getClasspath())
 
                         def jvmArgs = compileOptions.forkOptions.jvmArgs
-                        if(jvmArgs) {
+                        if (jvmArgs) {
                             javaExecSpec.jvmArgs(jvmArgs)
                         }
-                        javaExecSpec.setMaxHeapSize( compileOptions.forkOptions.memoryMaximumSize )
-                        javaExecSpec.setMinHeapSize( compileOptions.forkOptions.memoryInitialSize )
+                        javaExecSpec.setMaxHeapSize(compileOptions.forkOptions.memoryMaximumSize)
+                        javaExecSpec.setMinHeapSize(compileOptions.forkOptions.memoryInitialSize)
 
                         //This is the OLD Style and seems kinda silly to be hard coded this way. but restores functionality
                         //for now
-                        def configFiles = [
-                            project.file("grails-app/conf/application.yml").canonicalPath,
-                            project.file("grails-app/conf/application.groovy").canonicalPath
+                        String configFiles = [
+                                project.file("grails-app/conf/application.yml").canonicalPath,
+                                project.file("grails-app/conf/application.groovy").canonicalPath
                         ].join(',')
 
                         Path path = Paths.get(tmpDirPath)
-                        File tmp = tmpDir
-                        if (Files.exists(path)) {
-                            tmp = path.toFile()
-                        } else {
-                            tmp = Files.createDirectories(path).toFile()
-                        }
-                        def arguments = [
-                            srcDir.canonicalPath,
-                            destinationDir.canonicalPath,
-                            tmp.canonicalPath,
-                            targetCompatibility,
-                            packageName,
-                            serverpath,
-                            configFiles,
-                            compileOptions.encoding
+                        File tmp = Files.exists(path) ? path.toFile() : Files.createDirectories(path).toFile()
+                        List<String> arguments = [
+                                srcDir.get().asFile.canonicalPath,
+                                destinationDirectory.get().asFile.canonicalPath,
+                                tmp.canonicalPath,
+                                targetCompatibility,
+                                packageName.get() as String,
+                                serverpath.getOrNull() as String,
+                                configFiles,
+                                compileOptions.encoding.get()
                         ]
 
                         prepareArguments(arguments)

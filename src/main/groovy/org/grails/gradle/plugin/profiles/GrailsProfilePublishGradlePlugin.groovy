@@ -22,10 +22,12 @@ import org.gradle.api.XmlProvider
 import org.gradle.api.artifacts.Dependency
 import org.gradle.api.artifacts.DependencySet
 import org.gradle.api.artifacts.SelfResolvingDependency
+import org.gradle.api.plugins.ExtensionContainer
 import org.gradle.api.publish.maven.MavenPom
 import org.gradle.api.publish.maven.MavenPublication
 import org.gradle.api.publish.maven.tasks.GenerateMavenPom
 import org.gradle.api.tasks.bundling.Jar
+import org.grails.gradle.plugin.publishing.GrailsPublishExtension
 import org.grails.gradle.plugin.publishing.GrailsPublishGradlePlugin
 
 import java.nio.file.Files
@@ -43,6 +45,16 @@ class GrailsProfilePublishGradlePlugin extends GrailsPublishGradlePlugin {
 
     @Override
     void apply(Project project) {
+        project.afterEvaluate {
+            final GrailsPublishExtension gpe = project.extensions.findByType(GrailsPublishExtension)
+            if(gpe.javaPlatform) {
+                throw new RuntimeException("Java Platform publishing is not supported for profiles.")
+            }
+            if(gpe.publishTestSources) {
+                throw new RuntimeException("Test source publishing is not supported for profiles.")
+            }
+        }
+
         super.apply(project)
         final File tempReadmeForJavadoc = Files.createTempFile('README', 'txt').toFile()
         tempReadmeForJavadoc << 'https://central.sonatype.org/publish/requirements/#supply-javadoc-and-sources'
@@ -74,7 +86,7 @@ class GrailsProfilePublishGradlePlugin extends GrailsPublishGradlePlugin {
     }
 
     @Override
-    protected void doAddArtefact(Project project, MavenPublication publication) {
+    protected void doAddArtefact(GrailsPublishExtension gpe, Project project, MavenPublication publication) {
         publication.artifact(project.tasks.findByName('profileJar'))
         publication.artifact(project.tasks.findByName('sourcesProfileJar'))
         publication.artifact(project.tasks.findByName('javadocProfileJar'))
@@ -103,7 +115,7 @@ class GrailsProfilePublishGradlePlugin extends GrailsPublishGradlePlugin {
     }
 
     @Override
-    protected validateProjectPublishable(Project project) {
+    protected validateJavaProjectPublishable(Project project) {
         // no-op
     }
 }

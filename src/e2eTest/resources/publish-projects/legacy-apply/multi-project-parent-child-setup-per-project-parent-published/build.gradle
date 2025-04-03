@@ -4,7 +4,7 @@ buildscript {
         maven { url = 'https://repo.grails.org/grails/core' }
     }
     dependencies {
-        classpath "org.grails:grails-gradle-plugin:$grailsGradlePluginVersion"
+        classpath "org.apache.grails:grails-gradle-plugins:$grailsGradlePluginVersion"
     }
 }
 
@@ -26,9 +26,9 @@ allprojects {
 
 
 
-apply plugin: 'org.grails.grails-publish'
+apply plugin: 'org.apache.grails.gradle.grails-publish'
 grailsPublish {
-    githubSlug = 'grails/grails-gradle-plugin'
+    githubSlug = 'apache/grails-gradle-plugins'
     license {
         name = 'Apache-2.0'
     }

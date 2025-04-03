@@ -25,6 +25,7 @@ import org.gradle.api.Task
 import org.gradle.api.file.DuplicatesStrategy
 import org.gradle.api.plugins.ExtensionContainer
 import org.gradle.api.plugins.ExtraPropertiesExtension
+import org.gradle.api.plugins.JavaPlatformExtension
 import org.gradle.api.plugins.JavaPluginExtension
 import org.gradle.api.plugins.PluginManager
 import org.gradle.api.publish.maven.MavenPublication
@@ -217,7 +218,13 @@ Note: if project properties are used, the properties must be defined prior to ap
         project.afterEvaluate {
             final ExtensionContainer extensionContainer = project.extensions
 
-            validateProjectPublishable(project as Project)
+            final GrailsPublishExtension gpe = extensionContainer.findByType(GrailsPublishExtension)
+            if(gpe.javaPlatform) {
+                validateJavaPlatformProjectPublishable(project as Project)
+            }
+            else {
+                validateJavaProjectPublishable(project as Project)
+            }
             project.publishing {
                 if (useMavenPublish) {
                     final def mavenPublishUrl = project.findProperty('mavenPublishUrl') ?: System.getenv('MAVEN_PUBLISH_URL') ?: ''
@@ -246,13 +253,12 @@ Note: if project properties are used, the properties must be defined prior to ap
                     }
                 }
 
-                final GrailsPublishExtension gpe = extensionContainer.findByType(GrailsPublishExtension)
                 publications {
                     maven(MavenPublication) {
                         artifactId gpe.artifactId ?: project.name
                         groupId gpe.groupId ?: project.group
 
-                        doAddArtefact(project, delegate)
+                        doAddArtefact(gpe, project, delegate as MavenPublication)
                         def extraArtefact = getDefaultExtraArtifact(project)
                         if (extraArtefact) {
                             artifact extraArtefact
@@ -434,10 +440,13 @@ Note: if project properties are used, the properties must be defined prior to ap
         }
     }
 
-    protected void doAddArtefact(Project project, MavenPublication publication) {
-        publication.from project.components.java
+    protected void doAddArtefact(GrailsPublishExtension gpe, Project project, MavenPublication publication) {
+        publication.from gpe.javaPlatform ? project.components.javaPlatform : project.components.java
+        if(gpe.javaPlatform && gpe.publishTestSources) {
+            throw new RuntimeException("BOM publishes may only contain dependencies.")
+        }
 
-        if (project.extensions.findByType(GrailsPublishExtension).publishTestSources) {
+        if (gpe.publishTestSources) {
             publication.artifact(project.tasks.named('testSourcesJar', Jar))
         }
     }
@@ -459,7 +468,13 @@ Note: if project properties are used, the properties must be defined prior to ap
         'plugin'
     }
 
-    protected validateProjectPublishable(Project project) {
+    protected validateJavaPlatformProjectPublishable(Project project) {
+        if (!project.extensions.findByType(JavaPlatformExtension)) {
+            throw new RuntimeException("Grails Publish Plugin requires the Java Platform Plugin to be applied to the project.")
+        }
+    }
+
+    protected validateJavaProjectPublishable(Project project) {
         if (!project.extensions.findByType(JavaPluginExtension)) {
             throw new RuntimeException("Grails Publish Plugin requires the Java Plugin to be applied to the project.")
         }
