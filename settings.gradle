@@ -67,8 +67,8 @@ include (
         // Test Suite
         'grails-test-suite-base',
         'grails-test-suite-persistence',
-//        'grails-test-suite-uber',
-//        'grails-test-suite-web',
+        'grails-test-suite-uber',
+        'grails-test-suite-web',
 
         // Gradle Plugin
         'grails-gradle-model',
@@ -112,7 +112,7 @@ project(':grails-async-rxjava2').projectDir = file('grails-async/rxjava2')
 project(':grails-async-rxjava3').projectDir = file('grails-async/rxjava3')
 project(':grails-async-plugin').projectDir = file('grails-async/plugin')
 
-// Functional Tests
+//// Functional Tests
 //include (
 //        'grails-test-examples-async-events-pubsub-demo',
 //        'grails-test-examples-app1',
