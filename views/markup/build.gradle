@@ -1,29 +1,29 @@
 plugins {
     id 'groovy'
     id 'java-library'
-    id 'org.grails.grails-plugin'
+    id 'org.apache.grails.gradle.grails-plugin'
 }
 
 version = projectVersion
-group = 'org.grails.plugins'
+group = 'org.apache.grails'
 
 ext {
+    pomArtifactId = 'grails-views-markup'
     pomDescription = 'Grails Markup Views'
-    snapshotPublishUrl = 'https://repo.grails.org/grails/plugins3-snapshots-local'
 }
 
 dependencies {
-    implementation platform("org.grails:grails-bom:$grailsVersion"), {
+    implementation platform("org.apache.grails:grails-bom:$grailsVersion"), {
         // as a safeguard, exclude projects in this repo that included transitively to ensure we pick the right version
-        exclude group: 'org.grails', module: 'views-core'
-        exclude group: 'org.grails', module: 'views-json-testing-support'
-        exclude group: 'org.grails.plugins', module: 'scaffolding'
+        exclude group: 'org.apache.grails.views', module: 'grails-views-core'
+        exclude group: 'org.apache.grails', module: 'grails-testing-support-views-gson'
+        exclude group: 'org.apache.grails', module: 'grails-scaffolding'
     }
 
     api project(':views-core') // Used in public API
-    api 'org.grails:grails-core' // Used in public API
-    api 'org.grails:grails-plugin-mimetypes' // Used in public API
-    api 'org.grails:grails-plugin-rest' // Used in public API
+    api 'org.apache.grails:grails-core' // Used in public API
+    api 'org.apache.grails:grails-mimetypes' // Used in public API
+    api 'org.apache.grails:grails-rest-transforms' // Used in public API
 
     implementation 'org.apache.groovy:groovy'
     implementation 'org.springframework:spring-beans'
@@ -31,7 +31,7 @@ dependencies {
 
     compileOnly 'jakarta.annotation:jakarta.annotation-api' // Provided
 
-    testImplementation 'org.grails:grails-web-url-mappings'
+    testImplementation 'org.apache.grails.web:grails-web-url-mappings'
     testImplementation 'org.spockframework:spock-core'
     testImplementation 'jakarta.servlet:jakarta.servlet-api'
     testRuntimeOnly 'org.slf4j:slf4j-nop' // Get rid of warning about missing slf4j implementation during test task

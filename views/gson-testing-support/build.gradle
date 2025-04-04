@@ -4,29 +4,29 @@ plugins {
 }
 
 version = projectVersion
-group = 'org.grails'
+group = 'org.apache.grails'
 
 ext {
+    pomArtifactId = 'grails-testing-support-views-gson'
     pomDescription = 'JSON Views Testing Support'
-    snapshotPublishUrl = 'https://repo.grails.org/grails/libs-snapshots-local'
 }
 
 dependencies {
-    implementation platform("org.grails:grails-bom:$grailsVersion"), {
+    implementation platform("org.apache.grails:grails-bom:$grailsVersion"), {
         // as a safeguard, exclude projects in this repo that included transitively to ensure we pick the right version
-        exclude group: 'org.grails', module: 'views-core'
-        exclude group: 'org.grails', module: 'views-json-testing-support'
-        exclude group: 'org.grails.plugins', module: 'scaffolding'
+        exclude group: 'org.apache.grails.views', module: 'grails-views-core'
+        exclude group: 'org.apache.grails', module: 'grails-testing-support-views-gson'
+        exclude group: 'org.apache.grails', module: 'grails-scaffolding'
     }
 
-    api project(':views-json') // Used in public API
+    api project(':grails-gson') // Used in public API
     api 'org.springframework:spring-web' // Used in public API
-    api 'org.grails:grails-datastore-core' // Used in public API
+    api 'org.apache.grails.data:grails-datastore-core' // Used in public API
     api 'org.spockframework:spock-core' // Used in public API
 
-    implementation 'org.grails:grails-core'
-    implementation 'org.grails:grails-testing-support'
-    implementation 'org.grails:grails-web-url-mappings'
+    implementation 'org.apache.grails:grails-core'
+    implementation 'org.apache.grails.testing:grails-testing-support-core'
+    implementation 'org.apache.grails.web:grails-web-url-mappings'
     implementation 'org.apache.groovy:groovy'
     implementation 'org.apache.groovy:groovy-json'
     implementation 'org.apache.groovy:groovy-templates'

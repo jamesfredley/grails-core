@@ -5,7 +5,7 @@ ext {
     apiDocsProjects = [
             'views-core',
             'views-json',
-            'views-json-testing-support',
+            'grails-testing-support-views-gson',
             'views-markup'
     ]
     apiDocTitle = "Grails Views API - ${projectVersion}"

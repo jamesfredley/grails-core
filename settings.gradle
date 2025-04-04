@@ -5,7 +5,7 @@ plugins {
 
 def isCI = System.getenv('CI') != null
 def isLocal = !isCI
-def isAuthenticated = System.getenv('DEVELOCITY_ACCESS_KEY') != null
+def isAuthenticated = System.getenv('GRAILS_DEVELOCITY_ACCESS_KEY') != null
 
 develocity {
     server = 'https://ge.grails.org'
@@ -31,23 +31,23 @@ rootProject.name = 'grails-views'
 include 'views-core'
 project(':views-core').projectDir = file('views/core')
 
-include 'views-json'
-project(':views-json').projectDir = file('views/json')
+include 'grails-gson'
+project(':grails-gson').projectDir = file('views/gson')
 
 include 'views-docs'
 project(':views-docs').projectDir = file('views/docs')
 
-include 'views-json-testing-support'
-project(':views-json-testing-support').projectDir = file('views/json-testing-support')
+include 'grails-testing-support-views-gson'
+project(':grails-testing-support-views-gson').projectDir = file('views/gson-testing-support')
 
-include 'views-markup'
-project(':views-markup').projectDir = file('views/markup')
+include 'grails-markup'
+project(':grails-markup').projectDir = file('views/markup')
 
-include 'views-examples-functional-tests'
-project(':views-examples-functional-tests').projectDir = file('views/examples/functional-tests')
-
-include 'views-examples-functional-tests-plugin'
-project(':views-examples-functional-tests-plugin').projectDir = file('views/examples/functional-tests-plugin')
+//include 'views-examples-functional-tests'
+//project(':views-examples-functional-tests').projectDir = file('views/examples/functional-tests')
+//
+//include 'views-examples-functional-tests-plugin'
+//project(':views-examples-functional-tests-plugin').projectDir = file('views/examples/functional-tests-plugin')
 
 include 'scaffolding'
 
@@ -60,14 +60,14 @@ project(':fields-docs').projectDir = file('fields/docs')
 include 'gsp-docs'
 project(':gsp-docs').projectDir = file('gsp/docs')
 
+include 'grails-gsp-core'
+project(':grails-gsp-core').projectDir = file('gsp/core')
+
 include 'grails-gsp'
-project(':grails-gsp').projectDir = file('gsp/grails-gsp')
+project(':grails-gsp').projectDir = file('gsp/plugin')
 
-include 'grails-plugin-gsp'
-project(':grails-plugin-gsp').projectDir = file('gsp/grails-plugin-gsp')
-
-include 'grails-plugin-sitemesh3'
-project(':grails-plugin-sitemesh3').projectDir = file('gsp/grails-plugin-sitemesh3')
+include ':grails-sitemesh3'
+project(':grails-sitemesh3').projectDir = file('gsp/sitemesh3')
 
 include 'grails-taglib'
 project(':grails-taglib').projectDir = file('gsp/grails-taglib')
@@ -84,11 +84,11 @@ project(':grails-web-jsp').projectDir = file('gsp/grails-web-jsp')
 include 'grails-web-taglib'
 project(':grails-web-taglib').projectDir = file('gsp/grails-web-taglib')
 
-include 'grails-web-testing-support'
-project(':grails-web-testing-support').projectDir = file('gsp/grails-web-testing-support')
+include 'grails-testing-support-web'
+project(':grails-testing-support-web').projectDir = file('gsp/grails-testing-support-web')
 
-include 'gsp-examples-sitemesh3'
-project(':gsp-examples-sitemesh3').projectDir = file('gsp/examples/sitemesh3')
+//include 'gsp-examples-sitemesh3'
+//project(':gsp-examples-sitemesh3').projectDir = file('gsp/examples/sitemesh3')
 
 include 'grails-gsp-spring-boot'
 project(':grails-gsp-spring-boot').projectDir = file('gsp/grails-gsp-spring-boot')
