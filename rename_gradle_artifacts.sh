@@ -180,6 +180,7 @@ while getopts "pdvsqrtcfgl:" flag; do
       "org[.]grails:grails-datastore-gorm-hibernate5|org.apache.grails.data:grails-data-hibernate5-core"
       "org[.]grails:grails-datastore-gorm-async|org.apache.grails.data:grails-datamapping-async"
       "org[.]grails:grails-datastore-gorm|org.apache.grails.data:grails-datamapping-core"
+      "org[.]grails:grails-datastore-gorm-tck|org.apache.grails.data:grails-datamapping-tck-tests"
       "org[.]grails:grails-datastore-core|org.apache.grails.data:grails-datastore-core"
       "org[.]grails:grails-datastore-async|org.apache.grails.data:grails-datastore-async"
       "org[.]grails:gorm-mongodb-spring-boot|org.apache.grails:grails-data-mongodb-spring-boot"

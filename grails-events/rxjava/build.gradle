@@ -18,7 +18,7 @@ dependencies {
 
     testImplementation project(':grails-events-transforms')
     testImplementation 'org.apache.grails.data:grails-datastore-core'
-    testImplementation 'org.grails:grails-datastore-gorm-test'
+    testImplementation 'org.apache.grails.data:grails-datamapping-core-test'
     testImplementation 'org.spockframework:spock-core'
     testImplementation 'org.springframework:spring-context'
 
