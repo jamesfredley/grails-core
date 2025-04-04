@@ -35,6 +35,7 @@ jobs:
           GITHUB_MAVEN_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
         run: ./gradlew cleanTest build --continue -PonlyDatastoreTests
   mongodb-build:
+    if: false # TODO: Remove once we can run mongo
     name: "Build Mongodb Project"
     runs-on: ubuntu-24.04
     strategy:
@@ -64,6 +65,7 @@ jobs:
           GITHUB_MAVEN_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
         run: ./gradlew cleanTest build --continue -PonlyMongodbTests
   hibernate5-build:
+    if: false # TODO: Remove after publishing to core
     name: "Build Hibernate5 Project"
     runs-on: ubuntu-24.04
     strategy:
