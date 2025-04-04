@@ -8,7 +8,7 @@ group = 'org.apache.grails.data'
 
 ext {
     includeBaseTckClass = true
-    //TODO: We could publish the test classes once https://github.com/apache/grails-gradle-plugin/pull/425 is merged
+    pomPublishTestSources = true
 }
 
 dependencies {
@@ -107,4 +107,5 @@ dependencies {
 
 apply from: rootProject.layout.projectDirectory.file('gradle/java-config.gradle')
 apply from: rootProject.layout.projectDirectory.file('gradle/test-config.gradle')
+apply from: rootProject.layout.projectDirectory.file('gradle/publish-config.gradle')
 apply from: rootProject.layout.projectDirectory.file('gradle/tck-config.gradle')

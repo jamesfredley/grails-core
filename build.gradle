@@ -55,6 +55,7 @@ def publishedProjects = [
         'grails-datastore-async',
         'grails-datastore-core',
         'grails-datamapping-core',
+        'grails-datamapping-core-test',
         'grails-datamapping-async',
         //'grails-datamapping-rx',
         'grails-datamapping-support',
