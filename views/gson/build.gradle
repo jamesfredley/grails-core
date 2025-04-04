@@ -1,37 +1,37 @@
 plugins {
     id 'java-library'
     id 'groovy'
-    id 'org.grails.grails-plugin'
+    id 'org.apache.grails.gradle.grails-plugin'
 }
 
 version = projectVersion
-group = 'org.grails.plugins'
+group = 'org.apache.grails'
 
 ext {
+    pomArtifactId = 'grails-views-gson'
     pomDescription = 'Grails JSON Views'
-    snapshotPublishUrl = 'https://repo.grails.org/grails/plugins3-snapshots-local'
 }
 
 dependencies {
-    implementation platform("org.grails:grails-bom:$grailsVersion"), {
+    implementation platform("org.apache.grails:grails-bom:$grailsVersion"), {
         // as a safeguard, exclude projects in this repo that included transitively to ensure we pick the right version
-        exclude group: 'org.grails', module: 'views-core'
-        exclude group: 'org.grails', module: 'views-json-testing-support'
-        exclude group: 'org.grails.plugins', module: 'scaffolding'
+        exclude group: 'org.apache.grails.views', module: 'grails-views-core'
+        exclude group: 'org.apache.grails', module: 'grails-testing-support-views-gson'
+        exclude group: 'org.apache.grails', module: 'grails-scaffolding'
     }
 
     api project(':views-core') // Used in public API
-    api 'org.grails:grails-plugin-rest' // Used in public API
+    api 'org.apache.grails:grails-rest-transforms' // Used in public API
 
-    implementation 'org.grails:grails-encoder'
+    implementation 'org.apache.grails.web:grails-encoder'
     implementation 'org.apache.groovy:groovy'
     implementation 'org.apache.groovy:groovy-json'
     implementation 'jakarta.validation:jakarta.validation-api'
 
-    testImplementation project(':views-json-testing-support')
-    testImplementation 'org.grails:grails-testing-support'
-    testImplementation 'org.grails:grails-gorm-testing-support'
-    testImplementation 'org.grails:grails-datastore-gorm-hibernate5'
+    testImplementation project(':grails-testing-support-views-gson')
+    testImplementation 'org.apache.grails.testing:grails-testing-support-core'
+    testImplementation 'org.apache.grails:grails-testing-support-datamapping'
+    testImplementation 'org.apache.grails.data:grails-data-hibernate5-core'
     testImplementation 'org.spockframework:spock-core'
     testImplementation 'com.fasterxml.jackson.core:jackson-databind'
     testImplementation 'jakarta.servlet:jakarta.servlet-api'

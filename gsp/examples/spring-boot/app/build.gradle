@@ -1,10 +1,15 @@
 buildscript {
     repositories {
+        // mavenLocal()
         maven { url "https://repo.grails.org/grails/core/" }
+        maven {
+            name = 'ASF Snapshot repo'
+            url = 'https://repository.apache.org/content/repositories/snapshots'
+        }
     }
     dependencies {
-        classpath platform("org.grails:grails-bom:$grailsVersion")
-        classpath "org.grails:grails-gradle-plugin"
+        classpath platform("org.apache.grails:grails-bom:$grailsVersion")
+        classpath 'org.apache.grails:grails-gradle-plugins'
     }
 }
 
@@ -16,10 +21,14 @@ plugins {
     id "groovy"
 }
 
-apply plugin: "org.grails.grails-gsp"
+apply plugin: "org.apache.grails.gradle.grails-gsp"
 
 repositories {
     mavenCentral()
+    maven {
+        name = 'ASF Snapshot repo'
+        url = 'https://repository.apache.org/content/repositories/snapshots'
+    }
     maven { url "https://repo.grails.org/grails/core/" }
 }
 
@@ -32,7 +41,7 @@ compileGroovyPages {
 }
 
 dependencies {
-    implementation platform("org.grails:grails-bom:$grailsVersion")
+    implementation platform("org.apache.grails:grails-bom:$grailsVersion")
     implementation project(':grails-gsp-spring-boot')
 
     implementation "org.hibernate.validator:hibernate-validator:8.0.0.Final" // validation

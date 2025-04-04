@@ -20,7 +20,12 @@ allprojects {
     }
 
     repositories {
+        // mavenLocal()
         mavenCentral()
+        maven {
+            name = 'ASF Snapshot repo'
+            url = 'https://repository.apache.org/content/repositories/snapshots'
+        }
         maven { url = 'https://repo.grails.org/grails/core' }
         // mavenLocal() // Keep, this will be uncommented and used by CI (groovy-joint-workflow)
         if (customGroovyVersion?.endsWith('-SNAPSHOT')) {
@@ -57,24 +62,24 @@ group = 'this.will.be.overridden'
 
 def publishedProjects = [
         'views-core',
-        'views-json',
-        'views-json-testing-support',
-        'views-markup',
+        'grails-gson',
+        'grails-testing-support-views-gson',
+        'grails-markup',
         'scaffolding',
         'fields-plugin',
+        'grails-gsp-core',
         'grails-gsp',
-        'grails-plugin-gsp',
-        'grails-plugin-sitemesh3',
+        'grails-sitemesh3',
         'grails-taglib',
         'grails-web-gsp',
         'grails-web-gsp-taglib',
         'grails-web-jsp',
         'grails-web-taglib',
-        'grails-web-testing-support'
+        'grails-testing-support-web'
 ]
 subprojects {
     if (name in publishedProjects) {
         // This has to be applied here
-        apply plugin: 'org.grails.grails-publish'
+        apply plugin: 'org.apache.grails.gradle.grails-publish'
     }
 }

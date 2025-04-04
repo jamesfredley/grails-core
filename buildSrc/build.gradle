@@ -3,7 +3,12 @@ plugins {
 }
 
 repositories {
+    // mavenLocal()
     mavenCentral()
+    maven {
+        name = 'ASF Snapshot repo'
+        url = 'https://repository.apache.org/content/repositories/snapshots'
+    }
     maven { url = 'https://repo.grails.org/grails/core' }
 
     if (System.getenv("GITHUB_MAVEN_PASSWORD")) {
@@ -25,8 +30,7 @@ file("../gradle.properties").withReader {
 }
 
 dependencies {
-    implementation platform("org.grails:grails-bom:${gradleProperties.grailsVersion}")
-    implementation "org.grails:grails-gradle-plugin"
-    implementation "org.grails.plugins:views-gradle"
-    implementation "org.grails:grails-docs"
+    implementation platform("org.apache.grails:grails-bom:${gradleProperties.grailsVersion}")
+    implementation "org.apache.grails:grails-gradle-plugins"
+    implementation "org.apache.grails:grails-docs-core"
 }

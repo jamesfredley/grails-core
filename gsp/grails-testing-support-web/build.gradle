@@ -4,27 +4,26 @@ plugins {
 }
 
 version = projectVersion
-group = 'org.grails'
+group = 'org.apache.grails.web'
 
 ext {
-    pomArtifactId = 'grails-web-testing-support'
+    pomArtifactId = 'grails-testing-support-web'
     pomTitle = 'Grails Web Testing Support'
     pomDescription = 'Support for writing concise expressive tests for Grails Web Artifacts'
     pomDevelopers = [jeffscottbrown: 'Jeff Brown', jameskleeh: 'James Kleeh']
-    snapshotPublishUrl = 'https://repo.grails.org/grails/libs-snapshots-local'
 }
 
 // Note: documentation for this project is published to grails-doc as part of the other testing documentation
 
 dependencies {
-    implementation platform("org.grails:grails-bom:$grailsVersion")
+    implementation platform("org.apache.grails:grails-bom:$grailsVersion")
 
-    api project(':grails-plugin-gsp')
-    api 'org.grails:grails-plugin-rest'
-    api 'org.grails:grails-plugin-interceptors'
+    api project(':grails-gsp')
+    api 'org.apache.grails:grails-rest-transforms'
+    api 'org.apache.grails:grails-interceptors'
     api 'jakarta.servlet:jakarta.servlet-api'
 
-    api 'org.grails:grails-testing-support'
+    api 'org.apache.grails.testing:grails-testing-support-core'
     api "org.javassist:javassist:${javassistVersion}"
 }
 

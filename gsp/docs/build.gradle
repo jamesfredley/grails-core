@@ -3,15 +3,15 @@ ext {
     guideSubtitle = 'GSP (Groovy Server Pages) - A server-side view rendering technology based on Groovy'
 
     apiDocsProjects = [
+            'grails-gsp-core',
             'grails-gsp',
-            'grails-plugin-gsp',
-            'grails-plugin-sitemesh3',
+            'grails-sitemesh3',
             'grails-taglib',
             'grails-web-gsp',
             'grails-web-gsp-taglib',
             'grails-web-jsp',
             'grails-web-taglib',
-            'grails-web-testing-support'
+            'grails-testing-support-web'
     ]
     apiDocTitle = "Groovy Server Pages (GSP) API - ${projectVersion}"
     apiWindowTitle = "Groovy Server Pages (GSP) API - ${projectVersion}"
