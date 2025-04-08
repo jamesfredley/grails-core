@@ -12,6 +12,7 @@ import spock.lang.PendingFeatureIf
  * Contains misc proxy tests using Hibenrate defaults, which is ByteBuddy.
  * These should all be passing for Gorm to be operating correctly with Groovy.
  */
+//TODO Are we still supporting Proxies?
 class ByteBuddyProxySpec extends HibernateGormDatastoreSpec {
     static HibernateProxyHandler proxyHandler = new HibernateProxyHandler()
 
@@ -30,7 +31,7 @@ class ByteBuddyProxySpec extends HibernateGormDatastoreSpec {
         return team
     }
 
-    @Ignore("StaticTestUtil.team_id_asserts assert !Hibernate.isInitialized(team) fails")
+//    @Ignore("StaticTestUtil.team_id_asserts assert !Hibernate.isInitialized(team) fails")
     void "getId and id property checks dont initialize proxy if in a CompileStatic method"() {
         when:
         Team team = createATeam()

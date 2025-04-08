@@ -1,6 +1,7 @@
 package grails.gorm.specs
 
-import grails.gorm.tests.TestEntity
+import grails.gorm.tck.TestEntity
+
 
 class ReadOperationSpec extends HibernateGormDatastoreSpec {
 

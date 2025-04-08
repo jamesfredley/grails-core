@@ -8,6 +8,7 @@ import org.grails.datastore.gorm.query.transform.ApplyDetachedCriteriaTransform
  * Created by graemerocher on 01/03/2017.
  */
 @ApplyDetachedCriteriaTransform
+//TODO: How to create an alias inside a closure
 class SubqueryAliasSpec extends HibernateGormDatastoreSpec {
 
     List getDomainClasses() {

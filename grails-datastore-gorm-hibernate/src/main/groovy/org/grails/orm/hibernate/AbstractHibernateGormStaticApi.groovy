@@ -100,6 +100,7 @@ abstract class AbstractHibernateGormStaticApi<D> extends GormStaticApi<D> {
             // for multi-tenant entities we process get(..) via a query
 //            throw new UnsupportedOperationException("no yet")
             (D)hibernateTemplate.execute(  { Session session ->
+
                 return new HibernateQuery(hibernateSession,persistentEntity ).idEq(id).singleResult()
             } )
         }

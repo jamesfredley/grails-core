@@ -8,6 +8,7 @@ import spock.lang.Issue
 /**
  * Created by graemerocher on 03/11/16.
  */
+//TODO : How to create an alias inside a closure
 class WhereQueryWithAssociationSortSpec extends HibernateGormDatastoreSpec {
 
     @Issue('https://github.com/grails/grails-core/issues/9860')

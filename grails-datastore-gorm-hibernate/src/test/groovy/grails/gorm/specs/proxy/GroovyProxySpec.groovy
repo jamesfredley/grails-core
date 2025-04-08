@@ -1,17 +1,16 @@
 package grails.gorm.specs.proxy
 
+import grails.gorm.tck.Location
 import grails.gorm.tests.GormDatastoreSpec
-import grails.gorm.tests.Location
 import org.grails.datastore.gorm.proxy.GroovyProxyFactory
 import spock.lang.Ignore
 
 /**
  * @author graemerocher
  */
+//TODO Are we still supporting Proxies?
 class GroovyProxySpec extends GormDatastoreSpec {
 
-    // this test is ignored because Groovy proxies are not used with Hibernate
-    @Ignore
     void "Test creation and behavior of Groovy proxies"() {
 
         given:

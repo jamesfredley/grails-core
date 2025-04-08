@@ -1,15 +1,16 @@
 package grails.gorm.specs
 
 import grails.gorm.annotation.Entity
-import grails.gorm.transactions.Rollback
-import spock.lang.Ignore
+import org.jetbrains.annotations.NotNull
+
 
 import static grails.gorm.hibernate.mapping.MappingBuilder.define
 
 /**
  * Created by graemerocher on 26/01/2017.
  */
-@Ignore("Mapping is not working")
+//TODO: Failing at MappingModelCreationHelper line 1223
+//MappingModelCreationHelper assert ( (SortableValue) collectionBootValueMapping.getKey() ).isSorted()
 class CompositeIdWithJoinTableSpec extends HibernateGormDatastoreSpec {
     @Override
     List getDomainClasses() {
@@ -20,7 +21,7 @@ class CompositeIdWithJoinTableSpec extends HibernateGormDatastoreSpec {
     void "test composite id with join table"() {
         when:"A parent with a composite id and a join table is saved"
         new CompositeIdParent(name: "Test" , last:"Test 2")
-                .addToChildren(new CompositeIdChild())
+                .addToChildren(new CompositeIdChild(foo: "bar"))
                 .save(flush:true)
 
 
@@ -31,9 +32,10 @@ class CompositeIdWithJoinTableSpec extends HibernateGormDatastoreSpec {
 }
 
 @Entity
-class CompositeIdParent implements Serializable {
+class CompositeIdParent implements Serializable ,  Comparable<CompositeIdParent>{
     String name
     String last
+    SortedSet<CompositeIdChild> children
     static hasMany = [children:CompositeIdChild]
     static mapping = define {
         id composite('name','last')
@@ -50,14 +52,25 @@ class CompositeIdParent implements Serializable {
             }
         }
     }
+
+    @Override
+    int compareTo(@NotNull CompositeIdParent o) {
+        this.name <=> o.name ?: this.last <=> o.last
+    }
 }
 
 @Entity
-class CompositeIdChild {
+class CompositeIdChild implements Comparable<CompositeIdChild> {
+    String foo
+    static belongsTo = [parent:CompositeIdParent]
 
     static mapping = {
 
     }
     static constraints = {
+    }
+    @Override
+    int compareTo(CompositeIdChild other) {
+        foo <=> other.foo
     }
 }

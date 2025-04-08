@@ -15,7 +15,6 @@ import spock.lang.Specification
 /**
  * Created by graemerocher on 20/07/2016.
  */
-@Ignore
 class SchemaMultiTenantSpec extends Specification {
     void "Test a database per tenant multi tenancy"() {
         given:"A configuration for multiple data sources"

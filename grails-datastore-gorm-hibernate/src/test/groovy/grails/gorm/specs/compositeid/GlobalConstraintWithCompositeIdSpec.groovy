@@ -3,16 +3,18 @@ package grails.gorm.specs.compositeid
 import grails.gorm.annotation.Entity
 import grails.gorm.specs.HibernateGormDatastoreSpec
 import grails.gorm.transactions.Rollback
+import jakarta.annotation.Nonnull
 import org.grails.datastore.mapping.core.Session
 import org.grails.datastore.mapping.model.PersistentEntity
 import org.grails.orm.hibernate.cfg.PropertyConfig
-import org.jetbrains.annotations.NotNull
+
 import spock.lang.Ignore
 import spock.lang.Issue
 
 /**
  * Created by graemerocher on 17/02/2017.
  */
+//TODO CompositeId not working
 class GlobalConstraintWithCompositeIdSpec extends HibernateGormDatastoreSpec {
 
     @Override
@@ -53,7 +55,7 @@ class GlobalConstraintWithCompositeIdSpec extends HibernateGormDatastoreSpec {
         ChildB.count == 1
     }
 
-    @Ignore("DDL not working for composite id")
+//    @Ignore("DDL not working for composite id")
     @Issue('https://github.com/grails/grails-data-mapping/issues/877')
     void "test global constraints with unique constraint"() {
         given:
@@ -112,7 +114,7 @@ class ChildB implements Serializable, Comparable<ChildB> {
     }
 
     @Override
-    int compareTo(@NotNull ChildB o) {
+    int compareTo(@Nonnull ChildB o) {
         this.name <=> o.name
     }
 }

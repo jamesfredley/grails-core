@@ -18,6 +18,7 @@ package grails.gorm.specs.hasmany
 import grails.gorm.annotation.Entity
 import grails.gorm.annotation.JpaEntity
 import grails.gorm.hibernate.mapping.MappingBuilder
+import grails.gorm.specs.HibernateGormDatastoreSpec
 import grails.gorm.transactions.Rollback
 import jakarta.persistence.CascadeType
 import jakarta.persistence.GeneratedValue
@@ -30,14 +31,16 @@ import spock.lang.*
  * @author Graeme Rocher
  * @since 1.0
  */
-class TwoUnidirectionalHasManySpec extends Specification {
+//TODO: CreatedUsers sql is being run, but not added to the EcmMask instance
+class TwoUnidirectionalHasManySpec extends HibernateGormDatastoreSpec {
 
-    @Shared @AutoCleanup HibernateDatastore datastore = new HibernateDatastore(getClass().getPackage())
-
+    @Override
+    List getDomainClasses() {
+        [EcmMask,EcmMaskJpa,User2,User]
+    }
 
     @Rollback
     @Issue('https://github.com/grails/grails-core/issues/10811')
-    @Ignore
     void "test two undirectional one to many references"() {
         when:
         new EcmMask(name: "test")
@@ -56,7 +59,6 @@ class TwoUnidirectionalHasManySpec extends Specification {
 
     @Rollback
     @Issue('https://github.com/grails/grails-core/issues/10811')
-    @Ignore
     void "test two JPA undirectional one to many references"() {
 
         when:

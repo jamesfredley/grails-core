@@ -2,7 +2,9 @@ package grails.gorm.specs
 
 import grails.gorm.annotation.Entity
 import grails.gorm.transactions.Rollback
-import org.jetbrains.annotations.NotNull
+import jakarta.annotation.Nonnull
+
+//import org.jetbrains.annotations.NotNull
 import spock.lang.Issue
 
 /**
@@ -61,7 +63,7 @@ class ToothDisease implements Serializable,Comparable<ToothDisease> {
     }
 
     @Override
-    int compareTo(@NotNull ToothDisease o) {
+    int compareTo(@Nonnull ToothDisease o) {
         return idColumn <=> ((ToothDisease)o).idColumn
     }
 }

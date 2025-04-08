@@ -1,7 +1,9 @@
 package org.grails.orm.hibernate.connections
 
 import grails.gorm.annotation.Entity
+import grails.gorm.specs.HibernateGormDatastoreSpec
 import org.grails.datastore.mapping.core.DatastoreUtils
+import org.grails.datastore.mapping.core.Session
 import org.grails.datastore.mapping.core.connections.ConnectionSource
 import org.grails.orm.hibernate.HibernateDatastore
 import org.hibernate.dialect.H2Dialect
@@ -11,11 +13,16 @@ import spock.lang.Specification
 /**
  * Created by graemerocher on 20/02/2017.
  */
-class MultipleDataSourcesWithEventsSpec extends Specification {
+//TODO Multiple data sources not working
+class MultipleDataSourcesWithEventsSpec extends HibernateGormDatastoreSpec {
 
-    @Issue('https://github.com/grails/grails-core/issues/10451')
-    void "Test multiple data sources register the correct events"() {
-        given:"A configuration for multiple data sources"
+    @Override
+    List getDomainClasses() {
+        [EventsBook, SecondaryBook]
+    }
+
+    Session configure() {
+        ConfigObject grailsConfig = new ConfigObject()
         Map config = [
                 'dataSource.url':"jdbc:h2:mem:grailsDB;LOCK_TIMEOUT=10000",
                 'dataSource.dbCreate': 'update',
@@ -27,9 +34,15 @@ class MultipleDataSourcesWithEventsSpec extends Specification {
                 'hibernate.hbm2ddl.auto': 'create',
                 'dataSources.books':[url:"jdbc:h2:mem:books;LOCK_TIMEOUT=10000"]
         ]
+        grailsConfig.putAll(config)
+        setupClass.setup(((TEST_CLASSES + getDomainClasses()) as Set) as List, grailsConfig, true)
+    }
+
+    @Issue('https://github.com/grails/grails-core/issues/10451')
+    void "Test multiple data sources register the correct events"() {
+        given:"A configuration for multiple data sources"
 
         when:"A entity is saved with the default connection"
-        HibernateDatastore datastore = new HibernateDatastore(DatastoreUtils.createPropertyResolver(config),EventsBook, SecondaryBook )
         EventsBook book = new EventsBook(name:"test")
         EventsBook.withTransaction {
             book.save(flush:true)

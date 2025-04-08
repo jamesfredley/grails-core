@@ -26,7 +26,7 @@ import spock.lang.Specification
 /**
  * Created by graemerocher on 11/07/2016.
  */
-
+//TODO Multitenancy not working
 class PartitionedMultiTenancySpec extends HibernateGormDatastoreSpec {
 
     @Override

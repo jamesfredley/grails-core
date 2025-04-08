@@ -43,6 +43,7 @@ import org.hibernate.SessionFactory;
 import org.hibernate.query.ResultListTransformer;
 import org.hibernate.query.criteria.HibernateCriteriaBuilder;
 import org.hibernate.query.criteria.JpaExpression;
+import org.hibernate.query.sqm.PathElementException;
 import org.hibernate.transform.ResultTransformer;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.support.DefaultConversionService;

@@ -1,8 +1,8 @@
 package grails.gorm.specs
 
 import grails.gorm.annotation.Entity
-import grails.gorm.tests.GroupWithin
-import grails.gorm.tests.UniqueGroup
+import grails.gorm.tck.GroupWithin
+import grails.gorm.tck.UniqueGroup
 import org.grails.datastore.gorm.GormEntity
 import org.grails.orm.hibernate.HibernateDatastore
 import org.springframework.transaction.PlatformTransactionManager
@@ -73,7 +73,6 @@ class UniqueConstraintHibernateSpec extends Specification {
 
     }
 
-    @spock.lang.Ignore
     def "Test unique constraint with a hasOne association"() {
         when:"Two domain classes with the same license are saved"
         Driver one

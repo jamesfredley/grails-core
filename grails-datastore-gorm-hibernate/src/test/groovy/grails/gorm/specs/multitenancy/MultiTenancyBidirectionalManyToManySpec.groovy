@@ -19,6 +19,7 @@ import spock.lang.Specification
 /**
  * Created by puneetbehl on 21/03/2018.
  */
+//TODO Multitenancy not working
 class MultiTenancyBidirectionalManyToManySpec extends Specification {
 
     final Map config = [

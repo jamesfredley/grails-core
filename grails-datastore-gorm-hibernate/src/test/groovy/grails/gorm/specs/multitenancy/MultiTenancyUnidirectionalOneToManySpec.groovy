@@ -13,6 +13,7 @@ import spock.lang.Specification
 /**
  * Created by graemerocher on 16/06/2017.
  */
+//TODO Multitenancy not working
 class MultiTenancyUnidirectionalOneToManySpec extends Specification {
 
     @Issue('https://github.com/grails/grails-data-mapping/issues/954')

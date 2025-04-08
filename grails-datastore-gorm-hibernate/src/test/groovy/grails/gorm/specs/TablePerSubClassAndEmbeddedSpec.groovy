@@ -11,7 +11,7 @@ import spock.lang.Ignore
  * Created by graemerocher on 04/11/16.
  */
 @ApplyDetachedCriteriaTransform
-@Ignore("How does JPA deal with subclasses?")
+//TODO: Closure syntax not detecting that address is an embedded entity
 class TablePerSubClassAndEmbeddedSpec extends HibernateGormDatastoreSpec {
 
     @Override

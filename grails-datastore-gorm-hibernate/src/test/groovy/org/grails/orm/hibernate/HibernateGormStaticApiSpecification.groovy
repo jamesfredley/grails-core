@@ -181,7 +181,7 @@ class HibernateGormStaticApiTest extends HibernateGormDatastoreSpec{
         results[1] == "London"
     }
 
-    @Ignore("This is documented as working but fails")
+//TODO: Chained Criteria
     def multipleCriteria() {
         given:
         def accountCriteria = {

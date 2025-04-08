@@ -2,8 +2,7 @@ package grails.gorm.specs.hibernatequery
 
 import grails.gorm.DetachedCriteria
 import grails.gorm.specs.HibernateGormDatastoreSpec
-import grails.gorm.tests.Person
-import grails.gorm.tests.Pet
+import grails.gorm.tck.*
 import grails.persistence.Entity
 import jakarta.persistence.criteria.JoinType
 import org.grails.datastore.mapping.query.Query
@@ -126,7 +125,7 @@ class HibernateQuerySpec extends HibernateGormDatastoreSpec {
     }
 
 
-    @Ignore("Need better implementation of Predicate")
+//    @Ignore("Need better implementation of Predicate")
     def idEq() {
         given:
         Person oldFred = new Person(firstName: "Fred", lastName: "Rogers", age: 51).save(flush: true)
@@ -328,7 +327,7 @@ class HibernateQuerySpec extends HibernateGormDatastoreSpec {
         oldPet == newPet
     }
 
-    @Ignore("Exits subquery is broken")
+//    @Ignore("Exits subquery is broken")
     /**
      * org.grails.orm.hibernate.query.PredicateGenerator.getPredicates()
      * else if (criterion instanceof Query.Exists c)
@@ -354,10 +353,9 @@ class HibernateQuerySpec extends HibernateGormDatastoreSpec {
      */
     def exists() {
         given:
-        new Person(firstName: "Fred", lastName: "Rogers", age: 52).save(flush: true)
-        def oldPet = new Pet(name: "Lucky")
-        oldBob.addToPets(oldPet)
-        oldBob.save(flush: true)
+        def fred = new Person(firstName: "Fred", lastName: "Rogers", age: 52).save(flush: true)
+        new Pet(name: "Lucky", owner: oldBob).save(flush:true)
+        petHibernateQuery.singleResult()
         hibernateQuery.exists(new DetachedCriteria(Pet).eq("owner", oldBob))
         when:
         def newBob = hibernateQuery.singleResult()
@@ -365,7 +363,6 @@ class HibernateQuerySpec extends HibernateGormDatastoreSpec {
         oldBob == newBob
     }
 
-    @Ignore("Exists subquery is broken")
     /**
      *  org.grails.orm.hibernate.query.PredicateGenerator.getPredicates()
      * else if (criterion instanceof Query.NotExists c)

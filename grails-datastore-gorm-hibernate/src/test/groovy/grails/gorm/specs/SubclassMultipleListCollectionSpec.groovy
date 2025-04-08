@@ -23,7 +23,6 @@ class SubclassMultipleListCollectionSpec extends Specification {
         transactionManager = hibernateDatastore.getTransactionManager()
     }
 
-    @Ignore // not yet implemented
     @Rollback
     @Issue('https://github.com/grails/grails-data-mapping/issues/882')
     void "test inheritance with multiple list collections"() {

@@ -167,14 +167,18 @@ public class PredicateGenerator {
                         return cb.in(getFullyQualifiedPath(tablesByName, c.getProperty()), c.getValues());
                     } else if (criterion instanceof Query.Exists c) {
                         Subquery subquery = criteriaQuery.subquery(Object.class);
-                        Root from = subquery.from(c.getSubquery().getPersistentEntity().getJavaClass());
-                        Predicate[] predicates = getPredicates(cb, criteriaQuery, from, c.getSubquery().getCriteria(), tablesByName);
+                        Root subRoot = subquery.from(c.getSubquery().getPersistentEntity().getJavaClass());
+                        HashMap<String, From> subMap = new HashMap<>(tablesByName);
+                        subMap.put("root", subRoot);
+                        Predicate[] predicates = getPredicates(cb, criteriaQuery, subRoot, c.getSubquery().getCriteria(), subMap);
                         subquery.select(cb.literal(1)).where(cb.and(predicates));
                         return cb.exists(subquery);
                     } else if (criterion instanceof Query.NotExists c) {
                         Subquery subquery = criteriaQuery.subquery(Object.class);
-                        Root from = subquery.from(c.getSubquery().getPersistentEntity().getJavaClass());
-                        Predicate[] predicates = getPredicates(cb, criteriaQuery, from, c.getSubquery().getCriteria(), tablesByName);
+                        Root subRoot = subquery.from(c.getSubquery().getPersistentEntity().getJavaClass());
+                        HashMap<String, From> subMap = new HashMap<>(tablesByName);
+                        subMap.put("root", subRoot);
+                        Predicate[] predicates = getPredicates(cb, criteriaQuery, subRoot, c.getSubquery().getCriteria(), tablesByName);
                         subquery.select(cb.literal(1)).where(cb.and(predicates));
                         return cb.not(cb.exists(subquery));
                     } else if (criterion instanceof Query.SubqueryCriterion c) {

@@ -1,7 +1,7 @@
 package grails.gorm.specs
 
-import grails.gorm.tests.ChildEntity
-import grails.gorm.tests.TestEntity
+import grails.gorm.tck.TestEntity
+import grails.gorm.tck.ChildEntity
 
 class NullValueEqualSpec extends HibernateGormDatastoreSpec {
 

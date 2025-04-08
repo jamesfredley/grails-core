@@ -8,6 +8,7 @@ import spock.lang.*
 /**
  * Created by graemerocher on 03/05/2017.
  */
+//TODO Should this test be rewritten?
 class SaveWithInvalidEntitySpec extends Specification {
 
     @Shared @AutoCleanup HibernateDatastore hibernateDatastore = new HibernateDatastore(A, B)
@@ -16,7 +17,6 @@ class SaveWithInvalidEntitySpec extends Specification {
      * This currently fails with a NPE. See explanation https://github.com/grails/grails-core/issues/10604#issuecomment-298943022
      */
     @Rollback
-    @Ignore
     @Issue('https://github.com/grails/grails-core/issues/10604')
     void "test save with an invalid entity"() {
         when:

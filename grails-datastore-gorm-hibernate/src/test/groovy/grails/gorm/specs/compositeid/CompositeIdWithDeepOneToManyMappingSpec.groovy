@@ -4,14 +4,14 @@ import grails.gorm.annotation.Entity
 import grails.gorm.hibernate.mapping.MappingBuilder
 import grails.gorm.specs.HibernateGormDatastoreSpec
 import grails.gorm.transactions.Rollback
-import org.jetbrains.annotations.NotNull
+import jakarta.annotation.Nonnull
 import spock.lang.Ignore
 import spock.lang.Issue
 
 /**
  * Created by graemerocher on 26/01/2017.
  */
-@Ignore("AUTO CREATE DDL NOT WORKING")
+//TODO: CompositeId not working
 class CompositeIdWithDeepOneToManyMappingSpec extends HibernateGormDatastoreSpec {
 
     @Override
@@ -50,7 +50,7 @@ class Child implements Serializable, Comparable<Child> {
     }
 
     @Override
-    int compareTo(@NotNull Child o) {
+    int compareTo(@Nonnull Child o) {
         return this.name <=> o.name
     }
 }
@@ -68,7 +68,7 @@ class Parent implements Serializable, Comparable<Parent> {
     }
 
     @Override
-    int compareTo(@NotNull Parent o) {
+    int compareTo(@Nonnull Parent o) {
         return this.name <=> o.name
     }
 }

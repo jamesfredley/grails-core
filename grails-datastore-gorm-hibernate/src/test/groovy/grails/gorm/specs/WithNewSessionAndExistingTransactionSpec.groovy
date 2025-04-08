@@ -1,6 +1,6 @@
 package grails.gorm.specs
 
-import grails.gorm.tests.Book
+import grails.gorm.tck.Book
 import org.grails.datastore.gorm.Setup
 import org.grails.orm.hibernate.GormSpec
 import org.grails.orm.hibernate.HibernateDatastore
