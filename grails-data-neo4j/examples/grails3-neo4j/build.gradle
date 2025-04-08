@@ -1,6 +1,6 @@
 group "examples"
-configurations.all { Configuration c ->
-    c.exclude(group:'org.grails',module:'grails-datastore-simple')
+configurations.configureEach {
+    exclude group: 'org.apache.grails', module: 'grails-data-simple'
 }
 
 dependencies {
@@ -9,23 +9,21 @@ dependencies {
     implementation "org.springframework.boot:spring-boot-starter-actuator"
     implementation "org.springframework.boot:spring-boot-starter-tomcat"
     implementation "javax.servlet:javax.servlet-api:$servletApiVersion"
-    implementation "org.apache.grails:grails-core:$grailsVersion", {
-        exclude group: 'org.grails', module: 'grails-datastore-core' // TODO: Remove after gorm published & core updated
-    }
+    implementation "org.apache.grails:grails-core"
     implementation "org.apache.grails:grails-dependencies:$grailsVersion"
     implementation "org.apache.grails.web:grails-web-boot:$grailsVersion"
 
     implementation project(":grails-plugin")
 
     runtimeOnly "com.bertramlabs.plugins:asset-pipeline-grails:$assetPipelineVersion"
-    runtimeOnly "org.grails.plugins:scaffolding:$scaffoldingVersion"
-    runtimeOnly "org.grails.plugins:fields:$fieldsVersion"
+    runtimeOnly "org.apache.grails:grails-scaffolding:$scaffoldingVersion"
+    runtimeOnly "org.apache.grails:grails-fields:$fieldsVersion"
 
     testImplementation ("org.apache.grails.testing:grails-testing-support-core:$testingSupportVersion") {
         exclude group: "org.spockframework", module: "spock-core"
     }
     testImplementation project(':grails-testing-support-datamapping')
-    testImplementation ("org.grails:grails-web-testing-support:$testingSupportVersion") {
+    testImplementation ("org.apache.grails:grails-testing-support-web:$testingSupportVersion") {
         exclude group: "org.spockframework", module: "spock-core"
     }
 
@@ -45,7 +43,7 @@ dependencies {
 
     testRuntimeOnly "org.neo4j.test:neo4j-harness:$neo4jVersion"
 
-    profile "org.grails.profiles:web"
+    profile "org.apache.grails.profiles:web"
 }
 
 tasks.withType(Test) {

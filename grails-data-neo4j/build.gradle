@@ -12,7 +12,7 @@ buildscript {
     }
 }
 
-group "org.grails"
+group "org.apache.grails"
 version project.projectVersion
 println "GORM VERSION = ${project.datastoreVersion}"
 
@@ -95,7 +95,7 @@ subprojects { subproject ->
 
         if (isGrails3Example) {
             apply plugin: 'org.apache.grails.gradle.grails-web'
-            apply plugin:"org.grails.grails-gsp"
+            apply plugin:"org.apache.grails.gradle.grails-gsp"
 
             if (usesGeb) {
                 apply plugin:"com.github.erdi.webdriver-binaries"
@@ -182,10 +182,10 @@ subprojects { subproject ->
     }
        
     if (isPluginProject) {
-        group "org.grails.plugins"
+        group "org.apache.grails"
         version( rootProject.version )
     } else {
-        group "org.grails"
+        group "org.apache.grails.data"
         version rootProject.version
     }
 
@@ -214,7 +214,7 @@ subprojects { subproject ->
     configurations.all {
         resolutionStrategy.eachDependency { DependencyResolveDetails details ->
             def dependencyName = details.requested.name
-            if (details.requested.group == 'org.grails' &&
+            if (details.requested.group == 'org.apache.grails.data' &&
                     details.requested.name in ['grails-datastore-core',
                                                'grails-datastore-async',
                                                'grails-datamapping-core',
