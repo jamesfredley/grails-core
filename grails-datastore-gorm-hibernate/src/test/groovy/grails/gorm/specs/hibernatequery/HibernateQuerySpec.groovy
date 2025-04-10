@@ -2,7 +2,7 @@ package grails.gorm.specs.hibernatequery
 
 import grails.gorm.DetachedCriteria
 import grails.gorm.specs.HibernateGormDatastoreSpec
-import grails.gorm.tck.*
+import grails.gorm.tests.*
 import grails.persistence.Entity
 import jakarta.persistence.criteria.JoinType
 import org.grails.datastore.mapping.query.Query

@@ -1,8 +1,7 @@
 package grails.gorm.specs
 
 import grails.gorm.annotation.Entity
-import grails.gorm.tck.GroupWithin
-import grails.gorm.tck.UniqueGroup
+import grails.gorm.tests.*
 import org.grails.datastore.gorm.GormEntity
 import org.grails.orm.hibernate.HibernateDatastore
 import org.springframework.transaction.PlatformTransactionManager

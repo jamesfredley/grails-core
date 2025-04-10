@@ -1,8 +1,6 @@
 package grails.gorm.specs
 
-import grails.gorm.tck.OptLockNotVersioned
-import grails.gorm.tck.OptLockVersioned
-import grails.gorm.tests.GormDatastoreSpec
+import grails.gorm.tests.*
 import org.springframework.orm.hibernate5.HibernateOptimisticLockingFailureException
 
 
