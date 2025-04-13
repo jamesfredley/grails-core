@@ -24,7 +24,6 @@ dependencies {
 
     // As this is a plugin these dependencies will be provided by the Grails application
     // This removes circular dependencies
-    compileOnly project(':grails-bootstrap')
     compileOnly project(':grails-core')
 
     testImplementation 'org.spockframework:spock-core'
