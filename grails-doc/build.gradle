@@ -102,7 +102,7 @@ String getVersion(String artifact) {
 }
 
 tasks.register('publishGuide', grails.doc.gradle.PublishGuide) {
-    dependsOn(['generateBomDocumentation', ':aggregateGroovydoc', 'jar', 'resolveGroovyVersion', 'processTestResources'])
+    dependsOn(['generateBomDocumentation', ':aggregateGroovydoc', 'jar', 'resolveGroovyVersion', 'processTestResources', 'compileTestJava', 'compileTestGroovy', 'test'])
     targetDir = project.layout.buildDirectory.dir("manual").get().asFile
 
     doFirst {
