@@ -204,7 +204,7 @@ tasks.register("docs", Copy) {
     dependsOn ":aggregateGroovydoc", "publishGuide", "createReleaseDropdown", "publishPdf"
 
     def manualDocsDir = publishGuide.targetDir
-    def apiDocsDir = rootProject.layout.buildDirectory.dir('docs/api')
+    def apiDocsDir = rootProject.layout.buildDirectory.dir('docs')
     // This is the output directory of the groovydoc task in the grails project.
     def modifiedPagesDir = createReleaseDropdown.outputDir
     def mergedDocsDir = project.layout.buildDirectory.dir('docs')
