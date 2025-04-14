@@ -262,9 +262,11 @@ Note: if project properties are used, the properties must be defined prior to ap
                         pom.withXml {
                             Node pomNode = asNode()
 
-                            // Prevent multiple dependencyManagement nodes
-                            if (pomNode.dependencyManagement) {
-                                pomNode.dependencyManagement[0].replaceNode {}
+                            if (!project.extensions.findByType(JavaPlatformExtension)) {
+                                // Prevent multiple dependencyManagement nodes
+                                if (pomNode.dependencyManagement) {
+                                    pomNode.dependencyManagement[0].replaceNode {}
+                                }
                             }
 
                             if (gpe != null) {

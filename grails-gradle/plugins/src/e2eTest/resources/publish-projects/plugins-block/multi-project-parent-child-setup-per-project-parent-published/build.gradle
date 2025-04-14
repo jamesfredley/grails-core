@@ -33,7 +33,7 @@ allprojects {
 }
 
 grailsPublish {
-    githubSlug = 'apache/grails-gradle-plugins'
+    githubSlug = 'apache/grails-cores'
     license {
         name = 'Apache-2.0'
     }

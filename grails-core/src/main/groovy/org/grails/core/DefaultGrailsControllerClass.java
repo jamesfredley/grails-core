@@ -19,13 +19,9 @@ import grails.config.Settings;
 import grails.core.GrailsApplication;
 import grails.core.GrailsControllerClass;
 import grails.util.Environment;
-import grails.util.GrailsClassUtils;
 import grails.web.Action;
 import grails.web.UrlConverter;
 import groovy.lang.GroovyObject;
-import org.grails.core.exceptions.GrailsConfigurationException;
-import org.springframework.cglib.reflect.FastClass;
-import org.springframework.cglib.reflect.FastMethod;
 import org.springframework.util.ReflectionUtils;
 
 import java.lang.invoke.MethodHandle;

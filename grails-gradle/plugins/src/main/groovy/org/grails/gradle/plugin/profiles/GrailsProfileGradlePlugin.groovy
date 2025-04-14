@@ -15,7 +15,6 @@
  */
 package org.grails.gradle.plugin.profiles
 
-import grails.io.IOUtils
 import grails.util.BuildSettings
 import groovy.transform.CompileStatic
 import org.gradle.api.Plugin
@@ -25,7 +24,6 @@ import org.gradle.api.file.CopySpec
 import org.gradle.api.plugins.BasePlugin
 import org.gradle.api.tasks.Copy
 import org.gradle.api.tasks.bundling.Jar
-import org.grails.cli.profile.commands.script.GroovyScriptCommand
 import org.grails.gradle.plugin.profiles.tasks.ProfileCompilerTask
 
 import static org.gradle.api.plugins.BasePlugin.BUILD_GROUP
@@ -104,7 +102,9 @@ class GrailsProfileGradlePlugin implements Plugin<Project> {
             if(templatesDir.exists()) {
                 task.templatesDir = templatesDir
             }
-            task.classpath = project.configurations.getByName(RUNTIME_CONFIGURATION) + project.files(IOUtils.findJarFile(GroovyScriptCommand))
+
+            //TODO: we can probably use the project.configurations.runtimeClaspath.find { file -> file.name.contains('grails-shell-cli') to resolve the jar file location, but the runtime configuration should already contain it
+            task.classpath = project.configurations.getByName(RUNTIME_CONFIGURATION) // + project.files(IOUtils.findJarFile(GroovyScriptCommand))
         })
 
         def profileJarTask = project.tasks.register("profileJar", Jar, { Jar jar ->

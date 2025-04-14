@@ -12,18 +12,17 @@ group = 'org.apache.grails.bootstrap'
 dependencies {
     implementation platform(project(':grails-bom'))
 
-    // compile grails-bootstap with the Groovy version provided by Gradle
-    // to ensure build compatibility with Gradle, currently Groovy 3.0.x
-    // when used by grails-gradle-plugin
-    // see: https://docs.gradle.org/current/userguide/compatibility.html#groovy
     implementation "org.springframework:spring-context"
     implementation "org.springframework.boot:spring-boot-autoconfigure"
 
+    api 'org.apache.grails.gradle:grails-gradle-model', {
+        exclude group: 'org.codehaus.groovy'
+    }
 
-    compileOnly "org.codehaus.groovy:groovy:$GroovySystem.version"
-    compileOnly "org.codehaus.groovy:groovy-templates:$GroovySystem.version"
-    compileOnly "org.codehaus.groovy:groovy-xml:$GroovySystem.version"
-    compileOnly "org.codehaus.groovy:groovy-ant:$GroovySystem.version"
+    compileOnly "org.apache.groovy:groovy"
+    compileOnly "org.apache.groovy:groovy-templates"
+    compileOnly "org.apache.groovy:groovy-xml"
+    compileOnly "org.apache.groovy:groovy-ant"
 
     compileOnly "io.methvin:directory-watcher"
     compileOnly "org.fusesource.jansi:jansi"

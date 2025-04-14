@@ -18,7 +18,6 @@ package org.grails.cli
 import grails.build.logging.GrailsConsole
 import grails.build.proxy.SystemPropertiesAuthenticator
 import grails.config.ConfigMap
-import grails.io.support.SystemOutErrCapturer
 import grails.io.support.SystemStreamsRedirector
 import grails.util.BuildSettings
 import grails.util.Environment

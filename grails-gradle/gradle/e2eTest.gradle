@@ -4,8 +4,8 @@ def e2eTestTask = tasks.register('e2eTest', Test) {
     testClassesDirs = sourceSets.e2eTest.output.classesDirs
     classpath = sourceSets.e2eTest.runtimeClasspath
     useJUnitPlatform()
-    systemProperty("localMavenPath", rootProject.layout.buildDirectory.dir('local-maven').get().asFile.absolutePath)
-    systemProperty("grailsGradlePluginVersion", rootProject.version)
+    systemProperty("localMavenPath", project.layout.buildDirectory.dir('local-maven').get().asFile.absolutePath)
+    systemProperty("grailsGradlePluginVersion", project.version)
     systemProperty("groovyVersion", e2eGroovyVersion)
 
     testLogging {
@@ -27,7 +27,7 @@ gradlePlugin {
 
 dependencies {
     // Note: must use a groovy 3 compatible version of Spock
-    e2eTestImplementation "org.spockframework:spock-core:${project['spock.version']}", {
+    e2eTestImplementation "org.spockframework:spock-core:${bomDependencyVersions['gradle-spock.version']}", {
         exclude group: 'org.apache.groovy'
     }
     e2eTestImplementation 'commons-io:commons-io:2.18.0'

@@ -44,7 +44,6 @@ import grails.util.GrailsArrayUtils;
 import grails.util.GrailsClassUtils;
 import org.grails.core.io.CachingPathMatchingResourcePatternResolver;
 import org.grails.core.io.SpringResource;
-import org.grails.core.exceptions.GrailsConfigurationException;
 import org.grails.spring.RuntimeSpringConfiguration;
 import grails.plugins.exceptions.PluginException;
 import org.grails.plugins.support.WatchPattern;

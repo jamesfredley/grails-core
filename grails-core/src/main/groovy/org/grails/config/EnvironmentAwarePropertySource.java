@@ -18,7 +18,6 @@
 package org.grails.config;
 
 import grails.util.Environment;
-import groovy.transform.CompileStatic;
 import org.springframework.core.env.EnumerablePropertySource;
 import org.springframework.core.env.PropertySource;
 import org.springframework.core.env.PropertySources;

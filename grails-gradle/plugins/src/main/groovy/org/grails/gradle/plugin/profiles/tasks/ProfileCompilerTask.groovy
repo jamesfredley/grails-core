@@ -25,7 +25,6 @@ import org.gradle.api.file.FileTree
 import org.gradle.api.file.FileVisitDetails
 import org.gradle.api.tasks.*
 import org.gradle.api.tasks.compile.AbstractCompile
-import org.grails.cli.profile.commands.script.GroovyScriptCommand
 import org.grails.cli.profile.commands.script.GroovyScriptCommandTransform
 import org.grails.gradle.plugin.profiles.GrailsProfileGradlePlugin
 import org.yaml.snakeyaml.DumperOptions
@@ -167,7 +166,7 @@ class ProfileCompilerTask extends AbstractCompile {
         if (groovySourceFiles) {
 
             CompilerConfiguration configuration = new CompilerConfiguration()
-            configuration.setScriptBaseClass(GroovyScriptCommand.name)
+            configuration.setScriptBaseClass('org.grails.cli.profile.commands.script.GroovyScriptCommand')
             destinationDir.mkdirs()
             configuration.setTargetDirectory(destinationDir)
 

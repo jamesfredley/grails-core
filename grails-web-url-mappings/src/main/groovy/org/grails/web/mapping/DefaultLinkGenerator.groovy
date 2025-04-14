@@ -24,8 +24,6 @@ import grails.web.mapping.UrlMapping
 import grails.web.mapping.UrlMappingsHolder
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.util.StringUtils
-
 import jakarta.annotation.PostConstruct
 import java.util.regex.Pattern
 

@@ -32,7 +32,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import jakarta.servlet.ServletRequest;
 
 import grails.core.GrailsApplication;
-import grails.core.GrailsDomainClass;
 import grails.web.mime.MimeType;
 import grails.web.mime.MimeTypeResolver;
 import grails.web.mime.MimeTypeUtils;

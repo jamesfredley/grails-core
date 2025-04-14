@@ -24,7 +24,7 @@ import org.springframework.core.env.PropertyResolver
  * @author Graeme Rocher
  * @since 3.0
  */
-public interface Config extends PropertyResolver, ConfigMap {
+interface Config extends PropertyResolver, ConfigMap {
 
     /**
      * @return The flat version of the config

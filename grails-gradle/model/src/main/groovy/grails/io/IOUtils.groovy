@@ -67,7 +67,7 @@ class IOUtils extends SpringIOUtils {
      */
     static String toString(Reader reader) {
         def writer = new StringWriter()
-        copy reader, writer
+        org.grails.io.support.SpringIOUtils.copy reader, writer
         writer.toString()
     }
 
@@ -90,7 +90,7 @@ class IOUtils extends SpringIOUtils {
      */
     static void copy(InputStream input, Writer output, String encoding = null) {
         def reader = encoding ? new InputStreamReader(input, encoding) : new InputStreamReader(input)
-        copy(reader, output)
+        org.grails.io.support.SpringIOUtils.copy(reader, output)
     }
 
     /**

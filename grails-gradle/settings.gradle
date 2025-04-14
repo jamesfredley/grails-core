@@ -25,4 +25,16 @@ buildCache {
 	}
 }
 
-rootProject.name = 'grails-gradle-plugins'
+rootProject.name = 'grails-gradle'
+
+include 'grails-gradle-plugins'
+project(':grails-gradle-plugins').projectDir = file('plugins')
+
+include 'grails-gradle-bom'
+project(':grails-gradle-bom').projectDir = file('bom')
+
+include 'grails-gradle-model'
+project(':grails-gradle-model').projectDir = file('model')
+
+include 'grails-docs-core'
+project(':grails-docs-core').projectDir = file('docs-core')

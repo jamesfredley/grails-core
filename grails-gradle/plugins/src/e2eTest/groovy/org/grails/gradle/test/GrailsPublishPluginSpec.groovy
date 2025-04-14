@@ -490,7 +490,7 @@ class GrailsPublishPluginSpec extends GradleSpecification {
         
             apply plugin: 'org.apache.grails.gradle.grails-publish'
             grailsPublish {
-                githubSlug = 'apache/grails-gradle-plugins'
+                githubSlug = 'apache/grails-cores'
                 license {
                     name = 'Apache-2.0'
                 }
