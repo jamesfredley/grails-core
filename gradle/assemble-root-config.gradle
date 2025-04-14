@@ -80,7 +80,7 @@ class GrailsCreateStartScripts extends CreateStartScripts {
 tasks.register('install') { task ->
     dependsOn 'syncCliDependencies', 'grailsCreateStartScripts'
     subprojects { Project subproject ->
-        if (!(subproject.name in testProjects)) {
+        if (!(subproject.name in testProjects) && subproject.name != 'grails-doc') {
             task.dependsOn("$subproject.name:publishToMavenLocal")
         }
     }

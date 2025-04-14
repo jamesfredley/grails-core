@@ -17,25 +17,37 @@ package grails.doc.gradle
 
 import grails.doc.PdfPublisher
 import org.gradle.api.DefaultTask
+import org.gradle.api.file.Directory
+import org.gradle.api.model.ObjectFactory
+import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.TaskAction
+
+import javax.inject.Inject
 
 /**
  * Gradle task for generating a gdoc-based PDF user guide. Assumes the
  * single page HTML user guide has already been created in the default
  * location.
  */
-class PublishPdf extends DefaultTask {
+abstract class PublishPdf extends DefaultTask {
     @Input String pdfName = "single.pdf"
     @Input String language = ""
-    @OutputDirectory File outputDirectory = project.layout.buildDirectory.get().asFile
+    @OutputDirectory
+    final abstract Property<Directory> outputDirectory
+
+    @Inject
+    PublishPdf(ObjectFactory objects) {
+        outputDirectory = objects.directoryProperty().convention(project.layout.buildDirectory.dir("pdf"))
+    }
 
     @TaskAction
     def publish() {
-        File outputDir = new File(outputDirectory, language ?: "")
+        File baseOutputDir = outputDirectory.get().asFile
+        File i18nOutputDir = new File(baseOutputDir, language ?: "")
         try {
-            PdfPublisher.publishPdfFromHtml(outputDir, "guide/single.html", pdfName)
+            PdfPublisher.publishPdfFromHtml(i18nOutputDir, "guide/single.html", pdfName)
         }
         catch (Exception ex) {
             ex.printStackTrace()

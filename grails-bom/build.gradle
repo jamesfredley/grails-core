@@ -1,3 +1,5 @@
+import io.spring.gradle.dependencymanagement.org.apache.maven.model.io.xpp3.MavenXpp3Reader
+
 // Copyright 2024 the original author or authors.
 buildscript {
     apply from: rootProject.layout.projectDirectory.file('dependencies.gradle')
@@ -14,8 +16,6 @@ group = 'org.apache.grails'
 javaPlatform {
     allowDependencies()
 }
-
-
 
 ext {
     isReleaseBuild = System.getenv('GRAILS_PUBLISH_RELEASE') == 'true'
@@ -97,14 +97,134 @@ dependencies {
         api bomDependencies['views_markup']
 
         for (Project subproject : rootProject.subprojects) {
-            if(subproject.path == project.path || subproject.name in testProjects) {
+            if (subproject.path == project.path || subproject.name in testProjects || subproject.name == 'grails-doc') {
                 continue // ignore self & test projects
             }
 
             api project(":${subproject.path}")
         }
     }
+}
 
+
+configurations.register('bomDependencies').configure {
+    it.canBeResolved = true
+    it.transitive = true
+    it.extendsFrom(configurations.named('api').get())
+}
+
+String resolveMavenPomVersion(String dynamicVersion, Map properties, int maxIterations = 10) {
+    def dynamicPattern = ~/\$\{([^}]+)\}/
+    String expandedVersion = dynamicVersion
+
+    int iterations = 0
+    while ((expandedVersion =~ dynamicPattern).find() && iterations < maxIterations) {
+        expandedVersion = expandedVersion.replaceAll(dynamicPattern) { String fullMatch, String propName ->
+            String replacement = properties[propName] as String
+            return replacement ? replacement : fullMatch
+        }
+        iterations++
+    }
+
+    if ((expandedVersion =~ dynamicPattern).find()) {
+        logger.warn("Reached max iterations while resolving properties in: ${dynamicVersion}")
+    }
+
+    expandedVersion
+}
+
+//TODO: This really should be a gradle task that we export so others can use.
+tasks.register('extractConstraints') {
+    doLast {
+        def conf = configurations.detachedConfiguration()
+        conf.transitive(true)
+
+        Map<String, Tuple4<String, String, String, String>> bomConstraints = [:]
+        Configuration apiConfiguration = configurations.named('api').get()
+
+        // Explicit constraints
+        apiConfiguration.getAllDependencyConstraints().all { constraint ->
+            bomConstraints.put("${module.group}:${module.name}" as String,
+                    new Tuple4<>(
+                            constraint.module.group,
+                            constraint.module.name,
+                            constraint.version,
+                            "grails-bom"
+                    )
+            )
+        }
+
+        // Build an exclusion list so parsing the pom we can exclude any dependencies as they are matched
+        Map<String, List<Tuple2<String, String>>> allExclusions = [:].withDefault{ [] }
+        configurations.api.allDependencies.each { dep ->
+            if (dep instanceof org.gradle.api.artifacts.ModuleDependency) {
+                String coordinates = "${dep.group}:${dep.name}" as String
+
+                dep.excludeRules.each { exclusion ->
+                    Tuple2<String, String> exclude = new Tuple2<>(exclusion.group, exclusion.module)
+                    allExclusions.get(coordinates).add(exclude)
+                }
+            }
+        }
+
+        // Find inherited libraries via platform() usage
+        configurations.bomDependencies.incoming.resolutionResult.allDependencies.each { ResolvedDependencyResult dep ->
+            // Any non-constraint via api dependency should *always* be a platform dependency, so expand each of those
+            String bomGroup = dep.requested.group
+            String bomName = dep.requested.module
+            String bomVersion = dep.requested.version
+
+            String bomCoordinates = "${bomGroup}:${bomName}" as String
+            List<Tuple2<String, String>> excluded = allExclusions.get(bomCoordinates)
+
+            File bomPomFile
+            if(bomGroup == 'org.apache.grails' && bomName == 'grails-gradle-bom') {
+                // the pom won't exist for projects that aren't published yet, so fetch the generated one
+                // TODO: If we make this a reusable task, we should only apply this in this project
+                bomPomFile = rootProject.layout.projectDirectory.file('grails-gradle/bom/build/publications/maven/pom-default.xml').asFile
+            } else {
+                // fetc hthe BOM as a pom file so it can be expanded
+                def bomDependency = dependencies.create("${bomGroup}:${bomName}:${bomVersion}@pom") // TODO Blows up on
+                def bomConf = configurations.detachedConfiguration(bomDependency)
+                bomPomFile = bomConf.singleFile
+            }
+
+            def reader = new MavenXpp3Reader()
+            def model = reader.read(new FileReader(bomPomFile))
+
+            if (model.dependencyManagement && model.dependencyManagement.dependencies) {
+                model.dependencyManagement.dependencies.each { depItem ->
+
+                    String coordinates = "${depItem.groupId}:${depItem.artifactId}" as String
+                    if(!bomConstraints.containsKey(coordinates)) {
+                        boolean isExcluded = excluded.any {
+                            if(it.v1 && it.v2) {
+                                return coordinates == "${it.v1}:${it.v2}" as String
+                            }
+
+                            if(it.v1 && !it.v2) {
+                                return depItem.groupId == it.v1
+                            }
+
+                            if(!it.v1 && it.v2) {
+                                return depItem.artifactId == it.v2
+                            }
+
+                            false
+                        }
+                        if(!isExcluded) {
+                            String version = resolveMavenPomVersion(depItem.version, model.properties)
+                            bomConstraints.put(coordinates, new Tuple4<>(depItem.groupId, depItem.artifactId, version, bomName))
+                        }
+                    }
+                }
+            } else {
+                // Do not allow us to include boms that are invalid
+                throw new GradleException("BOM ${bomGroup}:${bomName}:${bomVersion} has no dependencyManagement section.")
+            }
+        }
+        ext.bomConstraints = bomConstraints
+    }
 }
 
 tasks.register('validateNoSnapshotDependencies') {
@@ -119,7 +239,7 @@ tasks.register('validateNoSnapshotDependencies') {
     }
 }
 
-if(ext.isReleaseBuild && ext.isPublishedExternal) {
+if (ext.isReleaseBuild && ext.isPublishedExternal) {
     tasks.named('generateMetadataFileForMavenPublication').configure {
         dependsOn(tasks.named('validateNoSnapshotDependencies'))
     }
@@ -132,7 +252,7 @@ Closure determinePropertyName = { String groupId, String artifactId, String vers
     Map<String, String> toSearch = isBom ? bomPlatformDependencies : bomDependencies
 
     Map.Entry<String, String> found = toSearch.entrySet().find { "$groupId:$artifactId:$version" as String == it.value as String }
-    if(!found) {
+    if (!found) {
         return null
     }
 
@@ -152,9 +272,9 @@ Closure determinePropertyName = { String groupId, String artifactId, String vers
             .replace('grails-testing-support-web', 'gsp')
             .replace('views-markup', 'gsp')
             .replace('views-gson', 'gsp')
-    while(possibleKey != null) {
+    while (possibleKey != null) {
         String propertyName = "${possibleKey}.version" as String
-        if(versions.containsKey(propertyName)) {
+        if (versions.containsKey(propertyName)) {
             return propertyName
         }
 
@@ -182,13 +302,13 @@ ext {
                 boolean isBom = dep.scope.text().trim() == 'import'
 
                 String inlineVersion = dep.version.text().trim()
-                if(inlineVersion == 'null') {
+                if (inlineVersion == 'null') {
                     inlineVersion = null
                 }
 
                 if (inlineVersion) {
                     String propertyName = determinePropertyName(groupId, artifactId, inlineVersion, isBom)
-                    if(propertyName) {
+                    if (propertyName) {
                         // Replace the version in the pom with a property reference
                         String propertyReference = "\${${propertyName}}"
                         dep.version[0].value = propertyReference
@@ -196,8 +316,7 @@ ext {
                         // Add an entry in the <properties> node with the actual version number
                         pomProperties.put(propertyName, inlineVersion)
                     }
-                }
-                else if(!inlineVersion) {
+                } else if (!inlineVersion) {
                     throw new GradleException("Dependency $groupId:$artifactId does not have a version.")
                 }
             }
@@ -208,44 +327,6 @@ ext {
         }
     }
 }
-
-//tasks.register('syncProps') {
-//    doLast {
-//        def gradlePropertiesFile = rootProject.layout.projectDirectory.file('gradle.properties').asFile
-//        String oldProperties = gradlePropertiesFile.text
-//        gradlePropertiesFile.write(oldProperties.substring(0, oldProperties.indexOf("# Generated on")) + """\
-//                    # Generated on ${new Date()} by: ./gradlew :grails-bom:${name}
-//                    # Only version value modifications allowed after this point. Do not insert or change version names.
-//                    ${dependenciesVersions.collect { "$it.version=$it.versionValue" }.join('\n                    ')}
-//                    """.stripIndent(true).trim())
-//        println "${gradlePropertiesFile} updated."
-//    }
-//}
-
-//tasks.register('dependabotBuild') {
-//    doLast {
-//        def dependabotBuildFile = rootProject.layout.projectDirectory.file('dependabot/build.gradle').asFile
-//        dependabotBuildFile.parentFile.mkdirs()
-//        dependabotBuildFile.write("""\
-//                    // Generated on ${new Date()} by: ./gradlew :grails-bom:${name}
-//                    plugins {
-//                        id 'java-library'
-//                    }
-//
-//                    dependencies {
-//                    ${allDependencies.collect { "    api \"${it.groupId}:${it.artifactId}:\${project['${it.version}']}\"" }.join('\n                    ')}
-//                    }
-//                    """.stripIndent(true).trim())
-//        println "${dependabotBuildFile} created."
-//    }
-//}
-//
-//tasks.register('dependabot') {
-//    group = 'Dependency Management'
-//    description = 'This task updates the dependabot/build.gradle and gradle.properties files by syncing them with the latest external dependencies listed in the Grails BOM (Bill of Materials). This ensures that Dependabot can monitor these dependencies and automatically create pull requests when newer versions become available.'
-//
-//    dependsOn 'syncProps', 'dependabotBuild'
-//}
 
 apply {
     from rootProject.layout.projectDirectory.file('gradle/publish-config.gradle')

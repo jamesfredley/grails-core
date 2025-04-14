@@ -30,6 +30,7 @@ dependencies {
         api bomDependencies['ant']
         api bomDependencies['ant_junit']
         api bomDependencies['asciidoctorj']
+        api bomDependencies['asciidoctorj_gradle_jvm']
         api bomDependencies['asset_pipeline_gradle']
         api bomDependencies['byte_buddy']
         api bomDependencies['commons_text']
@@ -148,4 +149,9 @@ publishing {
             }
         }
     }
+}
+
+// force this project to always generate a pom so it can be found in grails-docs:generateBomDocumentation
+tasks.withType(Jar).configureEach {
+    it.dependsOn('generatePomFileForMavenPublication')
 }

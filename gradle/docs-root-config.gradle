@@ -1,6 +1,6 @@
 apply from: layout.projectDirectory.file('gradle/docs-dependencies.gradle')
 
-tasks.register('docs', Groovydoc) {
+tasks.register('aggregateGroovydoc', Groovydoc) {
     group = 'documentation'
     def srcDirs = subprojects
             .findAll { it.findProperty('includeInApiDocs') }
