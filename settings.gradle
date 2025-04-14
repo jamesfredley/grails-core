@@ -41,7 +41,6 @@ include (
         'grails-databinding-core',
         'grails-databinding',
         'grails-datasource',
-        'grails-docs-core',
         'grails-domain-class',
         'grails-encoder',
         'grails-i18n',
