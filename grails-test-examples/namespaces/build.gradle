@@ -5,13 +5,16 @@ buildscript {
         maven { url = 'https://repository.apache.org/content/repositories/snapshots' }
     }
     dependencies {
-        classpath "org.apache.grails:grails-gradle-plugins:${project.projectVersion}"
+        classpath platform("org.apache.grails:grails-gradle-bom:${project.projectVersion}")
+        classpath "org.apache.grails:grails-gradle-plugins"
+        classpath "com.bertramlabs.plugins:asset-pipeline-gradle"
     }
 }
 
 version "0.1"
 group "namespaces"
 
+apply plugin: "asset-pipeline"
 apply plugin: "org.apache.grails.gradle.grails-web"
 
 // The grails-gsp Gradle plugin is not needed for running the functional tests.
