@@ -16,7 +16,7 @@ ext {
 }
 
 dependencies {
-    api platform("${bomPlatformDependencies['spring_boot_bom']}"), {
+    api platform(bomPlatformDependencies['spring_boot_bom']), {
         exclude group: 'org.apache.groovy'
         exclude group: 'org.spockframework'
         exclude group: 'com.fasterxml.jackson'
@@ -24,28 +24,28 @@ dependencies {
 
     // Because gradle uses groovy 3, we must use groovy 3 compatible versions for the grails-gradle-bom
     api platform("org.codehaus.groovy:groovy-bom:${GroovySystem.version}")
-    api platform("${bomPlatformDependencies['gradle_spock_bom']}")
+    api platform(bomPlatformDependencies['gradle_spock_bom'])
 
     constraints {
-        api "${bomDependencies['ant']}"
-        api "${bomDependencies['ant_junit']}"
-        api "${bomDependencies['asciidoctorj']}"
-        api "${bomDependencies['asset_pipeline_gradle']}"
-        api "${bomDependencies['byte_buddy']}"
-        api "${bomDependencies['commons_text']}"
-        api "${bomDependencies['directory_watcher']}"
-        api "${bomDependencies['flying_saucer_pdf_openpdf']}"
-        api "${bomDependencies['grails_gdoc_engine']}"
-        api "${bomDependencies['jansi']}"
-        api "${bomDependencies['javaparser_core']}"
-        api "${bomDependencies['jline']}"
-        api "${bomDependencies['jna']}"
-        api "${bomDependencies['jsoup']}"
-        api "${bomDependencies['objenesis']}"
-        api "${bomDependencies['gradle_nexus_publish_plugin']}"
-        api "${bomDependencies['spring_boot_cli']}"
-        api "${bomDependencies['spring_boot_gradle']}"
-        api "${bomDependencies['springloaded']}"
+        api bomDependencies['ant']
+        api bomDependencies['ant_junit']
+        api bomDependencies['asciidoctorj']
+        api bomDependencies['asset_pipeline_gradle']
+        api bomDependencies['byte_buddy']
+        api bomDependencies['commons_text']
+        api bomDependencies['directory_watcher']
+        api bomDependencies['flying_saucer_pdf_openpdf']
+        api bomDependencies['grails_gdoc_engine']
+        api bomDependencies['jansi']
+        api bomDependencies['javaparser_core']
+        api bomDependencies['jline']
+        api bomDependencies['jna']
+        api bomDependencies['jsoup']
+        api bomDependencies['objenesis']
+        api bomDependencies['gradle_nexus_publish_plugin']
+        api bomDependencies['spring_boot_cli']
+        api bomDependencies['spring_boot_gradle']
+        api bomDependencies['springloaded']
 
         for (Project subproject : rootProject.subprojects) {
             if(subproject.path == project.path) {
@@ -121,6 +121,10 @@ publishing {
                         boolean isBom = dep.scope.text().trim() == 'import'
 
                         String inlineVersion = dep.version.text().trim()
+                        if(inlineVersion == 'null') {
+                            inlineVersion = null
+                        }
+
                         if (inlineVersion) {
                             String propertyName = determinePropertyName(groupId, artifactId, inlineVersion, isBom)
                             if(propertyName) {

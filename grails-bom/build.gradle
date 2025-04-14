@@ -28,73 +28,73 @@ dependencies {
         exclude group: 'org.spockframework'
     }
 
-    api platform("${bomPlatformDependencies['groovy_bom']}")
-    api platform("${bomPlatformDependencies['spock_bom']}")
-    api platform("${bomPlatformDependencies['jackson_bom']}")
+    api platform(bomPlatformDependencies['groovy_bom'])
+    api platform(bomPlatformDependencies['spock_bom'])
+    api platform(bomPlatformDependencies['jackson_bom'])
 
     constraints {
-        api "${bomDependencies['asset_pipeline_grails']}"
-        api "${bomDependencies['bootstrap']}"
-        api "${bomDependencies['bootstrap_icons']}"
-        api "${bomDependencies['commons_codec']}"
-        api "${bomDependencies['fields']}"
-        api "${bomDependencies['geb_spock']}"
-        api "${bomDependencies['grails_cache']}"
-        api "${bomDependencies['grails_data_hibernate5']}"
-        api "${bomDependencies['grails_data_hibernate5_core']}"
-        api "${bomDependencies['grails_data_hibernate5_dbmigration']}"
-        api "${bomDependencies['grails_data_hibernate5_spring_boot']}"
-        api "${bomDependencies['grails_data_mongodb']}"
-        api "${bomDependencies['grails_data_mongodb_bson']}"
-        api "${bomDependencies['grails_data_mongodb_core']}"
-        api "${bomDependencies['grails_data_mongodb_ext']}"
-        api "${bomDependencies['grails_data_mongodb_gson_templates']}"
-        api "${bomDependencies['grails_data_mongodb_spring_boot']}"
-        api "${bomDependencies['grails_data_simple']}"
-        api "${bomDependencies['grails_datamapping_async']}"
-        api "${bomDependencies['grails_datamapping_core']}"
-        api "${bomDependencies['grails_datamapping_core_test']}"
-        api "${bomDependencies['grails_datamapping_rx']}"
-        api "${bomDependencies['grails_datamapping_support']}"
-        api "${bomDependencies['grails_datamapping_tck_tests']}"
-        api "${bomDependencies['grails_datamapping_validation']}"
-        api "${bomDependencies['grails_datastore_async']}"
-        api "${bomDependencies['grails_datastore_core']}"
-        api "${bomDependencies['grails_datastore_web']}"
-        api "${bomDependencies['grails_geb']}"
-        api "${bomDependencies['grails_gsp']}"
-        api "${bomDependencies['grails_gsp_core']}"
-        api "${bomDependencies['grails_profiles_angular']}"
-        api "${bomDependencies['grails_profiles_base']}"
-        api "${bomDependencies['grails_profiles_plugin']}"
-        api "${bomDependencies['grails_profiles_profile']}"
-        api "${bomDependencies['grails_profiles_react']}"
-        api "${bomDependencies['grails_profiles_rest_api']}"
-        api "${bomDependencies['grails_profiles_rest_api_plugin']}"
-        api "${bomDependencies['grails_profiles_vue']}"
-        api "${bomDependencies['grails_profiles_web']}"
-        api "${bomDependencies['grails_profiles_web_plugin']}"
-        api "${bomDependencies['grails_testing_support_datamapping']}"
-        api "${bomDependencies['grails_testing_support_views_gson']}"
-        api "${bomDependencies['grails_testing_support_web']}"
-        api "${bomDependencies['grails_web_gsp']}"
-        api "${bomDependencies['grails_web_taglib']}"
-        api "${bomDependencies['h2']}"
-        api "${bomDependencies['jquery']}"
-        api "${bomDependencies['liquibase_hibernate5']}"
-        api "${bomDependencies['liquibase_hibernate5_cdi']}"
-        api "${bomDependencies['liquibase_hibernate5_core']}"
-        api "${bomDependencies['liquibase_hibernate5_ext']}"
-        api "${bomDependencies['mongodb_bson']}"
-        api "${bomDependencies['mongodb_driver_core']}"
-        api "${bomDependencies['mongodb_driver_sync']}"
-        api "${bomDependencies['mongodb_record_codec']}"
-        api "${bomDependencies['rxjava']}"
-        api "${bomDependencies['rxjava2']}"
-        api "${bomDependencies['rxjava3']}"
-        api "${bomDependencies['scaffolding']}"
-        api "${bomDependencies['views_gson']}"
-        api "${bomDependencies['views_markup']}"
+        api bomDependencies['asset_pipeline_grails']
+        api bomDependencies['bootstrap']
+        api bomDependencies['bootstrap_icons']
+        api bomDependencies['commons_codec']
+        api bomDependencies['fields']
+        api bomDependencies['geb_spock']
+        api bomDependencies['grails_cache']
+        api bomDependencies['grails_data_hibernate5']
+        api bomDependencies['grails_data_hibernate5_core']
+        api bomDependencies['grails_data_hibernate5_dbmigration']
+        api bomDependencies['grails_data_hibernate5_spring_boot']
+        api bomDependencies['grails_data_mongodb']
+        api bomDependencies['grails_data_mongodb_bson']
+        api bomDependencies['grails_data_mongodb_core']
+        api bomDependencies['grails_data_mongodb_ext']
+        api bomDependencies['grails_data_mongodb_gson_templates']
+        api bomDependencies['grails_data_mongodb_spring_boot']
+        api bomDependencies['grails_data_simple']
+        api bomDependencies['grails_datamapping_async']
+        api bomDependencies['grails_datamapping_core']
+        api bomDependencies['grails_datamapping_core_test']
+        api bomDependencies['grails_datamapping_rx']
+        api bomDependencies['grails_datamapping_support']
+        api bomDependencies['grails_datamapping_tck_tests']
+        api bomDependencies['grails_datamapping_validation']
+        api bomDependencies['grails_datastore_async']
+        api bomDependencies['grails_datastore_core']
+        api bomDependencies['grails_datastore_web']
+        api bomDependencies['grails_geb']
+        api bomDependencies['grails_gsp']
+        api bomDependencies['grails_gsp_core']
+        api bomDependencies['grails_profiles_angular']
+        api bomDependencies['grails_profiles_base']
+        api bomDependencies['grails_profiles_plugin']
+        api bomDependencies['grails_profiles_profile']
+        api bomDependencies['grails_profiles_react']
+        api bomDependencies['grails_profiles_rest_api']
+        api bomDependencies['grails_profiles_rest_api_plugin']
+        api bomDependencies['grails_profiles_vue']
+        api bomDependencies['grails_profiles_web']
+        api bomDependencies['grails_profiles_web_plugin']
+        api bomDependencies['grails_testing_support_datamapping']
+        api bomDependencies['grails_testing_support_views_gson']
+        api bomDependencies['grails_testing_support_web']
+        api bomDependencies['grails_web_gsp']
+        api bomDependencies['grails_web_taglib']
+        api bomDependencies['h2']
+        api bomDependencies['jquery']
+        api bomDependencies['liquibase_hibernate5']
+        api bomDependencies['liquibase_hibernate5_cdi']
+        api bomDependencies['liquibase_hibernate5_core']
+        api bomDependencies['liquibase_hibernate5_ext']
+        api bomDependencies['mongodb_bson']
+        api bomDependencies['mongodb_driver_core']
+        api bomDependencies['mongodb_driver_sync']
+        api bomDependencies['mongodb_record_codec']
+        api bomDependencies['rxjava']
+        api bomDependencies['rxjava2']
+        api bomDependencies['rxjava3']
+        api bomDependencies['scaffolding']
+        api bomDependencies['views_gson']
+        api bomDependencies['views_markup']
 
         for (Project subproject : rootProject.subprojects) {
             if(subproject.path == project.path || subproject.name in testProjects) {
@@ -182,6 +182,10 @@ ext {
                 boolean isBom = dep.scope.text().trim() == 'import'
 
                 String inlineVersion = dep.version.text().trim()
+                if(inlineVersion == 'null') {
+                    inlineVersion = null
+                }
+
                 if (inlineVersion) {
                     String propertyName = determinePropertyName(groupId, artifactId, inlineVersion, isBom)
                     if(propertyName) {

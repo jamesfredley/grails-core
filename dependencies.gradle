@@ -37,7 +37,7 @@ ext {
             bootstrap                         : "org.webjars.npm:bootstrap:${bomDependencyVersions['bootstrap.version']}",
             bootstrap_icons                   : "org.webjars.npm:bootstrap-icons:${bomDependencyVersions['bootstrap-icons.version']}",
             commons_codec                     : "commons-codec:commons-codec:${bomDependencyVersions['commons-codec.version']}",
-            fields                            : "org.apache.grails:fields:${bomDependencyVersions['fields.version']}",
+            fields                            : "org.apache.grails:fields:${bomDependencyVersions['gsp.version']}",
             geb_spock                         : "org.gebish:geb-spock:${bomDependencyVersions['geb-spock.version']}",
             grails_cache                      : "org.apache.grails:grails-cache:${bomDependencyVersions['grails-cache.version']}",
             grails_data_hibernate5            : "org.apache.grails:grails-data-hibernate5:${bomDependencyVersions['grails-data.version']}",
