@@ -1,5 +1,8 @@
 // see https://github.com/dependabot/dependabot-core/issues/1618
 // This file allows dependabot to update the gradle dependencies
+
+// This file provides the 'grails-bom' dependencies, while grails-gradle/dependencies.gradle provides the 'grails-gradle-bom' dependencies
+// These files are split to facilitate separation of build vs application dependencies. These are the application dependencies.
 ext {
     bomDependencyVersions = [
             'asset-pipeline-grails.version': '5.0.9',
