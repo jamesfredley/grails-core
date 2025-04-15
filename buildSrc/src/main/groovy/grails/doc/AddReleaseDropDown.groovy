@@ -41,7 +41,7 @@ class AddReleaseDropDown extends DefaultTask {
 
     @Optional
     @Input
-    String slug = "grails/grails-doc"
+    String slug = "apache/grails-doc"
 
     @Optional
     @Input
@@ -86,7 +86,7 @@ class AddReleaseDropDown extends DefaultTask {
         final String snapshotHref = GRAILS_DOC_BASE_URL + "/snapshot" + page
         options << option(snapshotHref, "SNAPSHOT", version.endsWith("-SNAPSHOT"))
 
-        final Object result = listRepoTags("grails/grails-core")
+        final Object result = listRepoTags("apache/grails-core")
         parseSoftwareVersions(result)
                 .forEach { softwareVersion ->
                     final String versionName = softwareVersion.versionText
@@ -99,7 +99,7 @@ class AddReleaseDropDown extends DefaultTask {
     /**
      * List all tags in the repository using the GitHub API.
      *
-     * @param repoSlug The slug of the repository. e.g. grails/grails-core
+     * @param repoSlug The slug of the repository. e.g. apache/grails-core
      * @return The list of tags in the repository
      */
     private Object listRepoTags(String repoSlug) {
