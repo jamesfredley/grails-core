@@ -13,5 +13,5 @@ repositories {
 }
 
 dependencies {
-    implementation "${bomDependencies['gradle_nexus_publish_plugin']}"
+    implementation "${bomDependencies['gradle-nexus-publish-plugin']}"
 }
