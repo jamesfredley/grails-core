@@ -103,7 +103,11 @@ class AddReleaseDropDown extends DefaultTask {
      * @return The list of tags in the repository
      */
     private Object listRepoTags(String repoSlug) {
-        final String json = new URL(GITHUB_API_BASE_URL + "/repos/" + repoSlug + "/tags").text
+        URL url = new URL(GITHUB_API_BASE_URL + "/repos/" + repoSlug + "/tags")
+        URLConnection connection = url.openConnection()
+        connection.setRequestProperty("User-Agent", "apache/grails-core")
+        final String json = connection.inputStream.text
+
         def result = new JsonSlurper().parseText(json)
         result
     }
