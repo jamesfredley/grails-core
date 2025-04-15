@@ -39,7 +39,6 @@ dependencies {
         api bomDependencies['commons_codec']
         api bomDependencies['fields']
         api bomDependencies['geb_spock']
-        api bomDependencies['grails_cache']
         api bomDependencies['grails_data_hibernate5']
         api bomDependencies['grails_data_hibernate5_core']
         api bomDependencies['grails_data_hibernate5_dbmigration']
