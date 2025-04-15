@@ -37,7 +37,6 @@ dependencies {
         api bomDependencies['bootstrap']
         api bomDependencies['bootstrap-icons']
         api bomDependencies['commons-codec']
-        api bomDependencies['fields']
         api bomDependencies['geb-spock']
         api bomDependencies['grails-data-hibernate5']
         api bomDependencies['grails-data-hibernate5-core']
@@ -61,8 +60,6 @@ dependencies {
         api bomDependencies['grails-datastore-core']
         api bomDependencies['grails-datastore-web']
         api bomDependencies['grails-geb']
-        api bomDependencies['grails-gsp']
-        api bomDependencies['grails-gsp-core']
         api bomDependencies['grails-profiles-angular']
         api bomDependencies['grails-profiles-base']
         api bomDependencies['grails-profiles-plugin']
@@ -74,10 +71,6 @@ dependencies {
         api bomDependencies['grails-profiles-web']
         api bomDependencies['grails-profiles-web-plugin']
         api bomDependencies['grails-testing-support-datamapping']
-        api bomDependencies['grails-testing-support-views-gson']
-        api bomDependencies['grails-testing-support-web']
-        api bomDependencies['grails-web-gsp']
-        api bomDependencies['grails-web-taglib']
         api bomDependencies['h2']
         api bomDependencies['jquery']
         api bomDependencies['liquibase-hibernate5']
@@ -91,9 +84,6 @@ dependencies {
         api bomDependencies['rxjava']
         api bomDependencies['rxjava2']
         api bomDependencies['rxjava3']
-        api bomDependencies['scaffolding']
-        api bomDependencies['views-gson']
-        api bomDependencies['views-markup']
 
         for (Project subproject : rootProject.subprojects) {
             if (subproject.path == project.path || subproject.name in testProjects || subproject.name == 'grails-doc') {
@@ -263,15 +253,6 @@ Closure determinePropertyName = { String groupId, String artifactId, String vers
             .replace('grails-datamapping', 'grails-data')
             .replace('grails-datastore', 'grails-data')
             .replace('grails-testing-support-datamapping', 'grails-data')
-            .replace('grails-gsp', 'gsp')
-            .replace('grails-web-gsp', 'gsp')
-            .replace('grails-web-taglib', 'gsp')
-            .replace('scaffolding', 'gsp')
-            .replace('fields', 'gsp')
-            .replace('grails-testing-support-views-gson', 'gsp')
-            .replace('grails-testing-support-web', 'gsp')
-            .replace('views-markup', 'gsp')
-            .replace('views-gson', 'gsp')
     while (possibleKey != null) {
         String propertyName = "${possibleKey}.version" as String
         if (versions.containsKey(propertyName)) {

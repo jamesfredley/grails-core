@@ -220,7 +220,7 @@ class GrailsPluginGradlePlugin extends GrailsGradlePlugin {
 
     protected void configureAssembleTask(Project project) {
         // Assemble task in Grails Plugins should only produce a plain jar
-        project.tasks.named('assemble') { Task assembleTask ->
+        project.tasks.named('assemble').configure { Task assembleTask ->
             def disabledTasks = [
                     'bootDistTar',
                     'bootDistZip',
@@ -242,7 +242,7 @@ class GrailsPluginGradlePlugin extends GrailsGradlePlugin {
     }
 
     protected void configureJarTask(Project project) {
-        project.tasks.named('jar', Jar) { Jar jarTask ->
+        project.tasks.named('jar', Jar).configure { Jar jarTask ->
             jarTask.enabled = true
             jarTask.archiveClassifier.set('') // Remove '-plain' suffix from jar file name
             jarTask.exclude(

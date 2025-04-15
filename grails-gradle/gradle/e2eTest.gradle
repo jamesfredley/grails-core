@@ -17,7 +17,7 @@ def e2eTestTask = tasks.register('e2eTest', Test) {
     dependsOn "publishAllPublicationsToTestCaseMavenRepoRepository"
 }
 
-tasks.named("check") {
+tasks.named("check").configure {
     dependsOn e2eTestTask
 }
 

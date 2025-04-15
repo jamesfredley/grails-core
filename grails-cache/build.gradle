@@ -22,7 +22,7 @@ dependencies {
     api project(':grails-web-boot')
     api project(':grails-services')
 
-    api "org.apache.grails:grails-gsp"
+    api project(':grails-gsp')
     api "org.codehaus.gpars:gpars:$gparsVersion"
     api "com.googlecode.concurrentlinkedhashmap:concurrentlinkedhashmap-lru:$concurrentlinkedhashmapLruVersion"
 
@@ -30,9 +30,9 @@ dependencies {
 
     console project(':grails-console')
 
-    testImplementation "org.apache.grails:grails-testing-support-datamapping"
-    testImplementation "org.apache.grails:grails-testing-support-web"
-    testImplementation "org.spockframework:spock-core", {
+    testImplementation 'org.apache.grails:grails-testing-support-datamapping'
+    testImplementation project(':grails-testing-support-web')
+    testImplementation 'org.spockframework:spock-core', {
         exclude group: 'org.apache.groovy'
     }
     testImplementation "org.mockito:mockito-core" // to allow for correct mocking with Mock()

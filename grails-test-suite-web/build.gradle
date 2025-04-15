@@ -64,7 +64,7 @@ tasks.register('createCombinedReport', TestReport) {
     )
 }
 
-tasks.named('test', Test) {
+tasks.named('test', Test).configure {
     configure(defaultTestConfig)
     excludes.addAll(isolatedTests)
 }

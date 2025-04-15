@@ -22,10 +22,8 @@ group "functionaltests"
 apply plugin: "org.apache.grails.gradle.grails-web"
 apply plugin: "org.apache.grails.gradle.grails-gsp"
 
-compileJava.options.release = 17
-
 dependencies {
-    implementation platform("org.apache.grails:grails-bom:$grailsVersion")
+    implementation platform(project(':grails-bom'))
 
     implementation "org.apache.grails:grails-cache"
 

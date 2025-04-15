@@ -56,8 +56,8 @@ tasks.register("docFilesJar", Jar) {
     from "src/main/template"
 }
 
-tasks.named('jar', Jar) {
-    from docFilesJar
+tasks.named('jar', Jar).configure { Jar it ->
+    it.from docFilesJar
 }
 
 jar.dependsOn docFilesJar

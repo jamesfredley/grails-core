@@ -14,7 +14,7 @@ group "issueviews182"
 
 apply plugin:"org.apache.grails.gradle.grails-web"
 
-// The views-json plugins is not needed for running the functional tests.
+// The grails-gson plugins is not needed for running the functional tests.
 // It is applied as a smoke test to check that compiling gson-views
 // for production does not fail during build task.
 apply plugin: 'org.apache.grails.gradle.grails-gson'

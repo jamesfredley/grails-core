@@ -63,7 +63,7 @@ def writeProps = tasks.register('writeGrailsProperties', WriteProperties) {
     property("grails.version", project.version)
 }
 
-tasks.named('processResources') {
+tasks.named('processResources').configure {
     from writeProps
 }
 

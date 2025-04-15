@@ -21,7 +21,7 @@ def configurations = [
                 ':grails-interceptors',
                 ':grails-async-plugin',
                 ':grails-events-plugin',
-                'org.apache.grails:grails-gsp',
+                ':grails-gsp',
         ],
         'runtimeOnly': [
                 'com.h2database:h2',

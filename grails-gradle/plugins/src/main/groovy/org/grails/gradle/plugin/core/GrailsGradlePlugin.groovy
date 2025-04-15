@@ -144,7 +144,8 @@ class GrailsGradlePlugin extends GroovyPlugin {
 
         configureRunCommand(project)
 
-        configurePathingJar(project)
+        // TODO: Causes https://github.com/gradle/gradle/issues/28347
+        //configurePathingJar(project)
 
         configureGroovyCompiler(project)
 
@@ -560,45 +561,55 @@ class GrailsGradlePlugin extends GroovyPlugin {
         TaskContainer tasks = project.tasks
         if (project.configurations.findByName("console") == null) {
             def consoleConfiguration = project.configurations.create("console")
-            def findMainClass = tasks.findByName('findMainClass')
             def consoleTask = createConsoleTask(project, tasks, consoleConfiguration)
             def shellTask = createShellTask(project, tasks, consoleConfiguration)
 
-            findMainClass.doLast {
-                ExtraPropertiesExtension extraProperties = (ExtraPropertiesExtension) project.getExtensions().getByName("ext")
-                def mainClassName = extraProperties.get('mainClassName')
-                if (mainClassName) {
-                    consoleTask.args mainClassName
-                    shellTask.args mainClassName
-                    project.tasks.withType(ApplicationContextCommandTask) { ApplicationContextCommandTask task ->
+            tasks.named('findMainClass').configure {
+                it.doLast {
+                    ExtraPropertiesExtension extraProperties = (ExtraPropertiesExtension) project.getExtensions().getByName("ext")
+                    def mainClassName = extraProperties.get('mainClassName')
+                    if (mainClassName) {
+                        consoleTask.get().args mainClassName
+                        shellTask.get().args mainClassName
+                        project.tasks.withType(ApplicationContextCommandTask) { ApplicationContextCommandTask task ->
+                            task.args mainClassName
+                        }
+                    }
+                    project.tasks.withType(ApplicationContextScriptTask) { ApplicationContextScriptTask task ->
                         task.args mainClassName
                     }
                 }
-                project.tasks.withType(ApplicationContextScriptTask) { ApplicationContextScriptTask task ->
-                    task.args mainClassName
-                }
             }
 
-            consoleTask.dependsOn(tasks.findByName('classes'), findMainClass)
-            shellTask.dependsOn(tasks.findByName('classes'), findMainClass)
+            consoleTask.configure {
+                it.dependsOn(tasks.named('classes'), tasks.named('findMainClass'))
+            }
+
+            shellTask.configure {
+                it.dependsOn(tasks.named('classes'), tasks.named('findMainClass'))
+            }
         }
     }
 
     @CompileDynamic
-    protected JavaExec createConsoleTask(Project project, TaskContainer tasks, Configuration configuration) {
-        tasks.create("console", JavaExec) {
-            classpath = project.sourceSets.main.runtimeClasspath + configuration
-            mainClass.set("grails.ui.console.GrailsSwingConsole")
+    protected TaskProvider<JavaExec> createConsoleTask(Project project, TaskContainer tasks, Configuration configuration) {
+        def consoleTask = tasks.register("console", JavaExec)
+        consoleTask.configure {
+            it.classpath = project.sourceSets.main.runtimeClasspath + configuration
+            it.mainClass.set("grails.ui.console.GrailsSwingConsole")
         }
+        consoleTask
     }
 
     @CompileDynamic
-    protected JavaExec createShellTask(Project project, TaskContainer tasks, Configuration configuration) {
-        tasks.create("shell", JavaExec) {
-            classpath = project.sourceSets.main.runtimeClasspath + configuration
-            mainClass.set("grails.ui.shell.GrailsShell")
-            standardInput = System.in
+    protected TaskProvider<JavaExec> createShellTask(Project project, TaskContainer tasks, Configuration configuration) {
+        def shellTask = tasks.register("shell", JavaExec)
+        shellTask.configure {
+            it.classpath = project.sourceSets.main.runtimeClasspath + configuration
+            it.mainClass.set("grails.ui.shell.GrailsShell")
+            it.standardInput = System.in
         }
+        shellTask
     }
 
     @CompileDynamic
@@ -698,7 +709,7 @@ class GrailsGradlePlugin extends GroovyPlugin {
 
     @CompileDynamic
     protected Jar createPathingJarTask(Project project, String name, Configuration... configurations) {
-        project.tasks.create(name, Jar) { Jar task ->
+        project.tasks.register(name, Jar).configure { Jar task ->
             task.dependsOn(configurations)
             task.archiveAppendix.set('pathing')
 

@@ -58,7 +58,7 @@ dependencies {
     integrationTestImplementation testFixtures("org.apache.grails:grails-geb")
 }
 
-tasks.named('assetCompile') {
+tasks.named('assetCompile').configure {
     // No need to compile assets in functional tests
     enabled = false
 }

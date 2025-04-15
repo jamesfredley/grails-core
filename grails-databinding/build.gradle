@@ -19,15 +19,7 @@ dependencies {
     testImplementation project(':grails-codecs')
 
     testImplementation project(':grails-test-suite-base')
-    testImplementation "org.apache.grails:grails-testing-support-web", {
-        exclude module:'grails-rest-transforms'
-        exclude module:'grails-interceptors'
-        exclude module:'grails-test-core'
-        exclude module:'grails-core'
-        exclude module:'grails-async'
-        exclude module:'grails-gsp-core'
-        exclude module:'grails-testing-support-core'
-    }
+    testImplementation project(':grails-testing-support-web')
     testImplementation project(':grails-testing-support-core')
 
     compileOnly 'jakarta.servlet:jakarta.servlet-api'
