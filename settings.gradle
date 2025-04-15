@@ -31,6 +31,7 @@ rootProject.name = 'grails.core.ROOT'
 
 include (
         'grails-bootstrap',
+        'grails-cache',
         'grails-codecs-core',
         'grails-codecs',
         'grails-console',
@@ -134,6 +135,7 @@ include (
         'grails-test-examples-plugins-issue11005',
         // 'grails-test-examples-issue-11767', // micronaut has been removed from Grails can be restored based on https://micronaut-projects.github.io/micronaut-spring/latest/guide/#springBootStarter
         // 'grails-test-examples-plugins-issue-11767-plugin', // micronaut has been removed from Grails can be restored based on https://micronaut-projects.github.io/micronaut-spring/latest/guide/#springBootStarter
+        'grails-test-examples-cache',
 )
 project(':grails-test-examples-async-events-pubsub-demo').projectDir = file('grails-test-examples/async-events-pubsub-demo')
 project(':grails-test-examples-app1').projectDir = file('grails-test-examples/app1')
@@ -154,6 +156,7 @@ project(':grails-test-examples-plugins-loadafter').projectDir = file('grails-tes
 project(':grails-test-examples-plugins-issue11005').projectDir = file('grails-test-examples/plugins/issue11005')
 // project(':grails-test-examples-issue-11767').projectDir = file('grails-test-examples/issue-11767')
 // project(':grails-test-examples-plugins-issue-11767-plugin').projectDir = file('grails-test-examples/plugins/issue-11767-plugin')
+project(':grails-test-examples-cache').projectDir = file('grails-test-examples/cache')
 
 includeBuild ('./grails-gradle') {
     dependencySubstitution {

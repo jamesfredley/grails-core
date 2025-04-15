@@ -2,20 +2,10 @@ buildscript {
     repositories {
         maven { url = 'https://repo.grails.org/grails/core' }
         maven { url = 'https://repository.apache.org/content/repositories/snapshots' }
-        if (System.getenv("GITHUB_MAVEN_PASSWORD") && !grailsVersion.endsWith('-SNAPSHOT')) {
-            System.out.println("Adding Grails Core Repo")
-            maven {
-                url = 'https://maven.pkg.github.com/grails/grails-core'
-                credentials {
-                    username = 'DOES_NOT_MATTER'
-                    password = System.getenv("GITHUB_MAVEN_PASSWORD")
-                }
-            }
-        }
     }
     dependencies {
-        classpath platform("org.apache.grails:grails-bom:$grailsVersion")
-        classpath 'org.apache.grails:grails-gradle-plugins'
+        classpath platform("org.apache.grails:grails-gradle-bom:${project.projectVersion}")
+        classpath "org.apache.grails:grails-gradle-plugins"
     }
 }
 
@@ -27,7 +17,7 @@ plugins {
 }
 
 version = projectVersion
-group = "com.demo"
+group "functionaltests"
 
 apply plugin: "org.apache.grails.gradle.grails-web"
 apply plugin: "org.apache.grails.gradle.grails-gsp"
@@ -37,7 +27,7 @@ compileJava.options.release = 17
 dependencies {
     implementation platform("org.apache.grails:grails-bom:$grailsVersion")
 
-    implementation project(':plugin')
+    implementation "org.apache.grails:grails-cache"
 
     implementation "org.apache.grails:grails-core"
     implementation "org.apache.grails:grails-logging"
@@ -70,21 +60,7 @@ dependencies {
     testImplementation "org.spockframework:spock-core"
 }
 
-bootRun {
-    jvmArgs(
-            '-Dspring.output.ansi.enabled=always',
-            '-noverify',
-            '-XX:TieredStopAtLevel=1',
-            '-Xmx1024m')
-    sourceResources sourceSets.main
-    String springProfilesActive = 'spring.profiles.active'
-    systemProperty springProfilesActive, System.getProperty(springProfilesActive)
-}
-
-apply from: rootProject.layout.projectDirectory.file('gradle/java-config.gradle')
-apply from: rootProject.layout.projectDirectory.file('gradle/test-config.gradle')
-
-// no groovy doc for example
-tasks.withType(Groovydoc).configureEach {
-    enabled = false
+apply {
+    from rootProject.layout.projectDirectory.file('gradle/functional-test-config.gradle')
+    from rootProject.layout.projectDirectory.file('gradle/java-config.gradle')
 }

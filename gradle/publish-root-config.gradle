@@ -13,6 +13,7 @@ def publishedProjects = [
         'grails-async-rxjava3',
         'grails-bom',
         'grails-bootstrap',
+        'grails-cache',
         'grails-codecs-core',
         'grails-codecs',
         'grails-console',
