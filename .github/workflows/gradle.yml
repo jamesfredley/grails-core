@@ -149,7 +149,7 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
         with:
           develocity-access-key: ${{ secrets.GRAILS_DEVELOCITY_ACCESS_KEY  }}
-      - name: "📤 Publish Snapshot Artifacts"
+      - name: "📤 Publish Grails-Core Snapshot Artifacts"
         id: publish
         env:
           GRAILS_PUBLISH_RELEASE: 'false'
@@ -157,9 +157,7 @@ jobs:
           MAVEN_PUBLISH_USERNAME: ${{ secrets.NEXUS_USER }}
           MAVEN_PUBLISH_PASSWORD: ${{ secrets.NEXUS_PW  }}
         run: >
-          ./gradlew publish &&
-          cd grails-gradle && 
-          ./gradlew publish -Dorg.gradle.internal.publish.checksums.insecure=true
+          ./gradlew publish
   docs:
     if: github.event_name == 'push' && needs.skip_check.outputs.found_skip_publish != 'true'
     needs: [skip_check, publish]
