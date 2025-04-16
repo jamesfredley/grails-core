@@ -23,11 +23,7 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.file.DuplicatesStrategy
-import org.gradle.api.plugins.ExtensionContainer
-import org.gradle.api.plugins.ExtraPropertiesExtension
-import org.gradle.api.plugins.JavaPlatformExtension
-import org.gradle.api.plugins.JavaPluginExtension
-import org.gradle.api.plugins.PluginManager
+import org.gradle.api.plugins.*
 import org.gradle.api.publish.maven.MavenPublication
 import org.gradle.api.publish.maven.plugins.MavenPublishPlugin
 import org.gradle.api.tasks.SourceSet
@@ -441,7 +437,12 @@ Note: if project properties are used, the properties must be defined prior to ap
         project.plugins.withId(MAVEN_PUBLISH_PLUGIN_ID) {
             TaskProvider<? extends Task> publishTask = project.tasks.named("publish")
 
-            TaskProvider validateTask = project.tasks.register(taskName, c)
+            TaskProvider validateTask = project.tasks.register(taskName)
+            validateTask.configure {
+                it.doLast {
+                    c.call()
+                }
+            }
 
             publishTask.configure {
                 it.dependsOn validateTask
