@@ -144,9 +144,6 @@ class GrailsGradlePlugin extends GroovyPlugin {
 
         configureRunCommand(project)
 
-        // TODO: Causes https://github.com/gradle/gradle/issues/28347
-        //configurePathingJar(project)
-
         configureGroovyCompiler(project)
 
         addGroovyCompilerScript('GrailsCore', project) {
@@ -708,27 +705,6 @@ class GrailsGradlePlugin extends GroovyPlugin {
     }
 
     @CompileDynamic
-    protected Jar createPathingJarTask(Project project, String name, Configuration... configurations) {
-        project.tasks.register(name, Jar).configure { Jar task ->
-            task.dependsOn(configurations)
-            task.archiveAppendix.set('pathing')
-
-            Set files = []
-            configurations.each {
-                files.addAll(it.files)
-            }
-
-            task.doFirst {
-                manifest { Manifest manifest ->
-                    manifest.attributes "Class-Path": files.collect { File file ->
-                        file.toURI().toURL().toString().replaceFirst(/file:\/+/, '/')
-                    }.join(' ')
-                }
-            }
-        }
-    }
-
-    @CompileDynamic
     protected void configureRunScript(Project project) {
         if (project.tasks.findByName("runScript") == null) {
             project.tasks.create("runScript", ApplicationContextScriptTask) {
@@ -756,53 +732,6 @@ class GrailsGradlePlugin extends GroovyPlugin {
 
     protected FileCollection resolveClassesDirs(SourceSetOutput output, Project project) {
         output?.classesDirs ?: project.files(new File(project.buildDir, "classes/main"))
-    }
-
-    @CompileDynamic
-    protected void configurePathingJar(Project project) {
-        project.afterEvaluate {
-            if (project.tasks.findByName("pathingJar") == null) {
-                ConfigurationContainer configurations = project.configurations
-                Configuration runtime = configurations.getByName('runtimeClasspath')
-                Configuration developmentOnly = configurations.findByName('developmentOnly')
-                Configuration console = configurations.getByName('console')
-                SourceSet mainSourceSet = SourceSets.findMainSourceSet(project)
-                SourceSetOutput output = mainSourceSet?.output
-                FileCollection mainFiles = resolveClassesDirs(output, project)
-
-                Jar pathingJar
-
-                if (developmentOnly != null) {
-                    pathingJar = createPathingJarTask(project, "pathingJar", runtime, developmentOnly)
-                } else {
-                    pathingJar = createPathingJarTask(project, "pathingJar", runtime)
-                }
-
-                FileCollection pathingClasspath = project.files("${project.buildDir}/resources/main", "${project.projectDir}/gsp-classes", pathingJar.archiveFile) + mainFiles
-
-                Jar pathingJarCommand = createPathingJarTask(project, "pathingJarCommand", runtime, console)
-                FileCollection pathingClasspathCommand = project.files("${project.buildDir}/resources/main", "${project.projectDir}/gsp-classes", pathingJarCommand.archiveFile) + mainFiles
-
-                GrailsExtension grailsExt = project.extensions.getByType(GrailsExtension)
-
-                if (grailsExt.pathingJar && Os.isFamily(Os.FAMILY_WINDOWS)) {
-                    project.tasks.withType(JavaExec) { JavaExec task ->
-                        if (task.name in ['console', 'shell'] || task instanceof ApplicationContextCommandTask || task instanceof ApplicationContextScriptTask) {
-                            task.dependsOn(pathingJarCommand)
-                            task.doFirst {
-                                classpath = pathingClasspathCommand
-                            }
-                        } else {
-                            task.dependsOn(pathingJar)
-                            task.doFirst {
-                                classpath = pathingClasspath
-                            }
-                        }
-                    }
-
-                }
-            }
-        }
     }
 
     protected FileCollection buildClasspath(Project project, Configuration... configurations) {
