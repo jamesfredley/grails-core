@@ -431,12 +431,7 @@ Note: if project properties are used, the properties must be defined prior to ap
         project.plugins.withId(MAVEN_PUBLISH_PLUGIN_ID) {
             TaskProvider<? extends Task> publishTask = project.tasks.named("publish")
 
-            TaskProvider validateTask = project.tasks.register(taskName)
-            validateTask.configure {
-                it.doLast {
-                    c.call()
-                }
-            }
+            TaskProvider validateTask = project.tasks.register(taskName, c)
 
             publishTask.configure {
                 it.dependsOn validateTask
