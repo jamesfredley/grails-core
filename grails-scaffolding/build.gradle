@@ -1,5 +1,6 @@
 plugins {
     id 'java-library'
+    id 'project-report'
     id 'org.apache.grails.gradle.grails-plugin'
     id 'org.apache.grails.gradle.grails-gsp'
 }
