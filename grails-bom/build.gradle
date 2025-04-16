@@ -85,7 +85,7 @@ String resolveMavenPomVersion(String dynamicVersion, Map properties, int maxIter
 
 //TODO: This really should be a gradle task that we export so others can use.
 tasks.register('extractConstraints') {
-    dependsOn(gradle.includedBuild('grails-gradle').task(':grails-gradle-bom:generatePomFileForMavenPublication'))
+    dependsOn(project.tasks.named('generateMetadataFileForMavenPublication'), project.tasks.named('generatePomFileForMavenPublication'))
     doLast {
         def conf = configurations.detachedConfiguration()
         conf.transitive(true)
