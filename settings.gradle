@@ -192,10 +192,5 @@ project(':grails-test-examples-cache').projectDir = file('grails-test-examples/c
 project(':grails-test-examples-views-functional-tests').projectDir = file('grails-test-examples/views-functional-tests')
 project(':grails-test-examples-views-functional-tests-plugin').projectDir = file('grails-test-examples/views-functional-tests-plugin')
 
-includeBuild ('./grails-gradle') {
-    dependencySubstitution {
-        substitute module('org.apache.grails:grails-gradle-bom') using project(':grails-gradle-bom')
-        substitute module('org.apache.grails.gradle:grails-gradle-model') using project(':grails-gradle-model')
-    }
-}
+includeBuild ('./grails-gradle')
 
