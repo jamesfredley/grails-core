@@ -1,10 +1,10 @@
-tasks.register('installToHomeDist', Copy) {
-    inputs.files(tasks.named('jar').map { it.outputs.files })
-    inputs.files(tasks.named('sourcesJar').map { it.outputs.files })
-    inputs.files(tasks.named('javadocJar').map { it.outputs.files })
-    outputs.dir(distInstallDir)
-    from layout.buildDirectory.dir('libs')
-    into distInstallDir
+tasks.register('installToHomeDist', Copy).configure { Copy it ->
+    it.inputs.files(tasks.named('jar').map { jar -> jar.outputs.files })
+    it.inputs.files(tasks.named('sourcesJar').map { jar -> jar.outputs.files })
+    it.inputs.files(tasks.named('javadocJar').map { jar -> jar.outputs.files })
+    it.outputs.dir(distInstallDir)
+    it.from layout.buildDirectory.dir('libs')
+    it.into distInstallDir
 }
 
 tasks.withType(PublishToMavenLocal).configureEach {
