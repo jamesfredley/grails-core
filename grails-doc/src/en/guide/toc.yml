@@ -149,7 +149,7 @@ theWebLayer:
     jsonapi: JSON API Support
     templateEngine: The JsonTemplateEngine
     staticCompilation: Static Compilation
-    testing: Testing
+    gsonTesting: Testing
     pluginSupport: Plugin Support
     jsonConfiguration: Configuration
     converters: Custom Converters
@@ -157,9 +157,9 @@ theWebLayer:
     gsonDebugging: Debugging Views
   markup:
     title: Markup Views
-    markInstallation: Installation
-    markViewApi: Markup View API
-    markConfiguration: Configuration
+    markupInstallation: Installation
+    markupViewApi: Markup View API
+    markupConfiguration: Configuration
   urlmappings:
     title: URL Mappings
     mappingToControllersAndActions: Mapping to Controllers and Actions
