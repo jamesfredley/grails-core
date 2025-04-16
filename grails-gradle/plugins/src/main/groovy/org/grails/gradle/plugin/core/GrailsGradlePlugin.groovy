@@ -25,30 +25,18 @@ import io.spring.gradle.dependencymanagement.DependencyManagementPlugin
 import io.spring.gradle.dependencymanagement.dsl.DependencyManagementExtension
 import org.apache.tools.ant.filters.EscapeUnicode
 import org.apache.tools.ant.filters.ReplaceTokens
-import org.apache.tools.ant.taskdefs.condition.Os
-import org.gradle.api.Action
-import org.gradle.api.Plugin
-import org.gradle.api.Project
-import org.gradle.api.Task
+import org.gradle.api.*
 import org.gradle.api.artifacts.Configuration
-import org.gradle.api.artifacts.ConfigurationContainer
 import org.gradle.api.artifacts.Dependency
 import org.gradle.api.artifacts.DependencyResolveDetails
 import org.gradle.api.file.Directory
 import org.gradle.api.file.DuplicatesStrategy
 import org.gradle.api.file.FileCollection
 import org.gradle.api.file.RegularFile
-import org.gradle.api.java.archives.Manifest
 import org.gradle.api.plugins.ExtraPropertiesExtension
 import org.gradle.api.plugins.GroovyPlugin
 import org.gradle.api.provider.Provider
-import org.gradle.api.tasks.AbstractCopyTask
-import org.gradle.api.tasks.JavaExec
-import org.gradle.api.tasks.SourceSet
-import org.gradle.api.tasks.SourceSetOutput
-import org.gradle.api.tasks.TaskContainer
-import org.gradle.api.tasks.TaskProvider
-import org.gradle.api.tasks.bundling.Jar
+import org.gradle.api.tasks.*
 import org.gradle.api.tasks.compile.GroovyCompile
 import org.gradle.api.tasks.testing.Test
 import org.gradle.language.jvm.tasks.ProcessResources
@@ -136,9 +124,7 @@ class GrailsGradlePlugin extends GroovyPlugin {
 
         configureApplicationCommands(project)
 
-        project.gradle.projectsEvaluated {
-            createBuildPropertiesTask(project)
-        }
+        createBuildPropertiesTask(project)
 
         configureRunScript(project)
 
@@ -256,22 +242,22 @@ class GrailsGradlePlugin extends GroovyPlugin {
         // It would be nice to have documented in a comment why this global exclude is in here
         String slf4jPreventExclusion = project.properties['slf4jPreventExclusion']
         if (!slf4jPreventExclusion || slf4jPreventExclusion != 'true') {
-            project.configurations.all({ Configuration configuration ->
+            project.configurations.configureEach {Configuration configuration ->
                 configuration.exclude group: "org.slf4j", module: "slf4j-simple"
-            })
+            }
         }
     }
 
     protected void configureProfile(Project project) {
-        if (project.configurations.findByName(PROFILE_CONFIGURATION) == null) {
-            def profileConfiguration = project.configurations.create(PROFILE_CONFIGURATION)
-            profileConfiguration.incoming.beforeResolve() {
-                if (!profileConfiguration.allDependencies) {
-                    addDefaultProfile(project, profileConfiguration)
+        if(!project.configurations.names.contains(PROFILE_CONFIGURATION)) {
+            project.configurations.register(PROFILE_CONFIGURATION).configure { Configuration profileConfiguration ->
+                profileConfiguration.incoming.beforeResolve() {
+                    if (!profileConfiguration.allDependencies) {
+                        addDefaultProfile(project, profileConfiguration)
+                    }
                 }
             }
         }
-
     }
 
     protected void applyDefaultPlugins(Project project) {
@@ -315,32 +301,36 @@ class GrailsGradlePlugin extends GroovyPlugin {
     }
 
     @CompileDynamic
-    protected Task createBuildPropertiesTask(Project project) {
-        if (project.tasks.findByName("buildProperties") == null) {
-            File resourcesDir = SourceSets.findMainSourceSet(project).output.resourcesDir
-            File buildInfoFile = new File(resourcesDir, "META-INF/grails.build.info")
+    protected void createBuildPropertiesTask(Project project) {
+        if(!project.tasks.names.contains('buildProperties')) {
+            TaskProvider<Task> task = project.tasks.register("buildProperties")
+            task.configure { Task buildPropertiesTask ->
+                File resourcesDir = SourceSets.findMainSourceSet(project).output.resourcesDir
+                File buildInfoFile = new File(resourcesDir, "META-INF/grails.build.info")
 
+                Map<String, Object> buildPropertiesContents = ['grails.env'            : Environment.isSystemSet() ? Environment.getCurrent().getName() : Environment.PRODUCTION.getName(),
+                                                               'info.app.name'         : project.name,
+                                                               'info.app.version'      : project.version instanceof Serializable ? project.version : project.version.toString(),
+                                                               'info.app.grailsVersion': project.properties.get('grailsVersion')]
 
-            Task buildPropertiesTask = project.tasks.create("buildProperties")
-            Map<String, Object> buildPropertiesContents = ['grails.env'            : Environment.isSystemSet() ? Environment.getCurrent().getName() : Environment.PRODUCTION.getName(),
-                                                           'info.app.name'         : project.name,
-                                                           'info.app.version'      : project.version instanceof Serializable ? project.version : project.version.toString(),
-                                                           'info.app.grailsVersion': project.properties.get('grailsVersion')]
-
-            buildPropertiesTask.inputs.properties(buildPropertiesContents)
-            buildPropertiesTask.outputs.file(buildInfoFile)
-            buildPropertiesTask.doLast {
-                project.buildDir.mkdirs()
-                ant.mkdir(dir: buildInfoFile.parentFile)
-                ant.propertyfile(file: buildInfoFile) {
-                    for (me in buildPropertiesTask.inputs.properties) {
-                        entry key: me.key, value: me.value
+                buildPropertiesTask.inputs.properties(buildPropertiesContents)
+                buildPropertiesTask.outputs.file(buildInfoFile)
+                buildPropertiesTask.doLast {
+                    project.layout.buildDirectory.get().asFile.mkdirs()
+                    ant.mkdir(dir: buildInfoFile.parentFile)
+                    ant.propertyfile(file: buildInfoFile) {
+                        for (me in buildPropertiesTask.inputs.properties) {
+                            entry key: me.key, value: me.value
+                        }
                     }
                 }
             }
 
-            TaskContainer tasks = project.tasks
-            tasks.findByName("processResources")?.dependsOn(buildPropertiesTask)
+            if(project.tasks.names.contains('processResources')) {
+                project.tasks.named('processResources').configure {
+                    it.dependsOn(task)
+                }
+            }
         }
     }
 
@@ -548,16 +538,19 @@ class GrailsGradlePlugin extends GroovyPlugin {
         }
 
         TaskContainer tasks = project.tasks
-
         String grailsEnvSystemProperty = System.getProperty(Environment.KEY)
-        tasks.withType(Test).each systemPropertyConfigurer.curry(grailsEnvSystemProperty ?: Environment.TEST.getName())
-        tasks.withType(JavaExec).each systemPropertyConfigurer.curry(grailsEnvSystemProperty ?: Environment.DEVELOPMENT.getName())
+        tasks.withType(Test).configureEach {
+            systemPropertyConfigurer.curry(grailsEnvSystemProperty ?: Environment.TEST.getName())
+        }
+        tasks.withType(JavaExec).configureEach {
+            systemPropertyConfigurer.curry(grailsEnvSystemProperty ?: Environment.DEVELOPMENT.getName())
+        }
     }
 
     protected void configureConsoleTask(Project project) {
         TaskContainer tasks = project.tasks
-        if (project.configurations.findByName("console") == null) {
-            def consoleConfiguration = project.configurations.create("console")
+        if (!project.configurations.names.contains('console')) {
+            NamedDomainObjectProvider<Configuration> consoleConfiguration = project.configurations.register('console')
             def consoleTask = createConsoleTask(project, tasks, consoleConfiguration)
             def shellTask = createShellTask(project, tasks, consoleConfiguration)
 
@@ -589,20 +582,20 @@ class GrailsGradlePlugin extends GroovyPlugin {
     }
 
     @CompileDynamic
-    protected TaskProvider<JavaExec> createConsoleTask(Project project, TaskContainer tasks, Configuration configuration) {
+    protected TaskProvider<JavaExec> createConsoleTask(Project project, TaskContainer tasks, NamedDomainObjectProvider<Configuration> configuration) {
         def consoleTask = tasks.register("console", JavaExec)
         consoleTask.configure {
-            it.classpath = project.sourceSets.main.runtimeClasspath + configuration
+            it.classpath = project.sourceSets.main.runtimeClasspath + configuration.get()
             it.mainClass.set("grails.ui.console.GrailsSwingConsole")
         }
         consoleTask
     }
 
     @CompileDynamic
-    protected TaskProvider<JavaExec> createShellTask(Project project, TaskContainer tasks, Configuration configuration) {
+    protected TaskProvider<JavaExec> createShellTask(Project project, TaskContainer tasks, NamedDomainObjectProvider<Configuration> configuration) {
         def shellTask = tasks.register("shell", JavaExec)
         shellTask.configure {
-            it.classpath = project.sourceSets.main.runtimeClasspath + configuration
+            it.classpath = project.sourceSets.main.runtimeClasspath + configuration.get()
             it.mainClass.set("grails.ui.shell.GrailsShell")
             it.standardInput = System.in
         }
@@ -637,81 +630,84 @@ class GrailsGradlePlugin extends GroovyPlugin {
      **/
     @CompileDynamic
     protected void enableNative2Ascii(Project project, String grailsVersion) {
-        project.afterEvaluate {
-            SourceSet sourceSet = SourceSets.findMainSourceSet(project)
+        SourceSet sourceSet = SourceSets.findMainSourceSet(project)
 
-            TaskContainer taskContainer = project.tasks
-
-            taskContainer.getByName(sourceSet.processResourcesTaskName) { AbstractCopyTask task ->
-                GrailsExtension grailsExt = project.extensions.getByType(GrailsExtension)
-                boolean native2ascii = grailsExt.native2ascii
-                task.setDuplicatesStrategy(DuplicatesStrategy.INCLUDE)
-                if (native2ascii && grailsExt.native2asciiAnt && !taskContainer.findByName('native2ascii')) {
-                    File destinationDir = ((ProcessResources) task).destinationDir
-                    Task native2asciiTask = createNative2AsciiTask(taskContainer, project.file('grails-app/i18n'), destinationDir)
-                    task.dependsOn(native2asciiTask)
+        TaskContainer tasks = project.tasks
+        tasks.named(sourceSet.processResourcesTaskName).configure { AbstractCopyTask task ->
+            GrailsExtension grailsExt = project.extensions.getByType(GrailsExtension)
+            boolean native2ascii = grailsExt.native2ascii
+            task.setDuplicatesStrategy(DuplicatesStrategy.INCLUDE)
+            if (native2ascii && grailsExt.native2asciiAnt && !tasks.findByName('native2ascii')) {
+                File destinationDir = ((ProcessResources) task).destinationDir
+                TaskProvider<Task> native2asciiTask = createNative2AsciiTask(tasks, project.file('grails-app/i18n'), destinationDir)
+                task.configure {
+                    it.dependsOn(native2asciiTask)
                 }
+            }
 
-                Map<String, String> replaceTokens = [
-                        'info.app.name'         : project.name,
-                        'info.app.version'      : project.version?.toString(),
-                        'info.app.grailsVersion': grailsVersion
-                ]
+            Map<String, String> replaceTokens = [
+                    'info.app.name'         : project.name,
+                    'info.app.version'      : project.version?.toString(),
+                    'info.app.grailsVersion': grailsVersion
+            ]
 
-                task.from(project.relativePath("src/main/templates")) {
-                    into("META-INF/templates")
+            task.from(project.relativePath("src/main/templates")) { spec ->
+                spec.into("META-INF/templates")
+            }
+
+            if (!native2ascii) {
+                task.from(sourceSet.resources) { spec ->
+                    spec.include '**/*.properties'
+                    spec.filter(ReplaceTokens, tokens: replaceTokens)
                 }
-
-                if (!native2ascii) {
-                    task.from(sourceSet.resources) {
-                        include '**/*.properties'
-                        filter(ReplaceTokens, tokens: replaceTokens)
-                    }
-                } else if (!grailsExt.native2asciiAnt) {
-                    task.from(sourceSet.resources) {
-                        include '**/*.properties'
-                        filter(ReplaceTokens, tokens: replaceTokens)
-                        filter(EscapeUnicode)
-                    }
+            } else if (!grailsExt.native2asciiAnt) {
+                task.from(sourceSet.resources) { spec ->
+                    spec.include '**/*.properties'
+                    spec.filter(ReplaceTokens, tokens: replaceTokens)
+                    spec.filter(EscapeUnicode)
                 }
+            }
 
-                task.from(sourceSet.resources) {
-                    filter(ReplaceTokens, tokens: replaceTokens)
-                    include '**/*.groovy'
-                    include '**/*.yml'
-                    include '**/*.xml'
-                }
+            task.from(sourceSet.resources) { spec ->
+                spec.filter(ReplaceTokens, tokens: replaceTokens)
+                spec.include '**/*.groovy'
+                spec.include '**/*.yml'
+                spec.include '**/*.xml'
+            }
 
-                task.from(sourceSet.resources) {
-                    exclude '**/*.properties'
-                    exclude '**/*.groovy'
-                    exclude '**/*.yml'
-                    exclude '**/*.xml'
-                }
+            task.from(sourceSet.resources) { spec ->
+                spec.exclude '**/*.properties'
+                spec.exclude '**/*.groovy'
+                spec.exclude '**/*.yml'
+                spec.exclude '**/*.xml'
             }
         }
     }
 
     @CompileDynamic
-    protected Task createNative2AsciiTask(TaskContainer taskContainer, src, dest) {
-        Task native2asciiTask = taskContainer.create('native2ascii')
-        native2asciiTask.doLast {
-            ant.native2ascii(src: src, dest: dest,
-                    includes: "**/*.properties", encoding: "UTF-8")
+    protected TaskProvider<Task> createNative2AsciiTask(TaskContainer tasks, src, dest) {
+        TaskProvider<Task> native2asciiTask = tasks.register('native2ascii').configure {
+            it.doLast {
+                it.ant.native2ascii(src: src, dest: dest,
+                        includes: "**/*.properties", encoding: "UTF-8")
+            }
+            it.inputs.dir(src)
+            it.outputs.dir(dest)
         }
-        native2asciiTask.inputs.dir(src)
-        native2asciiTask.outputs.dir(dest)
+
         native2asciiTask
     }
 
     @CompileDynamic
     protected void configureRunScript(Project project) {
-        if (project.tasks.findByName("runScript") == null) {
-            project.tasks.create("runScript", ApplicationContextScriptTask) {
-                classpath = project.sourceSets.main.runtimeClasspath + project.configurations.console
-                systemProperty Environment.KEY, System.getProperty(Environment.KEY, Environment.DEVELOPMENT.getName())
-                if (project.hasProperty('args')) {
-                    args(CommandLineParser.translateCommandline(project.args))
+        if(!project.tasks.names.contains('runScript')) {
+            project.tasks.register("runScript", ApplicationContextScriptTask).configure {
+                SourceSet mainSourceSet = SourceSets.findMainSourceSet(project)
+                it.classpath = mainSourceSet.runtimeClasspath + project.configurations.getByName('console')
+                it.systemProperty Environment.KEY, System.getProperty(Environment.KEY, Environment.DEVELOPMENT.getName())
+                def argsProperty = project.findProperty('args')
+                if (argsProperty) {
+                    it.args(CommandLineParser.translateCommandline(argsProperty))
                 }
             }
         }
@@ -719,12 +715,14 @@ class GrailsGradlePlugin extends GroovyPlugin {
 
     @CompileDynamic
     protected void configureRunCommand(Project project) {
-        if (project.tasks.findByName("runCommand") == null) {
-            project.tasks.create("runCommand", ApplicationContextCommandTask) {
-                classpath = project.sourceSets.main.runtimeClasspath + project.configurations.console
-                systemProperty Environment.KEY, System.getProperty(Environment.KEY, Environment.DEVELOPMENT.getName())
-                if (project.hasProperty('args')) {
-                    args(CommandLineParser.translateCommandline(project.args))
+        if(!project.tasks.names.contains('runCommand')) {
+            project.tasks.register("runCommand", ApplicationContextCommandTask).configure {
+                SourceSet mainSourceSet = SourceSets.findMainSourceSet(project)
+                it.classpath = mainSourceSet.runtimeClasspath + project.configurations.getByName('console')
+                it.systemProperty Environment.KEY, System.getProperty(Environment.KEY, Environment.DEVELOPMENT.getName())
+                def argsProperty = project.findProperty('args')
+                if (argsProperty) {
+                    it.args(CommandLineParser.translateCommandline(argsProperty))
                 }
             }
         }
