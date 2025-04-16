@@ -124,7 +124,9 @@ class GrailsGradlePlugin extends GroovyPlugin {
 
         configureApplicationCommands(project)
 
-        createBuildPropertiesTask(project)
+        project.gradle.projectsEvaluated {
+            createBuildPropertiesTask(project)
+        }
 
         configureRunScript(project)
 
@@ -301,36 +303,32 @@ class GrailsGradlePlugin extends GroovyPlugin {
     }
 
     @CompileDynamic
-    protected void createBuildPropertiesTask(Project project) {
-        if(!project.tasks.names.contains('buildProperties')) {
-            TaskProvider<Task> task = project.tasks.register("buildProperties")
-            task.configure { Task buildPropertiesTask ->
-                File resourcesDir = SourceSets.findMainSourceSet(project).output.resourcesDir
-                File buildInfoFile = new File(resourcesDir, "META-INF/grails.build.info")
+    protected Task createBuildPropertiesTask(Project project) {
+        if (project.tasks.findByName("buildProperties") == null) {
+            File resourcesDir = SourceSets.findMainSourceSet(project).output.resourcesDir
+            File buildInfoFile = new File(resourcesDir, "META-INF/grails.build.info")
 
-                Map<String, Object> buildPropertiesContents = ['grails.env'            : Environment.isSystemSet() ? Environment.getCurrent().getName() : Environment.PRODUCTION.getName(),
-                                                               'info.app.name'         : project.name,
-                                                               'info.app.version'      : project.version instanceof Serializable ? project.version : project.version.toString(),
-                                                               'info.app.grailsVersion': project.properties.get('grailsVersion')]
 
-                buildPropertiesTask.inputs.properties(buildPropertiesContents)
-                buildPropertiesTask.outputs.file(buildInfoFile)
-                buildPropertiesTask.doLast {
-                    project.layout.buildDirectory.get().asFile.mkdirs()
-                    ant.mkdir(dir: buildInfoFile.parentFile)
-                    ant.propertyfile(file: buildInfoFile) {
-                        for (me in buildPropertiesTask.inputs.properties) {
-                            entry key: me.key, value: me.value
-                        }
+            Task buildPropertiesTask = project.tasks.create("buildProperties")
+            Map<String, Object> buildPropertiesContents = ['grails.env'            : Environment.isSystemSet() ? Environment.getCurrent().getName() : Environment.PRODUCTION.getName(),
+                                                           'info.app.name'         : project.name,
+                                                           'info.app.version'      : project.version instanceof Serializable ? project.version : project.version.toString(),
+                                                           'info.app.grailsVersion': project.properties.get('grailsVersion')]
+
+            buildPropertiesTask.inputs.properties(buildPropertiesContents)
+            buildPropertiesTask.outputs.file(buildInfoFile)
+            buildPropertiesTask.doLast {
+                project.buildDir.mkdirs()
+                ant.mkdir(dir: buildInfoFile.parentFile)
+                ant.propertyfile(file: buildInfoFile) {
+                    for (me in buildPropertiesTask.inputs.properties) {
+                        entry key: me.key, value: me.value
                     }
                 }
             }
 
-            if(project.tasks.names.contains('processResources')) {
-                project.tasks.named('processResources').configure {
-                    it.dependsOn(task)
-                }
-            }
+            TaskContainer tasks = project.tasks
+            tasks.findByName("processResources")?.dependsOn(buildPropertiesTask)
         }
     }
 
@@ -538,13 +536,10 @@ class GrailsGradlePlugin extends GroovyPlugin {
         }
 
         TaskContainer tasks = project.tasks
+
         String grailsEnvSystemProperty = System.getProperty(Environment.KEY)
-        tasks.withType(Test).configureEach {
-            systemPropertyConfigurer.curry(grailsEnvSystemProperty ?: Environment.TEST.getName())
-        }
-        tasks.withType(JavaExec).configureEach {
-            systemPropertyConfigurer.curry(grailsEnvSystemProperty ?: Environment.DEVELOPMENT.getName())
-        }
+        tasks.withType(Test).each systemPropertyConfigurer.curry(grailsEnvSystemProperty ?: Environment.TEST.getName())
+        tasks.withType(JavaExec).each systemPropertyConfigurer.curry(grailsEnvSystemProperty ?: Environment.DEVELOPMENT.getName())
     }
 
     protected void configureConsoleTask(Project project) {
