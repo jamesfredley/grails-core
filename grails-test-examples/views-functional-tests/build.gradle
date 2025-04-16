@@ -15,7 +15,7 @@ ext {
 dependencies {
     implementation platform(project(':grails-bom'))
 
-    implementation project(':grails-test-examples-views-functional-plugin')
+    implementation project(':grails-test-examples-views-functional-tests-plugin')
     implementation 'org.apache.grails:grails-views-gson'
     implementation 'org.apache.grails:grails-views-markup'
 
