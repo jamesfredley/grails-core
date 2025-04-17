@@ -450,10 +450,12 @@ Note: if project properties are used, the properties must be defined prior to ap
                 }
             }
 
-            project.tasks.names.findAll { it.startsWith("publish")}.each { String name ->
+            project.tasks.names.findAll { it.startsWith("publish") && it != 'publishToMavenLocal'}.each { String name ->
                 TaskProvider<? extends Task> relatedTask = project.tasks.named(name)
                 relatedTask.configure { it ->
-                    it.dependsOn validateTask
+                    if(it.group.contains('publishing')) {
+                        it.dependsOn validateTask
+                    }
                 }
             }
         }
