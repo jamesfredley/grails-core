@@ -222,7 +222,7 @@ Note: if project properties are used, the properties must be defined prior to ap
 
             validateProjectPublishable(project as Project)
 
-            final def mavenPublishUrl = project.findProperty('mavenPublishUrl') ?: System.getenv('MAVEN_PUBLISH_URL') ?: ''
+            final def mavenPublishUrl = project.findProperty('mavenPublishUrl') ?: System.getenv('MAVEN_PUBLISH_URL')
 
             project.publishing {
                 if (useMavenPublish) {
@@ -230,8 +230,8 @@ Note: if project properties are used, the properties must be defined prior to ap
 
                     repositories {
                         maven {
-                            final String mavenPublishUsername = project.findProperty('mavenPublishUsername') ?: System.getenv('MAVEN_PUBLISH_USERNAME') ?: ''
-                            final String mavenPublishPassword = project.findProperty('mavenPublishPassword') ?: System.getenv('MAVEN_PUBLISH_PASSWORD') ?: ''
+                            final String mavenPublishUsername = project.findProperty('mavenPublishUsername') ?: System.getenv('MAVEN_PUBLISH_USERNAME')
+                            final String mavenPublishPassword = project.findProperty('mavenPublishPassword') ?: System.getenv('MAVEN_PUBLISH_PASSWORD')
                             if (mavenPublishUsername && mavenPublishPassword) {
                                 credentials {
                                     username = mavenPublishUsername
