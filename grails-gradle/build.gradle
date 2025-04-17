@@ -1,4 +1,3 @@
-
 Properties props = new Properties()
 file('../gradle.properties').withInputStream {
     props.load(it)

@@ -14,7 +14,6 @@ dependencies {
 
     implementation 'org.apache.groovy:groovy'
     implementation 'org.slf4j:slf4j-api'
-
 }
 
 apply {

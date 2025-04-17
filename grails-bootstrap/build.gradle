@@ -58,7 +58,7 @@ dependencies {
 
 processResources {
     inputs.property "version", version
-    filter(ReplaceTokens, tokens:[version:version])
+    filter(ReplaceTokens, tokens: [version: version])
 }
 
 apply {

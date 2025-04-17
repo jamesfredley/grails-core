@@ -11,7 +11,7 @@ ext {
 }
 
 def configurations = [
-        'api': [
+        'api'        : [
                 ':grails-core',
                 ':grails-rest-transforms',
                 ':grails-databinding',
@@ -32,10 +32,9 @@ dependencies {
     implementation platform(project(':grails-bom'))
     configurations.each { String configuration, List<String> deps ->
         deps.each {
-            if(it.startsWith(':')) {
+            if (it.startsWith(':')) {
                 add(configuration, project(it))
-            }
-            else {
+            } else {
                 add(configuration, it)
             }
         }

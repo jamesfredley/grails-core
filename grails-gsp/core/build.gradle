@@ -65,7 +65,8 @@ dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter-api'
     testImplementation 'org.spockframework:spock-core'
 
-    testRuntimeOnly 'org.slf4j:slf4j-nop' // Get rid of warning about missing slf4j implementation during test compilation
+    testRuntimeOnly 'org.slf4j:slf4j-nop'
+    // Get rid of warning about missing slf4j implementation during test compilation
 }
 
 apply {

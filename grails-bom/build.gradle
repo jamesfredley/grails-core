@@ -109,7 +109,7 @@ tasks.register('extractConstraints') {
         }
 
         // Build an exclusion list so parsing the pom we can exclude any dependencies as they are matched
-        Map<String, List<Tuple2<String, String>>> allExclusions = [:].withDefault{ [] }
+        Map<String, List<Tuple2<String, String>>> allExclusions = [:].withDefault { [] }
         apiConfiguration.allDependencies.each { dep ->
             if (dep instanceof org.gradle.api.artifacts.ModuleDependency) {
                 String coordinates = "${dep.group}:${dep.name}" as String
@@ -143,23 +143,23 @@ tasks.register('extractConstraints') {
                 model.dependencyManagement.dependencies.each { depItem ->
 
                     String coordinates = "${depItem.groupId}:${depItem.artifactId}" as String
-                    if(!bomConstraints.containsKey(coordinates)) {
+                    if (!bomConstraints.containsKey(coordinates)) {
                         boolean isExcluded = excluded.any {
-                            if(it.v1 && it.v2) {
+                            if (it.v1 && it.v2) {
                                 return coordinates == "${it.v1}:${it.v2}" as String
                             }
 
-                            if(it.v1 && !it.v2) {
+                            if (it.v1 && !it.v2) {
                                 return depItem.groupId == it.v1
                             }
 
-                            if(!it.v1 && it.v2) {
+                            if (!it.v1 && it.v2) {
                                 return depItem.artifactId == it.v2
                             }
 
                             false
                         }
-                        if(!isExcluded) {
+                        if (!isExcluded) {
                             String version = resolveMavenPomVersion(depItem.version, model.properties)
                             bomConstraints.put(coordinates, new Tuple4<>(depItem.groupId, depItem.artifactId, version, bomName))
                         }
@@ -231,9 +231,9 @@ Closure determinePropertyName = { String groupId, String artifactId, String vers
     Map<String, String> toSearchGradle = isBom ? gradleBomPlatformDependencies : gradleBomDependencies
 
     Map.Entry<String, String> found = toSearch.entrySet().find { "$groupId:$artifactId:$version" as String == it.value as String }
-    if(!found) {
+    if (!found) {
         found = toSearchGradle.entrySet().find { "$groupId:$artifactId:$version" as String == it.value as String }
-        if(!found) {
+        if (!found) {
             return null
         }
     }
@@ -242,11 +242,11 @@ Closure determinePropertyName = { String groupId, String artifactId, String vers
 
     //TODO: this isn't the correct way to do this, but with project mergers it may not matter
     String propertyName = determinePossibleKey(found, versions)
-    if(!propertyName) {
+    if (!propertyName) {
         propertyName = determinePossibleKey(found, gradleBomDependencyVersions)
     }
 
-    if(propertyName) {
+    if (propertyName) {
         return propertyName
     }
 

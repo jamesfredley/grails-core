@@ -1,5 +1,5 @@
 rootProject.subprojects
-        .findAll {!(it.name in testProjects) && it.name != 'grails-doc' }
+        .findAll { !(it.name in testProjects) && it.name != 'grails-doc' }
         .each { project.evaluationDependsOn(it.path) }
 
 configurations.configureEach {
@@ -12,8 +12,7 @@ configurations.configureEach {
                 def substitutedArtifact = "$possibleProject.group:$artifactId"
                 if (possibleProject.name == 'grails-bom') {
                     substitute module(substitutedArtifact) using platform(project(':grails-bom'))
-                }
-                else {
+                } else {
                     substitute module(substitutedArtifact) using project(":$possibleProject.name")
                 }
             }
@@ -22,7 +21,7 @@ configurations.configureEach {
 }
 
 // work around for parallel builds due to https://github.com/bertramdev/asset-pipeline/issues/177
-if('assetCompile' in tasks.names) {
+if ('assetCompile' in tasks.names) {
     tasks.named('assetCompile').configure { Task task ->
         task.outputs.dir rootProject.layout.buildDirectory.dir('asset-serialize')
     }
