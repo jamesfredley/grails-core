@@ -151,22 +151,20 @@ class GrailsGradlePlugin extends GroovyPlugin {
 
     private void configureGroovyCompiler(Project project) {
         Provider<Directory> sourceConfigFiles = project.layout.buildDirectory.dir('groovyCompilerConfiguration')
-
-        // Gradle validates that this file exists and it is not a lazy validation
-        // so we must force the creation always to ensure it passes gradle's validation
-        File groovyCompilerConfigFile = project.layout.buildDirectory.file('grailsGroovyCompilerConfig.groovy').get().asFile
-        if (!groovyCompilerConfigFile.exists()) {
-            groovyCompilerConfigFile.parentFile.mkdirs()
-            groovyCompilerConfigFile.createNewFile()
-        }
-        groovyCompilerConfigFile.write('// Placeholder for grails metadata and other configuration')
-
+        Provider<RegularFile> groovyCompilerConfigFile = project.layout.buildDirectory.file('grailsGroovyCompilerConfig.groovy')
         if (!project.tasks.findByName('configureGroovyCompiler')) {
             project.tasks.register('cleanGroovyCompilerConfig').configure { Task task ->
                 task.group = 'build'
                 task.doFirst {
                     sourceConfigFiles.get().asFile.deleteDir()
                     sourceConfigFiles.get().asFile.mkdirs()
+
+                    File combinedFile = groovyCompilerConfigFile.get().asFile
+                    if (!combinedFile.exists()) {
+                        combinedFile.parentFile.mkdirs()
+                        combinedFile.createNewFile()
+                    }
+                    combinedFile.write('// Placeholder for grails metadata and other configuration')
                 }
             }
             // Merge the script at runtime so we don't suffer a performance penalty as part of every gradle task run
@@ -193,9 +191,10 @@ class GrailsGradlePlugin extends GroovyPlugin {
 
                     String combinedScripts = scripts.findResults { it?.trim() }.join('\n').trim()
                     if (combinedScripts) {
-                        groovyCompilerConfigFile.parentFile.mkdirs()
-                        groovyCompilerConfigFile.write(combinedScripts)
-                        compileTask.groovyOptions.configurationScript = groovyCompilerConfigFile
+                        File combinedFile = groovyCompilerConfigFile.get().asFile
+                        combinedFile.parentFile.mkdirs()
+                        combinedFile.write(combinedScripts)
+                        compileTask.groovyOptions.configurationScript = combinedFile
                     }
                 }
             }
