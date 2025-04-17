@@ -170,7 +170,8 @@ class GrailsGradlePlugin extends GroovyPlugin {
                 }
             }
             // Merge the script at runtime so we don't suffer a performance penalty as part of every gradle task run
-            project.tasks.register('configureGroovyCompiler').configure { Task task ->
+            TaskProvider<Task> configureTaskProvider = project.tasks.register('configureGroovyCompiler')
+            configureTaskProvider.configure { Task task ->
                 task.group = 'build'
                 task.dependsOn('cleanGroovyCompilerConfig')
 
@@ -201,13 +202,12 @@ class GrailsGradlePlugin extends GroovyPlugin {
 
             // Because the gradle plugin extends the groovy plugin, this will always exist at this point
             project.tasks.withType(GroovyCompile).configureEach {
-                it.dependsOn('configureGroovyCompiler')
+                it.dependsOn(configureTaskProvider)
             }
         }
     }
 
     protected TaskProvider<Task> addGroovyCompilerScript(String uniqueScriptName, Project project, Closure scriptGenerator) {
-        Provider<RegularFile> targetConfigFile = project.layout.buildDirectory.file("groovyCompilerConfiguration/${uniqueScriptName}Config.groovy")
         String taskName = "configureGroovyCompiler${uniqueScriptName}" as String
         if (taskName in project.tasks.names) {
             return project.tasks.named(taskName)
@@ -216,6 +216,8 @@ class GrailsGradlePlugin extends GroovyPlugin {
         TaskProvider<Task> configScriptTask = project.tasks.register(taskName)
         configScriptTask.configure { Task task ->
             task.group = 'build'
+
+            Provider<RegularFile> targetConfigFile = project.layout.buildDirectory.file("groovyCompilerConfiguration/${uniqueScriptName}Config.groovy")
             task.outputs.file(targetConfigFile)
             task.dependsOn('cleanGroovyCompilerConfig')
 
