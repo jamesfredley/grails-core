@@ -153,7 +153,8 @@ class GrailsGradlePlugin extends GroovyPlugin {
         Provider<Directory> sourceConfigFiles = project.layout.buildDirectory.dir('groovyCompilerConfiguration')
         Provider<RegularFile> groovyCompilerConfigFile = project.layout.buildDirectory.file('grailsGroovyCompilerConfig.groovy')
         if (!project.tasks.findByName('configureGroovyCompiler')) {
-            project.tasks.register('cleanGroovyCompilerConfig').configure { Task task ->
+            TaskProvider<Task> cleanGroovyConfigProvider = project.tasks.register('cleanGroovyCompilerConfig')
+            cleanGroovyConfigProvider.configure { Task task ->
                 task.group = 'build'
                 task.doFirst {
                     sourceConfigFiles.get().asFile.deleteDir()
@@ -201,7 +202,7 @@ class GrailsGradlePlugin extends GroovyPlugin {
 
             // Because the gradle plugin extends the groovy plugin, this will always exist at this point
             project.tasks.withType(GroovyCompile).configureEach {
-                it.dependsOn(configureTaskProvider)
+                it.dependsOn(configureTaskProvider, cleanGroovyConfigProvider)
             }
         }
     }
