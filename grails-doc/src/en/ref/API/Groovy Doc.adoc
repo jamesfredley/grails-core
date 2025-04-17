@@ -1,0 +1,2 @@
+== Groovy Doc
+All grails projects generate API documentation.  You can find the documentation link:../../api/index.html[here].

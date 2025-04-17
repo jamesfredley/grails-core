@@ -65,6 +65,9 @@ include (
         'grails-dependencies',
         'grails-bom',
 
+        // Docs
+        'grails-doc',
+
         // Test Suite
         'grails-test-suite-base',
         'grails-test-suite-persistence',

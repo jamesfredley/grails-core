@@ -228,6 +228,7 @@ class DocPublisher {
         def yamlTocFile = new File(guideSrcDir, TOC_FILENAME)
         def guide
         def ext = asciidoc ? ".adoc" : ".gdoc"
+
         if (yamlTocFile.exists()) {
             def tocStrategy = new YamlTocStrategy(new FileResourceChecker(guideSrcDir), ext)
             guide = tocStrategy.generateToc(yamlTocFile)
@@ -251,9 +252,7 @@ class DocPublisher {
             }
         }
         else {
-
-            def files = guideSrcDir.listFiles()?.findAll { it.name.endsWith(ext) } ?: []
-            guide = new LegacyTocStrategy().generateToc(files)
+            throw new RuntimeException("Legacy TOC is no longer supported. Please add a ${TOC_FILENAME}")
         }
 
         // When migrating from the old style docs to the new style, existing

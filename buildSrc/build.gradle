@@ -8,9 +8,12 @@ file('../gradle.properties').withInputStream {
     project.ext.gradleProperties = props
 }
 
+compileJava.options.release = gradleProperties.javaVersion.toString().toInteger()
+
 repositories {
     // mavenLocal()
     mavenCentral()
+    gradlePluginPortal()
     maven { url = 'https://repo.grails.org/grails/core' }
     maven { url = 'https://repository.apache.org/content/repositories/snapshots' }
 }
@@ -23,4 +26,6 @@ dependencies {
     }
     implementation "io.github.gradle-nexus:publish-plugin"
     implementation "org.apache.grails:grails-gradle-plugins"
+    implementation "org.apache.grails:grails-docs-core"
+    implementation "org.asciidoctor:asciidoctor-gradle-jvm"
 }

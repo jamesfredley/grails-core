@@ -23,7 +23,11 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.file.DuplicatesStrategy
-import org.gradle.api.plugins.*
+import org.gradle.api.plugins.ExtensionContainer
+import org.gradle.api.plugins.ExtraPropertiesExtension
+import org.gradle.api.plugins.JavaPlatformExtension
+import org.gradle.api.plugins.JavaPluginExtension
+import org.gradle.api.plugins.PluginManager
 import org.gradle.api.publish.maven.MavenPublication
 import org.gradle.api.publish.maven.plugins.MavenPublishPlugin
 import org.gradle.api.tasks.SourceSet
@@ -103,7 +107,7 @@ Note: if project properties are used, the properties must be defined prior to ap
 
     @Override
     void apply(Project project) {
-        project.rootProject.logger.lifecycle("Applying Grails Publish Gradle Plugin for `${project.name}`...");
+        project.rootProject.logger.info("Applying Grails Publish Gradle Plugin for `${project.name}`...");
         if (project.extensions.findByName('grailsPublish') == null) {
             project.extensions.add('grailsPublish', new GrailsPublishExtension())
         }
@@ -134,13 +138,19 @@ Note: if project properties are used, the properties must be defined prior to ap
             if (detectedVersion == Project.DEFAULT_VERSION) {
                 throw new IllegalStateException("Project ${project.name} has an unspecified version (neither `version` or the property `projectVersion` is defined). Release state cannot be determined.")
             }
-            if (project.version == Project.DEFAULT_VERSION) {
-                project.rootProject.logger.warn("Project ${project.name} does not have a version defined. Using the gradle property `projectVersion` to assume version is ${detectedVersion}.")
-            }
             project.rootProject.logger.info("Version $detectedVersion detected for project ${project.name}")
 
             isSnapshot = detectedVersion.endsWith('SNAPSHOT')
             isRelease = !isSnapshot
+
+            if (project.version == Project.DEFAULT_VERSION) {
+                if(isRelease) {
+                    project.rootProject.logger.warn("Project ${project.name} does not have a version defined. Using the gradle property `projectVersion` to assume version is ${detectedVersion}.")
+                }
+                else {
+                    project.rootProject.logger.info("Project ${project.name} does not have a version defined. Using the gradle property `projectVersion` to assume version is ${detectedVersion}.")
+                }
+            }
         }
 
         if (isSnapshot) {
