@@ -11,8 +11,8 @@ dependencies {
 
     implementation platform(project(':grails-bom'))
 
-    api "commons-codec:commons-codec"
-    api "org.apache.groovy:groovy:$groovyVersion"
+    api 'commons-codec:commons-codec'
+    api 'org.apache.groovy:groovy'
 
     testImplementation 'org.apache.groovy:groovy-test-junit5'
     testImplementation 'org.junit.jupiter:junit-jupiter-api'

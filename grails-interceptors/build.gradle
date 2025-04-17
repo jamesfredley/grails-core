@@ -11,9 +11,9 @@ dependencies {
 
     implementation platform(project(':grails-bom'))
 
-    api project(":grails-controllers")
-    api project(":grails-url-mappings")
-    api "org.apache.groovy:groovy:$groovyVersion"
+    api project(':grails-controllers')
+    api project(':grails-url-mappings')
+    api 'org.apache.groovy:groovy'
 
     compileOnly 'jakarta.servlet:jakarta.servlet-api'
     compileOnly 'org.springframework:spring-test', {

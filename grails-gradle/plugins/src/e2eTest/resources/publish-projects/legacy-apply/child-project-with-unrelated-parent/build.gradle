@@ -15,7 +15,7 @@ repositories {
 }
 
 version = "${projectVersion}"
-group = "org.grails.example"
+group = 'org.grails.example'
 
 apply plugin: 'java-library'
 apply plugin: 'groovy'

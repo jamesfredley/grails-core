@@ -5,14 +5,14 @@ plugins {
 }
 
 version = projectVersion
-group = "org.apache.grails"
+group = 'org.apache.grails'
 
 apply plugin: 'org.apache.grails.gradle.grails-plugin'
 
 ext {
-    pomTitle = "Grails Cache Plugin"
-    pomDescription = "Provides AST transformations for caching method calls"
-    pomDevelopers = [jeffbrown: "Jeff Scott Brown", "puneetbehl": "Puneet Behl"]
+    pomTitle = 'Grails Cache Plugin'
+    pomDescription = 'Provides AST transformations for caching method calls'
+    pomDevelopers = [jeffbrown: 'Jeff Scott Brown', 'puneetbehl': 'Puneet Behl']
 }
 
 dependencies {
@@ -35,7 +35,7 @@ dependencies {
     testImplementation 'org.spockframework:spock-core', {
         exclude group: 'org.apache.groovy'
     }
-    testImplementation "org.mockito:mockito-core" // to allow for correct mocking with Mock()
+    testImplementation 'org.mockito:mockito-core' // to allow for correct mocking with Mock()
 }
 
 apply {

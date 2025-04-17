@@ -17,10 +17,10 @@ ext {
 dependencies {
 
     implementation platform(project(':grails-bom'))
-    compileOnly "org.apache.ant:ant"
-    api project(":grails-gsp-core")
+    compileOnly 'org.apache.ant:ant'
+    api project(':grails-gsp-core')
     api project(':grails-web-common')
-    api project(":grails-web-taglib")
+    api project(':grails-web-taglib')
 
 //    api 'org.apache.grails:grails-core', { // GrailsDomainClass, CacheEntry, Environment, GrailsStringUtils, GrailsApplication, GrailsControllerClass, GrailsApplicationAware, ControllerArtefactHandler, GrailsPluginManager, GrailsFactoriesLoader
 //        // API dependencies in grails-core

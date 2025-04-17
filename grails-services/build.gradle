@@ -11,11 +11,11 @@ dependencies {
 
     implementation platform(project(':grails-bom'))
 
-    api "org.springframework:spring-tx"
+    api 'org.springframework:spring-tx'
 
-    api project(":grails-core")
-    api project(":grails-datasource")
-    api "org.apache.groovy:groovy:$groovyVersion"
+    api project(':grails-core')
+    api project(':grails-datasource')
+    api 'org.apache.groovy:groovy'
 
     compileOnly 'jakarta.servlet:jakarta.servlet-api'
     compileOnly 'org.springframework:spring-test', {

@@ -11,14 +11,14 @@ dependencies {
 
     implementation platform(project(':grails-bom'))
 
-    api project(":grails-web-common")
-    api project(":grails-web-databinding")
-    api project(":grails-web-url-mappings")
-    api project(":grails-web-mvc")
-    api project(":grails-encoder")
-    api "org.apache.groovy:groovy:$groovyVersion"
+    api project(':grails-web-common')
+    api project(':grails-web-databinding')
+    api project(':grails-web-url-mappings')
+    api project(':grails-web-mvc')
+    api project(':grails-encoder')
+    api 'org.apache.groovy:groovy'
 
-    api "org.apache.grails.views:grails-web-gsp", {
+    api 'org.apache.grails.views:grails-web-gsp', {
         exclude module: 'grails-encoder'
         exclude module: 'grails-core'
         exclude module: 'grails-web-common'

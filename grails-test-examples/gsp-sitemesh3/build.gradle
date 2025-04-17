@@ -6,7 +6,7 @@ buildscript {
     }
     dependencies {
         classpath platform("org.apache.grails:grails-gradle-bom:${project.projectVersion}")
-        classpath "org.apache.grails:grails-gradle-plugins"
+        classpath 'org.apache.grails:grails-gradle-plugins'
         classpath 'com.bertramlabs.plugins:asset-pipeline-gradle'
     }
 }

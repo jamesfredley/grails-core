@@ -18,8 +18,8 @@ dependencies {
 
     implementation platform(project(':grails-bom'))
     api project(':grails-core')
-    api project(":grails-taglib")
-    api "org.apache.groovy:groovy-templates"
+    api project(':grails-taglib')
+    api 'org.apache.groovy:groovy-templates'
 
 //    api project(':grails-bootstrap'), { // ConfigMap
 //        // API dependencies in grails-bootstrap

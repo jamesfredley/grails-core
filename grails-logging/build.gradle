@@ -11,8 +11,8 @@ dependencies {
 
     implementation platform(project(':grails-bom'))
 
-    api project(":grails-core")
-    api "org.apache.groovy:groovy:$groovyVersion"
+    api project(':grails-core')
+    api 'org.apache.groovy:groovy'
 
     testImplementation 'org.apache.groovy:groovy-test-junit5'
     testImplementation 'org.junit.jupiter:junit-jupiter-api'

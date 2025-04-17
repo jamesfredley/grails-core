@@ -17,9 +17,9 @@ dependencies {
     api project(':grails-web-core')
     api project(':grails-test-core')
     api project(':grails-domain-class')
-    api project(":grails-converters")
+    api project(':grails-converters')
 
-    api "org.apache.groovy:groovy:$groovyVersion"
+    api 'org.apache.groovy:groovy'
 
     compileOnly 'jakarta.servlet:jakarta.servlet-api'
     compileOnly 'org.springframework:spring-test', {

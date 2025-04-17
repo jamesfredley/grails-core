@@ -11,7 +11,7 @@ dependencies {
     implementation platform(project(':grails-bom'))
 
     api project(':grails-web-common')
-    api "org.apache.groovy:groovy:$groovyVersion"
+    api 'org.apache.groovy:groovy'
 
     compileOnly 'jakarta.servlet:jakarta.servlet-api' // Provided
 

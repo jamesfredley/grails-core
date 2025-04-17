@@ -25,7 +25,7 @@ dependencies {
     implementation platform(project(':grails-bom'))
     astImplementation platform(project(':grails-bom'))
 
-    api project(":grails-sitemesh3")
+    api project(':grails-sitemesh3')
 
     api project(':grails-gsp-core'), { // GroovyPageResourceLoader, GroovyPagesTemplateEngine, CachingGroovyPageStaticResourceLocator
         // API dependencies in grails-gsp
@@ -71,7 +71,7 @@ dependencies {
         exclude group: 'org.apache.grails.views', module: 'grails-taglib'
         exclude group: 'org.apache.grails.views', module: 'grails-web-gsp'
     }
-    implementation "org.apache.commons:commons-text" // StringEscapeUtils
+    implementation 'org.apache.commons:commons-text' // StringEscapeUtils
     implementation 'org.apache.groovy:groovy-xml' // MarkupBuilder
     implementation project(':grails-core'), { // Config
         // API dependencies in grails-core

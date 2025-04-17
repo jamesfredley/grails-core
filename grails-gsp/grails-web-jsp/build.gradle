@@ -18,7 +18,7 @@ dependencies {
 
     implementation platform(project(':grails-bom'))
     api project(':grails-web-common')
-    api project(":grails-web-gsp")
+    api project(':grails-web-gsp')
 
     // Required for JSP support
     compileOnly "jakarta.servlet.jsp:jakarta.servlet.jsp-api:$jspApiVersion"

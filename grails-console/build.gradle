@@ -12,18 +12,20 @@ dependencies {
     implementation platform(project(':grails-bom'))
 
     api project(":grails-core")
-    api "org.apache.groovy:groovy:$groovyVersion"
-    api "org.apache.groovy:groovy-console"
-    api "org.apache.groovy:groovy-swing"
-    api "org.apache.groovy:groovy-groovysh"
-    implementation "org.fusesource.jansi:jansi", "jline:jline", "net.java.dev.jna:jna"
+    api 'org.apache.groovy:groovy'
+    api 'org.apache.groovy:groovy-console'
+    api 'org.apache.groovy:groovy-swing'
+    api 'org.apache.groovy:groovy-groovysh'
+    implementation 'org.fusesource.jansi:jansi'
+    implementation 'jline:jline'
+    implementation 'net.java.dev.jna:jna'
 
-    api("org.springframework.boot:spring-boot")
-    api "org.springframework:spring-test"
+    api('org.springframework.boot:spring-boot')
+    api 'org.springframework:spring-test'
 
-    api "org.springframework:spring-web"
+    api 'org.springframework:spring-web'
 
-    api "jakarta.servlet:jakarta.servlet-api"
+    api 'jakarta.servlet:jakarta.servlet-api'
 
     testImplementation 'org.apache.groovy:groovy-test-junit5'
     testImplementation 'org.junit.jupiter:junit-jupiter-api'

@@ -88,8 +88,8 @@ dependencies {
 // work around for issue #10118
 compileGroovy.doLast {
     // unfortunate workaround, since the generated one overrides the one in src/main/resources
-    final String compileGroovyTargetDir = tasks.compileGroovy.destinationDirectory.getAsFile().getOrNull()?.path ?: "build/classes/groovy/main"
-    project.delete(compileGroovyTargetDir + "/META-INF/grails.factories")
+    final String compileGroovyTargetDir = tasks.compileGroovy.destinationDirectory.getAsFile().getOrNull()?.path ?: 'build/classes/groovy/main'
+    project.delete(compileGroovyTargetDir + '/META-INF/grails.factories')
 }
 
 apply {

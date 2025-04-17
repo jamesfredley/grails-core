@@ -11,11 +11,11 @@ dependencies {
 
     implementation platform(project(':grails-bom'))
 
-    api project(":grails-web-core")
-    api project(":grails-controllers")
-    api "org.apache.groovy:groovy:$groovyVersion"
+    api project(':grails-web-core')
+    api project(':grails-controllers')
+    api 'org.apache.groovy:groovy'
 
-    testCompileOnly "org.junit.jupiter:junit-jupiter-api"
+    testCompileOnly 'org.junit.jupiter:junit-jupiter-api'
 
     compileOnly 'jakarta.servlet:jakarta.servlet-api'
     compileOnly 'org.springframework:spring-test', {

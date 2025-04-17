@@ -11,11 +11,12 @@ dependencies {
 
     implementation platform(project(':grails-bom'))
 
-    api project(":grails-core")
-    api "org.apache.groovy:groovy:$groovyVersion"
-    api "org.apache.groovy:groovy-json"
-    // HtmlUtils is used from spring-web
-    api "org.springframework:spring-web"
+    api project(':grails-core')
+    api 'org.apache.groovy:groovy'
+    api 'org.apache.groovy:groovy-json'
+    api 'org.springframework:spring-web', {
+        // HtmlUtils is used from spring-web
+    }
 
     testImplementation 'org.apache.groovy:groovy-test-junit5'
     testImplementation 'org.junit.jupiter:junit-jupiter-api'
