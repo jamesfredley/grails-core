@@ -9,6 +9,9 @@ on:
       - '[4-9]+.[0-9]+.x'
       - '[3-9]+.[3-9]+.x'
   workflow_dispatch:
+env:
+  # to prevent throttling of the github api, include the github token in an environment variable since the build will check for it
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 jobs:
   skip_check:
     runs-on: ubuntu-latest
