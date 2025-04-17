@@ -29,7 +29,7 @@ import org.springframework.context.MessageSourceResolvable
 import org.springframework.context.i18n.LocaleContextHolder
 import org.springframework.validation.FieldError
 import spock.lang.Ignore
-import spock.lang.IgnoreIf
+import spock.lang.PendingFeature
 import spock.lang.Specification
 
 import java.beans.PropertyEditorSupport
@@ -270,7 +270,7 @@ class ValidationTagLibSpec extends Specification implements TagLibUnitTest<Valid
         applyTemplate(template, [book:b]) == "1.045,456"
     }
 
-    @IgnoreIf({ jvm.isJava14() || jvm.isJava15() || jvm.isJava17() }) // because space is converted to narrow no-break space 8239 and is not encoded
+    @PendingFeature // Was valid for JVM lower than 14 because space is converted to narrow no-break space 8239 and is not encoded
     void testFieldValueTagWithFrenchLocaleInTextField() {
         given:
         def b = new ValidationTagLibBook()

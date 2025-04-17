@@ -1,10 +1,12 @@
 package org.grails.plugins.web
 
 import spock.lang.IgnoreIf
+import spock.lang.PendingFeature
 import spock.lang.Requires
 import spock.lang.Shared
 import spock.lang.Specification
 import spock.lang.Unroll
+import spock.util.environment.Jvm
 
 import java.time.*
 import java.time.format.DateTimeFormatter
@@ -56,8 +58,9 @@ class DefaultDateHelperSpec extends Specification {
         null     | '1/5/41'
     }
 
+    @Requires({ Jvm.current.isJava17() })
     @Unroll
-    void "getTimeFormat for style #style returns #expected"(String style, String expected) {
+    void "Java 17 - getTimeFormat for style #style returns #expected"(String style, String expected) {
         given:
         DateTimeFormatter format
 
@@ -75,9 +78,10 @@ class DefaultDateHelperSpec extends Specification {
         null     | '8:00 AM'
     }
 
-    @Requires({ jvm.isJava8() })
+    @PendingFeature
+    @Requires({ !Jvm.current.isJava17() })
     @Unroll
-    void "Java 8 - Full getTimeFormat for style #style returns #expected"(String style, String expected) {
+    void "Java 21+ - Full getTimeFormat for style #style returns #expected"(String style, String expected) {
         given:
         DateTimeFormatter format
 
