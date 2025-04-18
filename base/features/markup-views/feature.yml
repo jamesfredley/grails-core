@@ -1,9 +1,9 @@
 description: Adds support for Markup Views to the project
 build:
     plugins:
-        - org.grails.plugins.views-markup
+        - org.apache.grails.gradle.grails-markup 
 dependencies:
     - scope: build
-      coords: "org.grails.plugins:views-gradle"
+      coords: "org.apache.grails.gradle:grails-markup"
     - scope: implementation
-      coords: "org.grails.plugins:views-markup"
+      coords: "org.apache.grails:grails-views-markup"

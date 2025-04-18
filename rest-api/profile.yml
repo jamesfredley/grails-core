@@ -8,43 +8,43 @@ features:
 build:
     plugins:
         - war
-        - org.grails.grails-web
+        - org.apache.grails.gradle.grails-web
     excludes:
-        - org.grails.grails-core
+        - org.apache.grails.gradle.grails-app
 dependencies:
     - scope: implementation
       coords: "org.springframework.boot:spring-boot-starter-actuator"
     - scope: implementation
       coords: "org.springframework.boot:spring-boot-starter-tomcat"
     - scope: implementation
-      coords: "org.grails:grails-plugin-url-mappings"
+      coords: "org.apache.grails:grails-url-mappings"
     - scope: implementation
-      coords: "org.grails:grails-plugin-rest"
+      coords: "org.apache.grails:grails-rest-transforms "
     - scope: implementation
-      coords: "org.grails:grails-plugin-codecs"
+      coords: "org.apache.grails:grails-codecs"
     - scope: implementation
-      coords: "org.grails:grails-plugin-interceptors"
+      coords: "org.apache.grails:grails-interceptors"
     - scope: implementation
-      coords: "org.grails:grails-plugin-services"
+      coords: "org.apache.grails:grails-services"
     - scope: implementation
-      coords: "org.grails:grails-plugin-datasource"
+      coords: "org.apache.grails:grails-datasource"
     - scope: implementation
-      coords: "org.grails:grails-plugin-databinding"
+      coords: "org.apache.grails:grails-databinding"
     - scope: implementation
-      coords: "org.grails:grails-web-boot"
+      coords: "org.apache.grails:grails-web-boot"
     - scope: implementation
-      coords: "org.grails:grails-logging"
+      coords: "org.apache.grails:grails-logging"
     - scope: implementation
-      coords: "org.grails.plugins:cache"
+      coords: "org.apache.grails:grails-cache"
     - scope: implementation
-      coords: "org.grails.plugins:async"
+      coords: "org.apache.grails:grails-async"
     - scope: testImplementation
       coords: "io.micronaut:micronaut-http-client"
     - scope: testImplementation
-      coords: "org.grails:grails-web-testing-support"
+      coords: "org.apache.grails:grails-testing-support-web"
     - scope: testImplementation
-      coords: "org.grails:grails-gorm-testing-support"
+      coords: "org.apache.grails:grails-testing-support-datamapping"
     - scope: testImplementation
-      coords: "org.grails:views-json-testing-support"
+      coords: "org.apache.grails: grails-testing-support-views-gson"
     - scope: testImplementation
       coords: "org.hibernate.validator:hibernate-validator"

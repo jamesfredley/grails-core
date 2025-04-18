@@ -4,7 +4,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath platform("org.grails:grails-bom:$grailsVersion")
+        classpath platform("org.apache.grails:grails-bom:$grailsVersion")
 @buildDependencies@
     }
 }
@@ -20,9 +20,9 @@ repositories {
 }
 
 dependencies {
-    implementation platform("org.grails:grails-bom:$grailsVersion")
+    implementation platform("org.apache.grails:grails-bom:$grailsVersion")
     developmentOnly("org.springframework.boot:spring-boot-devtools")
-    integrationTestImplementation testFixtures("org.grails.plugins:geb")
+    integrationTestImplementation testFixtures("org.apache.grails:grails-geb")
 @dependencies@
 }
 

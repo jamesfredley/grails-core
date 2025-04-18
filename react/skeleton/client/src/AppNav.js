@@ -29,7 +29,7 @@ const AppNav = ({serverInfo, clientInfo, collapse, toggle}) => {
                         <DropdownMenu right tag='ul'>
                             <NavDropdownItem>Environment: {environment}</NavDropdownItem>
                             <NavDropdownItem>App
-                                profile: {appprofile ? appprofile.replace('org.grails.profiles:', '') : null}</NavDropdownItem>
+                                profile: {appprofile ? appprofile.replace('org.apache.grails.profiles:', '') : null}</NavDropdownItem>
                             <NavDropdownItem>Server version: {appversion}</NavDropdownItem>
                             <NavDropdownItem>Client version: {clientInfo ? clientInfo.version : null}</NavDropdownItem>
                             <DropdownItem tag='li' divider></DropdownItem>

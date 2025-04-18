@@ -59,7 +59,7 @@ try {
         console.log """* Definition:
 
 dependencies {
-    compile "org.grails.plugins:${pluginName}:${latestVersion}"    
+    compile "org.apache.grails.profiles:${pluginName}:${latestVersion}"    
 }
 
 """

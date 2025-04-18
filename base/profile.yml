@@ -12,10 +12,10 @@ build:
     plugins:
         - eclipse
         - idea
-        - org.grails.grails-core
+        - org.apache.grails.gradle.grails-app
 dependencies:
     - scope: build
-      coords: "org.grails:grails-gradle-plugin"
+      coords: "org.apache.grails:grails-gradle-plugins"
     - scope: developmentOnly
       coords: "org.webjars.npm:bootstrap"
     - scope: developmentOnly
@@ -31,8 +31,8 @@ dependencies:
     - scope: implementation
       coords: "org.springframework.boot:spring-boot-starter"
     - scope: implementation
-      coords: "org.grails:grails-core"
+      coords: "org.apache.grails.gradle:grails-app"
     - scope: testImplementation
-      coords: "org.grails:grails-gorm-testing-support"
+      coords: "org.apache.grails:grails-testing-support-datamapping"
     - scope: console
-      coords: "org.grails:grails-console"
+      coords: "org.apache.grails:grails-console"

@@ -3,9 +3,9 @@ build:
     plugins:
         - org.grails.grails-plugin
     excludes:
-        - org.grails.grails-core
+        - org.apache.grails.gradle.grails-app
 dependencies:
     - scope: implementation
-      coords: "org.grails:grails-core"
+      coords: "org.apache.grails.gradle:grails-app"
 
 

@@ -24,10 +24,10 @@ build:
         - "https://plugins.gradle.org/m2/"
     plugins:
         - war
-        - org.grails.grails-web
+        - org.apache.grails.gradle.grails-web
         - com.github.node-gradle.node
     excludes:
-        - org.grails.grails-core
+        - org.apache.grails.gradle.grails-app
 dependencies:
     - scope: build
       coords: "com.github.node-gradle:gradle-node-plugin:2.2.0"
