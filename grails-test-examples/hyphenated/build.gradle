@@ -33,7 +33,7 @@ dependencies {
     implementation 'org.apache.grails.web:grails-web-boot'
 
     implementation 'org.apache.grails:grails-data-hibernate5'
-    runtimeOnly "org.hibernate:hibernate-ehcache:$hibernateVersion", {
+    runtimeOnly "org.hibernate:hibernate-ehcache:$hibernate5Version", {
         // exclude javax variant of hibernate-core
         exclude group: 'org.hibernate', module: 'hibernate-core'
     }
