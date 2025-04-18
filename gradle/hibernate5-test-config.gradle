@@ -4,6 +4,10 @@ dependencies {
 
 tasks.withType(Test).configureEach {
     onlyIf {
+        if (project.hasProperty('onlyFunctionalTests')) {
+            return false
+        }
+
         if (project.hasProperty('skipHibernate5Tests')) {
             return false
         }
@@ -12,7 +16,7 @@ tasks.withType(Test).configureEach {
             return false
         }
 
-        if (project.hasProperty('onlyDatastoreTests')) {
+        if (project.hasProperty('onlyCoreTests')) {
             return false
         }
 

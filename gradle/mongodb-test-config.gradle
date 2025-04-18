@@ -8,6 +8,10 @@ tasks.named('compileTestGroovy', GroovyCompile) {
 
 tasks.withType(Test).configureEach {
     onlyIf {
+        if (project.hasProperty('onlyFunctionalTests')) {
+            return false
+        }
+
         if (project.hasProperty('skipMongodbTests')) {
             return false
         }
@@ -16,7 +20,7 @@ tasks.withType(Test).configureEach {
             return false
         }
 
-        if (project.hasProperty('onlyDatastoreTests')) {
+        if (project.hasProperty('onlyCoreTests')) {
             return false
         }
 

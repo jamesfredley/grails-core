@@ -18,7 +18,7 @@ tasks.withType(Test).configureEach {
             return false
         }
 
-        if (project.hasProperty('skipDatastoreTests')) {
+        if (project.hasProperty('skipNonFunctionalTests')) {
             return false
         }
 

@@ -81,7 +81,7 @@ jobs:
           develocity-access-key: ${{ secrets.GRAILS_DEVELOCITY_ACCESS_KEY  }}
       - name: "🔨 Build project"
         id: build
-        run: ./gradlew build assemble groovydoc -PskipFunctionalTests --continue --stacktrace
+        run: ./gradlew build assemble groovydoc -PskipFunctionalTests --continue --stacktrace -PskipFunctionalTests
   functional:
     name: "Functional Tests"
     needs: skip_check
@@ -105,7 +105,66 @@ jobs:
         with:
           develocity-access-key: ${{ secrets.GRAILS_DEVELOCITY_ACCESS_KEY  }}
       - name: "🔨 Functional Tests"
-        run: ./gradlew build -PonlyFunctionalTests --stacktrace
+        run: ./gradlew build -PonlyFunctionalTests --stacktrace -PskipMongodbTests -PskipHibernate5Tests
+  mongodbFunctional:
+    name: "Mongodb Functional Tests"
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        java: [ 17, 21 ]
+        mongodb-version: [ '5', '6', '7', '8' ]
+    services:
+      mongodb:
+        image: mongo:${{ matrix.mongodb-version }}
+        ports:
+          - 27017:27017
+        options: >-
+          --health-cmd "mongosh --eval 'db.adminCommand(\"ping\")'"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - name: "📥 Checkout the repository"
+        uses: actions/checkout@v4
+      - name: "☕️ Setup JDK"
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ matrix.java }}
+          distribution: liberica
+      - name: "🐘 Setup Gradle"
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          develocity-access-key: ${{ secrets.GRAILS_DEVELOCITY_ACCESS_KEY }}
+      - name: "🔨 Run Build"
+        id: build
+        env:
+          GITHUB_MAVEN_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
+        run: ./gradlew cleanTest build --continue -PonlyMongodbTests
+  hibernate5Functional:
+    name: "Hibernate5 Functional Tests"
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        java: [ 17, 21 ]
+    steps:
+      - name: "📥 Checkout the repository"
+        uses: actions/checkout@v4
+      - name: "☕️ Setup JDK"
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ matrix.java }}
+          distribution: liberica
+      - name: "🐘 Setup Gradle"
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          develocity-access-key: ${{ secrets.GRAILS_DEVELOCITY_ACCESS_KEY }}
+      - name: "🔨 Run Build"
+        id: build
+        env:
+          GITHUB_MAVEN_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
+        run: ./gradlew cleanTest build --continue -PonlyHibernate5Tests
   publishGradle:
     if: github.repository_owner == 'apache' && github.event_name == 'push' && needs.skip_check.outputs.found_skip_publish != 'true'
     needs: [ skip_check, buildGradle ]
@@ -136,7 +195,7 @@ jobs:
           ./gradlew publish -Dorg.gradle.internal.publish.checksums.insecure=true
   publish:
     if: github.repository_owner == 'apache' && github.event_name == 'push' && needs.skip_check.outputs.found_skip_publish != 'true'
-    needs: [ skip_check, publishGradle, build, functional]
+    needs: [ skip_check, publishGradle, build, functional, hibernate5Functional, mongodbFunctional]
     permissions:
       contents: read # limit to read access
     runs-on: ubuntu-latest

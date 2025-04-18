@@ -1,9 +1,8 @@
 # Various properties that control which tests run
-* onlyDatastoreTests
 * onlyFunctionalTests
 * onlyHibernate5Tests
 * onlyMongodbTests
-* skipDatastoreTests
+* skipNonFunctionalTests
 * skipFunctionalTests
 * skipHibernate5Tests
 * skipMongodbTests
