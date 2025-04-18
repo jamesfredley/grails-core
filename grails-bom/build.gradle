@@ -42,7 +42,7 @@ dependencies {
         }
 
         for (Project subproject : rootProject.subprojects) {
-            if (subproject.path == project.path || subproject.name in testProjects || subproject.name == 'grails-doc') {
+            if (subproject.path == project.path || subproject.name in testProjects || subproject.name in docProjects) {
                 continue // ignore self & test projects
             }
 
@@ -56,7 +56,6 @@ dependencies {
         api "org.apache.grails:grails-docs-core:${projectVersion}"
     }
 }
-
 
 configurations.register('bomDependencies').configure {
     it.canBeResolved = true

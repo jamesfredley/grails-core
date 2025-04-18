@@ -16,6 +16,7 @@ ext {
             'grails-test-examples'
     ]
     testProjects = [ /* Will be populated by subprojects loop below */]
+    docProjects = [ /* Will be populated by subprojects loop below */]
 }
 
 allprojects {
@@ -34,6 +35,10 @@ subprojects {
         if (name.startsWith(testPrefix)) {
             rootProject.ext['testProjects'] << name
         }
+    }
+
+    if(name.startsWith('grails-doc') || name.startsWith('grails-data-doc') || name.endsWith('-docs')) {
+        rootProject.ext['docProjects'] << name
     }
 
     configurations.configureEach {
