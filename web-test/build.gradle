@@ -25,14 +25,14 @@ clean.dependsOn(deleteProfileApps)
 task cloneGrailsWrapper {
   doLast() {
     def grgit = Grgit.clone(dir: "${buildDir}/grails-wrapper".toString(),
-            uri: "https://github.com/grails/grails-wrapper.git", refToCheckout: grailsWrapperBranch)
+            uri: "https://github.com/apache/grails-wrapper.git", refToCheckout: grailsWrapperBranch)
   }
 }
 
 task cloneGrailsCore {
   doLast() {
     def grgit = Grgit.clone(dir: "${buildDir}/grails-core".toString(),
-              uri: "https://github.com/grails/grails-core.git", refToCheckout: grailsCoreBranch)
+              uri: "https://github.com/apache/grails-core.git", refToCheckout: grailsCoreBranch)
   }
 }
 
