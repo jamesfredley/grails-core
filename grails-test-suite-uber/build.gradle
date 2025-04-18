@@ -26,9 +26,9 @@ dependencies {
     testImplementation 'org.apache.groovy:groovy'
     testImplementation 'org.apache.groovy:groovy-test-junit5'
     testImplementation 'org.junit.jupiter:junit-jupiter-api'
-    testImplementation 'org.apache.grails.data:grails-data-hibernate5-core'
+    testImplementation project(':grails-data-hibernate5-core')
     testImplementation project(':grails-gsp')
-    testImplementation 'org.apache.grails:grails-testing-support-datamapping', {
+    testImplementation project(':grails-testing-support-datamapping'), {
         // This is a local project dependency
         exclude module: 'grails-testing-support-core'
         exclude module: 'grails-rest-transforms'
@@ -38,7 +38,7 @@ dependencies {
         exclude module: 'grails-testing-support-core'
         exclude module: 'grails-rest-transforms'
     }
-    testImplementation 'org.apache.grails.data:grails-datamapping-validation'
+    testImplementation project(':grails-datamapping-validation')
     testImplementation 'org.objenesis:objenesis'
 
     testCompileOnly 'jakarta.servlet:jakarta.servlet-api'

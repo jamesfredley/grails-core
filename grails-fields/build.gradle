@@ -13,7 +13,6 @@ ext {
     pomTitle = 'Grails Fields Plugin'
     pomDescription = 'Customizable form-field rendering based on overrideable GSP template'
     pomDevelopers = [robfletcher: 'Rob Fletcher', graemerocher: 'Graeme Rocher', sdelamo: 'Sergio del Amo', sbglasius: 'Søren Berg Glasius']
-    testForked = true
 }
 
 dependencies {
@@ -27,8 +26,8 @@ dependencies {
     compileOnly 'org.springframework.boot:spring-boot-starter-logging'
 
     testImplementation 'org.apache.groovy:groovy-dateutil'
-    testImplementation 'org.apache.grails.data:grails-data-hibernate5-core'
-    testImplementation 'org.apache.grails:grails-testing-support-datamapping'
+    testImplementation project(':grails-data-hibernate5-core')
+    testImplementation project(':grails-testing-support-datamapping')
     testImplementation project(':grails-testing-support-web')
     testImplementation 'org.javassist:javassist:3.29.0-GA'
     testImplementation("org.jodd:jodd-wot:$joddWotVersion") {

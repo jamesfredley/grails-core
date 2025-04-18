@@ -9,14 +9,13 @@ group = 'org.apache.grails.views'
 ext {
     pomDescription = 'Grails Views Core'
     pomDevelopers = [ 'graemerocher': 'Graeme Rocher', 'puneetbehl': 'Puneet Behl' ]
-    testForked = true
 }
 
 dependencies {
     implementation platform(project(':grails-bom'))
 
     api 'com.github.ben-manes.caffeine:caffeine' // Used in public API
-    api 'org.apache.grails.data:grails-datastore-core' // MappingContext is used in public API
+    api project(':grails-datastore-core') // MappingContext is used in public API
     api project(':grails-mimetypes') // MimeUtility is used in public API
     api project(':grails-rest-transforms') // Used in public API
     api project(':grails-web-url-mappings') // LinkGenerator is used in public API
@@ -24,7 +23,7 @@ dependencies {
 
     implementation project(':grails-bootstrap')
     implementation project(':grails-core')
-    implementation 'org.apache.grails.data:grails-datamapping-support'
+    implementation project(':grails-datamapping-support')
     implementation 'org.slf4j:slf4j-api'
     implementation 'org.springframework:spring-beans'
 

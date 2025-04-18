@@ -16,10 +16,10 @@ dependencies {
     compileOnly 'jakarta.servlet:jakarta.servlet-api' // Provided
 
     implementation 'org.apache.commons:commons-lang3'
-    implementation 'org.apache.grails.data:grails-datamapping-core'
+    implementation project(':grails-datamapping-core')
 
     testImplementation 'jakarta.servlet:jakarta.servlet-api'
-    testImplementation 'org.apache.grails.data:grails-datastore-core'
+    testImplementation project(':grails-datastore-core')
     testImplementation 'org.spockframework:spock-core'
     testImplementation 'org.springframework:spring-context'
     testImplementation project(':grails-core')

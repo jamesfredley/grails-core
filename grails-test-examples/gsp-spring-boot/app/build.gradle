@@ -8,7 +8,7 @@ buildscript {
         }
     }
     dependencies {
-        classpath platform("org.apache.grails:grails-gradle-bom:$grailsVersion")
+        classpath platform("org.apache.grails:grails-gradle-bom:$projectVersion")
         classpath 'org.apache.grails:grails-gradle-plugins'
     }
 }

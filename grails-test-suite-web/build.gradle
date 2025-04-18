@@ -9,7 +9,7 @@ dependencies {
 
     implementation platform(project(':grails-bom'))
 
-    testImplementation 'org.apache.grails:grails-testing-support-datamapping', {
+    testImplementation project(':grails-testing-support-datamapping'), {
         // This is a local project dependency
         exclude group: 'org.apache.grails', module: 'grails-testing-support-core'
     }
@@ -18,7 +18,7 @@ dependencies {
     testImplementation project(':grails-interceptors')
     testImplementation project(':grails-rest-transforms')
     testImplementation 'org.apache.groovy:groovy'
-    testImplementation 'org.apache.grails:grails-testing-support-web', {
+    testImplementation project(':grails-testing-support-web'), {
         // This is a local project dependency
         exclude group: 'org.apache.grails', module: 'grails-testing-support-core'
         exclude group: 'org.apache.grails', module: 'grails-rest-transforms'

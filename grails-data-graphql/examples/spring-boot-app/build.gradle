@@ -3,7 +3,7 @@ buildscript {
 		mavenCentral()
 	}
 	dependencies {
-		classpath platform("org.apache.grails:grails-bom:$grailsVersion")
+		classpath platform("org.apache.grails:grails-bom:$projectVersion")
 		classpath("org.springframework.boot:spring-boot-gradle-plugin")
 	}
 }
@@ -14,11 +14,11 @@ apply plugin: 'org.springframework.boot'
 apply plugin: 'io.spring.dependency-management'
 
 dependencies {
-	implementation platform("org.apache.grails:grails-bom:$grailsVersion")
+	implementation platform(project(':grails-bom'))
 
 	implementation 'org.springframework.boot:spring-boot-starter'
 	implementation "org.springframework.boot:spring-boot-starter-web"
-	implementation project(':hibernate5-boot-plugin')
+	implementation project(':grails-data-hibernate5-boot-plugin')
 	implementation "org.hibernate:hibernate-core:$hibernateCoreVersion"
 	implementation "org.hibernate:hibernate-ehcache:$hibernateCoreVersion", {
 		// exclude javax variant of hibernate-core

@@ -18,7 +18,7 @@ dependencies {
     }
 
     api 'org.apache.groovy:groovy'
-    api('org.apache.grails.data:grails-datamapping-validation')
+    api project(':grails-datamapping-validation')
 
     compileOnly 'org.fusesource.jansi:jansi'
     testRuntimeOnly 'org.fusesource.jansi:jansi'

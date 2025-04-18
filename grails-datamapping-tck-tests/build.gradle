@@ -1,0 +1,47 @@
+plugins {
+    id 'groovy'
+    id 'java-library'
+}
+
+version = projectVersion
+group = 'org.apache.grails.data'
+
+ext {
+    pomTitle = 'Grails GORM'
+    pomDescription = 'GORM - Grails Data Access Framework'
+    pomDevelopers = [
+            'graemerocher': 'Graeme Rocher',
+            'jeffscottbrown': 'Jeff Brown',
+            'burtbeckwith': 'Burt Beckwith',
+            'jameskleeh': 'James Kleeh',
+            'puneetbehl': 'Puneet Behl',
+            'jamesfredley': 'James Fredley'
+    ]
+    pomPublishTestSources = true
+}
+
+dependencies {
+    implementation platform(project(':grails-bom'))
+    compileOnly project(':grails-datamapping-tck-base')
+    compileOnly project(':grails-datamapping-tck-domains')
+
+    implementation 'org.springframework:spring-tx', {
+        // impl: DataIntegrityViolationException
+    }
+    implementation 'org.spockframework:spock-core'
+
+    compileOnlyApi project(':grails-datamapping-support'), {
+        // ast transforms
+    }
+    compileOnly 'org.apache.groovy:groovy'
+
+    runtimeOnly 'org.apache.groovy:groovy-dateutil', {
+        // Groovy Date Utils Extensions are used in the tests
+    }
+}
+
+//compileGroovy.groovyOptions.fork = false
+//compileGroovy.groovyOptions.forkOptions.jvmArgs = ['-Xdebug', '-Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=5005']
+
+apply from: rootProject.layout.projectDirectory.file('gradle/java-config.gradle')
+apply from: rootProject.layout.projectDirectory.file('gradle/publish-config.gradle')

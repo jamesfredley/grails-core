@@ -1,6 +1,7 @@
 ext {
     grailsVersion = projectVersion
     isCiBuild = System.getenv().get('CI') as Boolean
+    excludeUnusedTransDeps = findProperty('excludeUnusedTransDeps')
 
     // Directories created during the build which are related
     // to turning the workspace root into a GRAILS_HOME

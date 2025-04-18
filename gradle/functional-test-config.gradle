@@ -10,6 +10,7 @@ configurations.configureEach {
             if (!(possibleProject.name in testProjects) && possibleProject.name != 'grails-doc') {
                 def artifactId = possibleProject.findProperty('pomArtifactId') ?: possibleProject.name
                 def substitutedArtifact = "$possibleProject.group:$artifactId"
+                //TODO: This does not handle test fixtures, see grails-test-examples-mongodb-base & grails-test-examples-mongodb-hibernate5 for project() workaround
                 if (possibleProject.name == 'grails-bom') {
                     substitute module(substitutedArtifact) using platform(project(':grails-bom'))
                 } else {

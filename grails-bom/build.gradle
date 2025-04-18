@@ -246,11 +246,7 @@ if (ext.isReleaseBuild && ext.isPublishedExternal) {
 }
 
 Closure determinePossibleKey = { Map.Entry<String, String> found, Map versions ->
-    //TODO: this isn't the correct way to do this, but with project mergers it may not matter
     String possibleKey = found.key.toString()
-            .replace('grails-datamapping', 'grails-data')
-            .replace('grails-datastore', 'grails-data')
-            .replace('grails-testing-support-datamapping', 'grails-data')
     while (possibleKey != null) {
         String propertyName = "${possibleKey}.version" as String
         if (versions.containsKey(propertyName)) {
@@ -276,7 +272,6 @@ Closure determinePropertyName = { String groupId, String artifactId, String vers
 
     Map<String, String> versions = bomDependencyVersions
 
-    //TODO: this isn't the correct way to do this, but with project mergers it may not matter
     String propertyName = determinePossibleKey(found, versions)
     if (!propertyName) {
         propertyName = determinePossibleKey(found, gradleBomDependencyVersions)

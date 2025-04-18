@@ -68,6 +68,34 @@ def publishedProjects = [
         'grails-web-mvc',
         'grails-web-taglib',
         'grails-web-url-mappings',
+        // datastore
+        'grails-datastore-async',
+        'grails-datastore-core',
+        'grails-datamapping-core',
+        'grails-datamapping-core-test',
+        'grails-datamapping-async',
+        //'grails-datamapping-rx',
+        'grails-datamapping-support',
+        'grails-datamapping-tck-tests',
+        'grails-datamapping-tck-base',
+        'grails-datamapping-tck-domains',
+        'grails-datamapping-validation',
+        'grails-datastore-web',
+        'grails-testing-support-datamapping',
+        // simple
+        'grails-data-simple',
+        // hibernate5
+        'grails-data-hibernate5-boot-plugin',
+        'grails-data-hibernate5-database-migration',
+        'grails-data-hibernate5-core',
+        'grails-data-hibernate5',
+        // mongodb
+        'grails-data-mongodb-boot-plugin',
+        'grails-data-mongodb-core',
+        'grails-data-mongodb-bson',
+        'grails-data-mongodb-ext',
+        'grails-data-mongodb',
+        'grails-data-mongodb-gson-templates'
 ]
 
 subprojects {

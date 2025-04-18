@@ -25,7 +25,7 @@ dependencies {
     // Used to surface versions for AsciiDoc
     implementation project(':grails-dependencies')
     implementation project(':grails-testing-support-core')
-    implementation 'org.apache.grails:grails-data-hibernate5'
+    implementation project(':grails-data-hibernate5')
     implementation 'org.apache.grails:grails-gradle-plugins'
 }
 
@@ -42,8 +42,8 @@ tasks.register('aggregateGroovydoc', Groovydoc) {
     classpath = configurations.documentation
     groovyClasspath = configurations.documentation
     destinationDir = rootProject.layout.buildDirectory.dir('docs/api').get().asFile
-    windowTitle = "Grails $grailsVersion"
-    docTitle = "Grails $grailsVersion"
+    windowTitle = "Grails $projectVersion"
+    docTitle = "Grails $projectVersion"
     access = GroovydocAccess.PROTECTED
     includeAuthor = true
     includeMainForScripts = false
@@ -170,7 +170,7 @@ tasks.register('publishGuide', grails.doc.gradle.PublishGuide) {
                 'version'                  : projectVersion,
                 'gormVersion'              : gormVersion,
                 'cacheExampleSourceDir'    : rootProject.layout.projectDirectory.dir('grails-test-examples/cache').asFile,
-                'hibernateVersion'         : getVersion("hibernate-core-jakarta"),
+                'hibernate5Version'        : getVersion("hibernate-core-jakarta"),
                 'spockVersion'             : getVersion("spock-core"),
                 'testingSupportVersion'    : getVersion("grails-testing-support-core"),
                 'grailsGradlePluginVersion': getVersion("grails-gradle-plugins"),

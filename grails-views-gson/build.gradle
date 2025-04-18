@@ -10,7 +10,6 @@ group = 'org.apache.grails'
 ext {
     pomDescription = 'Grails JSON Views'
     pomDevelopers = [ 'graemerocher': 'Graeme Rocher', 'puneetbehl': 'Puneet Behl' ]
-    testForked = true
 }
 
 dependencies {
@@ -26,8 +25,8 @@ dependencies {
 
     testImplementation project(':grails-testing-support-views-gson')
     testImplementation project(':grails-testing-support-core')
-    testImplementation 'org.apache.grails:grails-testing-support-datamapping'
-    testImplementation 'org.apache.grails.data:grails-data-hibernate5-core'
+    testImplementation project(':grails-testing-support-datamapping')
+    testImplementation project(':grails-data-hibernate5-core')
     testImplementation 'org.spockframework:spock-core'
     testImplementation 'com.fasterxml.jackson.core:jackson-databind'
     testImplementation 'jakarta.servlet:jakarta.servlet-api'

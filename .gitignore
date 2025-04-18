@@ -44,6 +44,7 @@ classes
 dist/
 idea
 output/
+prodDb.mv.db
 **/src/en/ref/Dependency Versions/Grails BOM.adoc
 stacktrace.log
 target

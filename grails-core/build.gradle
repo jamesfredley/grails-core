@@ -32,7 +32,7 @@ dependencies {
     api project(':grails-bootstrap')
     api project(':grails-spring')
 
-    api 'org.apache.grails.data:grails-datastore-core'
+    api project(':grails-datastore-core')
 
     testImplementation 'org.springframework:spring-jdbc'
 

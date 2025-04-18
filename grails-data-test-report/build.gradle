@@ -1,0 +1,27 @@
+plugins {
+    id 'java'
+    id 'test-report-aggregation'
+}
+
+dependencies {
+    testReportAggregation project(':grails-datastore-async')
+    testReportAggregation project(':grails-datastore-core')
+    testReportAggregation project(':grails-datamapping-core')
+    testReportAggregation project(':grails-datamapping-async')
+    testReportAggregation project(':grails-datamapping-support')
+    testReportAggregation project(':grails-datamapping-core-test')
+    testReportAggregation project(':grails-datamapping-validation')
+    testReportAggregation project(':grails-datastore-web')
+}
+
+reporting {
+    reports {
+        testAggregateTestReport(AggregateTestReport) {
+            testSuiteName = 'test'
+        }
+    }
+}
+
+tasks.named('check') {
+    dependsOn tasks.named('testAggregateTestReport', TestReport)
+}
