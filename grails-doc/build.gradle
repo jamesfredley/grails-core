@@ -42,8 +42,8 @@ tasks.register('aggregateGroovydoc', Groovydoc) {
     classpath = configurations.documentation
     groovyClasspath = configurations.documentation
     destinationDir = rootProject.layout.buildDirectory.dir('docs/api').get().asFile
-    windowTitle = "Grails $grailsVersion"
-    docTitle = "Grails $grailsVersion"
+    windowTitle = "Grails $projectVersion"
+    docTitle = "Grails $projectVersion"
     access = GroovydocAccess.PROTECTED
     includeAuthor = true
     includeMainForScripts = false

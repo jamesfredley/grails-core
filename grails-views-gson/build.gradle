@@ -10,7 +10,6 @@ group = 'org.apache.grails'
 ext {
     pomDescription = 'Grails JSON Views'
     pomDevelopers = [ 'graemerocher': 'Graeme Rocher', 'puneetbehl': 'Puneet Behl' ]
-    testForked = true
 }
 
 dependencies {

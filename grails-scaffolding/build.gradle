@@ -12,7 +12,6 @@ ext {
     pomTitle = 'Grails Scaffolding Plugin'
     pomDescription = 'Provides scaffolding for Grails applications'
     pomDevelopers = [puneetbehl: 'Puneet Behl']
-    testForked = true
 }
 
 dependencies {

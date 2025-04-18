@@ -42,7 +42,7 @@ dependencies {
         }
 
         for (Project subproject : rootProject.subprojects) {
-            if (subproject.path == project.path || subproject.name in testProjects || subproject.name == 'grails-doc') {
+            if (subproject.path == project.path || subproject.name in testProjects || subproject.name in docProjects) {
                 continue // ignore self & test projects
             }
 
@@ -56,7 +56,6 @@ dependencies {
         api "org.apache.grails:grails-docs-core:${projectVersion}"
     }
 }
-
 
 configurations.register('bomDependencies').configure {
     it.canBeResolved = true
@@ -276,7 +275,6 @@ Closure determinePropertyName = { String groupId, String artifactId, String vers
 
     Map<String, String> versions = bomDependencyVersions
 
-    //TODO: this isn't the correct way to do this, but with project mergers it may not matter
     String propertyName = determinePossibleKey(found, versions)
     if (!propertyName) {
         propertyName = determinePossibleKey(found, gradleBomDependencyVersions)
