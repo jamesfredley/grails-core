@@ -36,6 +36,7 @@ def publishedProjects = [
         'grails-events-spring',
         'grails-events-transforms',
         'grails-fields',
+        'grails-geb',
         'grails-gsp',
         'grails-gsp-core',
         'grails-i18n',

@@ -10,10 +10,24 @@ configurations.configureEach {
             if (!(possibleProject.name in testProjects) && !(possibleProject.name in docProjects)) {
                 def artifactId = possibleProject.findProperty('pomArtifactId') ?: possibleProject.name
                 def substitutedArtifact = "$possibleProject.group:$artifactId"
-                //TODO: This does not handle test fixtures, see grails-test-examples-mongodb-base & grails-test-examples-mongodb-hibernate5 for project() workaround
+                //TODO: This does not handle libraries that are both test fixtures & a libraries like grails-data-mongodb,
+                // see grails-test-examples-mongodb-base, & grails-test-examples-mongodb-hibernate5 for project() workaround
                 if (possibleProject.name == 'grails-bom') {
                     substitute module(substitutedArtifact) using platform(project(':grails-bom'))
-                } else {
+                }
+                else if(possibleProject.name == 'grails-geb') {
+                    def selector = it.variant(module(substitutedArtifact)) { VariantSelectionDetails details ->
+                        details.capabilities { ModuleDependencyCapabilitiesHandler handler ->
+                            handler.requireCapability("${substitutedArtifact}-test-fixtures" as String)
+                        }
+                    }
+
+                    def replacement = it.variant(project(":$possibleProject.name")) { v ->
+                        v.capabilities { it.requireCapability("${substitutedArtifact}-test-fixtures") }
+                    }
+                    substitute selector using replacement
+                }
+                else {
                     substitute module(substitutedArtifact) using project(":$possibleProject.name")
                 }
             }

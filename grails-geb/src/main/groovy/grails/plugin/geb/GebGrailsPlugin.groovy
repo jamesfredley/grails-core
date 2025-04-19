@@ -12,9 +12,7 @@ class GebGrailsPlugin extends Plugin {
     def title = "Grails Geb Plugin"
     def author = "Graeme Rocher"
     def authorEmail = ""
-    def description = '''\
-Plugin that adds Geb functional testing code generation features.
-'''
+    def description = 'Plugin that adds Geb functional testing code generation features.'
     def documentation = "https://plugins.grails.org/plugin/grails/geb"
     def license = "APACHE"
     def issueManagement = [system: "Github Issues", url: "https://github.com/grails/geb/issues"]

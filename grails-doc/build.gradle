@@ -8,6 +8,12 @@ plugins {
     id 'groovy'
 }
 
+// Make sure doc projects are evaluated last so they pick up all projects with documentation since they are dynamically
+// found by the aggregateGroovydoc task
+rootProject.subprojects
+        .findAll { !(it.name in testProjects) && it.name != project.name }
+        .each { project.evaluationDependsOn(it.path) }
+
 compileJava.options.release = javaVersion.toInteger()
 
 version = projectVersion
@@ -33,19 +39,41 @@ dependencies {
     implementation 'org.apache.grails:grails-gradle-plugins'
 }
 
+tasks.register('resolvedVersions') {
+    group = 'documentation'
+    description = 'Resolve Geb Version from the BOM'
+    ext.gebVersion = configurations.compileClasspath
+            .resolvedConfiguration
+            .resolvedArtifacts
+            .find {
+                it.moduleVersion.id.group == 'org.gebish' &&
+                        it.moduleVersion.id.name == 'geb-spock'
+            }.moduleVersion.id.version
+    logger.lifecycle('Resolved Geb version for Javadoc links: {}', gebVersion)
+}
+
 // this task needs to be here instead of the root since bom resolution only occurs when the java / groovy plugins are applied
 apply from: rootProject.layout.projectDirectory.file('gradle/docs-dependencies.gradle')
 tasks.register('aggregateGroovydoc', Groovydoc).configure { Groovydoc gdoc ->
     gdoc.group = 'documentation'
     def srcDirs = rootProject.subprojects
             .findAll { it.findProperty('includeInApiDocs') }
-            .collect { it.sourceSets.main.allSource.srcDirs }
+            .collectMany {
+                List possibleSources = [it.sourceSets.main.allSource.srcDirs]
+                if(sourceSets.findByName('testFixtures')) {
+                    possibleSources.add(it.sourceSets.testFixtures.allSource.srcDirs)
+                }
+                if(sourceSets.findByName('ast')) {
+                    possibleSources.add(it.sourceSets.ast.allSource.srcDirs)
+                }
+                possibleSources
+            }
             .flatten()
     gdoc.source(srcDirs)
     gdoc.exclude('META-INF/**')
     gdoc.classpath = configurations.documentation
     gdoc.groovyClasspath = configurations.documentation
-    gdoc.destinationDir = rootProject.layout.buildDirectory.dir('docs/api').get().asFile
+    gdoc.destinationDir = project.layout.buildDirectory.dir('docs/api').get().asFile
     gdoc.windowTitle = "Grails $projectVersion"
     gdoc.docTitle = "Grails $projectVersion"
     gdoc.access = GroovydocAccess.PROTECTED
@@ -54,8 +82,9 @@ tasks.register('aggregateGroovydoc', Groovydoc).configure { Groovydoc gdoc ->
     gdoc.processScripts = false
     gdoc.inputs.files(srcDirs)
     gdoc.outputs.dir(destinationDir)
+    gdoc.link("https://www.gebish.org/manual/${resolvedVersions.gebVersion}/api/", 'geb')
     gdoc.doLast {
-        delete(rootProject.layout.buildDirectory.dir('tmp'))
+        delete(project.layout.buildDirectory.dir('tmp'))
     }
 }
 

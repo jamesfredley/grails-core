@@ -11,4 +11,13 @@ tasks.named('groovydoc', Groovydoc).configure {
     includeAuthor = true
     includeMainForScripts = false
     processScripts = false
+
+    List possibleSources = [sourceSets.main.allSource]
+    if(sourceSets.findByName('testFixtures')) {
+        possibleSources.add(sourceSets.testFixtures.allSource)
+    }
+    if(sourceSets.findByName('ast')) {
+        possibleSources.add(sourceSets.ast.allSource)
+    }
+    source = files(possibleSources)
 }

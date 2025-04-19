@@ -44,6 +44,7 @@ include (
         'grails-domain-class',
         'grails-encoder',
         'grails-fields',
+        'grails-geb',
         'grails-i18n',
         'grails-interceptors',
         'grails-logging',
@@ -283,6 +284,7 @@ include (
         'grails-test-examples-app3',
         'grails-test-examples-datasources',
         'grails-test-examples-namespaces',
+        'grails-test-examples-geb',
         'grails-test-examples-gorm',
         'grails-test-examples-gsp-sitemesh3',
         'grails-test-examples-gsp-spring-boot',
@@ -307,6 +309,7 @@ project(':grails-test-examples-app1').projectDir = file('grails-test-examples/ap
 project(':grails-test-examples-app2').projectDir = file('grails-test-examples/app2')
 project(':grails-test-examples-app3').projectDir = file('grails-test-examples/app3')
 project(':grails-test-examples-datasources').projectDir = file('grails-test-examples/datasources')
+project(':grails-test-examples-geb').projectDir = file('grails-test-examples/geb')
 project(':grails-test-examples-namespaces').projectDir = file('grails-test-examples/namespaces')
 project(':grails-test-examples-gorm').projectDir = file('grails-test-examples/gorm')
 project(':grails-test-examples-gsp-sitemesh3').projectDir = file('grails-test-examples/gsp-sitemesh3')
