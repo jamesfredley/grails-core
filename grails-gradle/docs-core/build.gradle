@@ -51,11 +51,11 @@ sourceSets {
     }
 }
 
-tasks.register('docFilesJar', Jar) {
-    description = 'Package up files used for generating documentation.'
-    archiveVersion = null
-    archiveFileName = 'grails-doc-files.jar'
-    from 'src/main/template'
+tasks.register('docFilesJar', Jar).configure {Jar it ->
+    it.description = 'Package up files used for generating documentation.'
+    it.archiveVersion = null
+    it.archiveFileName = 'grails-doc-files.jar'
+    it.from 'src/main/template'
 }
 
 tasks.named('jar', Jar).configure { Jar it ->

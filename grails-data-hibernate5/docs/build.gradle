@@ -48,19 +48,19 @@ tasks.named('asciidoctor', AsciidoctorTask) {
     }
 
     attributes(
-            'experimental'  : 'true',
-            'compat-mode'   : 'true',
-            'toc'           : 'left',
-            'icons'         : 'font',
-            'reproducible'  : '',
-            'version'       : projectVersion,
-            'pluginVersion' : projectVersion,
-            'groupId'       : project.group,
-            'artifactId'    : project.name,
-            'sourcedir'     : "$project.rootDir",
-            'migrationPluginExamplesDir' : rootProject.layout.projectDirectory.dir('grails-database-migration/src/integration-test/resources').asFile.absolutePath,
-            'migrationPluginGroupId' : rootProject.findProject(':grails-data-hibernate5-database-migration').group,
-            'migrationPluginArtifactId' : rootProject.findProject(':grails-data-hibernate5-database-migration').name,
+            'experimental': 'true',
+            'compat-mode': 'true',
+            'toc': 'left',
+            'icons': 'font',
+            'reproducible': '',
+            'version': projectVersion,
+            'pluginVersion': projectVersion,
+            'groupId': project.group,
+            'artifactId': project.name,
+            'sourcedir': "$project.rootDir",
+            'migrationPluginExamplesDir': rootProject.layout.projectDirectory.dir('grails-database-migration/src/integration-test/resources').asFile.absolutePath,
+            'migrationPluginGroupId': rootProject.findProject(':grails-data-hibernate5-database-migration').group,
+            'migrationPluginArtifactId': rootProject.findProject(':grails-data-hibernate5-database-migration').name,
             'liquibaseHibernate5Version': liquibaseHibernate5Version
     )
     jvm {
@@ -68,18 +68,18 @@ tasks.named('asciidoctor', AsciidoctorTask) {
     }
 }
 
-tasks.register('copyDocs', Copy) {
-    group = 'documentation'
-    dependsOn('asciidoctor')
-    mustRunAfter('asciidoctor', 'groovydoc', 'copyResources')
-    finalizedBy('cleanAsciidoc')
-    from(layout.buildDirectory.dir('docs/asciidoc'))
-    into(layout.buildDirectory.dir('docs/manual'))
+tasks.register('copyDocs', Copy) { Copy it ->
+    it.group = 'documentation'
+    it.dependsOn('asciidoctor')
+    it.mustRunAfter('asciidoctor', 'groovydoc', 'copyResources')
+    it.finalizedBy('cleanAsciidoc')
+    it.from(layout.buildDirectory.dir('docs/asciidoc'))
+    it.into(layout.buildDirectory.dir('docs/manual'))
 }
 
-tasks.register('cleanAsciidoc', Delete) {
-    group = 'documentation'
-    delete(layout.buildDirectory.dir('docs/asciidoc'))
+tasks.register('cleanAsciidoc', Delete).configure { Delete it ->
+    it.group = 'documentation'
+    it.delete(layout.buildDirectory.dir('docs/asciidoc'))
 }
 
 tasks.withType(Groovydoc).configureEach {
@@ -103,26 +103,26 @@ tasks.withType(Groovydoc).configureEach {
     groovyClasspath += configurations.documentation
 }
 
-tasks.register('copyResources', Copy) {
-    group = 'documentation'
-    from(layout.projectDirectory.dir('src/docs/resources'))
-    into(layout.buildDirectory.dir('docs'))
+tasks.register('copyResources', Copy).configure { Copy it ->
+    it.group = 'documentation'
+    it.from(layout.projectDirectory.dir('src/docs/resources'))
+    it.into(layout.buildDirectory.dir('docs'))
 }
 
-tasks.register('docs') {
-    group = 'documentation'
-    dependsOn('asciidoctor', 'copyDocs', 'cleanAsciidoc', 'groovydoc', 'copyResources',
+tasks.register('docs').configure { Task docTask ->
+    docTask.group = 'documentation'
+    docTask.dependsOn('asciidoctor', 'copyDocs', 'cleanAsciidoc', 'groovydoc', 'copyResources',
             rootProject.subprojects
                     .findAll { it.findProperty('apiDocs') }
                     .collect { ":${it.name}:groovydoc" }
     )
-    finalizedBy('assembleDocsDist')
+    docTask.finalizedBy('assembleDocsDist')
 }
 
-tasks.register('assembleDocsDist', Zip) {
-    group = 'documentation'
-    dependsOn('docs', 'copyDocs')
-    from(layout.buildDirectory.dir('docs'))
-    archiveFileName = "${project.name}-${project.version}.zip"
-    destinationDirectory = project.layout.buildDirectory.dir('distributions')
+tasks.register('assembleDocsDist', Zip).configure { Zip it ->
+    it.group = 'documentation'
+    it.dependsOn('docs', 'copyDocs')
+    it.from(layout.buildDirectory.dir('docs'))
+    it.archiveFileName = "${project.name}-${project.version}.zip"
+    it.destinationDirectory = project.layout.buildDirectory.dir('distributions')
 }

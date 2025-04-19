@@ -1,3 +1,7 @@
+import grails.doc.AddReleaseDropDown
+import grails.doc.gradle.PublishGuide
+import grails.doc.gradle.PublishPdf
+
 plugins {
     id 'base'
     id 'org.asciidoctor.jvm.convert'
@@ -31,26 +35,26 @@ dependencies {
 
 // this task needs to be here instead of the root since bom resolution only occurs when the java / groovy plugins are applied
 apply from: rootProject.layout.projectDirectory.file('gradle/docs-dependencies.gradle')
-tasks.register('aggregateGroovydoc', Groovydoc) {
-    group = 'documentation'
+tasks.register('aggregateGroovydoc', Groovydoc).configure { Groovydoc gdoc ->
+    gdoc.group = 'documentation'
     def srcDirs = rootProject.subprojects
             .findAll { it.findProperty('includeInApiDocs') }
             .collect { it.sourceSets.main.allSource.srcDirs }
             .flatten()
-    source(srcDirs)
-    exclude('META-INF/**')
-    classpath = configurations.documentation
-    groovyClasspath = configurations.documentation
-    destinationDir = rootProject.layout.buildDirectory.dir('docs/api').get().asFile
-    windowTitle = "Grails $projectVersion"
-    docTitle = "Grails $projectVersion"
-    access = GroovydocAccess.PROTECTED
-    includeAuthor = true
-    includeMainForScripts = false
-    processScripts = false
-    inputs.files(srcDirs)
-    outputs.dir(destinationDir)
-    doLast {
+    gdoc.source(srcDirs)
+    gdoc.exclude('META-INF/**')
+    gdoc.classpath = configurations.documentation
+    gdoc.groovyClasspath = configurations.documentation
+    gdoc.destinationDir = rootProject.layout.buildDirectory.dir('docs/api').get().asFile
+    gdoc.windowTitle = "Grails $projectVersion"
+    gdoc.docTitle = "Grails $projectVersion"
+    gdoc.access = GroovydocAccess.PROTECTED
+    gdoc.includeAuthor = true
+    gdoc.includeMainForScripts = false
+    gdoc.processScripts = false
+    gdoc.inputs.files(srcDirs)
+    gdoc.outputs.dir(destinationDir)
+    gdoc.doLast {
         delete(rootProject.layout.buildDirectory.dir('tmp'))
     }
 }
@@ -86,22 +90,22 @@ tasks.withType(org.gradle.api.tasks.javadoc.Groovydoc) {
     }
 }
 
-tasks.register('dist', Zip) {
-    dependsOn 'docs'
-    from outputDir
+tasks.register('dist', Zip).configure { Zip it ->
+    it.dependsOn 'docs'
+    it.from outputDir
 }
 
-tasks.register('createReleaseDropdown', grails.doc.AddReleaseDropDown) {
-    dependsOn 'publishGuide', 'publishPdf'
-    inputFiles = [project.layout.buildDirectory.file('manual/guide/single.html').get().asFile, project.layout.buildDirectory.file('manual/index.html').get().asFile]
+tasks.register('createReleaseDropdown', AddReleaseDropDown).configure { AddReleaseDropDown it ->
+    it.dependsOn 'publishGuide', 'publishPdf'
+    def inputFiles = [project.layout.buildDirectory.file('manual/guide/single.html').get().asFile, project.layout.buildDirectory.file('manual/index.html').get().asFile]
 
-    inputs.files(inputFiles)
-    outputs.dir(outputDir)
+    it.inputs.files(inputFiles)
+    it.outputs.dir(outputDir)
 }
 
-tasks.register('resolveGroovyVersion') {
-    group = 'documentation'
-    description = 'Resolve Groovy Version from the BOM'
+tasks.register('resolveGroovyVersion').configure { Task versionTask ->
+    versionTask.group = 'documentation'
+    versionTask.description = 'Resolve Groovy Version from the BOM'
     ext.resolved = configurations.compileClasspath
             .resolvedConfiguration
             .resolvedArtifacts
@@ -121,11 +125,11 @@ String getVersion(String artifact) {
             }?.moduleVersion?.id?.version
 }
 
-tasks.register('publishGuide', grails.doc.gradle.PublishGuide) {
-    dependsOn(['generateBomDocumentation', 'aggregateGroovydoc', 'jar', 'resolveGroovyVersion', 'processTestResources', 'compileTestJava', 'compileTestGroovy', 'test'])
-    targetDir = project.layout.buildDirectory.dir('manual').get().asFile
+tasks.register('publishGuide', PublishGuide).configure { PublishGuide publish ->
+    publish.dependsOn(['generateBomDocumentation', 'aggregateGroovydoc', 'jar', 'resolveGroovyVersion', 'processTestResources', 'compileTestJava', 'compileTestGroovy', 'test'])
+    publish.targetDir = project.layout.buildDirectory.dir('manual').get().asFile
 
-    doFirst {
+    publish.doFirst {
         def searchDirs = rootProject.projectDir.listFiles().findAll {
             new File(it, 'src/main/groovy/org/grails').exists()
         }.collect {
@@ -185,20 +189,20 @@ tasks.register('publishGuide', grails.doc.gradle.PublishGuide) {
     }
 }
 
-tasks.register('generateBomDocumentation') {
-    dependsOn(':grails-bom:extractConstraints')
+tasks.register('generateBomDocumentation').configure { Task it ->
+    it.dependsOn(':grails-bom:extractConstraints')
 
-    description = 'Generates an AsciiDoc table listing Group, Artifact, and Version for project dependencies.'
-    group = 'Reporting'
+    it.description = 'Generates an AsciiDoc table listing Group, Artifact, and Version for project dependencies.'
+    it.group = 'Reporting'
 
-    inputs.files(project(':grails-bom').layout.projectDirectory.asFileTree)
-    outputs.file(project.layout.projectDirectory.file('src/en/ref/Dependency Versions/Grails BOM.adoc'))
+    it.inputs.files(project(':grails-bom').layout.projectDirectory.asFileTree)
+    it.outputs.file(project.layout.projectDirectory.file('src/en/ref/Dependency Versions/Grails BOM.adoc'))
 
-    doFirst {
+    it.doFirst {
         project.layout.projectDirectory.dir('src/en/ref/Dependency Versions').asFile.mkdirs()
     }
 
-    doLast {
+    it.doLast {
         def bomDocument = project.layout.projectDirectory.file('src/en/ref/Dependency Versions/Grails BOM.adoc').asFile
         bomDocument.withWriter { writer ->
             writer.writeLine '== Grails BOM Dependency Documentation'
@@ -213,13 +217,13 @@ tasks.register('generateBomDocumentation') {
     }
 }
 
-tasks.register('publishPdf', grails.doc.gradle.PublishPdf) {
-    dependsOn 'publishGuide'
-    outputDirectory = project.layout.buildDirectory.dir('manual')
+tasks.register('publishPdf', PublishPdf).configure { PublishPdf pTask ->
+    pTask.dependsOn 'publishGuide'
+    pTask.outputDirectory = project.layout.buildDirectory.dir('manual')
 }
 
-tasks.register('docs', Copy) {
-    dependsOn 'aggregateGroovydoc', 'publishGuide', 'createReleaseDropdown', 'publishPdf'
+tasks.register('docs', Copy).configure {Copy it ->
+    it.dependsOn 'aggregateGroovydoc', 'publishGuide', 'createReleaseDropdown', 'publishPdf'
 
     def manualDocsDir = publishGuide.targetDir
     def apiDocsDir = rootProject.layout.buildDirectory.dir('docs')
@@ -227,17 +231,17 @@ tasks.register('docs', Copy) {
     def modifiedPagesDir = createReleaseDropdown.outputDir
     def mergedDocsDir = project.layout.buildDirectory.dir('docs')
 
-    inputs.dir manualDocsDir
-    inputs.dir apiDocsDir
-    inputs.dir modifiedPagesDir
-    inputs.dir project.layout.projectDirectory.dir('src')
+    it.inputs.dir manualDocsDir
+    it.inputs.dir apiDocsDir
+    it.inputs.dir modifiedPagesDir
+    it.inputs.dir project.layout.projectDirectory.dir('src')
 
-    outputs.dir mergedDocsDir
+    it.outputs.dir mergedDocsDir
 
-    from manualDocsDir, apiDocsDir, modifiedPagesDir
-    into mergedDocsDir
+    it.from manualDocsDir, apiDocsDir, modifiedPagesDir
+    it.into mergedDocsDir
 
-    duplicatesStrategy = DuplicatesStrategy.INCLUDE
+    it.duplicatesStrategy = DuplicatesStrategy.INCLUDE
 }
 
 artifacts {

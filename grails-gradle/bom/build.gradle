@@ -41,7 +41,7 @@ dependencies {
     }
 }
 
-tasks.register('validateNoSnapshotDependencies') {
+tasks.register('validateNoSnapshotDependencies').configure {
     doLast {
         configurations.each { config ->
             config.allDependencies.each { dep ->

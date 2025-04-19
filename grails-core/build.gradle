@@ -59,13 +59,14 @@ dependencies {
     testImplementation 'org.objenesis:objenesis'
 }
 
-def writeProps = tasks.register('writeGrailsProperties', WriteProperties) {
-    outputFile = file("${buildDir}/grails.build.properties")
-    property('grails.version', project.version)
+TaskProvider<WriteProperties> writeProps = tasks.register('writeGrailsProperties', WriteProperties)
+writeProps.configure { WriteProperties it ->
+    it.destinationFile = project.layout.buildDirectory.file('grails.build.properties')
+    it.property('grails.version', project.version)
 }
 
-tasks.named('processResources').configure {
-    from writeProps
+tasks.named('processResources', ProcessResources).configure { ProcessResources it ->
+    it.from writeProps
 }
 
 apply {

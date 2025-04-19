@@ -20,15 +20,15 @@ configurations {
     }
 }
 
-tasks.register('resolveMongodbVersion') {
-    group = 'documentation'
-    description = 'Resolve MongoDB Version from the BOM'
+tasks.register('resolveMongodbVersion').configure { Task docTask ->
+    docTask.group = 'documentation'
+    docTask.description = 'Resolve MongoDB Version from the BOM'
     ext.resolved = configurations.compileClasspath
             .resolvedConfiguration
             .resolvedArtifacts
             .find {
                 it.moduleVersion.id.group == 'org.mongodb' &&
-                it.moduleVersion.id.name.contains('mongodb-driver-sync')
+                        it.moduleVersion.id.name.contains('mongodb-driver-sync')
             }.moduleVersion.id.version
     logger.lifecycle('Resolved MongoDB Driver version for Guide links: {}', resolved)
 }
@@ -67,68 +67,68 @@ tasks.named('asciidoctor', AsciidoctorTask) { AsciidoctorTask it ->
     it.sourceDir layout.projectDirectory.dir('src/docs')
     it.outputDir = layout.buildDirectory.dir('docs')
     it.attributes = [
-            'experimental'  : 'true',
-            'compat-mode'   : 'true',
-            'toc'           : 'left',
-            'icons'         : 'font',
-            'reproducible'  : '',
-            'version'       : projectVersion,
-            'pluginVersion' : projectVersion,
+            'experimental'      : 'true',
+            'compat-mode'       : 'true',
+            'toc'               : 'left',
+            'icons'             : 'font',
+            'reproducible'      : '',
+            'version'           : projectVersion,
+            'pluginVersion'     : projectVersion,
             'mongoDriverVersion': resolveMongodbVersion.resolved,
-            'sourcedir'     : "$project.rootDir"
+            'sourcedir'         : "$project.rootDir"
     ]
 }
 
-tasks.register('copyDocs', Copy) {
-    dependsOn('asciidoctor')
-    mustRunAfter('asciidoctor', 'groovydoc', 'copyResources')
-    finalizedBy('cleanAsciidoc')
-    from(layout.buildDirectory.dir('docs/asciidoc'))
-    into(layout.buildDirectory.dir('docs/manual'))
+tasks.register('copyDocs', Copy).configure { Copy it ->
+    it.dependsOn('asciidoctor')
+    it.mustRunAfter('asciidoctor', 'groovydoc', 'copyResources')
+    it.finalizedBy('cleanAsciidoc')
+    it.from(layout.buildDirectory.dir('docs/asciidoc'))
+    it.into(layout.buildDirectory.dir('docs/manual'))
 }
 
-tasks.register('cleanAsciidoc', Delete) {
-    delete(layout.buildDirectory.dir('docs/asciidoc'))
+tasks.register('cleanAsciidoc', Delete).configure { Delete it ->
+    it.delete(layout.buildDirectory.dir('docs/asciidoc'))
 }
 
-tasks.withType(Groovydoc).configureEach {
-    docTitle = "GORM for MongoDB - $project.version"
+tasks.withType(Groovydoc).configureEach { Groovydoc groovydoc ->
+    groovydoc.docTitle = "GORM for MongoDB - $project.version"
 
     def sourceFiles = coreProjects.collect {
         layout.projectDirectory.files("$it/src/main/groovy")
     }.sum()
 
     rootProject.subprojects
-        .findAll { it.findProperty('apiDocs') }
-        .each { sourceFiles += it.files('src/main/groovy') }
-
-    source = sourceFiles
-    destinationDir = layout.buildDirectory.dir('docs/api').get().asFile
-    access = GroovydocAccess.PROTECTED
-    processScripts = false
-    includeMainForScripts = false
-    includeAuthor = true
-    classpath = configurations.documentation
-    groovyClasspath += configurations.documentation
-}
-
-tasks.register('copyResources', Copy) {
-    from(layout.projectDirectory.dir('src/docs/resources'))
-    into(layout.buildDirectory.dir('docs'))
-}
-
-tasks.register('docs') {
-    dependsOn('asciidoctor', 'copyDocs', 'cleanAsciidoc', 'groovydoc', 'copyResources',
-        rootProject.subprojects
             .findAll { it.findProperty('apiDocs') }
-            .collect { ":${it.name}:groovydoc" }
-    )
-    finalizedBy('assembleDocsDist')
+            .each { sourceFiles += it.files('src/main/groovy') }
+
+    groovydoc.source = sourceFiles
+    groovydoc.destinationDir = layout.buildDirectory.dir('docs/api').get().asFile
+    groovydoc.access = GroovydocAccess.PROTECTED
+    groovydoc.processScripts = false
+    groovydoc.includeMainForScripts = false
+    groovydoc.includeAuthor = true
+    groovydoc.classpath = configurations.documentation
+    groovydoc.groovyClasspath += configurations.documentation
 }
 
-tasks.register('assembleDocsDist', Zip) {
-    dependsOn('docs', 'copyDocs')
-    from(layout.buildDirectory.dir('docs'))
-    archiveFileName = "${project.name}-${project.version}.zip"
-    destinationDirectory = project.layout.buildDirectory.dir('distributions')
+tasks.register('copyResources', Copy).configure { Copy it ->
+    it.from(layout.projectDirectory.dir('src/docs/resources'))
+    it.into(layout.buildDirectory.dir('docs'))
+}
+
+tasks.register('docs').configure { Task doc ->
+    doc.dependsOn('asciidoctor', 'copyDocs', 'cleanAsciidoc', 'groovydoc', 'copyResources',
+            rootProject.subprojects
+                    .findAll { it.findProperty('apiDocs') }
+                    .collect { ":${it.name}:groovydoc" }
+    )
+    doc.finalizedBy('assembleDocsDist')
+}
+
+tasks.register('assembleDocsDist', Zip).configure { Zip it ->
+    it.dependsOn('docs', 'copyDocs')
+    it.from(layout.buildDirectory.dir('docs'))
+    it.archiveFileName = "${project.name}-${project.version}.zip"
+    it.destinationDirectory = project.layout.buildDirectory.dir('distributions')
 }

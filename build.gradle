@@ -67,9 +67,12 @@ subprojects {
     apply from: rootProject.layout.projectDirectory.file('gradle/dependency-licenses.gradle')
 }
 
-tasks.register('clean', Delete) {
+tasks.register('clean', Delete).configure {
     group = 'build'
-    delete(layout.buildDirectory, homeBinDir, homeConfDir, homeDistDir, homeLibDir)
+
+    doFirst {
+        delete(layout.buildDirectory, homeBinDir, homeConfDir, homeDistDir, homeLibDir)
+    }
 }
 
 apply {
