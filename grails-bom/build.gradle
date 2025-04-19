@@ -184,14 +184,20 @@ tasks.register('extractConstraints').configure { Task it ->
         }
 
         List lines = []
-        bomConstraints.values().sort { a, b -> a.v1 <=> b.v1 ?: a.v2 <=> b.v2 }.each {
-            lines << "| ${it.v1} | ${it.v2} | ${it.v3} | ${it.v4 ? it.v4 == '${project.version}' ? '' : it.v4 : ''} | ${it.v5} "
+        bomConstraints.values().sort { a, b -> a.v1 <=> b.v1 ?: a.v2 <=> b.v2 }.withIndex().each {
+            int position = it.v2 + 1
+            String groupId = it.v1.v1
+            String artifactId = it.v1.v2
+            String artifactVersion = it.v1.v3
+            String propertyName = it.v1.v4
+            String bomName = it.v1.v5
+            lines << "| ${position} | ${groupId} | ${artifactId} | ${artifactVersion} | ${propertyName ? propertyName == '${project.version}' ? '' : propertyName : ''} | ${bomName} "
         }
 
         project.layout.buildDirectory.file('grails-bom-constraints.adoc').get().asFile.withWriter { writer ->
-            writer.writeLine '[cols="1,1,1,1,1", options="header"]'
+            writer.writeLine '[cols="1,1,1,1,1,1", options="header"]'
             writer.writeLine '|==='
-            writer.writeLine '| Group | Artifact | Version | Property Name | Source'
+            writer.writeLine '| Index | Group | Artifact | Version | Property Name | Source'
             lines.each { line ->
                 writer.writeLine(line)
             }
