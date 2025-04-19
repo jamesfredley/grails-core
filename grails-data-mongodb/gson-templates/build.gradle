@@ -49,11 +49,5 @@ tasks.named('classes') {
     dependsOn 'compileViews'
 }
 
-// There are no javadocs for this project.
-// This is a workaround as a javadoc jar is required for publishing.
-tasks.register('javadocJar', Jar) {
-    from 'src/templates'
-}
-
 apply from: rootProject.layout.projectDirectory.file('gradle/java-config.gradle')
 apply from: rootProject.layout.projectDirectory.file('gradle/publish-config.gradle')
