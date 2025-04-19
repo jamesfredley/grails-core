@@ -96,7 +96,25 @@ tasks.named('isolatedTestsTwo', Test).configure {
 }
 
 tasks.withType(Test).configureEach {
-    onlyIf { !project.hasProperty('onlyFunctionalTests') }
+    onlyIf {
+        if (project.hasProperty('onlyHibernate5Tests')) {
+            return false
+        }
+
+        if (project.hasProperty('onlyMongodbTests')) {
+            return false
+        }
+
+        if (project.hasProperty('skipCoreTests')) {
+            return false
+        }
+
+        return true
+    }
+
+    onlyIf {
+        !project.hasProperty('onlyFunctionalTests')
+    }
     useJUnitPlatform()
     maxParallelForks = configuredTestParallel
     forkEvery = isCiBuild ? 25 : 100
