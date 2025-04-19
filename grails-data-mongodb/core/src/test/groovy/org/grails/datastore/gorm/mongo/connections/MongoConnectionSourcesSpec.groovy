@@ -1,7 +1,6 @@
 package org.grails.datastore.gorm.mongo.connections
 
-import com.mongodb.client.MongoClient
-import org.bson.Document
+import org.apache.grails.testing.AutoStartedMongoSpec
 import org.grails.datastore.mapping.core.Session
 import org.grails.datastore.mapping.mongo.MongoDatastore
 import org.grails.datastore.mapping.mongo.config.MongoSettings
@@ -9,27 +8,31 @@ import org.grails.datastore.mapping.mongo.connections.MongoConnectionSources
 import org.grails.datastore.mapping.multitenancy.resolvers.SystemPropertyTenantResolver
 import spock.lang.AutoCleanup
 import spock.lang.Shared
-import spock.lang.Specification
 
 /**
  * Created by graemerocher on 15/07/2016.
  */
-class MongoConnectionSourcesSpec extends Specification {
+class MongoConnectionSourcesSpec extends AutoStartedMongoSpec {
 
     @Shared @AutoCleanup MongoDatastore datastore
+
+    @Override
+    boolean shouldInitializeDatastore() {
+        false
+    }
 
     void setupSpec() {
         Map config = [
                 "grails.gorm.connectionSourcesClass"          : MongoConnectionSources,
                 "grails.gorm.multiTenancy.mode"               :"DATABASE",
                 "grails.gorm.multiTenancy.tenantResolverClass":SystemPropertyTenantResolver,
-                (MongoSettings.SETTING_URL)                   : "mongodb://localhost/defaultDb",
+                (MongoSettings.SETTING_URL)                   : "mongodb://${mongoHost}:${mongoPort}/defaultDb" as String,
                 (MongoSettings.SETTING_CONNECTIONS): [
                         test1: [
-                                url: "mongodb://localhost/test1Db"
+                                url: "mongodb://${mongoHost}:${mongoPort}/test1Db" as String
                         ],
                         test2: [
-                                url: "mongodb://localhost/test2Db"
+                                url: "mongodb://${mongoHost}:${mongoPort}/test2Db" as String
                         ]
                 ]
         ]
@@ -77,7 +80,7 @@ class MongoConnectionSourcesSpec extends Specification {
         tenantIds == [test1:1, test2:0]
 
         when:"A data source is added and switched to at runtime"
-        datastore.connectionSources.addConnectionSource("test3",[url:"mongodb://localhost/test3Db"])
+        datastore.connectionSources.addConnectionSource("test3",[url:"mongodb://${mongoHost}:${mongoPort}/test3Db" as String])
         System.setProperty(SystemPropertyTenantResolver.PROPERTY_NAME, "test3")
 
         then:"The database is usable"

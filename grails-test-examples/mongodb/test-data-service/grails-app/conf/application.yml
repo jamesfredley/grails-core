@@ -65,4 +65,4 @@ grails:
 ---
 grails:
     mongodb:
-        url: mongodb://localhost/mydb
+        url: mongodb://${docker.mongodb.hostname:localhost}:${docker.mongodb.port:27017}/mydb

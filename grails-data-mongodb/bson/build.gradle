@@ -75,6 +75,7 @@ dependencies {
         // impl: JsonSlurper
     }
     testImplementation 'org.spockframework:spock-core'
+    testImplementation project(':grails-testing-support-mongodb')
 }
 
 apply from: rootProject.layout.projectDirectory.file('gradle/java-config.gradle')

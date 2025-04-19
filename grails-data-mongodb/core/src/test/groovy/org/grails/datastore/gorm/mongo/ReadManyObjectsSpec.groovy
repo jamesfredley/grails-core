@@ -4,12 +4,15 @@ import grails.gorm.tests.GormDatastoreSpec
 import grails.persistence.Entity
 import org.bson.Document
 import org.bson.types.ObjectId
+import spock.lang.Requires
 
 /**
  * @author Graeme Rocher
  */
+@Requires({
+    System.getenv().get('CI') as Boolean
+})
 class ReadManyObjectsSpec extends GormDatastoreSpec {
-
     void "Test that reading thousands of objects doesn't run out of memory"() {
         given:"A lot of test data"
             createData()

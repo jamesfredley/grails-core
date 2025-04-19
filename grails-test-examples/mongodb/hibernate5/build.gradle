@@ -37,7 +37,7 @@ dependencies {
     testImplementation testFixtures(project(':grails-data-mongodb'))
     testImplementation 'org.apache.grails.testing:grails-testing-support-core'
     testImplementation 'org.spockframework:spock-core'
-    testImplementation "org.testcontainers:mongodb"
+    testImplementation project(':grails-testing-support-mongodb')
 
     integrationTestImplementation testFixtures('org.apache.grails:grails-geb')
 }

@@ -19,7 +19,7 @@ class DocumentMappingSpec extends GormDatastoreSpec {
         Document doc = CustomMapping.collection.find().first()
         then:
         CustomMapping.collection.namespace.collectionName == 'mycoll'
-        CustomMapping.collection.namespace.databaseName == 'mydb'
+        CustomMapping.collection.namespace.databaseName == 'myDb'
         doc.get("my_name") == "test"
         doc.get("loc").inspect() == '[\'type\':\'Point\', \'coordinates\':[10.0, 15.0]]'
 
@@ -38,7 +38,7 @@ class CustomMapping implements MongoEntity<CustomMapping> {
 
     static mapping = document {
         collection "mycoll"
-        database "mydb"
+        database "myDb"
         name property {
             reference false
             attr "my_name"

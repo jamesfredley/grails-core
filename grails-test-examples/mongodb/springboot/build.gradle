@@ -8,6 +8,7 @@ dependencies {
     implementation 'org.apache.grails:grails-data-mongodb-spring-boot'
     implementation 'org.apache.groovy:groovy'
     implementation 'org.springframework.boot:spring-boot-starter-web'
+    testImplementation project(':grails-testing-support-mongodb')
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.spockframework:spock-core'

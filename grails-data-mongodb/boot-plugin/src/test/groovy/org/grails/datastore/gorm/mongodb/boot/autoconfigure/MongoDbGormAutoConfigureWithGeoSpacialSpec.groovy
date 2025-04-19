@@ -2,6 +2,8 @@ package org.grails.datastore.gorm.mongodb.boot.autoconfigure
 
 import grails.gorm.annotation.Entity
 import grails.mongodb.geo.Point
+import org.apache.grails.testing.AbstractMongoGrailsExtension
+import org.apache.grails.testing.AutoStartedMongoSpec
 import org.bson.types.ObjectId
 import org.springframework.boot.autoconfigure.AutoConfigurationPackages
 import org.springframework.boot.autoconfigure.context.PropertyPlaceholderAutoConfiguration
@@ -14,9 +16,19 @@ import spock.lang.Specification
 /**
  * Created by graemerocher on 20/03/14.
  */
-class MongoDbGormAutoConfigureWithGeoSpacialSpec extends Specification{
+class MongoDbGormAutoConfigureWithGeoSpacialSpec extends AutoStartedMongoSpec {
 
     protected AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
+
+    @Override
+    boolean shouldInitializeDatastore() {
+        false
+    }
+
+    void setupSpec() {
+        System.setProperty('spring.data.mongodb.host', dbContainer.getHost())
+        System.setProperty('spring.data.mongodb.port', dbContainer.getMappedPort(AbstractMongoGrailsExtension.DEFAULT_MONGO_PORT) as String)
+    }
 
     void cleanup() {
         context.close()

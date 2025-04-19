@@ -3,30 +3,36 @@ package org.grails.datastore.gorm.mongo.connections
 import grails.gorm.MultiTenant
 import grails.gorm.annotation.Entity
 import grails.mongodb.MongoEntity
+import org.apache.grails.testing.AutoStartedMongoSpec
 import org.bson.types.ObjectId
 import org.grails.datastore.gorm.mongo.City
 import org.grails.datastore.mapping.core.Session
 import org.grails.datastore.mapping.mongo.MongoDatastore
 import org.grails.datastore.mapping.mongo.config.MongoSettings
 import org.grails.datastore.mapping.multitenancy.AllTenantsResolver
-import org.grails.datastore.mapping.multitenancy.exceptions.TenantNotFoundException
 import org.grails.datastore.mapping.multitenancy.resolvers.SystemPropertyTenantResolver
 import spock.lang.AutoCleanup
 import spock.lang.Shared
-import spock.lang.Specification
-import static com.mongodb.client.model.Filters.*;
+
+import static com.mongodb.client.model.Filters.*
+
 /**
  * Created by graemerocher on 13/07/2016.
  */
-class MultiTenancySpec extends Specification {
+class MultiTenancySpec extends AutoStartedMongoSpec {
 
     @Shared @AutoCleanup MongoDatastore datastore
+
+    @Override
+    boolean shouldInitializeDatastore() {
+        false
+    }
 
     void setupSpec() {
         Map config = [
                 "grails.gorm.multiTenancy.mode"               :"DISCRIMINATOR",
                 "grails.gorm.multiTenancy.tenantResolverClass": MyResolver,
-                (MongoSettings.SETTING_URL)                   : "mongodb://localhost/defaultDb",
+                (MongoSettings.SETTING_URL)                   : "mongodb://${mongoHost}:${mongoPort}/defaultDb" as String,
         ]
         this.datastore = new MongoDatastore(config, getDomainClasses() as Class[])
     }

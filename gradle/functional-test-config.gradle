@@ -50,6 +50,10 @@ tasks.withType(Test).configureEach {
             }
         }
 
+        if(project.hasProperty('onlyCoreTests')) {
+            return false
+        }
+
         return true
     }
     useJUnitPlatform()

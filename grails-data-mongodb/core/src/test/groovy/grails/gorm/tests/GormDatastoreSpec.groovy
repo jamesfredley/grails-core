@@ -13,23 +13,20 @@ import grails.gorm.tck.ClassWithOverloadedBeforeValidate
 import grails.gorm.tck.CommonTypes
 import grails.gorm.tck.Country
 import grails.gorm.tck.EnumThing
-import grails.gorm.tests.Face
 import grails.gorm.tck.Highway
 import grails.gorm.tck.Location
 import grails.gorm.tck.ModifyPerson
-import grails.gorm.tests.Nose
 import grails.gorm.tck.OptLockNotVersioned
 import grails.gorm.tck.OptLockVersioned
-import grails.gorm.tests.Person
 import grails.gorm.tck.PersonEvent
-import grails.gorm.tests.Pet
 import grails.gorm.tck.PetType
-import grails.gorm.tests.Plant
 import grails.gorm.tck.PlantCategory
 import grails.gorm.tck.Publication
 import grails.gorm.tck.Task
 import grails.gorm.tck.TestEntity
 import grails.gorm.validation.PersistentEntityValidator
+import groovy.util.logging.Slf4j
+import org.apache.grails.testing.AutoStartedMongoSpec
 import org.bson.Document
 import org.grails.datastore.bson.query.BsonQuery
 import org.grails.datastore.gorm.GormEnhancer
@@ -50,12 +47,12 @@ import org.springframework.context.support.StaticMessageSource
 import org.springframework.validation.Validator
 import spock.lang.AutoCleanup
 import spock.lang.Shared
-import spock.lang.Specification
 
 /**
  * Created by graemerocher on 06/06/16.
  */
-abstract class GormDatastoreSpec extends Specification {
+@Slf4j
+abstract class GormDatastoreSpec extends AutoStartedMongoSpec {
 
     static final CURRENT_TEST_NAME = "current.gorm.test"
 
@@ -67,13 +64,29 @@ abstract class GormDatastoreSpec extends Specification {
     }
 
     Map getConfiguration() {
-        [:]
+        [
+            (MongoSettings.SETTING_HOST): mongoHost,
+            (MongoSettings.SETTING_PORT): mongoPort,
+        ]
     }
 
-    @Shared @AutoCleanup MongoDatastore mongoDatastore
-    @Shared MongoClient mongoClient
-    @Shared GrailsApplication grailsApplication
-    @Shared MappingContext mappingContext
+    @Override
+    boolean shouldInitializeDatastore() {
+        false
+    }
+
+    @Shared
+    @AutoCleanup
+    MongoDatastore mongoDatastore
+
+    @Shared
+    MongoClient mongoClient
+
+    @Shared
+    GrailsApplication grailsApplication
+
+    @Shared
+    MappingContext mappingContext
 
     AbstractMongoSession session
 
@@ -82,14 +95,12 @@ abstract class GormDatastoreSpec extends Specification {
         def ctx = new GenericApplicationContext()
         ctx.refresh()
 
-        def databaseName = System.getProperty(GormDatastoreSpec.CURRENT_TEST_NAME) ?: 'test'
-
-
-        def config = [(MongoSettings.SETTING_DATABASE_NAME): databaseName]
-        // disable decimal type support on Travis, since MongoDB 3.4 support doesn't exist there yet
-        if(System.getenv('TRAVIS')) {
-            config.put(MongoSettings.SETTING_DECIMAL_TYPE, false)
-        }
+        String databaseName = System.getProperty(GormDatastoreSpec.CURRENT_TEST_NAME) ?: 'test'
+        def config = [
+                (MongoSettings.SETTING_DATABASE_NAME): databaseName,
+                (MongoSettings.SETTING_HOST)         : mongoHost,
+                (MongoSettings.SETTING_PORT)         : mongoPort,
+        ]
         mongoDatastore = new MongoDatastore(config << getConfiguration())
         mappingContext = mongoDatastore.mappingContext
         mappingContext.mappingFactory.registerCustomType(new AbstractMappingAwareCustomTypeMarshaller<Birthday, Document, Document>(Birthday) {
@@ -108,8 +119,7 @@ abstract class GormDatastoreSpec extends Specification {
                     dbo.put(BsonQuery.GTE_OPERATOR, criterion.getFrom().date.time)
                     dbo.put(BsonQuery.LTE_OPERATOR, criterion.getTo().date.time)
                     nativeQuery.put(key, dbo)
-                }
-                else {
+                } else {
                     nativeQuery.put(key, criterion.value.date.time)
                 }
             }
@@ -137,7 +147,7 @@ abstract class GormDatastoreSpec extends Specification {
         def evaluator = new DefaultConstraintEvaluator(new DefaultConstraintRegistry(messageSource), mappingContext, Collections.emptyMap())
         if (entity) {
             mappingContext.addEntityValidator(entity, validator ?:
-            new PersistentEntityValidator(entity, messageSource, evaluator))
+                    new PersistentEntityValidator(entity, messageSource, evaluator))
         }
     }
 
@@ -149,11 +159,17 @@ abstract class GormDatastoreSpec extends Specification {
     void cleanup() {
         session.disconnect()
         DatastoreUtils.unbindSession(session)
-        mongoDatastore.getMongoClient().getDatabase(mongoDatastore.defaultDatabase).drop()
+        mongoDatastore.getMongoClient().listDatabaseNames().findAll {!(it in ['admin', 'config', 'local']) }.each {
+            try {
+                mongoDatastore.getMongoClient().getDatabase(it).drop()
+            }
+            catch(e) {
+                log.warn("Could not drop ${it}")
+            }
+        }
         mongoDatastore.buildIndex()
-        for(cls in getDomainClasses()) {
+        for (cls in getDomainClasses()) {
             GormEnhancer.findValidationApi(cls).setValidator(null)
         }
     }
-
 }

@@ -27,6 +27,7 @@ dependencies {
 
     integrationTestImplementation 'org.apache.grails:grails-testing-support-datamapping'
     integrationTestImplementation 'org.spockframework:spock-core'
+    implementation 'org.testcontainers:mongodb'
 }
 
 apply {

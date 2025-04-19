@@ -3,6 +3,7 @@ package org.grails.datastore.gorm.mongo.connections
 import grails.gorm.MultiTenant
 import grails.gorm.annotation.Entity
 import grails.mongodb.MongoEntity
+import org.apache.grails.testing.AutoStartedMongoSpec
 import org.bson.types.ObjectId
 import org.grails.datastore.gorm.mongo.City
 import org.grails.datastore.mapping.core.Session
@@ -13,29 +14,32 @@ import org.grails.datastore.mapping.multitenancy.exceptions.TenantNotFoundExcept
 import org.grails.datastore.mapping.multitenancy.resolvers.SystemPropertyTenantResolver
 import spock.lang.AutoCleanup
 import spock.lang.Shared
-import spock.lang.Specification
 
-import static com.mongodb.client.model.Filters.eq
 import static com.mongodb.client.model.Filters.eq
 
 /**
  * Created by graemerocher on 07/07/2016.
  */
-class SingleTenancySpec extends Specification {
+class SingleTenancySpec extends AutoStartedMongoSpec {
 
     @Shared @AutoCleanup MongoDatastore datastore
+
+    @Override
+    boolean shouldInitializeDatastore() {
+        false
+    }
 
     void setupSpec() {
         Map config = [
                 "grails.gorm.multiTenancy.mode":"DATABASE",
                 "grails.gorm.multiTenancy.tenantResolverClass":SystemPropertyTenantResolver,
-                (MongoSettings.SETTING_URL): "mongodb://localhost/defaultDb",
+                (MongoSettings.SETTING_URL): "mongodb://${mongoHost}:${mongoPort}/defaultDb" as String,
                 (MongoSettings.SETTING_CONNECTIONS): [
                         test1: [
-                                url: "mongodb://localhost/test1Db"
+                                url: "mongodb://${mongoHost}:${mongoPort}/test1Db" as String
                         ],
                         test2: [
-                                url: "mongodb://localhost/test2Db"
+                                url: "mongodb://${mongoHost}:${mongoPort}/test2Db" as String
                         ]
                 ]
         ]

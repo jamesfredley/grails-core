@@ -47,11 +47,12 @@ import static org.gradle.api.tasks.SourceSet.TEST_SOURCE_SET_NAME
 @CompileStatic
 class IntegrationTestGradlePlugin implements Plugin<Project> {
 
-    static final String INTEGRATION_TEST_IMPLEMENTATION_CONFIGURATION_NAME = "integrationTestImplementation"
-    static final String INTEGRATION_TEST_RUNTIME_ONLY_CONFIGURATION_NAME = "integrationTestRuntimeOnly"
-    static final String INTEGRATION_TEST_SOURCE_SET_NAME = "integrationTest"
-    static final String INTEGRATION_TEST_TASK_NAME = "integrationTest"
-    static final String MERGE_TEST_REPORTS_TASK_NAME = "mergeTestReports"
+    static final String INTEGRATION_TEST_IMPLEMENTATION_CONFIGURATION_NAME = 'integrationTestImplementation'
+    static final String INTEGRATION_TEST_RUNTIME_ONLY_CONFIGURATION_NAME = 'integrationTestRuntimeOnly'
+    static final String INTEGRATION_TEST_SOURCE_SET_NAME = 'integrationTest'
+    static final String INTEGRATION_TEST_TASK_NAME = 'integrationTest'
+    static final String MERGE_TEST_REPORTS_TASK_NAME = 'mergeTestReports'
+    static final String GRAILS_INTEGRATION_TEST_INDICATOR = 'is.grails.integration.test'
 
     boolean ideaIntegration = true
     String sourceFolderName = "src/integration-test"
@@ -101,6 +102,7 @@ class IntegrationTestGradlePlugin implements Plugin<Project> {
             it.testLogging {
                 events "passed"
             }
+            it.systemProperty GRAILS_INTEGRATION_TEST_INDICATOR, true
         }
         tasks.named("check").configure {
             it.dependsOn(integrationTestTask)

@@ -3,6 +3,7 @@ package org.grails.datastore.gorm.mongo
 import grails.gorm.time.InstantConverter
 import grails.mongodb.MongoEntity
 import grails.persistence.Entity
+import org.apache.grails.testing.AutoStartedMongoSpec
 import org.bson.BsonDateTime
 import org.bson.BsonDocumentWrapper
 import org.bson.BsonReader
@@ -18,6 +19,7 @@ import org.grails.datastore.bson.codecs.temporal.TemporalBsonConverter
 import org.grails.datastore.mapping.engine.EntityAccess
 import org.grails.datastore.mapping.model.PersistentProperty
 import org.grails.datastore.mapping.mongo.MongoDatastore
+import org.grails.datastore.mapping.mongo.config.MongoSettings
 import spock.lang.AutoCleanup
 import spock.lang.Shared
 import spock.lang.Specification
@@ -30,23 +32,36 @@ import static java.time.temporal.ChronoUnit.DAYS
 /**
  * Created by graemerocher on 27/09/2016.
  */
-class CustomCodecSpec extends Specification {
+class CustomCodecSpec extends AutoStartedMongoSpec {
+    @Shared
+    @AutoCleanup
+    MongoDatastore mongoDatastore
 
-    @AutoCleanup @Shared MongoDatastore datastore = new MongoDatastore(
-            ['grails.mongodb.codecs':[BirthdayCodec,
-                                      InstantAsBsonDateTimeCodec
-            ]],
-            Person, InstantHolder)
+    @Override
+    boolean shouldInitializeDatastore() {
+        false
+    }
+
+    void setupSpec() {
+        mongoDatastore = new MongoDatastore([
+                'grails.mongodb.codecs'     : [
+                        BirthdayCodec,
+                        InstantAsBsonDateTimeCodec
+                ],
+                (MongoSettings.SETTING_HOST): mongoHost,
+                (MongoSettings.SETTING_PORT): mongoPort,
+        ], Person, InstantHolder)
+    }
 
     void "Test custom codecs"() {
-        when:"A new person is saved"
+        when: "A new person is saved"
         Person.DB.drop()
         def birthday = new Birthday(new Date())
-        new Person(name: "Fred", birthday: birthday).save(flush:true)
+        new Person(name: "Fred", birthday: birthday).save(flush: true)
 
         Person p = Person.first()
 
-        then:"The result is correct"
+        then: "The result is correct"
         p.name == "Fred"
         p.birthday
         Person.findByBirthday(birthday)
@@ -60,7 +75,7 @@ class CustomCodecSpec extends Specification {
         SimpleDecoder.SIMPLE_TYPE_DECODERS[Instant] = new InstantAsBsonDateTimeDecoder()
         SimpleEncoder.SIMPLE_TYPE_ENCODERS[Instant] = new InstantAsBsonDateTimeEncoder()
 
-        when:"A new instant holder is saved"
+        when: "A new instant holder is saved"
         InstantAsBsonDateTimeCodec.resetCounts()
         InstantHolder.DB.drop()
         def instant = Instant.now()
@@ -70,10 +85,10 @@ class CustomCodecSpec extends Specification {
         def wrapper = new BsonDocumentWrapper(holder, codecRegistry.get(InstantHolder))
         def serializedInstant = wrapper.get('anInstant')
 
-        holder.save(flush:true)
+        holder.save(flush: true)
         InstantHolder ih = InstantHolder.first()
 
-        then:"The serialization is correct"
+        then: "The serialization is correct"
         serializedInstant.class == BsonDateTime
         codecRegistry.get(Instant).class == InstantAsBsonDateTimeCodec
         ih.anInstant
@@ -94,15 +109,18 @@ class BirthdayCodec implements Codec<Birthday> {
     Birthday decode(BsonReader reader, DecoderContext decoderContext) {
         return new Birthday(new Date(reader.readDateTime()))
     }
+
     void encode(BsonWriter writer, Birthday value, EncoderContext encoderContext) {
         writer.writeDateTime(value.date.time)
     }
+
     Class<Birthday> getEncoderClass() { Birthday }
 }
 
 class InstantAsBsonDateTimeCodec implements Codec<Instant> {
     public static AtomicLong decodeCount = new AtomicLong()
     public static AtomicLong encodeCount = new AtomicLong()
+
     static void resetCounts() {
         decodeCount.set(0)
         encodeCount.set(0)
@@ -143,7 +161,7 @@ trait InstantAsBsonDateTimeConverter implements TemporalBsonConverter<Instant>, 
 class InstantAsBsonDateTimeEncoder implements SimpleEncoder.TypeEncoder, InstantAsBsonDateTimeConverter {
     @Override
     void encode(BsonWriter writer, PersistentProperty property, Object value) {
-        write(writer, (Instant)value)
+        write(writer, (Instant) value)
     }
 }
 

@@ -125,12 +125,13 @@ dependencies {
     testImplementation 'junit:junit' // JUnit 4
     testImplementation 'org.apache.grails.testing:grails-testing-support-core'
     testImplementation 'org.spockframework:spock-core'
+    testImplementation project(':grails-testing-support-mongodb')
 
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
     testRuntimeOnly 'org.slf4j:slf4j-nop' // Get rid of warning about missing slf4j implementation during tests
 }
 
 apply from: rootProject.layout.projectDirectory.file('gradle/java-config.gradle')
-apply from: rootProject.layout.projectDirectory.file('gradle/mongodb-test-config.gradle')
+apply from: rootProject.layout.projectDirectory.file('gradle/mongodb-forked-test-config.gradle')
 apply from: rootProject.layout.projectDirectory.file('gradle/publish-config.gradle')
 apply from: rootProject.layout.projectDirectory.file('gradle/grails-data-tck-config.gradle')

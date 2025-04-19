@@ -7,7 +7,7 @@ import org.bson.types.ObjectId
 
 /**
  */
-class DistinctPropertySpec extends GormDatastoreSpec{
+class DistinctPropertySpec extends GormDatastoreSpec {
 
     @Issue('GPMONGODB-220')
     def "Test that a distinct project returns distinct results"() {

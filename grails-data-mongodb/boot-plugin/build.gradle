@@ -81,6 +81,7 @@ dependencies {
     testImplementation 'org.spockframework:spock-core'
 
     testRuntimeOnly 'org.slf4j:slf4j-nop'
+    testImplementation project(':grails-testing-support-mongodb')
 }
 
 apply from: rootProject.layout.projectDirectory.file('gradle/java-config.gradle')

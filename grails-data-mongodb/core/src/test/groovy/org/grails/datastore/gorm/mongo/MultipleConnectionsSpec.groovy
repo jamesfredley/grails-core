@@ -1,30 +1,34 @@
 package org.grails.datastore.gorm.mongo
 
 import grails.gorm.annotation.Entity
-import grails.gorm.tests.GormDatastoreSpec
 import grails.mongodb.MongoEntity
+import org.apache.grails.testing.AutoStartedMongoSpec
 import org.bson.types.ObjectId
 import org.grails.datastore.mapping.mongo.MongoDatastore
 import org.grails.datastore.mapping.mongo.config.MongoSettings
 import spock.lang.Shared
-import spock.lang.Specification
 
 /**
  * Created by graemerocher on 30/06/16.
  */
-class MultipleConnectionsSpec extends Specification {
+class MultipleConnectionsSpec extends AutoStartedMongoSpec {
 
     @Shared MongoDatastore datastore
 
+    @Override
+    boolean shouldInitializeDatastore() {
+        false
+    }
+
     void setupSpec() {
         Map config = [
-            (MongoSettings.SETTING_URL)        : "mongodb://localhost/defaultDb",
+            (MongoSettings.SETTING_URL)        : "mongodb://${mongoHost}:${mongoPort}/defaultDb" as String,
             (MongoSettings.SETTING_CONNECTIONS): [
                     test1: [
-                            url: "mongodb://localhost/test1Db"
+                            url: "mongodb://${mongoHost}:${mongoPort}/test1Db" as String
                     ],
                     test2: [
-                            url: "mongodb://localhost/test2Db"
+                            url: "mongodb://${mongoHost}:${mongoPort}/test2Db" as String
                     ]
             ]
         ]

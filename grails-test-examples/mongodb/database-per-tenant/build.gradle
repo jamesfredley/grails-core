@@ -1,5 +1,5 @@
 version = projectVersion
-group = 'examples'
+group = 'examples.mongo.tenant'
 
 apply plugin: 'groovy'
 apply plugin: 'org.apache.grails.gradle.grails-web'
@@ -24,6 +24,7 @@ dependencies {
 
     testImplementation 'org.apache.grails.testing:grails-testing-support-core'
     testImplementation 'org.spockframework:spock-core'
+    testImplementation project(':grails-testing-support-mongodb')
 }
 
 apply {

@@ -17,10 +17,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  */
 class BookControllerSpec extends Specification {
 
-    @Shared @AutoCleanup MongoDatastore datastore = new MongoDatastore(getClass().getPackage())
+    @Shared MongoDatastore datastore
 
     BookController bookController = new BookController(bookService: datastore.getService(BookService))
-
 
     @Rollback
     void "test find by title"() {

@@ -18,15 +18,15 @@ tasks.withType(Test).configureEach {
             return false
         }
 
-        if (project.hasProperty('skipNonFunctionalTests')) {
-            return false
-        }
-
         if (project.hasProperty('onlyMongodbTests')) {
             return false
         }
 
         if (project.hasProperty('onlyHibernate5Tests')) {
+            return false
+        }
+
+        if(project.hasProperty('skipCoreTests')) {
             return false
         }
 

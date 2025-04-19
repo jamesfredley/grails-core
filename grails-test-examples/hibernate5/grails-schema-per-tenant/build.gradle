@@ -5,7 +5,7 @@ plugins {
 }
 
 version = projectVersion
-group = 'examples'
+group = 'schemapertenant'
 
 dependencies {
     implementation platform(project(':grails-bom'))

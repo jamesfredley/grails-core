@@ -3,28 +3,36 @@ package org.grails.datastore.gorm.mongo.connections
 import grails.gorm.annotation.Entity
 import grails.gorm.services.Service
 import grails.gorm.transactions.Transactional
+import org.apache.grails.testing.AutoStartedMongoSpec
 import org.grails.datastore.mapping.core.DatastoreUtils
 import org.grails.datastore.mapping.core.Session
 import org.grails.datastore.mapping.core.connections.ConnectionSource
 import org.grails.datastore.mapping.mongo.MongoDatastore
 import spock.lang.AutoCleanup
 import spock.lang.Shared
-import spock.lang.Specification
 
-class MultipleDataSourceConnectionsSpec extends Specification {
-
-    @Shared
-    Map config = [
-            'grails.mongodb.url'        : 'mongodb://localhost/grailsDB',
-            'grails.mongodb.connections': [
-                    'books'    : ['url': 'mongodb://localhost/books'],
-                    'moreBooks': ['url': 'mongodb://localhost/moreBooks'],
-            ],
-    ]
+class MultipleDataSourceConnectionsSpec extends AutoStartedMongoSpec {
 
     @Shared
     @AutoCleanup
-    MongoDatastore datastore = new MongoDatastore(DatastoreUtils.createPropertyResolver(config), Book, Author)
+    MongoDatastore datastore
+
+    @Override
+    boolean shouldInitializeDatastore() {
+        false
+    }
+
+    void setupSpec() {
+        Map config = [
+                'grails.mongodb.url'        : "mongodb://${mongoHost}:${mongoPort}/grailsDB" as String,
+                'grails.mongodb.connections': [
+                        'books'    : ['url': "mongodb://${mongoHost}:${mongoPort}/books" as String],
+                        'moreBooks': ['url': "mongodb://${mongoHost}:${mongoPort}/moreBooks" as String],
+                ],
+        ]
+
+        datastore  = new MongoDatastore(DatastoreUtils.createPropertyResolver(config), Book, Author)
+    }
 
     void "Test map to multiple data sources"() {
 

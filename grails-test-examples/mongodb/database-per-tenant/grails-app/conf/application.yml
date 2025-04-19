@@ -2,7 +2,7 @@
 grails:
     profile: web
     codegen:
-        defaultPackage: "functional.tests"
+        defaultPackage: "examples.mongo.tenant"
 info:
     app:
         name: '@info.app.name@'
@@ -22,12 +22,12 @@ grails:
       mode: DATABASE
       tenantResolverClass: org.grails.datastore.mapping.multitenancy.resolvers.SystemPropertyTenantResolver
   mongodb:
-    url: mongodb://localhost/mydb
+    url: mongodb://${grails.mongodb.host:localhost}:${grails.mongodb.port:27017}/mydb
     connections:
       test1:
-        url: mongodb://localhost/test1Db
+        url: mongodb://${grails.mongodb.host:localhost}:${grails.mongodb.port:27017}/test1Db
       test2:
-        url: mongodb://localhost/test2Db
+        url: mongodb://${grails.mongodb.host:localhost}:${grails.mongodb.port:27017}/test2Db
     options:
       maxWaitTime: 10000
 ---

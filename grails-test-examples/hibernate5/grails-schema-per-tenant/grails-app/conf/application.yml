@@ -7,7 +7,7 @@ info:
 grails:
   profile: web
   codegen:
-    defaultPackage: datasources
+    defaultPackage: schemapertenant
   mime:
     disable:
       accept:

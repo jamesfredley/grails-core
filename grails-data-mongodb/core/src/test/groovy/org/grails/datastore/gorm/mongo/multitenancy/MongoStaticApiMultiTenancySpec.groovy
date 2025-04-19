@@ -4,6 +4,7 @@ import com.mongodb.client.model.Filters
 import grails.gorm.MultiTenant
 import grails.mongodb.MongoEntity
 import grails.persistence.Entity
+import org.apache.grails.testing.AutoStartedMongoSpec
 import org.bson.types.ObjectId
 import org.grails.datastore.mapping.mongo.MongoDatastore
 import org.grails.datastore.mapping.mongo.config.MongoSettings
@@ -11,17 +12,21 @@ import org.grails.datastore.mapping.multitenancy.exceptions.TenantNotFoundExcept
 import org.grails.datastore.mapping.multitenancy.resolvers.SystemPropertyTenantResolver
 import spock.lang.AutoCleanup
 import spock.lang.Shared
-import spock.lang.Specification
 
-class MongoStaticApiMultiTenancySpec extends Specification {
+class MongoStaticApiMultiTenancySpec extends AutoStartedMongoSpec {
 
     @Shared  @AutoCleanup MongoDatastore datastore
+
+    @Override
+    boolean shouldInitializeDatastore() {
+        false
+    }
 
     void setupSpec() {
         Map config = [
                 "grails.gorm.multiTenancy.mode"               : "DISCRIMINATOR",
                 "grails.gorm.multiTenancy.tenantResolverClass": SystemPropertyTenantResolver,
-                (MongoSettings.SETTING_URL)                   : "mongodb://localhost/defaultDb",
+                (MongoSettings.SETTING_URL)                   : "mongodb://${mongoHost}:${mongoPort}/defaultDb" as String,
         ]
         this.datastore = new MongoDatastore(config, getDomainClasses() as Class[])
     }

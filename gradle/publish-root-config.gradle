@@ -51,6 +51,7 @@ def publishedProjects = [
         'grails-taglib',
         'grails-test-core',
         'grails-testing-support-core',
+        'grails-testing-support-mongodb',
         'grails-testing-support-views-gson',
         'grails-testing-support-web',
         'grails-url-mappings',
