@@ -27,7 +27,7 @@ Create **USER_HOME/.grails/settings.groovy**
                 }
             }
             apacheSnapshot {
-                url = "https://repository.apache.org/content/groups/snapshots/"
+                url = "https://repository.apache.org/content/groups/snapshots"
                 snapshotsEnabled = true
                 }
             }
