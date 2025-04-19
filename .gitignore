@@ -45,7 +45,7 @@ dist/
 idea
 output/
 prodDb.mv.db
-**/src/en/ref/Dependency Versions/Grails BOM.adoc
+**/src/en/ref/Versions/Grails BOM.adoc
 stacktrace.log
 target
 tmp/
