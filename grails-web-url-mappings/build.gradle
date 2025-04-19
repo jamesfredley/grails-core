@@ -53,16 +53,6 @@ dependencies {
     testRuntimeOnly 'net.bytebuddy:byte-buddy'
     testImplementation 'org.objenesis:objenesis'
 }
-tasks.withType(Test).configureEach {
-    testLogging {
-        exceptionFormat = 'full'
-//        showStandardStreams = true
-    }
-    afterSuite {
-        System.out.print('.')
-        System.out.flush()
-    }
-}
 
 apply {
     // java-configuration must be applied first since tasks are now lazy registered
