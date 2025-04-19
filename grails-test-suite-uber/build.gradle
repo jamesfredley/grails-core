@@ -98,7 +98,7 @@ tasks.named('isolatedTestsTwo', Test).configure {
 tasks.withType(Test).configureEach {
     onlyIf { !project.hasProperty('onlyFunctionalTests') }
     useJUnitPlatform()
-    maxParallelForks = isCiBuild ? 2 : Runtime.runtime.availableProcessors() * 3 / 4 as int ?: 1
+    maxParallelForks = configuredTestParallel
     forkEvery = isCiBuild ? 25 : 100
     maxHeapSize = isCiBuild ? '768m' : '1024m'
     jvmArgs('--add-opens=java.base/java.lang=ALL-UNNAMED', '--add-opens=java.base/java.util=ALL-UNNAMED')

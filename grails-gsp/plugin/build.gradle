@@ -9,7 +9,6 @@ version = projectVersion
 group = 'org.apache.grails'
 
 ext {
-    testMaxParallelFork = isCiBuild ? 1 : 4
     testForkEvery = isCiBuild ? 10 : 20
     testJvmArgs = ['-Xmx1536M']
 

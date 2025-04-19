@@ -65,13 +65,8 @@ tasks.withType(Test).configureEach {
         showStackTraces = true
     }
     if (findProperty('testForked')) {
-        if (isCiBuild) {
-            maxParallelForks = findProperty('testMaxParallelFork') ?: 2
-            forkEvery = findProperty('testForkEvery') ?: 0
-        } else {
-            maxParallelForks = findProperty('testMaxParallelFork') ?: 4
-            forkEvery = findProperty('testForkEvery') ?: 0
-        }
+        maxParallelForks = configuredTestParallel
+        forkEvery = (findProperty('testForkEvery') ?: 0) as long
     }
     if (findProperty('testJvmArgs')) {
         jvmArgs = findProperty('testJvmArgs')

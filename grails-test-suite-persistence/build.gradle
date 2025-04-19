@@ -69,7 +69,7 @@ dependencies {
 }
 
 test {
-    maxParallelForks = 2
+    maxParallelForks = configuredTestParallel
     forkEvery = isCiBuild ? 25 : 100
     if(!isCiBuild) {
         maxHeapSize = '2048m'

@@ -27,7 +27,7 @@ dependencies {
 }
 
 def defaultTestConfig = {
-    maxParallelForks = isCiBuild ? 2 : Runtime.runtime.availableProcessors() * 3 / 4 as int ?: 1
+    maxParallelForks = configuredTestParallel
     forkEvery = isCiBuild ? 10 : 100
     excludes = ['**/*TestCase.class', '**/*$*.class']
 }

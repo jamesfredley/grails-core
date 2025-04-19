@@ -28,7 +28,7 @@ tasks.withType(Test).configureEach {
     }
 
     useJUnitPlatform()
-    maxParallelForks = isCiBuild ? 2 : Runtime.runtime.availableProcessors() * 3 / 4 as int ?: 1
+    maxParallelForks = configuredTestParallel
     jvmArgs = ['-Xmx768M']
     afterSuite {
         System.out.print('.')

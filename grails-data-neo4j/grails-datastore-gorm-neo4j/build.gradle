@@ -28,14 +28,8 @@ dependencies {
 
 test {
     useJUnitPlatform()
-    if (isCiBuild) {
-        maxParallelForks = 1
-        forkEvery = 10
-    }
-    else {
-        maxParallelForks = 2
-        forkEvery = 10
-    }
+    maxParallelForks = configuredTestParallel
+    forkEvery = 10
 
     jvmArgs = ['-Xmx1028M']
     afterSuite {
