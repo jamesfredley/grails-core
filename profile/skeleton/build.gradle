@@ -25,5 +25,6 @@ repositories {
 }  
 
 dependencies {
-    profileRuntimeOnly "org.apache.grails.profiles:base:$baseProfileVersion"
+    profileRuntimeOnly platform("org.apache.grails:grails-bom:$grailsVersion")
+    profileRuntimeOnly "org.apache.grails.profiles:base"
 }
