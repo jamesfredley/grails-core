@@ -64,9 +64,9 @@ tasks.register('aggregateGroovydoc', Groovydoc).configure { Groovydoc gdoc ->
                 possibleSources
             }
             .flatten()
-    gdoc.source(sources.collect{ SourceSet it -> it.allSource.srcDirs }.flatten())
+    gdoc.source(sources.collect{ SourceSet it -> it.allSource.srcDirs }.flatten().unique())
     gdoc.exclude('META-INF/**', '*yml', '*properties', '*xml', '**/Application.groovy', '**/Bootstrap.groovy', '**/resources.groovy')
-    gdoc.classpath = files(sources.collect{ SourceSet it -> it.compileClasspath.filter(File.&isDirectory) }.flatten())
+    gdoc.classpath = files(sources.collect{ SourceSet it -> it.compileClasspath.filter(File.&isDirectory) }.flatten().unique())
     gdoc.groovyClasspath = configurations.documentation
     gdoc.destinationDir = project.layout.buildDirectory.dir('docs/api').get().asFile
     gdoc.windowTitle = "Grails $projectVersion"
@@ -261,6 +261,10 @@ tasks.register('publishPdf', PublishPdf).configure { PublishPdf pTask ->
 
 tasks.register('docs', Sync).configure { Sync it ->
     it.dependsOn 'aggregateGroovydoc', 'publishGuide', 'createReleaseDropdown', 'publishPdf', ':grails-data-docs-stage:docs'
+
+    doFirst {
+        project.layout.buildDirectory.dir('docs').get().asFile.mkdirs()
+    }
 
     def manualDocsDir = publishGuide.targetDir
     def apiDocsDir = rootProject.layout.buildDirectory.dir('docs')
