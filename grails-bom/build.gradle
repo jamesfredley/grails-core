@@ -83,6 +83,46 @@ String resolveMavenProperty(String errorDescription, String dynamicVersion, Map 
     expandedVersion
 }
 
+
+Closure determinePossibleKey = { Map.Entry<String, String> found, Map versions ->
+    String possibleKey = found.key.toString()
+    while (possibleKey != null) {
+        String propertyName = "${possibleKey}.version" as String
+        if (versions.containsKey(propertyName)) {
+            return propertyName
+        }
+
+        int lastIndex = possibleKey.lastIndexOf('-')
+        possibleKey = lastIndex > 0 ? possibleKey.substring(0, lastIndex) : null
+    }
+}
+
+Closure determinePropertyName = { String groupId, String artifactId, String version, boolean isBom ->
+    Map<String, String> toSearch = isBom ? bomPlatformDependencies : bomDependencies
+    Map<String, String> toSearchGradle = isBom ? gradleBomPlatformDependencies : gradleBomDependencies
+
+    Map.Entry<String, String> found = toSearch.entrySet().find { "$groupId:$artifactId:$version" as String == it.value as String }
+    if (!found) {
+        found = toSearchGradle.entrySet().find { "$groupId:$artifactId:$version" as String == it.value as String }
+        if (!found) {
+            return null
+        }
+    }
+
+    Map<String, String> versions = bomDependencyVersions
+
+    String propertyName = determinePossibleKey(found, versions)
+    if (!propertyName) {
+        propertyName = determinePossibleKey(found, gradleBomDependencyVersions)
+    }
+
+    if (propertyName) {
+        return propertyName
+    }
+
+    throw new GradleException("Could not determine artifact property key for $groupId:$artifactId:$version")
+}
+
 //TODO: This really should be a gradle task that we export so others can use.
 tasks.register('extractConstraints').configure { Task it ->
     it.inputs.files(configurations.named('bomDependencies'))
@@ -93,16 +133,22 @@ tasks.register('extractConstraints').configure { Task it ->
         def conf = configurations.detachedConfiguration()
         conf.transitive = true
 
-        Map<String, Tuple4<String, String, String, String>> bomConstraints = [:]
+        Map<String, Tuple5<String, String, String, String, String>> bomConstraints = [:]
         Configuration apiConfiguration = configurations.named('bomDependencies').get()
 
         // Explicit constraints
         apiConfiguration.getAllDependencyConstraints().all { constraint ->
+
+            def groupId = constraint.module.group as String
+            def artifactId = constraint.module.name as String
+            def artifactVersion = constraint.version as String
+            def propertyName = determinePropertyName(groupId, artifactId, artifactVersion, false)
             bomConstraints.put("${module.group}:${module.name}" as String,
-                    new Tuple4<String, String, String, String>(
-                            constraint.module.group as String,
-                            constraint.module.name as String,
-                            constraint.version as String,
+                    new Tuple5<>(
+                            groupId,
+                            artifactId,
+                            artifactVersion,
+                            propertyName ? "\${${propertyName}}" : '' as String,
                             'grails-bom'
                     )
             )
@@ -132,18 +178,20 @@ tasks.register('extractConstraints').configure { Task it ->
             List<Tuple2<String, String>> excluded = allExclusions.get(bomCoordinates)
 
             // fetch the BOM as a pom file so it can be expanded
+            def propertyName = determinePropertyName(bomGroup, bomName, bomVersion, true)
+            bomConstraints.put(bomCoordinates, new Tuple5<>(bomGroup, bomName, bomVersion, propertyName ? "\${${propertyName}}" : '' as String, bomName))
             populatePlatformDependencies(bomGroup, bomName, bomVersion, bomConstraints, excluded)
         }
 
         List lines = []
         bomConstraints.values().sort { a, b -> a.v1 <=> b.v1 ?: a.v2 <=> b.v2 }.each {
-            lines << "| ${it.v1} | ${it.v2} | ${it.v3} | ${it.v4} "
+            lines << "| ${it.v1} | ${it.v2} | ${it.v3} | ${it.v4 ? it.v4 == '${project.version}' ? '' : it.v4 : ''} | ${it.v5} "
         }
 
         project.layout.buildDirectory.file('grails-bom-constraints.adoc').get().asFile.withWriter { writer ->
-            writer.writeLine '[cols="1,1,1,1", options="header"]'
+            writer.writeLine '[cols="1,1,1,1,1", options="header"]'
             writer.writeLine '|==='
-            writer.writeLine '| Group | Artifact | Version | Source'
+            writer.writeLine '| Group | Artifact | Version | Property Name | Source'
             lines.each { line ->
                 writer.writeLine(line)
             }
@@ -153,7 +201,7 @@ tasks.register('extractConstraints').configure { Task it ->
 }
 
 private Properties populatePlatformDependencies(String bomGroup, String bomName, String bomVersion,
-                                                Map<String, Tuple4<String, String, String, String>> bomConstraints,
+                                                Map<String, Tuple5<String, String, String, String, String>> bomConstraints,
                                                 List<Tuple2<String, String>> excluded, boolean error = true, int level = 0) {
     def bomDependency = dependencies.create("${bomGroup}:${bomName}:${bomVersion}@pom")
     def bomConf = configurations.detachedConfiguration(bomDependency)
@@ -200,13 +248,13 @@ private Properties populatePlatformDependencies(String bomGroup, String bomName,
                 }
                 if (!isExcluded) {
 
-                    String version = resolveMavenProperty(resolvedCoordinates, depItem.version, versionProperties)
-
+                    String resolvedVersion = resolveMavenProperty(resolvedCoordinates, depItem.version, versionProperties)
+                    String propertyName = depItem.version.contains('$') ? depItem.version : null
                     if (depItem.scope == 'import') {
-                        bomConstraints.put(resolvedCoordinates, new Tuple4<String, String, String, String>(groupId, artifactId, version, bomName))
-                        populatePlatformDependencies(groupId, artifactId, version, bomConstraints, excluded, error, level + 1)
+                        bomConstraints.put(resolvedCoordinates, new Tuple5<>(groupId, artifactId, resolvedVersion, propertyName, bomName))
+                        populatePlatformDependencies(groupId, artifactId, resolvedVersion, bomConstraints, excluded, error, level + 1)
                     } else {
-                        bomConstraints.put(resolvedCoordinates, new Tuple4<>(groupId, artifactId, version, bomName))
+                        bomConstraints.put(resolvedCoordinates, new Tuple5<>(groupId, artifactId, resolvedVersion, propertyName, bomName))
                     }
                 }
             }
@@ -241,45 +289,6 @@ if (ext.isReleaseBuild && ext.isPublishedExternal) {
     tasks.named('generatePomFileForMavenPublication').configure {
         dependsOn(tasks.named('validateNoSnapshotDependencies'))
     }
-}
-
-Closure determinePossibleKey = { Map.Entry<String, String> found, Map versions ->
-    String possibleKey = found.key.toString()
-    while (possibleKey != null) {
-        String propertyName = "${possibleKey}.version" as String
-        if (versions.containsKey(propertyName)) {
-            return propertyName
-        }
-
-        int lastIndex = possibleKey.lastIndexOf('-')
-        possibleKey = lastIndex > 0 ? possibleKey.substring(0, lastIndex) : null
-    }
-}
-
-Closure determinePropertyName = { String groupId, String artifactId, String version, boolean isBom ->
-    Map<String, String> toSearch = isBom ? bomPlatformDependencies : bomDependencies
-    Map<String, String> toSearchGradle = isBom ? gradleBomPlatformDependencies : gradleBomDependencies
-
-    Map.Entry<String, String> found = toSearch.entrySet().find { "$groupId:$artifactId:$version" as String == it.value as String }
-    if (!found) {
-        found = toSearchGradle.entrySet().find { "$groupId:$artifactId:$version" as String == it.value as String }
-        if (!found) {
-            return null
-        }
-    }
-
-    Map<String, String> versions = bomDependencyVersions
-
-    String propertyName = determinePossibleKey(found, versions)
-    if (!propertyName) {
-        propertyName = determinePossibleKey(found, gradleBomDependencyVersions)
-    }
-
-    if (propertyName) {
-        return propertyName
-    }
-
-    throw new GradleException("Could not determine artifact property key for $groupId:$artifactId:$version")
 }
 
 ext {
