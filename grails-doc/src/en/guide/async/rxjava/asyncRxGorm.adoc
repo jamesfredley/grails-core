@@ -1,4 +1,4 @@
-https://gorm.grails.org/{gormVersion}/rx/manual/[RxGORM] is new implementation of GORM that has the following goals:
+https://gorm.grails.org/{projectVersion}/rx/manual/[RxGORM] is new implementation of GORM that has the following goals:
 
 * Reactive
 * Non-blocking

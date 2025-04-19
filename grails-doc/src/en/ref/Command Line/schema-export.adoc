@@ -72,7 +72,7 @@ repositories {
     maven { url = "https://repo.grails.org/grails/core/" }
 }
 dependencies {
-    classpath "org.grails.plugins:hibernate5:{gormVersion}"
+    classpath "org.apache.grails:grails-hibernate5:{projectVersion}"
 }
 ----
 
