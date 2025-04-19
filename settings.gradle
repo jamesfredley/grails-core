@@ -52,7 +52,6 @@ include (
         'grails-rest-transforms',
         'grails-scaffolding',
         'grails-services',
-        'grails-shell-cli',
         'grails-spring',
         'grails-test-core',
         'grails-testing-support-core',
