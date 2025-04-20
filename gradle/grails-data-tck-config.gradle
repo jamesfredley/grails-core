@@ -31,6 +31,34 @@ TaskProvider<Sync> extractTck = tasks.register('extractTckJar', Sync).configure 
 }
 
 tasks.withType(Test).configureEach {
+    onlyIf {
+        if (project.hasProperty('onlyFunctionalTests')) {
+            return false
+        }
+
+        if (project.hasProperty('skipHibernate5Tests') && project.name.startsWith('grails-data-hibernate5')) {
+            return false
+        }
+
+        if (project.hasProperty('onlyHibernate5Tests') && !project.name.startsWith('grails-data-hibernate5')) {
+            return false
+        }
+
+        if (project.hasProperty('skipMongoTests') && project.name.startsWith('grails-data-mongo')) {
+            return false
+        }
+
+        if (project.hasProperty('onlyMongodbTests') && !project.name.startsWith('grails-data-mongo')) {
+            return false
+        }
+
+        if (project.hasProperty('onlyCoreTests')) {
+            return false
+        }
+
+        true
+    }
+
     testClassesDirs = objects.fileCollection().from(extractTck, testClassesDirs)
     finalizedBy('cleanupTckClasses')
 }
