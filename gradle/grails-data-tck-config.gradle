@@ -23,13 +23,18 @@ dependencies {
 
 // TODO: gradle will happily put the jar file on the classpath, but junit won't find the tests.
 //  Dynamic test discovery also won't find them so extract the class files to force junit to work.
-TaskProvider<Sync> extractTck = tasks.register('extractTckJar', Sync).configure { Sync it ->
+TaskProvider<Sync> extractTck = tasks.register('extractTckJar').configure { Task it ->
     it.inputs.files(configurations.tck)
-
-    it.from { zipTree(configurations.tck.singleFile) }
-    it.into(layout.buildDirectory.dir('extracted-tck-classes'))
-    it.finalizedBy(tasks.withType(Test))
     it.outputs.updateWhen { false } // force the task to not cache
+    it.finalizedBy(tasks.withType(Test))
+
+    it.doLast {
+        copy {
+            it.from { zipTree(configurations.tck.singleFile) }
+            it.into(layout.buildDirectory.dir('extracted-tck-classes'))
+
+        }
+    }
 }
 
 tasks.withType(Test).configureEach {
