@@ -1,5 +1,3 @@
-import org.codehaus.groovy.groovydoc.GroovyDoc
-
 apply plugin: 'groovy'
 
 configurations.register('documentation')

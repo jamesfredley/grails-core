@@ -259,12 +259,14 @@ tasks.register('publishPdf', PublishPdf).configure { PublishPdf pTask ->
     pTask.outputDirectory = project.layout.buildDirectory.dir('manual')
 }
 
-tasks.register('docs', Sync).configure { Sync it ->
-    it.dependsOn 'aggregateGroovydoc', 'publishGuide', 'createReleaseDropdown', 'publishPdf', ':grails-data-docs-stage:docs'
-
+tasks.register('createDocsDestination').configure { Task it ->
     doFirst {
-        project.layout.buildDirectory.dir('docs').get().asFile.mkdirs()
+        rootProject.layout.buildDirectory.dir('docs').get().asFile.mkdirs()
     }
+}
+
+tasks.register('docs', Sync).configure { Sync it ->
+    it.dependsOn 'createDocsDestination', 'aggregateGroovydoc', 'publishGuide', 'createReleaseDropdown', 'publishPdf', ':grails-data-docs-stage:docs', ':grails-data-docs-stage:groovydoc'
 
     def manualDocsDir = publishGuide.targetDir
     def apiDocsDir = rootProject.layout.buildDirectory.dir('docs')
