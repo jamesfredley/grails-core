@@ -1,12 +1,14 @@
 package org.grails.datastore.gorm
 
 import grails.gorm.annotation.AutoTimestamp
-import org.grails.datastore.gorm.events.AutoTimestampEventListener
-
-import static grails.gorm.annotation.AutoTimestamp.EventType.*;
 import grails.gorm.tests.GormDatastoreSpec
 import grails.persistence.Entity
+import org.grails.datastore.gorm.events.AutoTimestampEventListener
+import spock.lang.Isolated
 
+import static grails.gorm.annotation.AutoTimestamp.EventType.CREATED
+
+@Isolated
 class CustomAutoTimestampSpec extends GormDatastoreSpec {
 
     void "Test when the auto timestamp properties are customized, they are correctly set"() {
