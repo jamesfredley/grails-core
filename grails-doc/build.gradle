@@ -64,7 +64,13 @@ tasks.register('aggregateGroovydoc', Groovydoc).configure { Groovydoc gdoc ->
                 possibleSources
             }
             .flatten()
-    gdoc.source(sources.collect{ SourceSet it -> it.allSource.srcDirs }.flatten().unique())
+    gdoc.source(sources.collect{ SourceSet it -> [it.allSource.srcDirs, it.allSource.srcDirs] }.flatten().findAll { File srcDir ->
+        if(!(srcDir.name in ['java', 'groovy'])) {
+            return false
+        }
+
+        srcDir.exists()
+    }.unique())
     gdoc.exclude('META-INF/**', '*yml', '*properties', '*xml', '**/Application.groovy', '**/Bootstrap.groovy', '**/resources.groovy')
     gdoc.classpath = files(sources.collect{ SourceSet it -> it.compileClasspath.filter(File.&isDirectory) }.flatten().unique())
     gdoc.groovyClasspath = configurations.documentation
