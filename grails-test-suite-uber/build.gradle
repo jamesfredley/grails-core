@@ -85,6 +85,29 @@ def isolatedTestPatterns = [
 
 isolatedTestPatterns.keySet().each { taskName ->
     tasks.register(taskName, Test).configure { Test tTask ->
+        tTask.onlyIf {
+            if(project.hasProperty('onlyFunctionalTests')) {
+                return false
+            }
+
+            if (project.hasProperty('onlyMongodbTests')) {
+                return false
+            }
+
+            if (project.hasProperty('onlyHibernate5Tests')) {
+                return false
+            }
+
+            if(project.hasProperty('skipCoreTests')) {
+                return false
+            }
+
+            if(project.hasProperty('skipTests')) {
+                return false
+            }
+
+            true
+        }
         tTask.group = 'verification'
         tTask.filter.includePatterns = isolatedTestPatterns[taskName]
     }
@@ -123,6 +146,30 @@ tasks.withType(Test).configureEach {
 }
 
 tasks.named('test', Test).configure {
+    onlyIf {
+        if(project.hasProperty('onlyFunctionalTests')) {
+            return false
+        }
+
+        if (project.hasProperty('onlyMongodbTests')) {
+            return false
+        }
+
+        if (project.hasProperty('onlyHibernate5Tests')) {
+            return false
+        }
+
+        if(project.hasProperty('skipCoreTests')) {
+            return false
+        }
+
+        if(project.hasProperty('skipTests')) {
+            return false
+        }
+
+        true
+    }
+
     filter.excludePatterns = isolatedTestPatterns.values().flatten()
     dependsOn(provider {
         tasks.findAll({
