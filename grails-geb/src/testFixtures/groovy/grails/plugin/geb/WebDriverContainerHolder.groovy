@@ -33,8 +33,10 @@ import org.spockframework.runtime.model.SpecInfo
 import org.testcontainers.Testcontainers
 import org.testcontainers.containers.BrowserWebDriverContainer
 import org.testcontainers.containers.PortForwardingContainer
+import org.testcontainers.images.PullPolicy
 
 import java.time.Duration
+import java.time.temporal.ChronoUnit
 import java.util.function.Supplier
 
 /**
@@ -108,6 +110,7 @@ class WebDriverContainerHolder {
             withEnv('SE_ENABLE_TRACING', grailsGebSettings.tracingEnabled)
             withAccessToHost(true)
             start()
+            withImagePullPolicy(PullPolicy.ageBased(Duration.of(1, ChronoUnit.DAYS)))
         }
         if (hostnameChanged) {
             currentContainer.execInContainer('/bin/sh', '-c', "echo '$hostIp\t${currentConfiguration.hostName}' | sudo tee -a /etc/hosts")
