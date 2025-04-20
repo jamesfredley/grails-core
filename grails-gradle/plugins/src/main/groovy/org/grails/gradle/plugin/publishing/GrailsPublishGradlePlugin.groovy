@@ -249,8 +249,8 @@ Note: if project properties are used, the properties must be defined prior to ap
                 final GrailsPublishExtension gpe = extensionContainer.findByType(GrailsPublishExtension)
                 publications {
                     maven(MavenPublication) {
-                        artifactId gpe.artifactId ?: project.name
-                        groupId gpe.groupId ?: project.group
+                        delegate.artifactId = gpe.artifactId ?: project.name
+                        delegate.groupId = gpe.groupId ?: project.group
 
                         doAddArtefact(project, delegate)
                         def extraArtefact = getDefaultExtraArtifact(project)

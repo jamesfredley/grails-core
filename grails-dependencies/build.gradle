@@ -19,8 +19,8 @@ def configurations = [
                 ':grails-services',
                 ':grails-url-mappings',
                 ':grails-interceptors',
-                ':grails-async-plugin',
-                ':grails-events-plugin',
+                ':grails-async',
+                ':grails-events',
                 ':grails-gsp',
         ],
         'runtimeOnly': [

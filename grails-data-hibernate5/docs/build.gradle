@@ -34,7 +34,7 @@ dependencies {
         documentation "org.apache.grails.data:$it"
     }
     rootProject.subprojects
-            .findAll { it.findProperty('apiDocs') }
+            .findAll { it.findProperty('gormApiDocs') }
             .each { documentation project(":$it.name") }
 }
 
@@ -58,9 +58,9 @@ tasks.named('asciidoctor', AsciidoctorTask) {
             'groupId': project.group,
             'artifactId': project.name,
             'sourcedir': "$project.rootDir",
-            'migrationPluginExamplesDir': rootProject.layout.projectDirectory.dir('grails-database-migration/src/integration-test/resources').asFile.absolutePath,
-            'migrationPluginGroupId': rootProject.findProject(':grails-data-hibernate5-database-migration').group,
-            'migrationPluginArtifactId': rootProject.findProject(':grails-data-hibernate5-database-migration').name,
+            'migrationPluginExamplesDir': rootProject.findProject(':grails-data-hibernate5-dbmigration').layout.projectDirectory.dir('src/integration-test/resources').asFile.absolutePath,
+            'migrationPluginGroupId': rootProject.findProject(':grails-data-hibernate5-dbmigration').group,
+            'migrationPluginArtifactId': rootProject.findProject(':grails-data-hibernate5-dbmigration').name,
             'liquibaseHibernate5Version': liquibaseHibernate5Version
     )
     jvm {
@@ -90,7 +90,7 @@ tasks.withType(Groovydoc).configureEach {
     }.sum()
 
     rootProject.subprojects
-            .findAll { it.findProperty('apiDocs') }
+            .findAll { it.findProperty('gormApiDocs') }
             .each { sourceFiles += it.files('src/main/groovy') }
 
     source = sourceFiles
@@ -113,7 +113,7 @@ tasks.register('docs').configure { Task docTask ->
     docTask.group = 'documentation'
     docTask.dependsOn('asciidoctor', 'copyDocs', 'cleanAsciidoc', 'groovydoc', 'copyResources',
             rootProject.subprojects
-                    .findAll { it.findProperty('apiDocs') }
+                    .findAll { it.findProperty('gormApiDocs') }
                     .collect { ":${it.name}:groovydoc" }
     )
     docTask.finalizedBy('assembleDocsDist')

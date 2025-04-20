@@ -35,7 +35,7 @@ dependencies {
     testRuntimeOnly 'org.springframework:spring-aspects'
     testRuntimeOnly 'org.aspectj:aspectjrt', 'org.aspectj:aspectjweaver'
 
-    testImplementation project(':grails-async-plugin')
+    testImplementation project(':grails-async')
     testImplementation project(':grails-testing-support-datamapping'), {
         exclude module:'grails-testing-support-core'
     }

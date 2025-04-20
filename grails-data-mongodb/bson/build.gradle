@@ -7,8 +7,7 @@ version = projectVersion
 group = 'org.apache.grails.data'
 
 ext {
-    apiDocs = true
-    pomArtifactId = 'grails-data-mongodb-bson'
+    gormApiDocs = true
     pomTitle = 'GORM for MongoDB'
     pomDescription = 'Provides a GORM Object Mapping implementations for the MongoDB Document Database'
     pomDevelopers =  [

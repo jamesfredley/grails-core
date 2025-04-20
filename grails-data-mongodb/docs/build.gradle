@@ -45,7 +45,7 @@ dependencies {
         documentation "org.apache.grails.data:$it"
     }
     rootProject.subprojects
-            .findAll { it.findProperty('apiDocs') }
+            .findAll { it.findProperty('gormApiDocs') }
             .each { documentation project(":$it.name") }
 
     // These are added to be able to resolve the mongo version from grails-bom
@@ -99,7 +99,7 @@ tasks.withType(Groovydoc).configureEach { Groovydoc groovydoc ->
     }.sum()
 
     rootProject.subprojects
-            .findAll { it.findProperty('apiDocs') }
+            .findAll { it.findProperty('gormApiDocs') }
             .each { sourceFiles += it.files('src/main/groovy') }
 
     groovydoc.source = sourceFiles
@@ -120,7 +120,7 @@ tasks.register('copyResources', Copy).configure { Copy it ->
 tasks.register('docs').configure { Task doc ->
     doc.dependsOn('asciidoctor', 'copyDocs', 'cleanAsciidoc', 'groovydoc', 'copyResources',
             rootProject.subprojects
-                    .findAll { it.findProperty('apiDocs') }
+                    .findAll { it.findProperty('gormApiDocs') }
                     .collect { ":${it.name}:groovydoc" }
     )
     doc.finalizedBy('assembleDocsDist')

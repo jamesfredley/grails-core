@@ -7,7 +7,6 @@ version = projectVersion
 group = 'org.apache.grails'
 
 ext {
-    pomArtifactId = 'grails-data-mongodb-gson-templates'
     pomTitle = 'Grails MongoDB JSON Views'
     pomDescription = 'Provides JSON Views for MongoDB to the Grails framework.'
     pomDevelopers = ['puneetbehl': 'Puneet Behl']

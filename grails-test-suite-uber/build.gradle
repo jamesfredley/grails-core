@@ -9,7 +9,7 @@ group = 'org.apache.grails.testing'
 dependencies {
     implementation platform(project(':grails-bom'))
 
-    testImplementation project(':grails-async-plugin')
+    testImplementation project(':grails-async')
     testImplementation project(':grails-codecs')
     testImplementation project(':grails-controllers')
     testImplementation project(':grails-databinding')

@@ -7,8 +7,7 @@ version = projectVersion
 group = 'org.apache.grails'
 
 ext {
-    apiDocs = true
-    pomArtifactId = 'grails-data-hibernate5-spring-boot'
+    gormApiDocs = true
     pomTitle = 'Grails GORM'
     pomDescription = 'GORM - Grails Data Access Framework'
     pomDevelopers =  [
