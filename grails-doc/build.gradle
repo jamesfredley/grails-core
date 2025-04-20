@@ -82,7 +82,7 @@ tasks.register('aggregateGroovydoc', Groovydoc).configure { Groovydoc gdoc ->
     gdoc.includeMainForScripts = false
     gdoc.processScripts = false
     gdoc.inputs.files(gdoc.source)
-    gdoc.outputs.dir(destinationDir)
+    gdoc.outputs.dir(gdoc.destinationDir)
 
     def gebVersion = getVersion('org.gebish', 'geb-spock')
     def testContainersVersion = getVersion('org.testcontainers', 'testcontainers')
@@ -121,14 +121,6 @@ asciidoctor {
 }
 
 asciidoctor.dependsOn('aggregateGroovydoc')
-
-tasks.withType(org.gradle.api.tasks.javadoc.Groovydoc) {
-    configure {
-        access = GroovydocAccess.PRIVATE
-        processScripts = false
-        includeMainForScripts = false
-    }
-}
 
 tasks.register('dist', Zip).configure { Zip it ->
     it.dependsOn 'docs'
