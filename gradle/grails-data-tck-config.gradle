@@ -28,6 +28,7 @@ TaskProvider<Sync> extractTck = tasks.register('extractTckJar', Sync).configure 
 
     it.from { zipTree(configurations.tck.singleFile) }
     it.into(layout.buildDirectory.dir('extracted-tck-classes'))
+    it.finalizedBy(tasks.withType(Test))
 }
 
 tasks.withType(Test).configureEach {
@@ -65,9 +66,10 @@ tasks.withType(Test).configureEach {
 
 // There is a known issue with IntelliJ that can cause it's inspection process to lock up.
 // this is a work around to help prevent the scenario that causes the lock up.
-tasks.register('cleanupTckClasses') {
+tasks.register('cleanupTckClasses').configure { Task it ->
     Provider<Directory> extractDir = layout.buildDirectory.dir('extracted-tck-classes')
-    doLast {
+    it.doLast {
         extractDir.get().asFile.deleteDir()
     }
+    it.outputs.upToDateWhen {false}
 }
