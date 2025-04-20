@@ -18,9 +18,9 @@ package org.grails.gradle.plugin.views.gsp
 import groovy.transform.CompileDynamic
 import groovy.transform.CompileStatic
 import org.gradle.api.Action
+import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.Directory
 import org.gradle.api.file.DirectoryProperty
-import org.gradle.api.file.FileCollection
 import org.gradle.api.file.FileTree
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Property
@@ -51,6 +51,10 @@ abstract class GroovyPageForkCompileTask extends AbstractCompile {
     @Optional
     final Property<String> packageName
 
+    @InputFiles
+    @PathSensitive(PathSensitivity.RELATIVE)
+    final ConfigurableFileCollection grailsConfigurationPaths
+
     @InputDirectory
     final DirectoryProperty srcDir
 
@@ -73,6 +77,11 @@ abstract class GroovyPageForkCompileTask extends AbstractCompile {
         srcDir = objectFactory.directoryProperty()
         compileOptions = objectFactory.newInstance(ViewCompileOptions.class)
         serverpath = objectFactory.property(String)
+        grailsConfigurationPaths = objectFactory.fileCollection()
+        grailsConfigurationPaths.from(
+                project.layout.projectDirectory.file("grails-app/conf/application.yml"),
+                project.layout.projectDirectory.file("grails-app/conf/application.groovy")
+        )
     }
 
 
@@ -123,12 +132,7 @@ abstract class GroovyPageForkCompileTask extends AbstractCompile {
                         javaExecSpec.setMaxHeapSize(compileOptions.forkOptions.memoryMaximumSize)
                         javaExecSpec.setMinHeapSize(compileOptions.forkOptions.memoryInitialSize)
 
-                        //This is the OLD Style and seems kinda silly to be hard coded this way. but restores functionality
-                        //for now
-                        String configFiles = [
-                                project.file("grails-app/conf/application.yml").canonicalPath,
-                                project.file("grails-app/conf/application.groovy").canonicalPath
-                        ].join(',')
+                        String configFiles = grailsConfigurationPaths.files.collect { it.canonicalPath }.join(",")
 
                         Path path = Paths.get(tmpDirPath)
                         File tmp = Files.exists(path) ? path.toFile() : Files.createDirectories(path).toFile()

@@ -3,6 +3,7 @@ package org.grails.gradle.plugin.views
 import groovy.transform.CompileDynamic
 import groovy.transform.CompileStatic
 import org.gradle.api.Action
+import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Property
@@ -27,6 +28,10 @@ abstract class AbstractGroovyTemplateCompileTask extends AbstractCompile {
     @Input
     @Optional
     final Property<String> packageName
+
+    @InputFiles
+    @PathSensitive(PathSensitivity.RELATIVE)
+    final ConfigurableFileCollection grailsConfigurationPaths
 
     @InputDirectory
     final DirectoryProperty srcDir
@@ -54,6 +59,11 @@ abstract class AbstractGroovyTemplateCompileTask extends AbstractCompile {
         fileExtension = objectFactory.property(String)
         scriptBaseName = objectFactory.property(String)
         compilerName = objectFactory.property(String)
+        grailsConfigurationPaths = objectFactory.fileCollection()
+        grailsConfigurationPaths.from(
+                //TODO: historically this only used .yml, should it explore all configuration paths?
+                project.layout.projectDirectory.file("grails-app/conf/application.yml")
+        )
     }
 
     @Override
@@ -88,13 +98,16 @@ abstract class AbstractGroovyTemplateCompileTask extends AbstractCompile {
                         javaExecSpec.minHeapSize = compileOptions.forkOptions.memoryInitialSize
 
                         String packageImports = projectPackageNames.join(',') ?: packageName.get()
+
+                        String configFiles = grailsConfigurationPaths.files.collect { it.canonicalPath }.join(",")
+
                         List<String> arguments = [
                                 srcDir.get().asFile.canonicalPath,
                                 destinationDirectory.get().asFile.canonicalPath,
                                 targetCompatibility,
                                 packageImports,
                                 packageName.get(),
-                                project.file('grails-app/conf/application.yml').canonicalPath,
+                                configFiles,
                                 compileOptions.encoding.get()
                         ] as List<String>
 
