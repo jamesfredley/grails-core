@@ -25,7 +25,9 @@ dependencies {
 //  Dynamic test discovery also won't find them so extract the class files to force junit to work.
 TaskProvider<Sync> extractTck = tasks.register('extractTckJar', Sync)
 extractTck.configure { Sync it ->
-    inputs.files(configurations.tck)
+    it.inputs.files(configurations.tck)
+    it.outputs.upToDateWhen { false }
+    it.finalizedBy(tasks.named('test', Test))
 
     it.from { zipTree(configurations.tck.singleFile) }
     it.into(layout.buildDirectory.dir('extracted-tck-classes'))
@@ -39,11 +41,11 @@ cleanupTask.configure { Task it ->
     it.doLast {
         extractDir.get().asFile.deleteDir()
     }
-    it.outputs.upToDateWhen {false}
+    it.outputs.upToDateWhen { false }
 }
 
-tasks.withType(Test).configureEach {
-    onlyIf {
+tasks.withType(Test).configureEach { Test it ->
+    it.onlyIf {
         if (project.hasProperty('onlyFunctionalTests')) {
             return false
         }
@@ -68,13 +70,13 @@ tasks.withType(Test).configureEach {
             return false
         }
 
-        if(project.hasProperty('skipTests')) {
+        if (project.hasProperty('skipTests')) {
             return false
         }
 
         true
     }
 
-    testClassesDirs = objects.fileCollection().from(extractTck, testClassesDirs)
-    finalizedBy(cleanupTask)
+    it.testClassesDirs = objects.fileCollection().from(extractTck, testClassesDirs)
+    it.finalizedBy(cleanupTask)
 }
