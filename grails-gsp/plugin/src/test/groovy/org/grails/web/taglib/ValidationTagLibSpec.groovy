@@ -28,7 +28,6 @@ import org.springframework.beans.factory.support.RootBeanDefinition
 import org.springframework.context.MessageSourceResolvable
 import org.springframework.context.i18n.LocaleContextHolder
 import org.springframework.validation.FieldError
-import spock.lang.Ignore
 import spock.lang.PendingFeature
 import spock.lang.Specification
 
@@ -167,7 +166,7 @@ class ValidationTagLibSpec extends Specification implements TagLibUnitTest<Valid
         applyTemplate(htmlCodecDirective + '<g:render template="/sometemplate_nocodec" model="[book:book]" />' + template, [book:b]) == expected + expected
     }
 
-    @Ignore
+    @PendingFeature
     void testFieldValueTagForBadUrl() {
         given:
         def b = new ValidationTagLibBook()
@@ -449,7 +448,7 @@ class ValidationTagLibSpec extends Specification implements TagLibUnitTest<Valid
         result.endsWith("</ul>")
     }
 
-    @Ignore
+    @PendingFeature
     void testRenderErrorsAsXMLTag() {
         given:
         def b = new ValidationTagLibBook()
@@ -521,7 +520,6 @@ class ValidationTagLibSpec extends Specification implements TagLibUnitTest<Valid
         applyTemplate(htmlCodecDirective + template, [book:b]) == expected
     }
 
-    @Ignore
     void testMessageHtmlEscapingWithFunctionSyntaxCall() {
         given:
         def b = new ValidationTagLibBook()
@@ -538,7 +536,7 @@ class ValidationTagLibSpec extends Specification implements TagLibUnitTest<Valid
 
     }
 
-    @Ignore
+    @PendingFeature
     void testMessageHtmlEscapingDifferentEncodings() {
         given:
         def b = new ValidationTagLibBook()
