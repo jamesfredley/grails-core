@@ -82,7 +82,6 @@ class TeamSpec extends HttpClientSpec {
         ''')
     }
 
-    @IgnoreIf({ System.getenv('GITHUB_REF') })
     void 'Test HAL rendering'() {
         when:
         HttpRequest request = HttpRequest.GET('/teams/hal/1')

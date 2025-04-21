@@ -62,7 +62,6 @@ class LinkGeneratorWithUrlMappingsSpec extends Specification{
             uri == "$baseUrl/$path"
     }
 
-    @IgnoreIf({ env['GITHUB_WORKFLOW'] })
     void "absolute links are generated when a relative link is asked for, but the deployment context is not known or set"() {
         when:
             context = null

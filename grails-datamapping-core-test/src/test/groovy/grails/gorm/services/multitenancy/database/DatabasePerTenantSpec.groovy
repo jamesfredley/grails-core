@@ -29,8 +29,6 @@ class DatabasePerTenantSpec extends Specification {
     )
     @Shared IBookService bookDataService = datastore.getService(IBookService)
 
-    //Ignore test on Github Workflow because of inconsistent behavior
-    @IgnoreIf({ System.getenv("GITHUB_WORKFLOW")})
     void 'Test database per tenant'() {
         when:"When there is no tenant"
         Book.count()

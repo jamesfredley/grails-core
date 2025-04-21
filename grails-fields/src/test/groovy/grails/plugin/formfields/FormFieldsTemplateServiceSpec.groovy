@@ -388,7 +388,7 @@ class FormFieldsTemplateServiceSpec extends BuildsAccessorFactory implements Ser
 
 //	@IgnoreIf({ GrailsApplicationAttributes.metaClass.hasProperty(GrailsApplicationAttributes, "CONTROLLER_NAMESPACE_ATTRIBUTE") == false })
 	@IgnoreIf({ GrailsWebRequest.metaClass.respondsTo(GrailsWebRequest, "getControllerNamespace").size() == 0 })
-	@Issue('https://github.com/grails-fields-plugin/grails-fields/issues/168')
+	@Issue('https://github.com/grails/fields/issues/168')
 	void "resolves template from namespaced controller views directory"() {
 		given:
 		webRequest.setControllerNamespace('namespace')
