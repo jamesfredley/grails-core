@@ -4,19 +4,13 @@ import grails.gorm.annotation.AutoTimestamp
 import grails.persistence.Entity
 
 @Entity
-class Cyborg extends HomoSapiens {
+class Cyborg extends Person {
 	@AutoTimestamp(AutoTimestamp.EventType.CREATED) Date created
 	@AutoTimestamp Date modified
 }
 
 @Entity
-class Person extends HomoSapiens {}
-
-/*
- 	Workaround for problem with domain inheritance in Groovy 4.
- 	(Superclasses cannot be Gorm entities).
-*/
-class HomoSapiens {
+class Person {
     Salutation salutation
 	String name
 	String password
