@@ -93,7 +93,7 @@ tasks.withType(Test).configureEach { Test task ->
     }
     if (findProperty('testForked')) {
         task.maxParallelForks = configuredTestParallel
-        task.forkEvery = (findProperty('testForkEvery') ?: 0) as long
+        task.forkEvery = (findProperty('testForkEvery') ?: 0)
     }
     if (findProperty('testJvmArgs')) {
         task.jvmArgs = findProperty('testJvmArgs')
