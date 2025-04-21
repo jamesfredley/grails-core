@@ -82,7 +82,7 @@ tasks.register('aggregateGroovydoc', Groovydoc).configure { Groovydoc gdoc ->
     gdoc.includeMainForScripts = false
     gdoc.processScripts = false
     gdoc.inputs.files(gdoc.source)
-    gdoc.outputs.dir(gdoc.destinationDir)
+    gdoc.outputs.dir(project.layout.buildDirectory.dir('docs/api'))
 
     def gebVersion = getVersion('org.gebish', 'geb-spock')
     def testContainersVersion = getVersion('org.testcontainers', 'testcontainers')
@@ -184,7 +184,7 @@ tasks.register('publishGuide', PublishGuide).configure { PublishGuide publish ->
         def springBootVersion = getVersion('org.springframework.boot', 'spring-boot')
 
         properties = [
-                'api'                      : '../../api',
+                'api'                      : '../api',
                 'safe'                     : 'UNSAFE', // Make sure any asciidoc security is disabled
                 'jakartaee'                : 'https://jakarta.ee/specifications/platform/10/apidocs/',
                 'javase'                   : "https://docs.oracle.com/en/java/javase/${javaVersion}/docs/api/",
@@ -194,10 +194,10 @@ tasks.register('publishGuide', PublishGuide).configure { PublishGuide publish ->
                 'springapi'                : "https://docs.spring.io/spring/docs/${springVersion}/javadoc-api/",
                 'springdocs'               : "https://docs.spring.io/spring/docs/${springVersion}/",
                 'githubBranch'             : githubBranch,
-                'gormApiDocs'              : '../../grails-data/api',
-                'gormWebsite'              : '../../grails-data',
-                'hibernate5Guide'          : '../../grails-data/hibernate5',
-                'mongodb5Guide'            : '../../grails-data/mongodb',
+                'gormApiDocs'              : '../grails-data/api',
+                'gormWebsite'              : '../grails-data',
+                'hibernate5Guide'          : '../grails-data/hibernate5',
+                'mongodb5Guide'            : '../grails-data/mongodb',
                 'hibernate5Reference'      : 'https://docs.jboss.org/hibernate/orm/5.6/userguide/html_single/Hibernate_User_Guide.html',
                 'springapi'                : "https://docs.spring.io/spring/docs/${springVersion}/javadoc-api/",
                 'springbootapi'            : "https://docs.spring.io/spring-boot/docs/${springBootVersion}/api",
@@ -259,7 +259,9 @@ tasks.register('publishPdf', PublishPdf).configure { PublishPdf pTask ->
 
 tasks.register('createDocsDestination').configure { Task it ->
     doFirst {
-        rootProject.layout.buildDirectory.dir('docs').get().asFile.mkdirs()
+        File outputDir = rootProject.layout.buildDirectory.dir('docs').get().asFile
+        outputDir.deleteDir()
+        outputDir.mkdirs()
     }
 }
 
