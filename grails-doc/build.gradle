@@ -250,7 +250,7 @@ tasks.register('generateGuide').configure { Task task ->
 }
 
 tasks.register('docs', Sync).configure { Sync it ->
-    it.dependsOn 'aggregateGroovydoc', 'generateGuide', 'generateGuidePdf', ':grails-data-docs-stage:docs'
+    it.dependsOn 'aggregateGroovydoc', 'generateGuide', ':grails-data-docs-stage:docs'
 
     def manualDocsDir = project.layout.buildDirectory.dir('modified-guide')
     def apiDocsDir = project.layout.buildDirectory.dir('combined-api')
