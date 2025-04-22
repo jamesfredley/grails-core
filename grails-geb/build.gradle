@@ -25,7 +25,7 @@ dependencies {
     // for consistency, add the platform here and later move away from the grails-plugin gradle plugin apply
     implementation platform(project(':grails-bom'))
     testFixturesApi(platform(project(':grails-bom')))
-    testFixturesimplementation platform(project(':grails-bom'))
+    testFixturesImplementation platform(project(':grails-bom'))
 
     compileOnly project(':grails-core') // Provided, as this is a Grails plugin
 
