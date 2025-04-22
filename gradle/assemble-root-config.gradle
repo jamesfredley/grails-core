@@ -103,10 +103,10 @@ tasks.register('assemble', Zip).configure {
             def pathsToExclude = [
                     'ant/bin', 'src/grails', 'src/war'
             ]
-            docProjects.each { String projectName ->
+            docProjects.each { projectName ->
                 pathsToExclude << rootProject.projectDir.relativePath(project(projectName as String).projectDir)
             }
-            testProjects.each { def projectName ->
+            testProjects.each { projectName ->
                 pathsToExclude << rootProject.projectDir.relativePath(project(projectName as String).projectDir)
             }
             exclude pathsToExclude
