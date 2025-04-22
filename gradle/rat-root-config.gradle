@@ -31,5 +31,7 @@ tasks.named('rat') {
             'LICENSE',
             'NOTICE',
             '**/*.png', '**/*.svg', '**/*.ico', '**/*.eps', '**/*.icns', '**/*.jpg', '**/*.jpeg', '**/*.gif', // Image files
+            '**/*.db', // H2 database test files
+            '**/*.gitkeep', // Empty Gitkeep file
     ]
 }
