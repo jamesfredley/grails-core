@@ -7,7 +7,6 @@ apply plugin: 'org.apache.grails.gradle.grails-web'
 dependencies {
 
     implementation platform(project(':grails-bom'))
-    integrationTestImplementation platform(project(':grails-bom'))
 
     implementation 'org.apache.grails:grails-data-mongodb'
     implementation 'org.apache.grails:grails-core'
