@@ -8,21 +8,8 @@ dependencies {
     documentation 'org.apache.groovy:groovy-ant'
 }
 
-tasks.register('cleanDocs', Delete).configure { Delete it ->
-//    it.inputs.files(
-//            rootProject.layout.projectDirectory.dir('grails-data-docs/guide-whats-new/src/main/docs'),
-//            rootProject.layout.projectDirectory.dir('grails-data-docs/guide-rx/src/main/docs'),
-//            rootProject.layout.projectDirectory.dir('grails-data-docs/guide-developer/src/main/docs'),
-//            rootProject.layout.projectDirectory.dir('grails-data-docs/data-mapping-website/src/main/resources'),
-//            rootProject.layout.projectDirectory.dir('grails-data-hibernate5/docs/src/main/docs'),
-//            rootProject.layout.projectDirectory.dir('grails-data-mongodb/docs/src/main/docs'),
-//    )
-    it.group = 'documentation'
-    it.delete(project.layout.buildDirectory.dir('docs'))
-}
-
 // grails-data-mapping api
-tasks.register('data-mapping-groovydoc', Groovydoc).configure { Groovydoc task ->
+tasks.register('aggregateDataMappingGroovydoc', Groovydoc).configure { Groovydoc task ->
     task.group = 'documentation'
     task.description = 'Copies Groovy API Documentation for all supporting projects'
     Set<Project> docProjects = rootProject.subprojects.findAll {
@@ -92,7 +79,7 @@ tasks.register('copyHibernate5Docs', Sync).configure { Sync it ->
 
 tasks.register('docs', Sync).configure { Sync it ->
     it.group = 'documentation'
-    it.dependsOn('copyRootWebsite', 'data-mapping-groovydoc', 'copyGuides', 'copyMongodbDocs', 'copyHibernate5Docs')
+    it.dependsOn('aggregateDataMappingGroovydoc', 'copyGuides', 'copyMongodbDocs', 'copyHibernate5Docs')
 
     def websiteDir = rootProject.layout.projectDirectory.dir('grails-data-docs/data-mapping-website/src/main/resources')
     def guidesDir = project.layout.buildDirectory.dir('guides/grails-data')
@@ -104,13 +91,6 @@ tasks.register('docs', Sync).configure { Sync it ->
 
     it.from websiteDir, guidesDir, mongoApiDir, hibernate5ApiDir, dataCoreApiDir
     it.into combinedDir
-}
-
-tasks.register('copyRootWebsite', Copy).configure { Copy it ->
-    it.dependsOn('cleanDocs')
-    it.group = 'documentation'
-    it.from rootProject.layout.projectDirectory.dir('grails-data-docs/data-mapping-website/src/main/resources')
-    it.into project.layout.buildDirectory.dir('docs/grails-data')
 }
 
 tasks.register('copyGuides').configure { Task task ->

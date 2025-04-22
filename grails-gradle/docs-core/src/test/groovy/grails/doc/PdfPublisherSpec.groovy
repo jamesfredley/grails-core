@@ -16,7 +16,7 @@ class PdfPublisherSpec extends Specification {
         !new File("${sampleDocsFolderPath}/guide/${pdfName}").exists()
 
         when:
-        PdfPublisher.publishPdfFromHtml(sampleDocsFolder, child, pdfName)
+        PdfPublisher.publishPdfFromHtml(sampleDocsFolder, new File(sampleDocsFolder, child), pdfName)
 
         then:
         noExceptionThrown()

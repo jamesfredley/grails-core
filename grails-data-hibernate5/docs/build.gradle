@@ -40,7 +40,7 @@ dependencies {
 
 tasks.named('asciidoctor', AsciidoctorTask) {
     inputs.dir layout.projectDirectory.dir('src/docs')
-    outputs.dir layout.buildDirectory.dir('docs')
+    outputs.dir layout.buildDirectory.dir('asciidoc/manual')
     baseDirFollowsSourceDir()
     resources {
         from("$project.projectDir/src/docs/asciidoc/images")
@@ -68,22 +68,12 @@ tasks.named('asciidoctor', AsciidoctorTask) {
     }
 }
 
-tasks.register('copyDocs', Copy) { Copy it ->
-    it.group = 'documentation'
-    it.dependsOn('asciidoctor')
-    it.mustRunAfter('asciidoctor', 'groovydoc', 'copyResources')
-    it.finalizedBy('cleanAsciidoc')
-    it.from(layout.buildDirectory.dir('docs/asciidoc'))
-    it.into(layout.buildDirectory.dir('docs/manual'))
-}
-
-tasks.register('cleanAsciidoc', Delete).configure { Delete it ->
-    it.group = 'documentation'
-    it.delete(layout.buildDirectory.dir('docs/asciidoc'))
-}
-
 tasks.withType(Groovydoc).configureEach {
-    docTitle = "GORM for Hibernate 5 - $project.version"
+    it.dependsOn(rootProject.subprojects
+            .findAll { it.findProperty('gormApiDocs') }
+            .collect { ":${it.name}:groovydoc" })
+
+    it.docTitle = "GORM for Hibernate 5 - $project.version"
 
     def sourceFiles = coreProjects.collect {
         rootProject.layout.projectDirectory.files("$it/src/main/groovy")
@@ -93,35 +83,33 @@ tasks.withType(Groovydoc).configureEach {
             .findAll { it.findProperty('gormApiDocs') }
             .each { sourceFiles += it.files('src/main/groovy') }
 
-    source = sourceFiles
-    destinationDir = layout.buildDirectory.dir('docs/api').get().asFile
-    access = GroovydocAccess.PROTECTED
-    processScripts = false
-    includeMainForScripts = false
-    includeAuthor = false
-    classpath = configurations.documentation
-    groovyClasspath += configurations.documentation
+    it.source = sourceFiles
+    it.destinationDir = layout.buildDirectory.dir('combined-api/api').get().asFile
+    it.access = GroovydocAccess.PROTECTED
+    it.processScripts = false
+    it.includeMainForScripts = false
+    it.includeAuthor = false
+    it.classpath = configurations.documentation
+    it.groovyClasspath += configurations.documentation
 }
 
-tasks.register('copyResources', Copy).configure { Copy it ->
-    it.group = 'documentation'
-    it.from(layout.projectDirectory.dir('src/docs/resources'))
-    it.into(layout.buildDirectory.dir('docs'))
-}
-
-tasks.register('docs').configure { Task docTask ->
+tasks.register('docs', Sync).configure { Sync docTask ->
     docTask.group = 'documentation'
-    docTask.dependsOn('asciidoctor', 'copyDocs', 'cleanAsciidoc', 'groovydoc', 'copyResources',
-            rootProject.subprojects
-                    .findAll { it.findProperty('gormApiDocs') }
-                    .collect { ":${it.name}:groovydoc" }
-    )
+    docTask.dependsOn('asciidoctor', 'groovydoc')
+
+    def apiDir = layout.buildDirectory.dir('combined-api')
+    def resourceDir = layout.projectDirectory.dir('src/docs/resources')
+    def guideDir = layout.buildDirectory.dir('asciidoc')
+
+    docTask.from apiDir, resourceDir, guideDir
+    docTask.into layout.buildDirectory.dir('docs')
+
     docTask.finalizedBy('assembleDocsDist')
 }
 
 tasks.register('assembleDocsDist', Zip).configure { Zip it ->
     it.group = 'documentation'
-    it.dependsOn('docs', 'copyDocs')
+    it.dependsOn('docs')
     it.from(layout.buildDirectory.dir('docs'))
     it.archiveFileName = "${project.name}-${project.version}.zip"
     it.destinationDirectory = project.layout.buildDirectory.dir('distributions')

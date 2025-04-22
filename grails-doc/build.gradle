@@ -74,7 +74,7 @@ tasks.register('aggregateGroovydoc', Groovydoc).configure { Groovydoc gdoc ->
     gdoc.exclude('META-INF/**', '*yml', '*properties', '*xml', '**/Application.groovy', '**/Bootstrap.groovy', '**/resources.groovy')
     gdoc.classpath = files(sources.collect{ SourceSet it -> it.compileClasspath.filter(File.&isDirectory) }.flatten().unique())
     gdoc.groovyClasspath = configurations.documentation
-    gdoc.destinationDir = project.layout.buildDirectory.dir('docs/api').get().asFile
+    gdoc.destinationDir = project.layout.buildDirectory.dir('combined-api/api').get().asFile
     gdoc.windowTitle = "Grails $projectVersion"
     gdoc.docTitle = "Grails $projectVersion"
     gdoc.access = GroovydocAccess.PROTECTED
@@ -82,10 +82,10 @@ tasks.register('aggregateGroovydoc', Groovydoc).configure { Groovydoc gdoc ->
     gdoc.includeMainForScripts = false
     gdoc.processScripts = false
     gdoc.inputs.files(gdoc.source)
-    gdoc.outputs.dir(project.layout.buildDirectory.dir('docs/api'))
+    gdoc.outputs.dir(gdoc.destinationDir)
 
-    def gebVersion = getVersion('org.gebish', 'geb-spock')
-    def testContainersVersion = getVersion('org.testcontainers', 'testcontainers')
+    def gebVersion = getVersion('geb-spock')
+    def testContainersVersion = getVersion('testcontainers')
     def springVersion = getVersion('spring-core')
     def springBootVersion = getVersion('spring-boot')
 
@@ -128,11 +128,11 @@ tasks.register('dist', Zip).configure { Zip it ->
 }
 
 tasks.register('createReleaseDropdown', AddReleaseDropDown).configure { AddReleaseDropDown it ->
-    it.dependsOn 'publishGuide', 'publishPdf'
-    def inputFiles = [project.layout.buildDirectory.file('manual/guide/single.html').get().asFile, project.layout.buildDirectory.file('manual/index.html').get().asFile]
+    it.dependsOn 'publishGuide'
 
-    it.inputs.files(inputFiles)
-    it.outputs.dir(outputDir)
+    it.inputFiles = project.layout.buildDirectory.files('original-guide/guide/single.html')
+    it.docsDirectory = project.layout.buildDirectory.dir('original-guide')
+    it.outputDir = project.layout.buildDirectory.dir('modified-guide')
 }
 
 tasks.register('resolveGroovyVersion').configure { Task versionTask ->
@@ -148,7 +148,7 @@ tasks.register('resolveGroovyVersion').configure { Task versionTask ->
     logger.lifecycle('Resolved Groovy version for Guide links: {}', ext.resolved)
 }
 
-String getVersion(String group = null, String artifact) {
+String getVersion(String artifact) {
     String version = configurations.runtimeClasspath
             .resolvedConfiguration
             .resolvedArtifacts
@@ -163,27 +163,22 @@ String getVersion(String group = null, String artifact) {
 
 tasks.register('publishGuide', PublishGuide).configure { PublishGuide publish ->
     publish.dependsOn(['generateBomDocumentation', 'aggregateGroovydoc', 'jar', 'resolveGroovyVersion', 'processTestResources', 'compileTestJava', 'compileTestGroovy', 'test'])
-    publish.targetDir = project.layout.buildDirectory.dir('manual').get().asFile
 
-    publish.doFirst {
-        def searchDirs = rootProject.projectDir.listFiles().findAll {
-            new File(it, 'src/main/groovy/org/grails').exists()
-        }.collect {
-            new File(it, 'src/main/groovy/org/grails')
-        }
+    // No language setting because we want the English guide to be
+    // generated with a 'en' in the path, but the source is in 'en'
+    // so that it's easy to track with git.
+    publish.targetDir = project.layout.buildDirectory.dir('original-guide')
+    publish.sourceRepo = "https://github.com/apache/grails-core/edit/$githubBranch/grails-doc/src/en"
+    publish.sourceDir = project.layout.projectDirectory.dir('src/en')
+    publish.propertiesFiles = project.files(
+            rootProject.layout.projectDirectory.file('gradle.properties')
+    )
 
-        // No language setting because we want the English guide to be
-        // generated with a 'en' in the path, but the source is in 'en'
-        // so that it's easy to track with git.
-        sourceRepo = "https://github.com/apache/grails-core/edit/$githubBranch/grails-doc/src/en"
-        sourceDir = project.layout.projectDirectory.dir('src/en').asFile
-        propertiesFiles = [rootProject.layout.projectDirectory.file('gradle.properties').asFile]
-        asciidoc = true
+    publish.properties = project.provider {
+        def springVersion = getVersion('spring-core')
+        def springBootVersion = getVersion('spring-boot')
 
-        def springVersion = getVersion('org.springframework','spring-core')
-        def springBootVersion = getVersion('org.springframework.boot', 'spring-boot')
-
-        properties = [
+        [
                 'api'                      : '../api',
                 'safe'                     : 'UNSAFE', // Make sure any asciidoc security is disabled
                 'jakartaee'                : 'https://jakarta.ee/specifications/platform/10/apidocs/',
@@ -219,8 +214,7 @@ tasks.register('publishGuide', PublishGuide).configure { PublishGuide publish ->
                 'rxjavadocs'               : 'https://reactivex.io/RxJava/1.x/javadoc',
                 'rxjava2docs'              : 'https://reactivex.io/RxJava/2.x/javadoc',
                 'tags'                     : '../ref/Tags'
-        ]
-        macros = [new grails.doc.macros.GspTagSourceMacro(searchDirs)]
+        ] as Map<String, String>
     }
 }
 
@@ -252,41 +246,37 @@ tasks.register('generateBomDocumentation').configure { Task it ->
     }
 }
 
-tasks.register('publishPdf', PublishPdf).configure { PublishPdf pTask ->
+tasks.register('generateGuidePdf', PublishPdf).configure { PublishPdf pTask ->
     pTask.dependsOn 'publishGuide'
-    pTask.outputDirectory = project.layout.buildDirectory.dir('manual')
+    pTask.outputDirectory = project.layout.buildDirectory.dir('guide-pdf')
+    pTask.guideSingleFile = project.layout.buildDirectory.file('original-guide/guide/single.html')
 }
 
-tasks.register('createDocsDestination').configure { Task it ->
-    doFirst {
-        File outputDir = rootProject.layout.buildDirectory.dir('docs').get().asFile
-        outputDir.deleteDir()
-        outputDir.mkdirs()
-    }
+tasks.register('generateGuide').configure { Task task ->
+    task.dependsOn('createReleaseDropdown')
+    task.finalizedBy('generateGuidePdf')
 }
 
 tasks.register('docs', Sync).configure { Sync it ->
-    it.dependsOn 'createDocsDestination', 'aggregateGroovydoc', 'publishGuide', 'createReleaseDropdown', 'publishPdf', ':grails-data-docs-stage:docs', ':grails-data-docs-stage:groovydoc'
+    it.dependsOn 'aggregateGroovydoc', 'generateGuide', 'generateGuidePdf', ':grails-data-docs-stage:docs'
 
-    def manualDocsDir = publishGuide.targetDir
-    def apiDocsDir = rootProject.layout.buildDirectory.dir('docs')
-    // This is the output directory of the groovydoc task in the grails project.
-    def modifiedPagesDir = createReleaseDropdown.outputDir
-    def mergedDocsDir = project.layout.buildDirectory.dir('docs')
+    def manualDocsDir = project.layout.buildDirectory.dir('modified-guide')
+    def apiDocsDir = project.layout.buildDirectory.dir('combined-api')
     def dataDocsDir = rootProject.layout.projectDirectory.dir('grails-data-docs/stage/build/docs')
+    def guidePdfDir = project.layout.buildDirectory.dir('guide-pdf')
+
+    def mergedDocsDir = project.layout.buildDirectory.dir('docs')
 
     it.inputs.dir manualDocsDir
     it.inputs.dir apiDocsDir
-    it.inputs.dir modifiedPagesDir
-    it.inputs.dir project.layout.projectDirectory.dir('src')
     it.inputs.dir dataDocsDir
+    it.inputs.dir guidePdfDir
+    it.inputs.dir project.layout.projectDirectory.dir('src')
 
     it.outputs.dir mergedDocsDir
 
-    it.from manualDocsDir, apiDocsDir, modifiedPagesDir, dataDocsDir
+    it.from manualDocsDir, apiDocsDir, dataDocsDir
     it.into mergedDocsDir
-
-    it.duplicatesStrategy = DuplicatesStrategy.INCLUDE
 }
 
 artifacts {
