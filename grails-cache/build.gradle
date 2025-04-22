@@ -30,7 +30,7 @@ dependencies {
 
     console project(':grails-console')
 
-    testImplementation 'org.apache.grails:grails-testing-support-datamapping'
+    testImplementation project(':grails-testing-support-datamapping')
     testImplementation project(':grails-testing-support-web')
     testImplementation 'org.spockframework:spock-core', {
         exclude group: 'org.apache.groovy'

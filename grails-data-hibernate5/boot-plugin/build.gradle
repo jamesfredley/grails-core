@@ -1,0 +1,46 @@
+plugins {
+    id 'groovy'
+    id 'java-library'
+}
+
+version = projectVersion
+group = 'org.apache.grails'
+
+ext {
+    gormApiDocs = true
+    pomTitle = 'Grails GORM'
+    pomDescription = 'GORM - Grails Data Access Framework'
+    pomDevelopers =  [
+            'graemerocher': 'Graeme Rocher',
+            'jeffscottbrown': 'Jeff Brown',
+            'burtbeckwith': 'Burt Beckwith',
+            'puneetbehl': 'Puneet Behl',
+    ]
+}
+
+dependencies {
+    // TODO: Clarify and clean up dependencies
+    implementation platform(project(':grails-bom'))
+
+    compileOnly project(':grails-shell-cli'), {
+        exclude group:'org.apache.groovy', module:'groovy'
+    }
+    api "org.apache.groovy:groovy"
+    api "org.springframework.boot:spring-boot-autoconfigure"
+    api project(":grails-data-hibernate5-core")
+
+    testImplementation project(':grails-shell-cli'), {
+        exclude group:'org.apache.groovy', module:'groovy'
+    }
+    testImplementation "org.spockframework:spock-core"
+
+    testRuntimeOnly "org.apache.tomcat:tomcat-jdbc"
+    testRuntimeOnly "com.h2database:h2"
+}
+
+apply {
+    from rootProject.layout.projectDirectory.file('gradle/java-config.gradle')
+    from rootProject.layout.projectDirectory.file('gradle/hibernate5-test-config.gradle')
+    from rootProject.layout.projectDirectory.file('gradle/publish-config.gradle')
+    from rootProject.layout.projectDirectory.file('gradle/docs-config.gradle')
+}

@@ -4,7 +4,7 @@ plugins {
     id 'maven-publish'
 }
 
-version = project.projectVersion
+version = projectVersion
 group = 'org.apache.grails'
 
 dependencies {

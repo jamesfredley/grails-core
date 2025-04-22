@@ -28,7 +28,7 @@ groovyVersion=3.0.7
 
 ### Bump up GORM Version
 
-If you were using http://gorm.grails.org[GORM], you will need to update the version defined in `gradle.properties` as:
+If you were using link:{gormWebsite}[GORM], you will need to update the version defined in `gradle.properties` as:
 
 [source, properties]
 .gradle.properties

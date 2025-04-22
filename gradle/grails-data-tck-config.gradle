@@ -1,0 +1,83 @@
+configurations {
+    tck {
+        transitive = false
+    }
+
+    // Because we reference tests in the SimpleTestSuite to be able to run them in the IDE,
+    // the tests need explicitly added to the classpath as well
+    testImplementation.extendsFrom(tck)
+}
+
+dependencies {
+    if (!project.hasProperty('includeBaseTckClass') || project.findProperty('includeBaseTckClass')) {
+        testImplementation project(':grails-datamapping-tck-base')
+    }
+    // So we can easily extract the compiled classes
+    tck project(':grails-datamapping-tck-tests')
+    testImplementation project(':grails-datamapping-tck-tests')
+    testImplementation project(':grails-datamapping-tck-domains')
+
+    runtimeOnly 'org.apache.groovy:groovy-dateutil', {
+        // Groovy Date Utils Extensions are used in the tests
+    }
+}
+
+// TODO: gradle will happily put the jar file on the classpath, but junit won't find the tests.
+//  Dynamic test discovery also won't find them so extract the class files to force junit to work.
+TaskProvider<Sync> extractTck = tasks.register('extractTckJar', Sync)
+extractTck.configure { Sync it ->
+    it.inputs.files(configurations.tck)
+    it.outputs.upToDateWhen { false }
+    it.finalizedBy(tasks.named('test', Test))
+
+    it.from { zipTree(configurations.tck.singleFile) }
+    it.into(layout.buildDirectory.dir('extracted-tck-classes'))
+}
+
+// There is a known issue with IntelliJ that can cause it's inspection process to lock up.
+// this is a work around to help prevent the scenario that causes the lock up.
+def cleanupTask = tasks.register('cleanupTckClasses')
+cleanupTask.configure { Task it ->
+    Provider<Directory> extractDir = layout.buildDirectory.dir('extracted-tck-classes')
+    it.doLast {
+        extractDir.get().asFile.deleteDir()
+    }
+    it.outputs.upToDateWhen { false }
+}
+
+tasks.withType(Test).configureEach { Test it ->
+    it.onlyIf {
+        if (project.hasProperty('onlyFunctionalTests')) {
+            return false
+        }
+
+        if (project.hasProperty('skipHibernate5Tests') && project.name.startsWith('grails-data-hibernate5')) {
+            return false
+        }
+
+        if (project.hasProperty('onlyHibernate5Tests') && !project.name.startsWith('grails-data-hibernate5')) {
+            return false
+        }
+
+        if (project.hasProperty('skipMongoTests') && project.name.startsWith('grails-data-mongo')) {
+            return false
+        }
+
+        if (project.hasProperty('onlyMongodbTests') && !project.name.startsWith('grails-data-mongo')) {
+            return false
+        }
+
+        if (project.hasProperty('onlyCoreTests')) {
+            return false
+        }
+
+        if (project.hasProperty('skipTests')) {
+            return false
+        }
+
+        true
+    }
+
+    it.testClassesDirs = objects.fileCollection().from(extractTck, testClassesDirs)
+    it.finalizedBy(cleanupTask)
+}

@@ -13,26 +13,8 @@ env:
   # to prevent throttling of the github api, include the github token in an environment variable since the build will check for it
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 jobs:
-  skip_check:
-    runs-on: ubuntu-latest
-    outputs:
-      found_skip_publish: ${{ steps.check_prevent_property.outputs.value }}
-    permissions:
-      contents: read
-    steps:
-      - name: "📥 Checkout repository"
-        uses: actions/checkout@v4
-      - name: "🔍 Check if we should skip publish"
-        id: check_prevent_property
-        run: |
-          if grep -q '^preventSnapshotPublish=true' gradle.properties; then
-            echo "value=true" >> $GITHUB_OUTPUT
-          else
-            echo "value=false" >> $GITHUB_OUTPUT
-          fi
   buildGradle:
     name: 'Build Gradle Plugins'
-    needs: skip_check
     permissions:
       contents: read  #  to fetch code (actions/checkout)
     strategy:
@@ -58,7 +40,6 @@ jobs:
         run: ./gradlew build assemble --continue --stacktrace
   build:
     name: 'Build Grails-Core'
-    needs: skip_check
     permissions:
       contents: read  #  to fetch code (actions/checkout)
     strategy:
@@ -81,10 +62,15 @@ jobs:
           develocity-access-key: ${{ secrets.GRAILS_DEVELOCITY_ACCESS_KEY  }}
       - name: "🔨 Build project"
         id: build
-        run: ./gradlew build assemble groovydoc -PskipFunctionalTests --continue --stacktrace
+        run: >
+          ./gradlew build 
+          assemble 
+          groovydoc 
+          --continue 
+          --stacktrace 
+          -PskipFunctionalTests -PskipMongodbTests -PskipHibernate5Tests
   functional:
     name: "Functional Tests"
-    needs: skip_check
     permissions:
       contents: read  #  to fetch code (actions/checkout)
     strategy:
@@ -105,10 +91,68 @@ jobs:
         with:
           develocity-access-key: ${{ secrets.GRAILS_DEVELOCITY_ACCESS_KEY  }}
       - name: "🔨 Functional Tests"
-        run: ./gradlew build -PonlyFunctionalTests --stacktrace
+        run: >
+          ./gradlew 
+          build 
+          --stacktrace 
+          -PonlyFunctionalTests -PskipMongodbTests -PskipHibernate5Tests
+  mongodbFunctional:
+    name: "Mongodb Functional Tests"
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        java: [ 17, 21 ]
+        mongodb-version: [ '5.0', '6.0', '7.0', '8.0' ]
+    steps:
+      - name: "📥 Checkout the repository"
+        uses: actions/checkout@v4
+      - name: "☕️ Setup JDK"
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ matrix.java }}
+          distribution: liberica
+      - name: "🐘 Setup Gradle"
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          develocity-access-key: ${{ secrets.GRAILS_DEVELOCITY_ACCESS_KEY }}
+      - name: "🔨 Run Build"
+        id: build
+        env:
+          GITHUB_MAVEN_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
+        run: >
+          ./gradlew 
+          cleanTest 
+          build 
+          --continue 
+          -PonlyMongodbTests -PmongodbContainerVersion=${{ matrix.mongodb-version }}
+  hibernate5Functional:
+    name: "Hibernate5 Functional Tests"
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        java: [ 17, 21 ]
+    steps:
+      - name: "📥 Checkout the repository"
+        uses: actions/checkout@v4
+      - name: "☕️ Setup JDK"
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ matrix.java }}
+          distribution: liberica
+      - name: "🐘 Setup Gradle"
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          develocity-access-key: ${{ secrets.GRAILS_DEVELOCITY_ACCESS_KEY }}
+      - name: "🔨 Run Build"
+        id: build
+        env:
+          GITHUB_MAVEN_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
+        run: ./gradlew cleanTest build --continue -PonlyHibernate5Tests
   publishGradle:
-    if: github.event_name == 'push' && needs.skip_check.outputs.found_skip_publish != 'true'
-    needs: [ skip_check, buildGradle ]
+    if: github.repository_owner == 'apache' && github.event_name == 'push'
+    needs: [ buildGradle ]
     permissions:
       contents: read # limit to read access
     runs-on: ubuntu-latest
@@ -135,8 +179,8 @@ jobs:
         run: >
           ./gradlew publish -Dorg.gradle.internal.publish.checksums.insecure=true
   publish:
-    if: github.event_name == 'push' && needs.skip_check.outputs.found_skip_publish != 'true'
-    needs: [ skip_check, publishGradle, build, functional]
+    if: github.repository_owner == 'apache' && github.event_name == 'push'
+    needs: [ publishGradle, build, functional, hibernate5Functional, mongodbFunctional]
     permissions:
       contents: read # limit to read access
     runs-on: ubuntu-latest
@@ -162,8 +206,8 @@ jobs:
         run: >
           ./gradlew publish
   docs:
-    if: github.event_name == 'push' && needs.skip_check.outputs.found_skip_publish != 'true'
-    needs: [skip_check, publish]
+    if: github.repository_owner == 'apache' && github.event_name == 'push'
+    needs: [publish]
     runs-on: ubuntu-latest
     permissions:
       contents: write

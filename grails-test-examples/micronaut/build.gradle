@@ -2,7 +2,7 @@ buildscript {
     repositories {
         // mavenLocal()
         maven { url = 'https://repo.grails.org/grails/core' }
-        maven { url = 'https://repository.apache.org/content/repositories/snapshots' }
+        maven { url = 'https://repository.apache.org/content/groups/snapshots' }
     }
     dependencies {
         classpath platform("org.apache.grails:grails-gradle-bom:${project.projectVersion}")
@@ -36,7 +36,7 @@ dependencies {
     implementation 'org.apache.grails:grails-core'
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
     implementation 'org.springframework.boot:spring-boot-starter-tomcat'
-    implementation 'org.apache.grails.web:grails-web-boot'
+    implementation 'org.apache.grails:grails-web-boot'
     implementation 'org.apache.grails:grails-logging'
     implementation 'org.apache.grails:grails-rest-transforms'
     implementation 'org.apache.grails:grails-databinding'

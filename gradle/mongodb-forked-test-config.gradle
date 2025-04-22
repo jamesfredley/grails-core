@@ -1,0 +1,51 @@
+dependencies {
+    // https://docs.gradle.org/8.3/userguide/upgrading_version_8.html#test_framework_implementation_dependencies
+    add('testRuntimeOnly', 'org.junit.platform:junit-platform-launcher')
+}
+
+tasks.named('compileTestGroovy', GroovyCompile) {
+    groovyOptions.forkOptions.jvmArgs = ['-Xmx768m']
+}
+
+tasks.withType(Test).configureEach {
+    onlyIf {
+        if (project.hasProperty('onlyFunctionalTests')) {
+            return false
+        }
+
+        if (project.hasProperty('skipMongodbTests')) {
+            return false
+        }
+
+        if (project.hasProperty('onlyHibernate5Tests')) {
+            return false
+        }
+
+        if (project.hasProperty('onlyCoreTests')) {
+            return false
+        }
+
+        if(project.hasProperty('skipTests')) {
+            return false
+        }
+
+        true
+    }
+
+    useJUnitPlatform()
+    maxParallelForks = configuredTestParallel
+    jvmArgs = ['-Xmx768M']
+    afterSuite {
+        System.out.print('.')
+        System.out.flush()
+    }
+    testLogging {
+        events('passed', 'skipped', 'failed')
+        exceptionFormat = 'full'
+        showCauses = true
+        showExceptions = true
+        showStackTraces = true
+    }
+    // Used in the TCK test to selectively enable/disable tests
+    systemProperty('mongodb.gorm.suite', 'true')
+}

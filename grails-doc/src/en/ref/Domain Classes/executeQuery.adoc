@@ -6,7 +6,7 @@
 === Purpose
 
 
-Executes https://gorm.grails.org/{gormVersion}/hibernate/manual/index.html#hql[HQL queries]
+Executes  link:{hibernate5Guide}/manual/index.html#hql[HQL queries]
 
 
 === Examples

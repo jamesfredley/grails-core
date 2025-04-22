@@ -1,0 +1,105 @@
+plugins {
+    id 'groovy'
+    id 'java-library'
+}
+
+version = projectVersion
+group = 'org.apache.grails.data'
+
+ext {
+    pomTitle = 'Grails GORM'
+    pomDescription = 'GORM - Grails Data Access Framework'
+    pomDevelopers = [
+            'graemerocher': 'Graeme Rocher',
+            'jeffscottbrown': 'Jeff Brown',
+            'burtbeckwith': 'Burt Beckwith',
+            'jameskleeh': 'James Kleeh',
+            'puneetbehl': 'Puneet Behl',
+            'jamesfredley': 'James Fredley'
+    ]
+}
+
+dependencies {
+
+    implementation platform(project(':grails-bom'))
+
+    api project(':grails-datastore-core'), {
+        // api: BuildableCriteria, ConnectionSourcesProvider, Criteria, Datastore, MappingContext, PersistentEntity,
+        //      ProjectionList, Query, QueryableCriteria, QueryCreator, Session, SessionCallback, ValidatorRegistry,
+        //      VoidSessionCallback
+        // impl: Association, AssociationQuery, Basic, ClassUtils, Connection, ConnectionSource, DatastoreUtils,
+        //       NameUtils, PersistentProperty, Restrictions, QueryArgumentsAware
+        if (excludeUnusedTransDeps) {
+            // API dependencies in grails-datastore-core
+            exclude group: 'jakarta.persistence', module: 'jakarta.persistence-api'
+            //exclude group: 'org.javassist', module: 'javassist' // activate JavassistProxyFactory
+            exclude group: 'org.springframework', module: 'spring-context'
+            exclude group: 'org.springframework', module: 'spring-core'
+            exclude group: 'org.springframework', module: 'spring-tx'
+        }
+    }
+    api project(':grails-datamapping-validation'), {
+        // api: BeforeValidateHelper, CascadingValidator, DefaultValidatorRegistry
+        if (excludeUnusedTransDeps) {
+            // API dependencies in grails-datamapping-validation
+            exclude group: 'commons-validator', module: 'commons-validator'
+            exclude group: 'org.apache.grails.data', module: 'grails-datastore-core'
+            exclude group: 'org.springframework', module: 'spring-context'
+        }
+    }
+    api 'jakarta.annotation:jakarta.annotation-api', {
+        // api: PostConstruct, PreDestroy
+    }
+    api 'jakarta.persistence:jakarta.persistence-api', {
+        // api: FetchType, JoinType
+    }
+    api 'org.springframework:spring-context', {
+        // api: Validator
+    }
+    api 'org.springframework:spring-jdbc', {
+        // api: DriverManagerDataSource
+        // impl: DelegatingDataSource, TransactionAwareDataSourceProxy
+    }
+    api 'org.springframework:spring-tx', {
+        // api: Isolation, PlatformTransactionManager, Propagation, TransactionAttribute, TransactionDefinition,
+        //      TransactionException
+        // impl: DataIntegrityViolationException, DefaultTransactionDefinition, LazyConnectionDataSourceProxy,
+        //       NoRollbackRuleAttribute, RollbackRuleAttribute, TransactionCallback, TransactionDefinition,
+        //       TransactionStatus, TransactionSynchronizationManager, TransactionSystemException
+    }
+
+    implementation 'org.apache.groovy:groovy', {
+        // impl: Closure, ClosureExpression, DelegatesTo, GroovyASTTransformationClass
+        // comp: CompileDynamic, CompileStatic
+    }
+    implementation 'org.hibernate.validator:hibernate-validator', {
+        // impl: ResourceBundleMessageInterpolator
+    }
+
+    compileOnlyApi "jakarta.el:jakarta.el-api:$elApiVersion"
+
+    runtimeOnly "org.glassfish.expressly:expressly:$defaultElImplementationVersion", {
+        // Note: Default EL implementation included for convenience,
+        //       can be replaced by downstream consumers
+    }
+
+    compileOnly 'org.slf4j:slf4j-api'
+
+    testImplementation project(':grails-core'), {
+        // impl: ValidationException
+    }
+    testImplementation 'org.junit.jupiter:junit-jupiter-api'
+    testImplementation 'org.spockframework:spock-core'
+
+    testRuntimeOnly 'com.h2database:h2'
+    testRuntimeOnly 'org.slf4j:slf4j-nop' // Get rid of warning about missing slf4j implementation during tests
+}
+
+//compileGroovy.groovyOptions.forkOptions.jvmArgs = ['-Xdebug', '-Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=5005']
+
+apply {
+    from rootProject.layout.projectDirectory.file('gradle/java-config.gradle')
+    from rootProject.layout.projectDirectory.file('gradle/test-config.gradle')
+    from rootProject.layout.projectDirectory.file('gradle/publish-config.gradle')
+    from rootProject.layout.projectDirectory.file('gradle/docs-config.gradle')
+}

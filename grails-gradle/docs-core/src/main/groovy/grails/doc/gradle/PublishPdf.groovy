@@ -14,15 +14,15 @@
  */
 package grails.doc.gradle
 
-
 import grails.doc.PdfPublisher
+import groovy.transform.CompileStatic
 import org.gradle.api.DefaultTask
+import org.gradle.api.GradleException
 import org.gradle.api.file.Directory
+import org.gradle.api.file.RegularFile
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Property
-import org.gradle.api.tasks.Input
-import org.gradle.api.tasks.OutputDirectory
-import org.gradle.api.tasks.TaskAction
+import org.gradle.api.tasks.*
 
 import javax.inject.Inject
 
@@ -31,26 +31,42 @@ import javax.inject.Inject
  * single page HTML user guide has already been created in the default
  * location.
  */
+@CacheableTask
+@CompileStatic
 abstract class PublishPdf extends DefaultTask {
-    @Input String pdfName = "single.pdf"
-    @Input String language = ""
+    @Optional
+    @Input
+    final Property<String> language
+
+    @Input
+    final Property<String> pdfName
+
     @OutputDirectory
-    final abstract Property<Directory> outputDirectory
+    final Property<Directory> outputDirectory
+
+    @InputFile
+    @PathSensitive(PathSensitivity.RELATIVE)
+    final Property<RegularFile> guideSingleFile
 
     @Inject
     PublishPdf(ObjectFactory objects) {
         outputDirectory = objects.directoryProperty().convention(project.layout.buildDirectory.dir("pdf"))
+        guideSingleFile = objects.fileProperty().convention(project.layout.buildDirectory.file('guide/single.html'))
+        pdfName = objects.property(String).convention('single.pdf')
+        language = objects.property(String).convention(null as String)
+        group = 'documentation'
     }
 
     @TaskAction
     def publish() {
         File baseOutputDir = outputDirectory.get().asFile
-        File i18nOutputDir = new File(baseOutputDir, language ?: "")
+        File i18nOutputDir = new File(baseOutputDir, language.getOrElse(''))
+        File inputFile = guideSingleFile.get().asFile
         try {
-            PdfPublisher.publishPdfFromHtml(i18nOutputDir, "guide/single.html", pdfName)
+            PdfPublisher.publishPdfFromHtml(i18nOutputDir, inputFile, pdfName.get())
         }
         catch (Exception ex) {
-            ex.printStackTrace()
+            throw new GradleException("Unable to generate PDF from ${inputFile.absolutePath}", ex)
         }
     }
 }

@@ -5,6 +5,7 @@ ext {
 }
 
 tasks.named('groovydoc', Groovydoc).configure {
+    // TODO: Fix this for testFixtures
     classpath = configurations.documentation
     groovyClasspath = configurations.documentation
     access = GroovydocAccess.PROTECTED

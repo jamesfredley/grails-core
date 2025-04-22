@@ -1,4 +1,4 @@
-# Functional tests for Grails Core
+# Functional Tests
 
 A Suite of functional tests for Grails.  
 

@@ -44,6 +44,7 @@ include (
         'grails-domain-class',
         'grails-encoder',
         'grails-fields',
+        'grails-geb',
         'grails-i18n',
         'grails-interceptors',
         'grails-logging',
@@ -55,6 +56,7 @@ include (
         'grails-spring',
         'grails-test-core',
         'grails-testing-support-core',
+        'grails-testing-support-mongodb',
         'grails-testing-support-views-gson',
         'grails-testing-support-web',
         'grails-url-mappings',
@@ -91,7 +93,7 @@ include (
         'grails-events-rxjava',
         'grails-events-rxjava2',
         'grails-events-rxjava3',
-        'grails-events-plugin',
+        'grails-events',
 
         // async
         'grails-async-core',
@@ -99,7 +101,7 @@ include (
         'grails-async-rxjava',
         'grails-async-rxjava2',
         'grails-async-rxjava3',
-        'grails-async-plugin',
+        'grails-async',
 
         // gsp
         'grails-gsp-core',
@@ -110,6 +112,31 @@ include (
         'grails-web-gsp-taglib',
         'grails-web-jsp',
         'grails-web-taglib',
+
+        'grails-datastore-core',
+        'grails-datastore-web',
+
+        // Core GORM Implementation projects
+        'grails-datamapping-core',
+        'grails-datastore-async',
+        'grails-datamapping-async',
+        'grails-datamapping-validation',
+        'grails-datamapping-support',
+        // the tck is split into domains -> base -> tck so that the base class can be swapped out or reused
+        'grails-datamapping-tck-tests',
+        'grails-datamapping-tck-base',
+        'grails-datamapping-tck-domains',
+        'grails-datamapping-core-test',
+
+        // RX projects
+        // until this can be finished ported to grails 7, we are disabling
+        //'grails-datamapping-rx',
+
+        // Testing Support
+        'grails-testing-support-datamapping',
+
+        // Test Report
+        'grails-data-test-report'
 )
 
 // Instead of using : to separate nested projects, fix the project directories by setting the projectDir explicitly
@@ -122,14 +149,14 @@ project(':grails-events-spring').projectDir = file('grails-events/spring')
 project(':grails-events-rxjava').projectDir = file('grails-events/rxjava')
 project(':grails-events-rxjava2').projectDir = file('grails-events/rxjava2')
 project(':grails-events-rxjava3').projectDir = file('grails-events/rxjava3')
-project(':grails-events-plugin').projectDir = file('grails-events/plugin')
+project(':grails-events').projectDir = file('grails-events/plugin')
 
 project(':grails-async-core').projectDir = file('grails-async/core')
 project(':grails-async-gpars').projectDir = file('grails-async/gpars')
 project(':grails-async-rxjava').projectDir = file('grails-async/rxjava')
 project(':grails-async-rxjava2').projectDir = file('grails-async/rxjava2')
 project(':grails-async-rxjava3').projectDir = file('grails-async/rxjava3')
-project(':grails-async-plugin').projectDir = file('grails-async/plugin')
+project(':grails-async').projectDir = file('grails-async/plugin')
 
 project(':grails-gsp-core').projectDir = file('grails-gsp/core')
 project(':grails-gsp').projectDir = file('grails-gsp/plugin')
@@ -140,6 +167,115 @@ project(':grails-web-gsp-taglib').projectDir = file('grails-gsp/grails-web-gsp-t
 project(':grails-web-jsp').projectDir = file('grails-gsp/grails-web-jsp')
 project(':grails-web-taglib').projectDir = file('grails-gsp/grails-web-taglib')
 
+// Data Mapping - Documentation
+include 'grails-data-docs-guide-developer'
+project(':grails-data-docs-guide-developer').projectDir = file('grails-data-docs/guide-developer')
+// until this can be finished ported to grails 7, we are disabling
+// include 'grails-data-docs-guide-rx'
+// project(':grails-data-docs-guide-rx').projectDir = file('docs/guide-rx')
+include 'grails-data-docs-guide-whats-new'
+project(':grails-data-docs-guide-whats-new').projectDir = file('grails-data-docs/guide-whats-new')
+include 'grails-data-docs-stage'
+project(':grails-data-docs-stage').projectDir = file('grails-data-docs/stage')
+
+// Data Mapping - Simple (for simple gorm usage, unit tests, and base implementation testing)
+include 'grails-data-simple'
+findProject(':grails-data-simple').projectDir = file('grails-data-simple')
+
+// Data Mapping - Hibernate 5
+// Core
+include 'grails-data-hibernate5-core'
+findProject(':grails-data-hibernate5-core').projectDir = file('grails-data-hibernate5/core')
+
+// Documentation
+include 'grails-data-hibernate5-docs'
+findProject(':grails-data-hibernate5-docs').projectDir = new File(settingsDir, 'grails-data-hibernate5/docs')
+
+// Plugins
+include ':grails-data-hibernate5'
+findProject(':grails-data-hibernate5').projectDir = new File(settingsDir, 'grails-data-hibernate5/grails-plugin')
+
+include 'grails-data-hibernate5-dbmigration'
+findProject(':grails-data-hibernate5-dbmigration').projectDir = new File(settingsDir, 'grails-data-hibernate5/dbmigration')
+
+include 'grails-data-hibernate5-spring-boot'
+findProject(':grails-data-hibernate5-spring-boot').projectDir = new File(settingsDir, 'grails-data-hibernate5/boot-plugin')
+
+// functional tests - Hibernate5 examples
+include 'grails-test-examples-hibernate5-grails-hibernate'
+project(':grails-test-examples-hibernate5-grails-hibernate').projectDir = new File(settingsDir, 'grails-test-examples/hibernate5/grails-hibernate')
+
+include 'grails-test-examples-hibernate5-grails-multiple-datasources'
+project(':grails-test-examples-hibernate5-grails-multiple-datasources').projectDir = new File(settingsDir, 'grails-test-examples/hibernate5/grails-multiple-datasources')
+
+include 'grails-test-examples-hibernate5-grails-database-per-tenant'
+project(':grails-test-examples-hibernate5-grails-database-per-tenant').projectDir = new File(settingsDir, 'grails-test-examples/hibernate5/grails-database-per-tenant')
+
+include 'grails-test-examples-hibernate5-grails-schema-per-tenant'
+project(':grails-test-examples-hibernate5-grails-schema-per-tenant').projectDir = new File(settingsDir, 'grails-test-examples/hibernate5/grails-schema-per-tenant')
+
+include 'grails-test-examples-hibernate5-grails-partitioned-multi-tenancy'
+project(':grails-test-examples-hibernate5-grails-partitioned-multi-tenancy').projectDir = new File(settingsDir, 'grails-test-examples/hibernate5/grails-partitioned-multi-tenancy')
+
+include 'grails-test-examples-hibernate5-standalone-hibernate'
+project(':grails-test-examples-hibernate5-standalone-hibernate').projectDir = new File(settingsDir, 'grails-test-examples/hibernate5/standalone-hibernate')
+
+include 'grails-test-examples-hibernate5-spring-boot-hibernate'
+project(':grails-test-examples-hibernate5-spring-boot-hibernate').projectDir = new File(settingsDir, 'grails-test-examples/hibernate5/spring-boot-hibernate')
+
+include 'grails-test-examples-hibernate5-grails-data-service'
+project(':grails-test-examples-hibernate5-grails-data-service').projectDir = new File(settingsDir, 'grails-test-examples/hibernate5/grails-data-service')
+
+include 'grails-test-examples-hibernate5-grails-hibernate-groovy-proxy'
+project(':grails-test-examples-hibernate5-grails-hibernate-groovy-proxy').projectDir = new File(settingsDir, 'grails-test-examples/hibernate5/grails-hibernate-groovy-proxy')
+
+include 'grails-test-examples-hibernate5-issue450'
+project(':grails-test-examples-hibernate5-issue450').projectDir = new File(settingsDir, 'grails-test-examples/hibernate5/issue450')
+
+// Mongodb
+// core
+include 'grails-data-mongodb-core'
+project(':grails-data-mongodb-core').projectDir = new File(settingsDir, 'grails-data-mongodb/core')
+
+include 'grails-data-mongodb-bson'
+project(':grails-data-mongodb-bson').projectDir = new File(settingsDir, 'grails-data-mongodb/bson')
+
+include 'grails-data-mongodb-ext'
+project(':grails-data-mongodb-ext').projectDir = new File(settingsDir, 'grails-data-mongodb/ext')
+
+// documentation
+include 'grails-data-mongodb-docs'
+project(':grails-data-mongodb-docs').projectDir = new File(settingsDir, 'grails-data-mongodb/docs')
+
+// plugins
+include 'grails-data-mongodb-spring-boot'
+project(':grails-data-mongodb-spring-boot').projectDir = new File(settingsDir, 'grails-data-mongodb/boot-plugin')
+
+include 'grails-data-mongodb'
+project(':grails-data-mongodb').projectDir = new File(settingsDir, 'grails-data-mongodb/grails-plugin')
+
+include 'grails-data-mongodb-gson-templates'
+project(':grails-data-mongodb-gson-templates').projectDir = new File(settingsDir, 'grails-data-mongodb/gson-templates')
+
+// functional tests - mongodb examples
+include 'grails-test-examples-mongodb-base'
+project(':grails-test-examples-mongodb-base').projectDir = new File(settingsDir, 'grails-test-examples/mongodb/base')
+
+include 'grails-test-examples-mongodb-database-per-tenant'
+project(':grails-test-examples-mongodb-database-per-tenant').projectDir = new File(settingsDir, 'grails-test-examples/mongodb/database-per-tenant')
+
+include 'grails-test-examples-mongodb-hibernate5'
+project(':grails-test-examples-mongodb-hibernate5').projectDir = new File(settingsDir, 'grails-test-examples/mongodb/hibernate5')
+
+include 'grails-test-examples-mongodb-springboot'
+project(':grails-test-examples-mongodb-springboot').projectDir = new File(settingsDir, 'grails-test-examples/mongodb/springboot')
+
+include 'grails-test-examples-mongodb-test-data-service'
+project(':grails-test-examples-mongodb-test-data-service').projectDir = new File(settingsDir, 'grails-test-examples/mongodb/test-data-service')
+
+include 'grails-test-examples-mongodb-gson-templates'
+project(':grails-test-examples-mongodb-gson-templates').projectDir = new File(settingsDir, 'grails-test-examples/mongodb/gson-templates')
+
 // Functional Tests
 include (
         'grails-test-examples-async-events-pubsub-demo',
@@ -148,6 +284,7 @@ include (
         'grails-test-examples-app3',
         'grails-test-examples-datasources',
         'grails-test-examples-namespaces',
+        'grails-test-examples-geb',
         'grails-test-examples-gorm',
         'grails-test-examples-gsp-sitemesh3',
         'grails-test-examples-gsp-spring-boot',
@@ -172,6 +309,7 @@ project(':grails-test-examples-app1').projectDir = file('grails-test-examples/ap
 project(':grails-test-examples-app2').projectDir = file('grails-test-examples/app2')
 project(':grails-test-examples-app3').projectDir = file('grails-test-examples/app3')
 project(':grails-test-examples-datasources').projectDir = file('grails-test-examples/datasources')
+project(':grails-test-examples-geb').projectDir = file('grails-test-examples/geb')
 project(':grails-test-examples-namespaces').projectDir = file('grails-test-examples/namespaces')
 project(':grails-test-examples-gorm').projectDir = file('grails-test-examples/gorm')
 project(':grails-test-examples-gsp-sitemesh3').projectDir = file('grails-test-examples/gsp-sitemesh3')

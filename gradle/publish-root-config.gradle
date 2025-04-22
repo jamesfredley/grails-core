@@ -7,7 +7,7 @@ group = 'this.will.be.overridden'
 def publishedProjects = [
         'grails-async-core',
         'grails-async-gpars',
-        'grails-async-plugin',
+        'grails-async',
         'grails-async-rxjava',
         'grails-async-rxjava2',
         'grails-async-rxjava3',
@@ -29,13 +29,14 @@ def publishedProjects = [
         'grails-events-compat',
         'grails-events-core',
         'grails-events-gpars',
-        'grails-events-plugin',
+        'grails-events',
         'grails-events-rxjava',
         'grails-events-rxjava2',
         'grails-events-rxjava3',
         'grails-events-spring',
         'grails-events-transforms',
         'grails-fields',
+        'grails-geb',
         'grails-gsp',
         'grails-gsp-core',
         'grails-i18n',
@@ -51,6 +52,7 @@ def publishedProjects = [
         'grails-taglib',
         'grails-test-core',
         'grails-testing-support-core',
+        'grails-testing-support-mongodb',
         'grails-testing-support-views-gson',
         'grails-testing-support-web',
         'grails-url-mappings',
@@ -68,6 +70,34 @@ def publishedProjects = [
         'grails-web-mvc',
         'grails-web-taglib',
         'grails-web-url-mappings',
+        // datastore
+        'grails-datastore-async',
+        'grails-datastore-core',
+        'grails-datamapping-core',
+        'grails-datamapping-core-test',
+        'grails-datamapping-async',
+        //'grails-datamapping-rx',
+        'grails-datamapping-support',
+        'grails-datamapping-tck-tests',
+        'grails-datamapping-tck-base',
+        'grails-datamapping-tck-domains',
+        'grails-datamapping-validation',
+        'grails-datastore-web',
+        'grails-testing-support-datamapping',
+        // simple
+        'grails-data-simple',
+        // hibernate5
+        'grails-data-hibernate5-spring-boot',
+        'grails-data-hibernate5-dbmigration',
+        'grails-data-hibernate5-core',
+        'grails-data-hibernate5',
+        // mongodb
+        'grails-data-mongodb-spring-boot',
+        'grails-data-mongodb-core',
+        'grails-data-mongodb-bson',
+        'grails-data-mongodb-ext',
+        'grails-data-mongodb',
+        'grails-data-mongodb-gson-templates'
 ]
 
 subprojects {

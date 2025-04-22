@@ -8,6 +8,8 @@ extensions.configure(JavaPluginExtension) {
 
 tasks.withType(GroovyCompile).configureEach {
     groovyOptions.encoding = 'UTF-8'
+    // Preserve method parameter names in Groovy classes for IDE parameter hints.
+    groovyOptions.parameters = true
     options.encoding = 'UTF-8'
     options.fork = true
     options.forkOptions.jvmArgs = ['-Xms128M', '-Xmx1G']

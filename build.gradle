@@ -1,6 +1,8 @@
 ext {
     grailsVersion = projectVersion
     isCiBuild = System.getenv().get('CI') as Boolean
+    configuredTestParallel = findProperty('maxTestParallel') as Integer ?: (isCiBuild ? 3 : Runtime.runtime.availableProcessors() * 3 / 4 as int ?: 1)
+    excludeUnusedTransDeps = findProperty('excludeUnusedTransDeps')
 
     // Directories created during the build which are related
     // to turning the workspace root into a GRAILS_HOME
@@ -15,6 +17,7 @@ ext {
             'grails-test-examples'
     ]
     testProjects = [ /* Will be populated by subprojects loop below */]
+    docProjects = [ /* Will be populated by subprojects loop below */]
 }
 
 allprojects {
@@ -22,7 +25,7 @@ allprojects {
         mavenCentral()
         maven { url = 'https://repo.grails.org/grails/core' }
         maven { url = 'https://oss.sonatype.org/content/repositories/snapshots' }
-        maven { url = 'https://repository.apache.org/content/repositories/snapshots' }
+        maven { url = 'https://repository.apache.org/content/groups/snapshots' }
         // mavenLocal() // Keep, this will be uncommented and used by CI (groovy-joint-workflow)
     }
 }
@@ -33,6 +36,10 @@ subprojects {
         if (name.startsWith(testPrefix)) {
             rootProject.ext['testProjects'] << name
         }
+    }
+
+    if (name.startsWith('grails-doc') || name.startsWith('grails-data-doc') || name.endsWith('-docs') || name.endsWith('-test-report')) {
+        rootProject.ext['docProjects'] << name
     }
 
     configurations.configureEach {
@@ -61,9 +68,12 @@ subprojects {
     apply from: rootProject.layout.projectDirectory.file('gradle/dependency-licenses.gradle')
 }
 
-tasks.register('clean', Delete) {
+tasks.register('clean', Delete).configure {
     group = 'build'
-    delete(layout.buildDirectory, homeBinDir, homeConfDir, homeDistDir, homeLibDir)
+
+    doFirst {
+        delete(layout.buildDirectory, homeBinDir, homeConfDir, homeDistDir, homeLibDir)
+    }
 }
 
 apply {

@@ -681,8 +681,8 @@ class HalJsonRendererSpec extends Specification {
         }''')
     }
 
-    @Issue('GRAILS-10372')
-    @Ignore
+    @Issue('https://github.com/apache/grails-core/issues/5671')
+    @Ignore // fails in github vs locally due to time zone issues
     void "Test that the HAL renderer allows for different date converters"() {
         given:"A HAL renderer"
         HalJsonRenderer renderer = getEventRenderer()
@@ -719,7 +719,7 @@ class HalJsonRendererSpec extends Specification {
               "type": "application/hal+json"
             }
           },
-          "date": "2013-11-08T13:12:30-08:00",
+          "date": "2013-11-08T18:12:30+0000",
           "name": "Lollapalooza",
           "state": "OPEN"
         }''')

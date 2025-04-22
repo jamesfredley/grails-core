@@ -7,10 +7,6 @@ plugins {
 version = projectVersion
 group = 'org.apache.grails'
 
-ext {
-    pomArtifactId = 'grails-events'
-}
-
 dependencies {
     implementation platform(project(':grails-bom'))
 

@@ -13,7 +13,18 @@ dependencies {
 }
 
 tasks.withType(Test).configureEach {
-    onlyIf { !project.hasProperty('onlyFunctionalTests') }
+    onlyIf {
+        ![
+                'onlyFunctionalTests',
+                'onlyHibernate5Tests',
+                'onlyMongodbTests',
+                'skipCoreTests',
+                'skipTests'
+        ].find {
+            project.hasProperty(it)
+        }
+    }
+
     useJUnitPlatform()
     jvmArgs += java17moduleReflectionCompatibilityArguments
     develocity {
@@ -31,16 +42,15 @@ tasks.withType(Test).configureEach {
         showStackTraces = true
     }
     excludes = ['**/*TestCase.class', '**/*$*.class']
-    maxParallelForks = isCiBuild ? 2 : Runtime.runtime.availableProcessors() * 3 / 4 as int ?: 1
+    maxParallelForks = configuredTestParallel
     maxHeapSize = isCiBuild ? '768m' : '1024m'
+    forkEvery = isCiBuild ? 20 : 100
     if (System.getProperty('debug.tests')) {
         jvmArgs += debugArguments
+    }
+    afterSuite {
+        System.out.print('.')
+        System.out.flush()
     }
 }
 
-tasks.register('singleTest', Test) {
-    description = 'Task for running a single test with -DsingleTest.single=TestName singleTest'
-    if (System.getProperty('debug.tests')) {
-        jvmArgs += debugArguments
-    }
-}

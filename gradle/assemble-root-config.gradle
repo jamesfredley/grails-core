@@ -80,7 +80,7 @@ class GrailsCreateStartScripts extends CreateStartScripts {
 tasks.register('install').configure { task ->
     dependsOn 'syncCliDependencies', 'grailsCreateStartScripts'
     subprojects { Project subproject ->
-        if (!(subproject.name in testProjects) && subproject.name != 'grails-doc') {
+        if (!(subproject.name in testProjects) && !(subproject.name in docProjects)) {
             task.dependsOn("$subproject.name:publishToMavenLocal")
         }
     }
@@ -99,7 +99,17 @@ tasks.register('assemble', Zip).configure {
         from(rootProject.layout.projectDirectory) {
             // Some of these are probably not needed as they are not present in the project folder
             include 'bin/grails', 'bin/grails.bat', 'lib/', 'media/', 'samples/', 'scripts/', 'LICENSE', 'INSTALL'
-            exclude 'ant/bin', 'src/grails', 'src/war', 'grails-doc'
+
+            def pathsToExclude = [
+                    'ant/bin', 'src/grails', 'src/war'
+            ]
+            docProjects.each { projectName ->
+                pathsToExclude << rootProject.projectDir.relativePath(project(projectName as String).projectDir)
+            }
+            testProjects.each { projectName ->
+                pathsToExclude << rootProject.projectDir.relativePath(project(projectName as String).projectDir)
+            }
+            exclude pathsToExclude
         }
         from(homeDistDir) {
             into 'dist'

@@ -17,8 +17,8 @@ dependencies {
     implementation 'org.slf4j:slf4j-api'
 
     testImplementation project(':grails-events-transforms')
-    testImplementation 'org.apache.grails.data:grails-datastore-core'
-    testImplementation 'org.apache.grails.data:grails-datamapping-core-test'
+    testImplementation project(':grails-datastore-core')
+    testImplementation project(':grails-datamapping-core-test')
     testImplementation 'org.spockframework:spock-core'
     testImplementation 'org.springframework:spring-context'
 

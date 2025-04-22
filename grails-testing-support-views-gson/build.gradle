@@ -17,7 +17,7 @@ dependencies {
 
     api project(':grails-views-gson') // Used in public API
     api 'org.springframework:spring-web' // Used in public API
-    api 'org.apache.grails.data:grails-datastore-core' // Used in public API
+    api project(':grails-datastore-core') // Used in public API
     api 'org.spockframework:spock-core' // Used in public API
 
     implementation project(':grails-core')
@@ -29,6 +29,9 @@ dependencies {
     implementation 'org.springframework:spring-webmvc'
 }
 
-apply from: rootProject.layout.projectDirectory.file('gradle/java-config.gradle')
-apply from: rootProject.layout.projectDirectory.file('gradle/test-config.gradle')
-apply from: rootProject.layout.projectDirectory.file('gradle/publish-config.gradle')
+apply {
+    from rootProject.layout.projectDirectory.file('gradle/java-config.gradle')
+    from rootProject.layout.projectDirectory.file('gradle/test-config.gradle')
+    from rootProject.layout.projectDirectory.file('gradle/publish-config.gradle')
+    from rootProject.layout.projectDirectory.file('gradle/docs-config.gradle')
+}

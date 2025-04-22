@@ -23,7 +23,7 @@ NOTE: All of the default renderers in the registry have a priority of < 0, so re
 Input renders must implement the link:api/org/grails/scaffolding/registry/DomainInputRenderer.html[DomainInputRenderer] interface. Implementations must define 2 methods.
 
 * `Boolean supports(DomainProperty domainProperty)`
-    Return true if your renderer supports the given property. See the link:api/org/grails/scaffolding/model/property/DomainProperty.html[DomainProperty] and link:http://gorm.grails.org/latest/api/org/grails/datastore/mapping/model/PersistentProperty.html[PersistentProperty] interfaces to see what data is available on the domain property instance.
+    Return true if your renderer supports the given property. See the link:api/org/grails/scaffolding/model/property/DomainProperty.html[DomainProperty] and link:{gormApiDocs}/org/grails/datastore/mapping/model/PersistentProperty.html[PersistentProperty] interfaces to see what data is available on the domain property instance.
 * `Closure renderInput(Map defaultAttributes, DomainProperty property)`
     Return a closure to be passed to a link:http://docs.groovy-lang.org/latest/html/api/groovy/xml/MarkupBuilder.html[MarkupBuilder] that renders your property
 
@@ -43,7 +43,7 @@ domainInputRendererRegistry.registerDomainRenderer(new MyCustomDomainInputRender
 Output renders must implement the link:api/org/grails/scaffolding/registry/DomainOutputRenderer.html[DomainOutputRenderer] interface. Implementations must define 3 methods.
 
 * `Boolean supports(DomainProperty domainProperty)`
-    Return true if your renderer supports the given property. See the link:api/org/grails/scaffolding/model/property/DomainProperty.html[DomainProperty] and link:http://gorm.grails.org/latest/api/org/grails/datastore/mapping/model/PersistentProperty.html[PersistentProperty] interfaces to see what data is available on the domain property instance.
+    Return true if your renderer supports the given property. See the link:api/org/grails/scaffolding/model/property/DomainProperty.html[DomainProperty] and link:{gormApiDocs}/org/grails/datastore/mapping/model/PersistentProperty.html[PersistentProperty] interfaces to see what data is available on the domain property instance.
 * `Closure renderListOutput(DomainProperty property)`
     Return a closure to be passed to a link:http://docs.groovy-lang.org/latest/html/api/groovy/xml/MarkupBuilder.html[MarkupBuilder] that renders your property in the context of a list of domain class instances
 * `Closure renderOutput(DomainProperty property)`

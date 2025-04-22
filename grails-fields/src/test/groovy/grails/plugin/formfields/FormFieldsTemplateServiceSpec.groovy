@@ -388,7 +388,7 @@ class FormFieldsTemplateServiceSpec extends BuildsAccessorFactory implements Ser
 
 //	@IgnoreIf({ GrailsApplicationAttributes.metaClass.hasProperty(GrailsApplicationAttributes, "CONTROLLER_NAMESPACE_ATTRIBUTE") == false })
 	@IgnoreIf({ GrailsWebRequest.metaClass.respondsTo(GrailsWebRequest, "getControllerNamespace").size() == 0 })
-	@Issue('https://github.com/grails-fields-plugin/grails-fields/issues/168')
+	@Issue('https://github.com/grails/fields/issues/168')
 	void "resolves template from namespaced controller views directory"() {
 		given:
 		webRequest.setControllerNamespace('namespace')
@@ -625,7 +625,6 @@ class FormFieldsTemplateServiceSpec extends BuildsAccessorFactory implements Ser
 		render(template: template.path) == 'DEFAULT FIELD TEMPLATE'
 	}
 
-	@PendingFeature(reason = 'until domain class inheritance works in Groovy 4')
 	def "resolves template for superclass property"() {
 		given:
 		views["/_fields/default/_wrapper.gsp"] = 'DEFAULT FIELD TEMPLATE'

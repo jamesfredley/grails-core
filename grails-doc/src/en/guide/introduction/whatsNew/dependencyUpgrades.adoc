@@ -1,7 +1,7 @@
 Grails {version} ships with the following dependency upgrades:
 
 * Groovy {groovyVersion}
-* GORM {gormVersion}
+* GORM {version}
 * Spring Framework {springVersion}
 * Spring Boot {springBootVersion}
 * Gradle {gradleVersion}

@@ -8,6 +8,30 @@ def java17moduleReflectionCompatibilityArguments = [
 ]
 
 tasks.withType(Test).configureEach {
+    onlyIf {
+        if (project.hasProperty('onlyFunctionalTests')) {
+            return false
+        }
+
+        if (project.hasProperty('onlyMongodbTests')) {
+            return false
+        }
+
+        if (project.hasProperty('onlyHibernate5Tests')) {
+            return false
+        }
+
+        if (project.hasProperty('skipCoreTests')) {
+            return false
+        }
+
+        if (project.hasProperty('skipTests')) {
+            return false
+        }
+
+        true
+    }
+
     useJUnitPlatform()
     jvmArgs += java17moduleReflectionCompatibilityArguments
     develocity {
@@ -25,7 +49,7 @@ tasks.withType(Test).configureEach {
         showStackTraces = true
     }
     excludes = ['**/*TestCase.class', '**/*$*.class']
-    maxParallelForks = isCiBuild ? 2 : Runtime.runtime.availableProcessors() * 3/4 as int ?: 1
+    maxParallelForks = configuredTestParallel
     maxHeapSize = isCiBuild ? '768m' : '1024m'
     if (System.getProperty('debug.tests')) {
         jvmArgs += debugArguments
