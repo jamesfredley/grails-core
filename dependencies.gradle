@@ -121,7 +121,7 @@ ext {
     ]
 
     // Because pom exclusions aren't properly supported by gradle, we can't inherit the grails-gradle-bom
-    // this requires copying the platforms selectively to the grails-bom.  Due this via these combinations
+    // this requires copying the platforms selectively to the grails-bom. Create a combined version for convenience.
     combinedPlatforms = ['spring-boot-bom': gradleBomPlatformDependencies['spring-boot-bom']] + bomPlatformDependencies
     combinedDependencies = gradleBomDependencies + bomDependencies
     combinedVersions = gradleBomDependencyVersions + bomDependencyVersions
