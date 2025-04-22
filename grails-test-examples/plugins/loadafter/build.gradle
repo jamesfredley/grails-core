@@ -29,7 +29,7 @@ dependencies {
     api 'org.apache.grails:grails-dependencies'
     api 'jakarta.servlet:jakarta.servlet-api'
 
-    implementation "org.apache.grails:grails-spring-security:$springSecurityCoreVersion"
+    implementation "org.apache.grails:grails-spring-security:$grailsSpringSecurityVersion"
 
     console 'org.apache.grails:grails-console'
 }
