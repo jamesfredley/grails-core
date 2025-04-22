@@ -22,11 +22,11 @@ group = 'examples'
 
 apply plugin: 'groovy'
 apply plugin: 'org.apache.grails.gradle.grails-web'
+apply plugin: 'com.bertramlabs.asset-pipeline'
 
 dependencies {
 
     implementation platform(project(':grails-bom'))
-    integrationTestImplementation platform(project(':grails-bom'))
 
     implementation 'org.apache.grails:grails-data-mongodb'
     implementation 'org.apache.grails:grails-core'
@@ -49,7 +49,7 @@ dependencies {
 
     // This project also has unit tests in it, so we must define the launcher per
     // https://docs.gradle.org/8.3/userguide/upgrading_version_8.html#test_framework_implementation_dependencies
-    add('testRuntimeOnly', 'org.junit.platform:junit-platform-launcher')
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
     integrationTestImplementation testFixtures('org.apache.grails:grails-geb')
 }

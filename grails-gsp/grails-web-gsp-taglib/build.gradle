@@ -23,7 +23,7 @@ plugins {
     id 'java-library'
 }
 
-version = project.projectVersion
+version = projectVersion
 group = 'org.apache.grails.views'
 
 ext {

@@ -42,7 +42,6 @@ ext {
 dependencies {
 
     implementation platform(project(':grails-bom'))
-    testFixturesCompileOnly platform(project(':grails-bom'))
 
     api project(':grails-data-mongodb-core'), {
         // api: needed as classes should also be available when compiling apps. eg. MongoEntity

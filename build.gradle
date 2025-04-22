@@ -20,7 +20,7 @@
 ext {
     grailsVersion = projectVersion
     isCiBuild = System.getenv().get('CI') as Boolean
-    configuredTestParallel = find('maxTestParallel') as Integer ?: (isCiBuild ? 3 : Runtime.runtime.availableProcessors() * 3/4 as int ?: 1)
+    configuredTestParallel = findProperty('maxTestParallel') as Integer ?: (isCiBuild ? 3 : Runtime.runtime.availableProcessors() * 3 / 4 as int ?: 1)
     excludeUnusedTransDeps = findProperty('excludeUnusedTransDeps')
 
     // Directories created during the build which are related
@@ -57,7 +57,7 @@ subprojects {
         }
     }
 
-    if(name.startsWith('grails-doc') || name.startsWith('grails-data-doc') || name.endsWith('-docs') || name.endsWith("-test-report")) {
+    if (name.startsWith('grails-doc') || name.startsWith('grails-data-doc') || name.endsWith('-docs') || name.endsWith('-test-report')) {
         rootProject.ext['docProjects'] << name
     }
 

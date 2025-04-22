@@ -33,28 +33,17 @@ dependencies {
 
 tasks.withType(Test).configureEach {
     onlyIf {
-        if(project.hasProperty('onlyFunctionalTests')) {
-            return false
+        ![
+                'onlyFunctionalTests',
+                'onlyHibernate5Tests',
+                'onlyMongodbTests',
+                'skipCoreTests',
+                'skipTests'
+        ].find {
+            project.hasProperty(it)
         }
-
-        if (project.hasProperty('onlyMongodbTests')) {
-            return false
-        }
-
-        if (project.hasProperty('onlyHibernate5Tests')) {
-            return false
-        }
-
-        if(project.hasProperty('skipCoreTests')) {
-            return false
-        }
-
-        if(project.hasProperty('skipTests')) {
-            return false
-        }
-
-        true
     }
+
     useJUnitPlatform()
     jvmArgs += java17moduleReflectionCompatibilityArguments
     develocity {

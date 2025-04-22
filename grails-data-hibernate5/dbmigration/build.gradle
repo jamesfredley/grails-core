@@ -51,20 +51,22 @@ dependencies {
     api(project(':grails-shell-cli')) {
         exclude group: 'org.slf4j', module: 'slf4j-simple'
 
-        //TODO: These excludes groovy right now, where previously it didn't.
+        // TODO: the shell cli is exporting groovy 3, while this project is expected to use groovy 4
+        //       this plugin needs split into commands & the plugin itself so that different versions
+        //       of groovy can be used
         exclude group: 'org.codehaus.groovy', module: 'groovy'
         exclude group: 'org.codehaus.groovy', module: 'groovy-bom'
     }
 
     compileOnly 'org.springframework.boot:spring-boot-starter-logging'
     compileOnly 'org.springframework.boot:spring-boot-autoconfigure'
-    compileOnly project('::grails-data-hibernate5')
+    compileOnly project(':grails-data-hibernate5')
     compileOnly project(':grails-core')
     compileOnly 'org.apache.groovy:groovy-sql'
     compileOnly 'org.apache.groovy:groovy-xml'
 
     testImplementation 'org.springframework.boot:spring-boot-starter-tomcat'
-    testImplementation project('::grails-data-hibernate5')
+    testImplementation project(':grails-data-hibernate5')
     testImplementation project(':grails-core')
     testImplementation project(':grails-testing-support-datamapping')
     testImplementation project(':grails-testing-support-web')

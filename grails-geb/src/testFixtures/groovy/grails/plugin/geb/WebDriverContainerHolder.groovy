@@ -109,8 +109,8 @@ class WebDriverContainerHolder {
         currentContainer.tap {
             withEnv('SE_ENABLE_TRACING', grailsGebSettings.tracingEnabled)
             withAccessToHost(true)
-            start()
             withImagePullPolicy(PullPolicy.ageBased(Duration.of(1, ChronoUnit.DAYS)))
+            start()
         }
         if (hostnameChanged) {
             currentContainer.execInContainer('/bin/sh', '-c', "echo '$hostIp\t${currentConfiguration.hostName}' | sudo tee -a /etc/hosts")

@@ -33,7 +33,7 @@ ext {
 
 dependencies {
 
-    implementation(platform(project(':grails-bom')))
+    implementation platform(project(':grails-bom'))
 
     api project(':grails-views-gson')
 

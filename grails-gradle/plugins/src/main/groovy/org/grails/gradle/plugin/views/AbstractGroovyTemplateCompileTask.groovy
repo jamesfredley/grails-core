@@ -64,7 +64,7 @@ abstract class AbstractGroovyTemplateCompileTask extends AbstractCompile {
         grailsConfigurationPaths = objectFactory.fileCollection()
         grailsConfigurationPaths.from(
                 //TODO: historically this only used .yml, should it explore all configuration paths?
-                project.layout.projectDirectory.file("grails-app/conf/application.yml")
+                project.layout.projectDirectory.file('grails-app/conf/application.yml')
         )
     }
 

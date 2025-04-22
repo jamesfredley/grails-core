@@ -42,9 +42,9 @@ dependencies {
     // Because this is a grails plugin and the gradle grails-plugin is applied, these won't be used due to the mavenBom apply
     // For most core projects, we don't apply the plugin and only add what we need so we need the platform
     // for consistency, add the platform here and later move away from the grails-plugin gradle plugin apply
-    implementation(platform(project(':grails-bom')))
+    implementation platform(project(':grails-bom'))
     testFixturesApi(platform(project(':grails-bom')))
-    testFixturesImplementation(platform(project(':grails-bom')))
+    testFixturesImplementation platform(project(':grails-bom'))
 
     compileOnly project(':grails-core') // Provided, as this is a Grails plugin
 

@@ -81,8 +81,8 @@ abstract class GroovyPageForkCompileTask extends AbstractCompile {
         serverpath = objectFactory.property(String)
         grailsConfigurationPaths = objectFactory.fileCollection()
         grailsConfigurationPaths.from(
-                project.layout.projectDirectory.file("grails-app/conf/application.yml"),
-                project.layout.projectDirectory.file("grails-app/conf/application.groovy")
+                project.layout.projectDirectory.file('grails-app/conf/application.yml'),
+                project.layout.projectDirectory.file('grails-app/conf/application.groovy')
         )
     }
 
@@ -165,11 +165,11 @@ abstract class GroovyPageForkCompileTask extends AbstractCompile {
 
     @Input
     protected String getCompilerName() {
-        "org.grails.web.pages.GroovyPageForkedCompiler"
+        'org.grails.web.pages.GroovyPageForkedCompiler'
     }
 
     @Input
     String getFileExtension() {
-        "gsp"
+        'gsp'
     }
 }
