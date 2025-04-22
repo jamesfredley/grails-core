@@ -4,7 +4,7 @@ plugins {
     id 'org.asciidoctor.jvm.convert'
 }
 
-version = project.projectVersion
+version = projectVersion
 group = 'org.apache.grails'
 
 def asciidoctorAttributes = [

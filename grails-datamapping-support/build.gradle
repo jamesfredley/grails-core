@@ -22,7 +22,6 @@ ext {
 dependencies {
 
     implementation platform(project(':grails-bom'))
-    api platform(project(':grails-bom'))
 
     api project(':grails-datastore-core'), {
         // api: AssociationQueryExecutor, Datastore, GrailsArtefactClassInjector, ProxyFactory, ProxyHandler, Session
