@@ -32,7 +32,9 @@ dependencies {
     api(project(':grails-shell-cli')) {
         exclude group: 'org.slf4j', module: 'slf4j-simple'
 
-        //TODO: These excludes groovy right now, where previously it didn't.
+        // TODO: the shell cli is exporting groovy 3, while this project is expected to use groovy 4
+        //       this plugin needs split into commands & the plugin itself so that different versions
+        //       of groovy can be used
         exclude group: 'org.codehaus.groovy', module: 'groovy'
         exclude group: 'org.codehaus.groovy', module: 'groovy-bom'
     }
