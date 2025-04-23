@@ -16,7 +16,6 @@
  *  specific language governing permissions and limitations
  *  under the License.
  */
-
 package org.grails.datastore.rx.collection
 
 import grails.gorm.rx.collection.ObservableCollection
