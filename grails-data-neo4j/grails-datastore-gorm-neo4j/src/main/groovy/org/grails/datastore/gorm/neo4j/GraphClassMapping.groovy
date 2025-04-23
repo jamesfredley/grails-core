@@ -16,7 +16,6 @@
  *  specific language governing permissions and limitations
  *  under the License.
  */
-
 package org.grails.datastore.gorm.neo4j
 
 import groovy.transform.CompileStatic
