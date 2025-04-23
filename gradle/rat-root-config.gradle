@@ -30,6 +30,7 @@ tasks.named('rat') {
             'src/*', // exclude build artifacts
             'LICENSE',
             'NOTICE',
+            '.sdkmanrc', // tool selection files aren't code
             '**/*.png', '**/*.svg', '**/*.ico', '**/*.eps', '**/*.icns', '**/*.jpg', '**/*.jpeg', '**/*.gif', // Image files
             '**/*.db', // H2 database test files
             '**/*.gitkeep', // Empty Gitkeep file
