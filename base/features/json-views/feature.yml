@@ -3,8 +3,6 @@ build:
     plugins:
         - org.apache.grails.gradle.grails-gson
 dependencies:
-    - scope: build
-      coords: "org.apache.grails.gradle:grails-markup"
     - scope: implementation
       coords: "org.apache.grails:grails-views-gson"
     - scope: implementation

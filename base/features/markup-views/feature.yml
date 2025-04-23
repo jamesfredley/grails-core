@@ -3,7 +3,5 @@ build:
     plugins:
         - org.apache.grails.gradle.grails-markup 
 dependencies:
-    - scope: build
-      coords: "org.apache.grails.gradle:grails-markup"
     - scope: implementation
       coords: "org.apache.grails:grails-views-markup"
