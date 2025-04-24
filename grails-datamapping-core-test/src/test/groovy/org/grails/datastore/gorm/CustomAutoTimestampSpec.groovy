@@ -22,15 +22,9 @@ import grails.gorm.annotation.AutoTimestamp
 import grails.gorm.tests.GormDatastoreSpec
 import grails.persistence.Entity
 import org.grails.datastore.gorm.events.AutoTimestampEventListener
-import spock.lang.IgnoreIf
-import spock.lang.Retry
-import spock.lang.Stepwise
 
 import static grails.gorm.annotation.AutoTimestamp.EventType.CREATED
 
-@Retry // this test is flaky on CI due to https://github.com/apache/grails-data-mapping/issues/1877
-@Stepwise
-@IgnoreIf( { os.windows } )
 class CustomAutoTimestampSpec extends GormDatastoreSpec {
 
     void "Test when the auto timestamp properties are customized, they are correctly set"() {
@@ -41,19 +35,21 @@ class CustomAutoTimestampSpec extends GormDatastoreSpec {
             r = RecordCustom.get(r.id)
 
         then:"the custom lastUpdated and dateCreated are set"
-            r.modified != null && r.modified < new Date()
-            r.created != null && r.created < new Date()
+            r.modified != null
+            r.created != null
 
         when:"An entity is modified"
             Date previousCreated = r.created
             Date previousModified = r.modified
             r.name = "Test 2"
+            sleep(50) // give the save a chance to set a different time
             r.save(flush:true)
             session.clear()
             r = RecordCustom.get(r.id)
 
             then:"the custom lastUpdated property is updated and dateCreated is not"
-            r.modified != null && previousModified < r.modified
+            r.modified != null
+            previousModified.time < r.modified.time
             previousCreated.time == r.created.time
     }
 
@@ -63,24 +59,27 @@ class CustomAutoTimestampSpec extends GormDatastoreSpec {
         def now = new Date()
         r.created = new Date(now.time)
         r.modified = r.created
+        sleep(50) // give the save a chance to set a different time
         r.save(flush:true, failOnError:true)
         session.clear()
         r = RecordCustom.get(r.id)
 
         then:"the custom lastUpdated and dateCreated are set"
-        now < r.modified
-        now < r.created
+        now.time < r.modified.time
+        now.time < r.created.time
 
         when:"An entity is modified"
         Date previousCreated = r.created
         Date previousModified = r.modified
         r.name = "Test 2"
+        sleep(50) // give the save a chance to set a different time
         r.save(flush:true)
         session.clear()
         r = RecordCustom.get(r.id)
 
         then:"the custom lastUpdated property is updated and dateCreated is not"
-        r.modified != null && previousModified < r.modified
+        r.modified != null
+        previousModified.time < r.modified.time
         previousCreated.time == r.created.time
     }
 
@@ -94,6 +93,7 @@ class CustomAutoTimestampSpec extends GormDatastoreSpec {
         def now = new Date()
         r.created = new Date(now.time)
         r.modified = r.created
+        sleep(50) // give the save a chance to set a different time
         r.save(flush:true, failOnError:true)
         session.clear()
         r = RecordCustom.get(r.id)
@@ -106,16 +106,15 @@ class CustomAutoTimestampSpec extends GormDatastoreSpec {
         Date previousCreated = r.created
         Date previousModified = r.modified
         r.name = "Test 2"
+        sleep(50) // give the save a chance to set a different time
         r.save(flush:true)
         session.clear()
         r = RecordCustom.get(r.id)
 
         then:"the custom lastUpdated property is updated and dateCreated is not"
-        r.modified != null && previousModified < r.modified
+        r.modified != null
+        previousModified.time < r.modified.time
         previousCreated.time == r.created.time
-
-        cleanup:
-        (RecordCustom.gormPersistentEntity.mappingContext.eventListeners.find { it.class == AutoTimestampEventListener} as AutoTimestampEventListener).insertOverwrite = true
     }
 
     @Override
