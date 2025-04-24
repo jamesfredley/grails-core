@@ -53,9 +53,11 @@ Files.walk(root)
 artifacts.findAll {
     !it.toString().contains("${File.separator}buildSrc${File.separator}") // build src jars aren't published
     !it.toString().contains("${File.separator}grails-test-examples${File.separator}") // test examples aren't published
-}.sort { a, b -> a.toString() <=> b.toString() }
-        .each { Path jar ->
-            String hash = sha256(jar)
-            String relative = root.relativize(jar).toString()
-            println "${hash} ${relative}"
-        }
+}.sort { a, b -> a.toString() <=> b.toString()
+}.collect { Path jar ->
+    String hash = sha256(jar)
+    String relative = root.relativize(jar).toString()
+    "${relative} ${hash}"
+}.sort().each {
+    println it
+}

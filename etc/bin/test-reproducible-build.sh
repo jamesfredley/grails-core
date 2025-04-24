@@ -25,10 +25,12 @@ SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 cd "$SCRIPT_DIR/../.."
 
 git clean -xdf
+killall -e java || true
 ./gradlew build --rerun-tasks -PskipTests
 FIRST_BUILD=$("$SCRIPT_DIR/generate-build-artifact-hashes.groovy")
 
 git clean -xdf
+killall -e java || true
 ./gradlew build --rerun-tasks -PskipTests
 SECOND_BUILD=$("$SCRIPT_DIR/generate-build-artifact-hashes.groovy")
 
@@ -36,4 +38,6 @@ cd -
 echo "$FIRST_BUILD" > first.txt
 echo "$SECOND_BUILD" > second.txt
 
-diff -u first.txt second.txt
+# diff -u first.txt second.txt
+echo "Differing artifacts:"
+comm -3 first.txt second.txt | cut -d' ' -f1 | sed 's/^[[:space:]]*//;s/[[:space:]]*$//' | uniq | sort
