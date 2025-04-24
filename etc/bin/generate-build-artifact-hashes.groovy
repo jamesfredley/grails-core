@@ -44,14 +44,16 @@ List<Path> artifacts = []
 Files.walk(root)
         .filter {
             Files.isRegularFile(it) &&
-                    !it.toString().contains("buildSrc${File.separator}") &&  // build src jars aren't published
-                    !it.toString().contains("grails-test-examples${File.separator}") // test examples aren't published
+                    !it.toString().contains("buildSrc") &&
                     it.toString().endsWith('.jar') &&
                     it.toString().contains("${File.separator}build${File.separator}libs${File.separator}")
         }
         .forEach { artifacts << it }
 
-artifacts.sort { a, b -> a.toString() <=> b.toString() }
+artifacts.findAll {
+    !it.toString().contains("${File.separator}buildSrc${File.separator}") // build src jars aren't published
+    !it.toString().contains("${File.separator}grails-test-examples${File.separator}") // test examples aren't published
+}.sort { a, b -> a.toString() <=> b.toString() }
         .each { Path jar ->
             String hash = sha256(jar)
             String relative = root.relativize(jar).toString()
