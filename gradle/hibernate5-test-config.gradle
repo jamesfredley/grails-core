@@ -24,27 +24,15 @@ dependencies {
 
 tasks.withType(Test).configureEach {
     onlyIf {
-        if (project.hasProperty('onlyFunctionalTests')) {
-            return false
+        ![
+                'onlyFunctionalTests',
+                'skipHibernate5Tests',
+                'onlyMongodbTests',
+                'onlyCoreTests',
+                'skipTests'
+        ].find {
+            project.hasProperty(it)
         }
-
-        if (project.hasProperty('skipHibernate5Tests')) {
-            return false
-        }
-
-        if (project.hasProperty('onlyMongodbTests')) {
-            return false
-        }
-
-        if (project.hasProperty('onlyCoreTests')) {
-            return false
-        }
-
-        if(project.hasProperty('skipTests')) {
-            return false
-        }
-
-        true
     }
 
     useJUnitPlatform()
