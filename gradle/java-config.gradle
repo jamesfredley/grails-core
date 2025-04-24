@@ -22,7 +22,7 @@ compileJava.options.release = javaVersion.toInteger()
 extensions.configure(JavaPluginExtension) {
     // Explicit `it` is required here
     it.withJavadocJar()
-    it.withJavadocJar()
+    it.withSourcesJar()
 }
 
 tasks.withType(Javadoc).configureEach { Javadoc it ->
