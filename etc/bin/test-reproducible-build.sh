@@ -17,6 +17,7 @@
 #  specific language governing permissions and limitations
 #  under the License.
 #
+set -e
 
 export SOURCE_DATE_EPOCH=$(git log -1 --pretty=%ct)
 
