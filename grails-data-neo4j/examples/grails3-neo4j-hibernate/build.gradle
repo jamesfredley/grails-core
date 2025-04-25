@@ -86,5 +86,5 @@ webdriverBinaries {
 }
 
 apply {
-    from rootProject.layout.projectDirectory.file('gradle/webjar-asset-pipeline-config.gradle')
+    from rootProject.layout.projectDirectory.file('gradle/test-webjar-asset-config.gradle')
 }
