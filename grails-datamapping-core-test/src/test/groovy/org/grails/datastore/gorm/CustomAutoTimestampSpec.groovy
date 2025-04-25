@@ -33,10 +33,13 @@ class CustomAutoTimestampSpec extends GormDatastoreSpec {
             r.save(flush:true, failOnError:true)
             session.clear()
             r = RecordCustom.get(r.id)
+            sleep(1) // give the date comparison below a chance diff
 
         then:"the custom lastUpdated and dateCreated are set"
             r.modified != null
             r.created != null
+            r.modified.time < new Date().time
+            r.created.time < new Date().time
 
         when:"An entity is modified"
             Date previousCreated = r.created
