@@ -68,10 +68,12 @@ interface GroovyTransformOrder {
     //
     // Canonicalization Orders
     //
+    static final int INTEGRATION_ORDER = HIGHEST_STARTING_PRIORITY
+
     /**
      * Transforms where queries into DetachedCriteria
      */
-    static final int WHERE_ORDER = HIGHEST_STARTING_PRIORITY
+    static final int WHERE_ORDER = INTEGRATION_ORDER + DECREMENT_PRIORITY
 
     /**
      * Transforms groovy finders into DetachedCriteria
