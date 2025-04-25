@@ -28,27 +28,15 @@ tasks.named('compileTestGroovy', GroovyCompile) {
 
 tasks.withType(Test).configureEach {
     onlyIf {
-        if (project.hasProperty('onlyFunctionalTests')) {
-            return false
+        ![
+                'onlyFunctionalTests',
+                'onlyHibernate5Tests',
+                'skipMongodbTests',
+                'onlyCoreTests',
+                'skipTests'
+        ].find {
+            project.hasProperty(it)
         }
-
-        if (project.hasProperty('skipMongodbTests')) {
-            return false
-        }
-
-        if (project.hasProperty('onlyHibernate5Tests')) {
-            return false
-        }
-
-        if (project.hasProperty('onlyCoreTests')) {
-            return false
-        }
-
-        if(project.hasProperty('skipTests')) {
-            return false
-        }
-
-        true
     }
 
     useJUnitPlatform()
