@@ -40,15 +40,30 @@ Path scriptDir = Paths.get(getClass()
         .parent
 
 Path root = scriptDir.resolve('..').resolve('..').normalize()
+
+// ---------------------------------------------------------------------------
+// Decide where to search: project root by default, or user-supplied path
+// (absolute or relative to project root) when an argument is given.
+Path scanRoot
+if (this.args && this.args.length > 0) {
+    Path argPath = Paths.get(this.args[0])
+    scanRoot = argPath.isAbsolute() ? argPath : root.resolve(argPath).normalize()
+    if (!Files.exists(scanRoot)) {
+        System.err.println "❌  Path '${scanRoot}' does not exist."
+        System.exit(1)
+    }
+} else {
+    scanRoot = root
+}
 List<Path> artifacts = []
-Files.walk(root)
-        .filter {
-            Files.isRegularFile(it) &&
-                    !it.toString().contains("buildSrc") &&
-                    it.toString().endsWith('.jar') &&
-                    it.toString().contains("${File.separator}build${File.separator}libs${File.separator}")
-        }
-        .forEach { artifacts << it }
+Files.walk(scanRoot)
+            .filter {
+                Files.isRegularFile(it) &&
+                        !it.toString().contains("buildSrc") &&
+                        it.toString().endsWith('.jar') &&
+                        it.toString().contains("${File.separator}build${File.separator}libs${File.separator}")
+            }
+            .forEach { artifacts << it }
 
 artifacts.findAll {
     !it.toString().contains("${File.separator}buildSrc${File.separator}") // build src jars aren't published
