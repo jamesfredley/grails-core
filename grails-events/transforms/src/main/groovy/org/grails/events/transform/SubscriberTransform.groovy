@@ -23,6 +23,7 @@ import grails.events.annotation.Subscriber
 import grails.events.annotation.gorm.Listener
 import groovy.transform.AutoFinal
 import groovy.transform.CompileStatic
+import org.apache.grails.common.compiler.GroovyTransformOrder
 import org.codehaus.groovy.ast.*
 import org.codehaus.groovy.ast.expr.ArgumentListExpression
 import org.codehaus.groovy.ast.expr.ConstantExpression
@@ -176,5 +177,10 @@ class SubscriberTransform extends AbstractTraitApplyingGormASTTransformation {
     @Override
     protected Object getAppliedMarker() {
         return APPLIED_MARKER
+    }
+
+    @Override
+    int priority() {
+        GroovyTransformOrder.SUBSCRIBER_ORDER
     }
 }

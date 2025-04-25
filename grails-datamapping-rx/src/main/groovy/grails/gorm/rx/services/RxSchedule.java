@@ -21,6 +21,7 @@ package grails.gorm.rx.services;
 import org.codehaus.groovy.transform.GroovyASTTransformationClass;
 import org.grails.datastore.gorm.transform.GormASTTransformationClass;
 import rx.schedulers.Schedulers;
+import org.apache.grails.common.compiler.GroovyTransformOrder;
 
 import java.lang.annotation.*;
 
@@ -46,4 +47,8 @@ public @interface RxSchedule {
      * @return Whether the underlying query method returns a single result of an iterable
      */
     boolean singleResult() default false;
+
+    default int priority() {
+        return GroovyTransformOrder.RX_SCHEDULE;
+    }
 }

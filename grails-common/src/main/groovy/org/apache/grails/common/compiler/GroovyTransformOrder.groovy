@@ -142,9 +142,15 @@ interface GroovyTransformOrder {
     static final int ENTITY_ORDER = GORM_ENTITY_ORDER + DECREMENT_PRIORITY
 
     /**
+     * Several of the gorm related transforms iterate not at the priority level but on the node level, this class
+     * performs those iterations
+     */
+    static final int GORM_TRANSFORMS_ORDER = ENTITY_ORDER + DECREMENT_PRIORITY
+
+    /**
      * Implements Publisher
      */
-    static final int PUBLISHER_ORDER = ENTITY_ORDER + DECREMENT_PRIORITY
+    static final int PUBLISHER_ORDER = GORM_TRANSFORMS_ORDER + DECREMENT_PRIORITY
 
     /**
      * Implements the Transaction, and Readonly transforms

@@ -41,6 +41,9 @@ import static org.grails.datastore.mapping.reflect.AstUtils.findAnnotation
  * Central AST transformation that ensures that GORM AST Transformations are executed in the correct order.
  * Each GORM transform can implement the {@link org.grails.datastore.mapping.core.Ordered} interface to achieve property placement.
  *
+ * The transforms used by this cannot use TransformWithPriority because they iteratively get executed on each visited node,
+ * instead of executing only one transform across all nodes
+ *
  * @author Graeme Rocher
  * @since 6.1
  */

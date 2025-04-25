@@ -21,6 +21,7 @@ package org.grails.plugin.cache.compiler
 import grails.plugin.cache.Cacheable
 import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
+import org.apache.grails.common.compiler.GroovyTransformOrder
 import org.codehaus.groovy.ast.AnnotationNode
 import org.codehaus.groovy.ast.ClassNode
 import org.codehaus.groovy.ast.MethodNode
@@ -115,4 +116,8 @@ class CacheableTransformation extends AbstractCacheTransformation {
         return originalMethodCallExpr
     }
 
+    @Override
+    int priority() {
+        GroovyTransformOrder.CACHEABLE_ORDER
+    }
 }

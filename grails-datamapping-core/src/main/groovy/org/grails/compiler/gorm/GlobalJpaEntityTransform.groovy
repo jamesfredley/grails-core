@@ -67,6 +67,6 @@ class GlobalJpaEntityTransform extends AbstractASTTransformation implements ASTT
 
     @Override
     int priority() {
-        GroovyTransformOrder.JPA_ORDER
+        GroovyTransformOrder.GLOBAL_JPA_ORDER
     }
 }

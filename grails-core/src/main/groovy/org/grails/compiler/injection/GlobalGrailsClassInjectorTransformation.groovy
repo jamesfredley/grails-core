@@ -64,7 +64,7 @@ class GlobalGrailsClassInjectorTransformation implements ASTTransformation, Comp
 
     @Override
     int priority() {
-        return GroovyTransformOrder.GRAILS_TRANSFORM_ORDER
+        return GroovyTransformOrder.GLOBAL_GRAILS_TRANSFORM_ORDER
     }
 
     @Override

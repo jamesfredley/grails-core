@@ -20,6 +20,7 @@ package org.grails.plugin.cache.compiler
 
 import grails.plugin.cache.CachePut
 import groovy.transform.CompileStatic
+import org.apache.grails.common.compiler.GroovyTransformOrder
 import org.codehaus.groovy.ast.AnnotationNode
 import org.codehaus.groovy.ast.ClassNode
 import org.codehaus.groovy.ast.MethodNode
@@ -45,7 +46,6 @@ import static org.grails.datastore.gorm.transform.AstMethodDispatchUtils.callD
 @GroovyASTTransformation(phase = CompilePhase.CANONICALIZATION)
 @CompileStatic
 class CachePutTransformation extends AbstractCacheTransformation {
-
 
     public static final ClassNode ANNOTATION_TYPE = make(CachePut)
 
@@ -87,4 +87,8 @@ class CachePutTransformation extends AbstractCacheTransformation {
         return ANNOTATION_TYPE
     }
 
+    @Override
+    int priority() {
+        GroovyTransformOrder.CACHE_PUT_ORDER
+    }
 }

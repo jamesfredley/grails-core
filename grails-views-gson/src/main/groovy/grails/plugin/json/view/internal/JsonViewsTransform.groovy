@@ -24,6 +24,7 @@ import grails.plugin.json.view.JsonViewWritableScript
 import grails.views.compiler.ViewsTransform
 import groovy.transform.CompileStatic
 import groovy.transform.InheritConstructors
+import org.apache.grails.common.compiler.GroovyTransformOrder
 import org.codehaus.groovy.control.CompilePhase
 import org.codehaus.groovy.transform.GroovyASTTransformation
 import org.grails.core.io.support.GrailsFactoriesLoader
@@ -44,5 +45,10 @@ class JsonViewsTransform extends ViewsTransform {
             ti.artefactTypes.contains(JsonViewWritableScript.TYPE)
         }
         return injectors
+    }
+
+    @Override
+    int priority() {
+        GroovyTransformOrder.VIEWS_GSON_ORDER
     }
 }
