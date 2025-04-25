@@ -30,11 +30,13 @@ import org.codehaus.groovy.transform.GroovyASTTransformationClass;
  *
  * @author Graeme Rocher
  * @since 2.3
+ * @deprecated Mixins are deprecated in Groovy 4 and will be removed in a future version of Grails
  */
 @java.lang.annotation.Documented
 @Retention(RetentionPolicy.SOURCE)
 @Target(ElementType.TYPE)
 @GroovyASTTransformationClass("org.grails.compiler.injection.MixinTransformation")
+@Deprecated
 public @interface Mixin {
     Class<?>[] value ();
 }

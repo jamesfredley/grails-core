@@ -44,7 +44,9 @@ import org.codehaus.groovy.transform.TransformWithPriority;
  *
  * @author Graeme Rocher
  * @since 2.1.2
+ * @deprecated Mixins are deprecated in Groovy 4 and will be removed in a future version of Grails
  */
+@Deprecated
 @GroovyASTTransformation(phase = CompilePhase.CANONICALIZATION)
 public class MixinTransformation implements ASTTransformation, TransformWithPriority {
 
