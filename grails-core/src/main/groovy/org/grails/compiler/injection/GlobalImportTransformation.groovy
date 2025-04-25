@@ -26,6 +26,7 @@ import org.codehaus.groovy.control.CompilePhase
 import org.codehaus.groovy.control.SourceUnit
 import org.codehaus.groovy.transform.ASTTransformation
 import org.codehaus.groovy.transform.GroovyASTTransformation
+import org.codehaus.groovy.transform.TransformWithPriority
 
 /**
  * @author Graeme Rocher
@@ -33,10 +34,15 @@ import org.codehaus.groovy.transform.GroovyASTTransformation
  */
 @GroovyASTTransformation( phase= CompilePhase.CONVERSION)
 @CompileStatic
-class GlobalImportTransformation implements ASTTransformation {
+class GlobalImportTransformation implements ASTTransformation, TransformWithPriority {
     @Override
     void visit(ASTNode[] nodes, SourceUnit source) {
         ModuleNode ast = source.getAST();
         ast.addImport("Autowired", ClassHelper.make("org.springframework.beans.factory.annotation.Autowired"))
+    }
+
+    @Override
+    int priority() {
+        GroovyTransformOrder.GLOBAL_IMPORT_ORDER
     }
 }

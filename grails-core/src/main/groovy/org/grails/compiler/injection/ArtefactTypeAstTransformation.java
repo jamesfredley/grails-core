@@ -226,4 +226,9 @@ public class ArtefactTypeAstTransformation extends AbstractArtefactTypeAstTransf
 	public void setCompilationUnit(CompilationUnit unit) {
 		compilationUnit = unit;
 	}
+
+    @Override
+    public int priority() {
+        return GroovyTransformOrder.ARTIFACT_TYPE_ORDER;
+    }
 }

@@ -33,8 +33,6 @@ import org.codehaus.groovy.control.CompilePhase
 import org.codehaus.groovy.control.SourceUnit
 import org.codehaus.groovy.transform.GroovyASTTransformation
 
-import java.lang.reflect.Modifier
-
 import static java.lang.reflect.Modifier.*
 
 /**
@@ -48,7 +46,6 @@ import static java.lang.reflect.Modifier.*
 class EnhancesTraitTransformation extends AbstractArtefactTypeAstTransformation implements CompilationUnitAware {
 
     private static final ClassNode MY_TYPE = new ClassNode(Enhances)
-
 
     CompilationUnit compilationUnit
 
@@ -104,9 +101,12 @@ class EnhancesTraitTransformation extends AbstractArtefactTypeAstTransformation 
 
     }
 
-    public boolean isTrait(ClassNode cNode) {
+    boolean isTrait(ClassNode cNode) {
         org.codehaus.groovy.transform.trait.Traits.isTrait(cNode) || cNode.name.endsWith('$Trait$Helper')
     }
 
-
+    @Override
+    int priority() {
+        GroovyTransformOrder.ENHANCES_ORDER
+    }
 }

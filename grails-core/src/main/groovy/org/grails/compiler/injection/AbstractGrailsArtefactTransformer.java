@@ -48,7 +48,7 @@ import java.util.*;
 public abstract class AbstractGrailsArtefactTransformer implements GrailsArtefactClassInjector, AnnotatedClassInjector, Comparable {
 
 
-    private static final Set<String> KNOWN_TRANSFORMED_CLASSES = new HashSet<String>();
+    private static final Set<String> KNOWN_TRANSFORMED_CLASSES = new LinkedHashSet<String>();
     private static final String INSTANCE_PREFIX = "instance";
     private static final String STATIC_PREFIX = "static";
     private static final AnnotationNode AUTO_WIRED_ANNOTATION = new AnnotationNode(new ClassNode(Autowired.class));
@@ -62,7 +62,7 @@ public abstract class AbstractGrailsArtefactTransformer implements GrailsArtefac
 
     private static final String[] DEFAULT_GENERICS_PLACEHOLDERS = new String[]{"D", "T"};
 
-    private final Set<String> classesTransformedByThis = new HashSet<String>();
+    private final Set<String> classesTransformedByThis = new LinkedHashSet<String>();
 
     public String[] getArtefactTypes() {
         return new String[]{ getArtefactType() };
@@ -226,7 +226,7 @@ public abstract class AbstractGrailsArtefactTransformer implements GrailsArtefac
     }
 
     protected Map<String, ClassNode> resolveGenericsPlaceHolders(ClassNode classNode) {
-        Map<String, ClassNode> genericsPlaceHolders = new HashMap<String, ClassNode>();
+        Map<String, ClassNode> genericsPlaceHolders = new LinkedHashMap<String, ClassNode>();
         for(String placeHolder : DEFAULT_GENERICS_PLACEHOLDERS) {
             genericsPlaceHolders.put(placeHolder, classNode);
         }

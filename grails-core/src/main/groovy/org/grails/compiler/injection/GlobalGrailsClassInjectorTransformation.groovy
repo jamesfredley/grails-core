@@ -39,6 +39,7 @@ import org.codehaus.groovy.control.CompilePhase
 import org.codehaus.groovy.control.SourceUnit
 import org.codehaus.groovy.transform.ASTTransformation
 import org.codehaus.groovy.transform.GroovyASTTransformation
+import org.codehaus.groovy.transform.TransformWithPriority
 import org.grails.core.io.support.GrailsFactoriesLoader
 import org.grails.io.support.AntPathMatcher
 import org.grails.io.support.GrailsResourceUtils
@@ -54,11 +55,16 @@ import java.lang.reflect.Modifier
  */
 @GroovyASTTransformation(phase= CompilePhase.CANONICALIZATION)
 @CompileStatic
-class GlobalGrailsClassInjectorTransformation implements ASTTransformation, CompilationUnitAware {
+class GlobalGrailsClassInjectorTransformation implements ASTTransformation, CompilationUnitAware, TransformWithPriority {
 
     public static final ClassNode ARTEFACT_HANDLER_CLASS = ClassHelper.make("grails.core.ArtefactHandler")
     public static final ClassNode APPLICATION_CONTEXT_COMMAND_CLASS = ClassHelper.make("grails.dev.commands.ApplicationCommand")
     public static final ClassNode TRAIT_INJECTOR_CLASS = ClassHelper.make("grails.compiler.traits.TraitInjector")
+
+    @Override
+    int priority() {
+        return GroovyTransformOrder.GRAILS_TRANSFORM_ORDER
+    }
 
     @Override
     void visit(ASTNode[] nodes, SourceUnit source) {
@@ -74,11 +80,11 @@ class GlobalGrailsClassInjectorTransformation implements ASTTransformation, Comp
         List<ArtefactHandler> artefactHandlers = GrailsFactoriesLoader.loadFactories(ArtefactHandler)
         ClassInjector[] classInjectors = GrailsAwareInjectionOperation.getClassInjectors()
 
-        Map<String, List<ClassInjector>> cache = new HashMap<String, List<ClassInjector>>().withDefault { String key ->
+        Map<String, List<ClassInjector>> cache = new LinkedHashMap<String, List<ClassInjector>>().withDefault { String key ->
             ArtefactTypeAstTransformation.findInjectors(key, classInjectors)
         }
 
-        Set<String> transformedClasses = []
+        LinkedHashSet<String> transformedClasses = []
         String pluginVersion = null
         ClassNode pluginClassNode = null
         def compilationTargetDirectory = resolveCompilationTargetDirectory(source)
@@ -234,12 +240,12 @@ class GlobalGrailsClassInjectorTransformation implements ASTTransformation, Comp
         sourceDirectory.parentFile
     }
 
-    static Set<String> pendingPluginClasses = []
+    static LinkedHashSet<String> pendingPluginClasses = []
     static Collection<String> pluginExcludes = []
 
     protected static void generatePluginXml(ClassNode pluginClassNode, String pluginVersion, Set<String> transformedClasses, File pluginXmlFile) {
         def pluginXmlExists = pluginXmlFile.exists()
-        Set<String> pluginClasses = []
+        LinkedHashSet<String> pluginClasses = []
         pluginClasses.addAll(transformedClasses)
         pluginClasses.addAll(pendingPluginClasses)
 

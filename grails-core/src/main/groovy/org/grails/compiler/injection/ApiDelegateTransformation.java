@@ -27,6 +27,7 @@ import org.codehaus.groovy.control.CompilePhase;
 import org.codehaus.groovy.control.SourceUnit;
 import org.codehaus.groovy.transform.ASTTransformation;
 import org.codehaus.groovy.transform.GroovyASTTransformation;
+import org.codehaus.groovy.transform.TransformWithPriority;
 
 import java.util.Arrays;
 import java.util.Map;
@@ -38,7 +39,12 @@ import java.util.Map;
  * @since 2.0
  */
 @GroovyASTTransformation(phase = CompilePhase.CANONICALIZATION)
-public class ApiDelegateTransformation implements ASTTransformation{
+public class ApiDelegateTransformation implements ASTTransformation, TransformWithPriority {
+    @Override
+    public int priority() {
+        return GroovyTransformOrder.API_DELEGATE_ORDER;
+    }
+
     public void visit(ASTNode[] nodes, SourceUnit source) {
         if (nodes.length != 2 || !(nodes[0] instanceof AnnotationNode) || !(nodes[1] instanceof AnnotatedNode)) {
             throw new GroovyBugError("Internal error: expecting [AnnotationNode, AnnotatedNode] but got: " + Arrays.asList(nodes));

@@ -34,11 +34,12 @@ import org.codehaus.groovy.control.CompilePhase;
 import org.codehaus.groovy.control.SourceUnit;
 import org.codehaus.groovy.transform.ASTTransformation;
 import org.codehaus.groovy.transform.GroovyASTTransformation;
+import org.codehaus.groovy.transform.TransformWithPriority;
 import org.grails.core.artefact.DomainClassArtefactHandler;
 
 
 @GroovyASTTransformation(phase = CompilePhase.CANONICALIZATION)
-public class EntityASTTransformation implements ASTTransformation, CompilationUnitAware {
+public class EntityASTTransformation implements ASTTransformation, CompilationUnitAware, TransformWithPriority {
 
     private static final ClassNode MY_TYPE = new ClassNode(Entity.class);
     private static final String MY_TYPE_NAME = "@" + MY_TYPE.getNameWithoutPackage();
@@ -101,5 +102,10 @@ public class EntityASTTransformation implements ASTTransformation, CompilationUn
     @Override
     public void setCompilationUnit(CompilationUnit unit) {
         compilationUnit = unit;
+    }
+
+    @Override
+    public int priority() {
+        return GroovyTransformOrder.ENTITY_ORDER;
     }
 }
