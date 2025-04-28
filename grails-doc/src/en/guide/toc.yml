@@ -42,9 +42,10 @@ upgrading:
 conf:
   title: Configuration
   config:
-    title: Basic Configuration
-    ymlOptions: Options for the YML format Config
-    builtInOptions: Built in options
+    title: Configuration Types
+    ymlPropertyOptions: YML Configuration
+    externalConfiguration: External Configuration
+    builtInOptions: Built-in Properties
     logging:
         title: Logging
         loggerName: Logger Names

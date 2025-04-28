@@ -27,6 +27,11 @@ Grails framework {GrailsVersion} updates Spring Boot to version {springBootVersi
 
 The minimum Java version required to run Grails {GrailsVersion} has been updated to Java 17.
 
+=== External Configuration
+
+The https://github.com/sbglasius/external-config[external configuration plugin] is now integrated into Grails.
+See the xref:conf.adoc#externalConfiguration[Configuration] section for details.
+
 === Ubiquitous Containerized Browser Testing with Geb
 
 The https://github.com/apache/grails-geb[Grails Geb Plugin] has received a significant update, introducing test fixtures that enable ubiquitous containerized browser testing.
