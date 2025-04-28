@@ -25,6 +25,7 @@ import io.github.gradlenexus.publishplugin.NexusPublishPlugin
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.Task
+import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.DuplicatesStrategy
 import org.gradle.api.plugins.*
 import org.gradle.api.publish.maven.MavenPublication
@@ -34,6 +35,7 @@ import org.gradle.api.tasks.SourceSetContainer
 import org.gradle.api.tasks.TaskContainer
 import org.gradle.api.tasks.TaskProvider
 import org.gradle.api.tasks.bundling.Jar
+import org.gradle.api.tasks.javadoc.Groovydoc
 import org.gradle.plugins.signing.Sign
 import org.gradle.plugins.signing.SigningExtension
 import org.gradle.plugins.signing.SigningPlugin
@@ -499,35 +501,53 @@ Note: if project properties are used, the properties must be defined prior to ap
             it.withSourcesJar()
         }
 
-        final TaskContainer taskContainer = project.tasks
-        taskContainer.named('javadocJar', Jar).configure { Jar task ->
-            project.rootProject.logger.info("Configuring javadocJar task for project {} to include groovydoc", project.name)
-            Task groovyDocTask = taskContainer.findByName('groovydoc')
+        final TaskContainer tasks = project.tasks
+        tasks.named('javadoc').configure {
+            Task groovyDocTask = tasks.findByName('groovydoc')
             if (groovyDocTask) {
-                task.dependsOn groovyDocTask
-
-                task.duplicatesStrategy = DuplicatesStrategy.INCLUDE
-                task.from groovyDocTask.outputs
+                project.rootProject.logger.info("Configuring javadocJar task for project {} to include groovydoc", project.name)
+                it.enabled = false
             }
-
-            task.outputs.cacheIf { true }
         }
 
-        taskContainer.named('sourcesJar', Jar).configure { Jar task ->
+        tasks.named('javadocJar', Jar).configure { Jar jar ->
+            jar.reproducibleFileOrder = true
+            jar.preserveFileTimestamps = false
+            jar.dirMode = 0755 // To avoid platform specific defaults
+            jar.fileMode = 0644 // to avoid platform specific defaults
+
+            Groovydoc groovyDocTask = tasks.findByName('groovydoc')
+            if (groovyDocTask) {
+                jar.dependsOn(groovyDocTask)
+
+                ConfigurableFileCollection groovyDocFiles = project.files(groovyDocTask.destinationDir)
+                jar.from(groovyDocFiles)
+                jar.inputs.files(groovyDocFiles)
+            }
+        }
+
+        tasks.named('sourcesJar', Jar).configure { Jar jar ->
             SourceSetContainer sourceSets = SourceSets.findSourceSets(project)
-            task.duplicatesStrategy = DuplicatesStrategy.INCLUDE
-            // don't only include main, but any source set
-            task.from sourceSets.collect { it.allSource }
+            jar.reproducibleFileOrder = true
+            jar.preserveFileTimestamps = false
+            jar.dirMode = 0755 // To avoid platform specific defaults
+            jar.fileMode = 0644 // to avoid platform specific defaults
+            jar.duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 
-            task.outputs.cacheIf { true }
+            // don't only include main, but any source set
+            jar.from sourceSets.collect { it.allSource }
+            jar.inputs.files(sourceSets.collect { it.allSource })
         }
 
-        project.tasks.register('testSourcesJar', Jar).configure {
-            it.dependsOn('testClasses')
-            it.from project.sourceSets.test.output
-            it.archiveClassifier.set('tests')
-
-            it.outputs.cacheIf { true }
+        project.tasks.register('testSourcesJar', Jar).configure { Jar jar ->
+            jar.dependsOn('testClasses')
+            jar.reproducibleFileOrder = true
+            jar.preserveFileTimestamps = false
+            jar.dirMode = 0755 // To avoid platform specific defaults
+            jar.fileMode = 0644 // to avoid platform specific defaults
+            jar.from project.sourceSets.test.output
+            jar.inputs.files(project.sourceSets.test.output)
+            jar.archiveClassifier.set('tests')
         }
 
         SourceSetContainer sourceSets = SourceSets.findSourceSets(project)
