@@ -25,6 +25,7 @@ import grails.compiler.ast.ClassInjector;
 import grails.compiler.ast.GlobalClassInjector;
 import grails.compiler.ast.GrailsArtefactClassInjector;
 import groovy.transform.CompilationUnitAware;
+import org.apache.grails.common.compiler.GroovyTransformOrder;
 import org.codehaus.groovy.ast.ASTNode;
 import org.codehaus.groovy.ast.AnnotatedNode;
 import org.codehaus.groovy.ast.AnnotationNode;
@@ -226,4 +227,9 @@ public class ArtefactTypeAstTransformation extends AbstractArtefactTypeAstTransf
 	public void setCompilationUnit(CompilationUnit unit) {
 		compilationUnit = unit;
 	}
+
+    @Override
+    public int priority() {
+        return GroovyTransformOrder.ARTIFACT_TYPE_ORDER;
+    }
 }

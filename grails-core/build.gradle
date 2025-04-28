@@ -48,6 +48,7 @@ dependencies {
     compileOnly 'org.springframework:spring-test'
     compileOnly 'org.apache.groovy:groovy-templates'
 
+    api project(':grails-common')
     api project(':grails-bootstrap')
     api project(':grails-spring')
 

@@ -46,7 +46,7 @@ class InheritedConfigSpec extends SuperSpec {
         go '/serverName'
 
         then: 'the emitted hostname is correct'
-        $('p').text() == 'Server name: super.example.com'
+        pageSource.contains('Server name: super.example.com')
     }
 }
 
@@ -57,7 +57,7 @@ class NotInheritedConfigSpec extends NotSuperSpec {
         go '/serverName'
 
         then: 'the emitted hostname is correct'
-        $('p').text() != 'Server name: not.example.com'
+        !pageSource.contains('Server name: not.example.com')
     }
 }
 
@@ -73,7 +73,7 @@ class ChildPreferenceInheritedConfigSpec extends SuperSpec {
         go '/serverName'
 
         then: 'the emitted hostname is correct'
-        $('p').text() == 'Server name: child.example.com'
+        pageSource.contains('Server name: child.example.com')
 
         when:
         report('whatever')
@@ -81,7 +81,7 @@ class ChildPreferenceInheritedConfigSpec extends SuperSpec {
         then:
         // geb.test.GebTestManager: "Reporting has not been enabled on this GebTestManager yet report() was called"
         Throwable t = thrown(Exception)
-        t.message.contains("not been enabled")
+        t.message.contains('not been enabled')
     }
 }
 
@@ -101,7 +101,7 @@ class MultipleInheritanceSpec extends SuperSuperInheritedConfigSpec {
         go '/serverName'
 
         then: 'the emitted hostname is correct'
-        $('p').text() == 'Server name: super.example.com'
+        pageSource.contains('Server name: super.example.com')
         report('multi inheritance report')
     }
 }

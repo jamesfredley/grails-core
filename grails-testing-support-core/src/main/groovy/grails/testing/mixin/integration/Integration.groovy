@@ -33,7 +33,7 @@ import java.lang.annotation.Target
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target([ElementType.TYPE])
-@GroovyASTTransformationClass("org.grails.compiler.injection.testing.IntegrationTestMixinTransformation")
+@GroovyASTTransformationClass("org.grails.compiler.injection.testing.IntegrationTestAstTransformation")
 public @interface Integration {
 
     /**

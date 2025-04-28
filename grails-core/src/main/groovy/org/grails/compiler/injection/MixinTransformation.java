@@ -27,6 +27,7 @@ import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.List;
 
+import org.apache.grails.common.compiler.GroovyTransformOrder;
 import org.codehaus.groovy.ast.ASTNode;
 import org.codehaus.groovy.ast.AnnotatedNode;
 import org.codehaus.groovy.ast.AnnotationNode;
@@ -37,15 +38,18 @@ import org.codehaus.groovy.control.CompilePhase;
 import org.codehaus.groovy.control.SourceUnit;
 import org.codehaus.groovy.transform.ASTTransformation;
 import org.codehaus.groovy.transform.GroovyASTTransformation;
+import org.codehaus.groovy.transform.TransformWithPriority;
 
 /**
  * The logic for the {@link grails.util.Mixin} location transform.
  *
  * @author Graeme Rocher
  * @since 2.1.2
+ * @deprecated Mixins are deprecated in Groovy 4 and will be removed in a future version of Grails
  */
+@Deprecated
 @GroovyASTTransformation(phase = CompilePhase.CANONICALIZATION)
-public class MixinTransformation implements ASTTransformation {
+public class MixinTransformation implements ASTTransformation, TransformWithPriority {
 
     public static final ClassNode GROOVY_OBJECT_CLASS_NODE = new ClassNode(GroovyObjectSupport.class);
     private static final ClassNode MY_TYPE = new ClassNode(Mixin.class);
@@ -150,5 +154,10 @@ public class MixinTransformation implements ASTTransformation {
             Modifier.isPublic(declaredMethod.getModifiers()) &&
             !Modifier.isAbstract(declaredMethod.getModifiers()) &&
             !groovyMethods.hasMethod(declaredMethod.getName(), declaredMethod.getParameters());
+    }
+
+    @Override
+    public int priority() {
+        return GroovyTransformOrder.MIXIN_ORDER;
     }
 }

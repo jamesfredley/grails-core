@@ -19,6 +19,7 @@
 package grails.core;
 
 import org.codehaus.groovy.ast.ClassNode;
+import org.springframework.core.Ordered;
 
 /**
  * <p>The ArtefactHandler interface's purpose is to allow the analysis of conventions within a Grails application.
@@ -34,7 +35,7 @@ import org.codehaus.groovy.ast.ClassNode;
  * @author Marc Palmer (marc@anyware.co.uk)
  * @since 1.0
  */
-public interface ArtefactHandler {
+public interface ArtefactHandler extends Ordered {
 
     /**
      * Obtains the plugin name that deals with this artefact.

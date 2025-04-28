@@ -87,7 +87,7 @@ class AstUtils {
     public static final ArgumentListExpression ZERO_ARGUMENTS = new ArgumentListExpression()
     public static final ClassNode OBJECT_CLASS_NODE = new ClassNode(Object.class).getPlainNodeReference()
 
-    private static final Set<String> TRANSFORMED_CLASSES = new HashSet<String>()
+    private static final Set<String> TRANSFORMED_CLASSES = new LinkedHashSet<String>()
     private static final Set<String> ENTITY_ANNOTATIONS = ["grails.persistence.Entity", "grails.gorm.annotation.Entity", Entity.class.getName()] as Set<String>
 
     /**
