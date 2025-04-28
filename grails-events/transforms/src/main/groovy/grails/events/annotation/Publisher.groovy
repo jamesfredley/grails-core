@@ -16,7 +16,6 @@
  *  specific language governing permissions and limitations
  *  under the License.
  */
-
 package grails.events.annotation
 
 import org.codehaus.groovy.transform.GroovyASTTransformationClass
@@ -29,7 +28,6 @@ import java.lang.annotation.Inherited
 import java.lang.annotation.Retention
 import java.lang.annotation.RetentionPolicy
 import java.lang.annotation.Target
-
 
 /**
  * Transforms a method so the return value is emitted as an event

@@ -27,6 +27,7 @@ import org.grails.core.exceptions.GrailsRuntimeException;
 import org.grails.io.support.GrailsResourceUtils;
 import org.grails.io.support.Resource;
 import org.grails.io.support.UrlResource;
+import org.springframework.core.Ordered;
 
 import java.io.IOException;
 import java.lang.reflect.Constructor;
@@ -42,7 +43,7 @@ import java.net.URL;
  * @since 1.0
  */
 @SuppressWarnings( "deprecation" )
-public class ArtefactHandlerAdapter implements ArtefactHandler {
+public abstract class ArtefactHandlerAdapter implements ArtefactHandler {
 
     protected String type;
     protected Class<?> grailsClassType;
@@ -191,5 +192,10 @@ public class ArtefactHandlerAdapter implements ArtefactHandler {
 
     public boolean isArtefactGrailsClass(GrailsClass artefactGrailsClass) {
         return grailsClassType.isAssignableFrom(artefactGrailsClass.getClass());
+    }
+
+    @Override
+    public int getOrder() {
+        return Ordered.LOWEST_PRECEDENCE;
     }
 }

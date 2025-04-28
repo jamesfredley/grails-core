@@ -20,6 +20,7 @@ package org.grails.plugin.cache.compiler
 
 import grails.plugin.cache.CacheEvict
 import groovy.transform.CompileStatic
+import org.apache.grails.common.compiler.GroovyTransformOrder
 import org.codehaus.groovy.ast.AnnotationNode
 import org.codehaus.groovy.ast.ClassNode
 import org.codehaus.groovy.ast.MethodNode
@@ -103,5 +104,10 @@ class CacheEvictTransformation extends AbstractCacheTransformation {
     @Override
     protected ClassNode getAnnotationType() {
         return ANNOTATION_TYPE
+    }
+
+    @Override
+    int priority() {
+        GroovyTransformOrder.CACHE_EVICT_ORDER
     }
 }

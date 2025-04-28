@@ -23,6 +23,7 @@ import grails.gorm.transactions.NotTransactional
 import groovy.transform.CompilationUnitAware
 import groovy.transform.CompileStatic
 import groovyjarjarasm.asm.Opcodes
+import org.apache.grails.common.compiler.GroovyTransformOrder
 import org.codehaus.groovy.ast.AnnotationNode
 import org.codehaus.groovy.ast.ClassHelper
 import org.codehaus.groovy.ast.ClassNode
@@ -425,5 +426,10 @@ class ServiceTransformation extends AbstractTraitApplyingGormASTTransformation i
                 warning(sourceUnit, classNode, "Error generating service loader descriptor for class [${className}]: $e.message")
             }
         }
+    }
+
+    @Override
+    int priority() {
+        GroovyTransformOrder.DATA_SERVICE_ORDER
     }
 }

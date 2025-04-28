@@ -1091,7 +1091,7 @@ public class GrailsASTUtils {
      */
     public static Map<String, ClassNode> getAssocationMap(ClassNode classNode, String associationType) {
         PropertyNode property = classNode.getProperty(associationType);
-        Map<String, ClassNode> associationMap = new HashMap<String, ClassNode>();
+        Map<String, ClassNode> associationMap = new LinkedHashMap<String, ClassNode>();
         if (property != null && property.isStatic()) {
             Expression e = property.getInitialExpression();
             if (e instanceof MapExpression) {
@@ -1109,7 +1109,7 @@ public class GrailsASTUtils {
     }
 
     public static Map<String,ClassNode> getAllAssociationMap(ClassNode classNode) {
-        Map<String, ClassNode> associationMap = new HashMap<String, ClassNode>();
+        Map<String, ClassNode> associationMap = new LinkedHashMap<String, ClassNode>();
         associationMap.putAll( getAssocationMap(classNode, GormProperties.HAS_MANY));
         associationMap.putAll( getAssocationMap(classNode, GormProperties.HAS_ONE));
         associationMap.putAll( getAssocationMap(classNode, GormProperties.BELONGS_TO));
@@ -1431,7 +1431,7 @@ public class GrailsASTUtils {
     }
     
     public static void removeCompileStaticAnnotations(final AnnotatedNode annotatedNode) {
-        filterAnnotations(annotatedNode, null, new HashSet<String>(Arrays.asList(new String[]{CompileStatic.class.getName(), TypeChecked.class.getName()})));
+        filterAnnotations(annotatedNode, null, new LinkedHashSet<String>(Arrays.asList(new String[]{CompileStatic.class.getName(), TypeChecked.class.getName()})));
     }
     
     public static void markApplied(ASTNode astNode, Class<?> transformationClass) {

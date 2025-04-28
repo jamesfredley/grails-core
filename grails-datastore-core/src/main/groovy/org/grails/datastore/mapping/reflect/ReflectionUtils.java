@@ -24,7 +24,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -40,7 +40,7 @@ import org.springframework.util.StringUtils;
  */
 public class ReflectionUtils {
 
-    public static final Map<Class<?>, Class<?>> PRIMITIVE_TYPE_COMPATIBLE_CLASSES = new HashMap<Class<?>, Class<?>>();
+    public static final Map<Class<?>, Class<?>> PRIMITIVE_TYPE_COMPATIBLE_CLASSES = new HashMap<>();
     @SuppressWarnings("rawtypes")
     private static final Class[] EMPTY_CLASS_ARRAY = {};
 
@@ -180,7 +180,7 @@ public class ReflectionUtils {
             return new PropertyDescriptor[0];
         }
 
-        Set<PropertyDescriptor> properties = new HashSet<PropertyDescriptor>();
+        Set<PropertyDescriptor> properties = new LinkedHashSet<>();
         try {
             for (PropertyDescriptor descriptor : BeanUtils.getPropertyDescriptors(clazz)) {
                 Class<?> currentPropertyType = descriptor.getPropertyType();

@@ -16,15 +16,18 @@
  *  specific language governing permissions and limitations
  *  under the License.
  */
-
 package org.grails.compiler.injection.testing
+
 import grails.boot.test.GrailsApplicationContextLoader
 import grails.boot.config.GrailsAutoConfiguration
 import grails.testing.mixin.integration.Integration
 import groovy.transform.CompileStatic
+import org.apache.grails.common.compiler.GroovyTransformOrder
 import org.codehaus.groovy.ast.*
 import org.codehaus.groovy.ast.expr.*
 import org.codehaus.groovy.ast.stmt.*
+import org.codehaus.groovy.transform.TransformWithPriority
+
 import static org.codehaus.groovy.ast.tools.GeneralUtils.*
 import org.codehaus.groovy.control.CompilePhase
 import org.codehaus.groovy.control.SourceUnit
@@ -45,7 +48,6 @@ import org.springframework.context.ApplicationContext
 import org.springframework.context.ApplicationContextAware
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.web.WebAppConfiguration
-import org.springframework.util.ClassUtils
 
 import java.lang.reflect.Modifier
 
@@ -55,7 +57,7 @@ import java.lang.reflect.Modifier
  */
 @CompileStatic
 @GroovyASTTransformation(phase = CompilePhase.CANONICALIZATION)
-class IntegrationTestMixinTransformation implements ASTTransformation {
+class IntegrationTestAstTransformation implements ASTTransformation, TransformWithPriority {
 
     static final ClassNode MY_TYPE = new ClassNode(Integration.class)
     public static final ClassNode CONTEXT_CONFIG_ANNOTATION = ClassHelper.make(ContextConfiguration)
@@ -75,40 +77,39 @@ class IntegrationTestMixinTransformation implements ASTTransformation {
 
         AnnotatedNode parent = (AnnotatedNode) astNodes[1]
         AnnotationNode annotationNode = (AnnotationNode) astNodes[0]
-        if (!MY_TYPE.equals(annotationNode.classNode) || !(parent instanceof ClassNode)) {
+        if (MY_TYPE != annotationNode.classNode || !(parent instanceof ClassNode)) {
             return
         }
 
-        ClassExpression applicationClassExpression = (ClassExpression)annotationNode.getMember('applicationClass')
+        ClassExpression applicationClassExpression = (ClassExpression) annotationNode.getMember('applicationClass')
 
         final applicationClassNode
-        if(applicationClassExpression) {
+        if (applicationClassExpression) {
             applicationClassNode = applicationClassExpression.getType()
-            if(!applicationClassNode.isDerivedFrom(ClassHelper.make(GrailsAutoConfiguration))) {
+            if (!applicationClassNode.isDerivedFrom(ClassHelper.make(GrailsAutoConfiguration))) {
                 GrailsASTUtils.error(source, applicationClassExpression, "Invalid applicationClass attribute value [${applicationClassNode.getName()}].  The applicationClass attribute must specify a class which extends grails.boot.config.GrailsAutoConfiguration.", true)
             }
         } else {
             String mainClass = MainClassFinder.searchMainClass(source.source.URI)
-            if(mainClass) {
+            if (mainClass) {
                 applicationClassNode = ClassHelper.make(mainClass)
             } else {
                 applicationClassNode = null
             }
         }
 
-        if(applicationClassNode) {
+        if (applicationClassNode) {
             ClassNode classNode = (ClassNode) parent
 
             weaveIntegrationTestMixin(classNode, applicationClassNode)
-
         }
 
     }
 
-    public void weaveIntegrationTestMixin(ClassNode classNode, ClassNode applicationClassNode) {
-        if(applicationClassNode == null) return
-
-
+    void weaveIntegrationTestMixin(ClassNode classNode, ClassNode applicationClassNode) {
+        if (applicationClassNode == null) {
+            return
+        }
         enableAutowireByName(classNode)
 
         if (GrailsASTUtils.isSubclassOf(classNode, SPEC_CLASS)) {
@@ -140,29 +141,26 @@ class IntegrationTestMixinTransformation implements ASTTransformation {
         try {
             servletApi = Class.forName("jakarta.servlet.ServletContext", false, getClass().classLoader)
         }
-        catch(Exception e) {
+        catch (Exception e) {
             // ignore
         }
-        
-        
-        if (servletApi != null) {
 
-            if( GrailsASTUtils.findAnnotation(classNode, SpringBootTest) == null) {
+        if (servletApi) {
+            if (!GrailsASTUtils.findAnnotation(classNode, SpringBootTest)) {
                 GrailsASTUtils.addAnnotationOrGetExisting(
                         classNode, SpringBootTest, [
-                                webEnvironment: propX(classX(SpringBootTest.WebEnvironment), 'RANDOM_PORT'),
-                                useMainMethod: propX(classX(SpringBootTest.UseMainMethod), 'ALWAYS')
-                        ] as Map<String,Object>
+                        webEnvironment: propX(classX(SpringBootTest.WebEnvironment), 'RANDOM_PORT'),
+                        useMainMethod : propX(classX(SpringBootTest.UseMainMethod), 'ALWAYS')
+                ] as Map<String, Object>
                 )
 
-                if(classNode.getProperty("serverPort") == null) {
-
+                if (classNode.getProperty("serverPort") == null) {
                     def serverPortField = new FieldNode("serverPort", Modifier.PROTECTED, ClassHelper.Integer_TYPE, classNode, new ConstantExpression(8080))
                     def valueAnnotation = new AnnotationNode(ClassHelper.make(Value))
                     valueAnnotation.setMember("value", new ConstantExpression('${local.server.port}'))
                     serverPortField.addAnnotation(valueAnnotation)
 
-                    classNode.addProperty(new PropertyNode(serverPortField, Modifier.PUBLIC, null, null ))
+                    classNode.addProperty(new PropertyNode(serverPortField, Modifier.PUBLIC, null, null))
                 }
             }
         } else {
@@ -219,5 +217,10 @@ class IntegrationTestMixinTransformation implements ASTTransformation {
             method.addAnnotation(new AnnotationNode(ClassHelper.make(Autowired)))
             classNode.addMethod(method)
         }
+    }
+
+    @Override
+    int priority() {
+        GroovyTransformOrder.INTEGRATION_ORDER
     }
 }
