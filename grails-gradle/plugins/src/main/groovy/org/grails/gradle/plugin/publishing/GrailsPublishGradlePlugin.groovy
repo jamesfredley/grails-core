@@ -520,6 +520,10 @@ Note: if project properties are used, the properties must be defined prior to ap
             if (groovyDocTask) {
                 jar.dependsOn(groovyDocTask)
 
+                // Ensure the java source set is included in the groovydoc source set
+                SourceSetContainer sourceSets = project.extensions.getByType(SourceSetContainer)
+                groovyDocTask.source(project.files(sourceSets.main.java.srcDirs))
+
                 ConfigurableFileCollection groovyDocFiles = project.files(groovyDocTask.destinationDir)
                 jar.from(groovyDocFiles)
                 jar.inputs.files(groovyDocFiles)
