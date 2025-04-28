@@ -33,6 +33,7 @@ import groovy.xml.StreamingMarkupBuilder
 import groovy.xml.XmlSlurper
 import groovy.xml.slurpersupport.GPathResult
 import org.apache.grails.common.compiler.GroovyTransformOrder
+import org.apache.grails.common.properties.PropertyFileUtils
 import org.codehaus.groovy.ast.ASTNode
 import org.codehaus.groovy.ast.AnnotationNode
 import org.codehaus.groovy.ast.ClassHelper
@@ -52,8 +53,6 @@ import org.grails.io.support.GrailsResourceUtils
 import org.grails.io.support.UrlResource
 
 import java.lang.reflect.Modifier
-import java.nio.charset.StandardCharsets
-import java.time.Instant
 
 /**
  * A global transformation that applies Grails' transformations to classes within a Grails project
@@ -211,27 +210,11 @@ class GlobalGrailsClassInjectorTransformation implements ASTTransformation, Comp
                 props.store(writer, "Grails Factories File")
             }
 
-            makeFactoriesFileReproducible(factoriesFile)
+            PropertyFileUtils.makePropertiesFileReproducible(factoriesFile)
 
             return true
         }
         return false
-    }
-
-    private static void makeFactoriesFileReproducible(File factoriesFile) {
-        String sourceDateEpoch = System.getenv('SOURCE_DATE_EPOCH')
-        if (!sourceDateEpoch) {
-            return
-        }
-
-        Instant buildInstant = Instant.ofEpochSecond(sourceDateEpoch as Long)
-        List<String> lines = factoriesFile.readLines(StandardCharsets.ISO_8859_1.name())
-        lines[1] = "# ${Date.from(buildInstant).toString()}" as String
-        factoriesFile.withWriter { BufferedWriter writer ->
-            lines.each { String line ->
-                writer.writeLine(line)
-            }
-        }
     }
 
     private static void loadFromFile(Properties props, File factoriesFile) {
