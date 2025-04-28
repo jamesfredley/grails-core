@@ -21,23 +21,14 @@ def e2eTest = sourceSets.create('e2eTest')
 def e2eTestTask = tasks.register('e2eTest', Test)
 e2eTestTask.configure { Test it ->
     it.onlyIf {
-        if(project.hasProperty('onlyFunctionalTests')) {
-            return false
+        ![
+                'onlyFunctionalTests',
+                'onlyHibernate5Tests',
+                'onlyMongodbTests',
+                'skipTests'
+        ].find {
+            project.hasProperty(it)
         }
-
-        if (project.hasProperty('onlyMongodbTests')) {
-            return false
-        }
-
-        if (project.hasProperty('onlyHibernate5Tests')) {
-            return false
-        }
-
-        if(project.hasProperty('skipTests')) {
-            return false
-        }
-
-        true
     }
     it.group = 'verification'
     it.testClassesDirs = sourceSets.e2eTest.output.classesDirs

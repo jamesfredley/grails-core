@@ -67,7 +67,13 @@ class GrailsFactoriesLoader extends FactoriesLoaderSupport {
         for(Class<? extends T> clazz : loadFactoryClasses(factoryClass, classLoader)) {
             results.add(hasArguments ? clazz.newInstance(arguments) : clazz.getDeclaredConstructor().newInstance())
         }
-        OrderComparator.sort((List<?>) results)
+
+        // This list should always be rather small, so sort the handlers by class name.  This will provide
+        // a deterministic order before accounting for PriorityOrdering
+        results.sort { T a, T b ->
+            a?.getClass()?.name <=> b?.getClass()?.name
+        }
+        OrderComparator.sort((List<T>) results)
         results
     }
     

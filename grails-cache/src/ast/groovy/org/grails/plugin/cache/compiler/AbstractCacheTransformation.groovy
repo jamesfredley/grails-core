@@ -32,7 +32,6 @@ import org.codehaus.groovy.transform.trait.TraitComposer
 import org.grails.datastore.gorm.multitenancy.transform.TenantTransform
 import org.grails.datastore.gorm.transform.AbstractMethodDecoratingTransformation
 import org.grails.datastore.gorm.transform.AbstractTraitApplyingGormASTTransformation
-import org.grails.datastore.mapping.core.Ordered
 import org.grails.datastore.mapping.model.config.GormProperties
 import org.grails.plugin.cache.GrailsCacheManagerAware
 import org.springframework.cache.Cache
@@ -49,7 +48,7 @@ import static org.grails.datastore.gorm.transform.AstMethodDispatchUtils.*
  * @author Jeff Brown
  */
 @CompileStatic
-abstract class AbstractCacheTransformation extends AbstractMethodDecoratingTransformation implements Ordered {
+abstract class AbstractCacheTransformation extends AbstractMethodDecoratingTransformation {
 
     public static final String GRAILS_CACHE_MANAGER_PROPERTY_NAME = 'grailsCacheManager'
     public static final String CACHE_KEY_LOCAL_VARIABLE_NAME = '$_cache_cacheKey'
@@ -75,15 +74,6 @@ abstract class AbstractCacheTransformation extends AbstractMethodDecoratingTrans
     private static final MethodNode GET_CACHE_METHOD_NODE = CACHE_MANAGER_CLASS_NODE.getMethod('getCache', [new Parameter(STRING_TYPE, 'name')] as Parameter[])
     private static final MethodNode MAP_PUT_METHOD = MAP_TYPE.getMethod('put', [new Parameter(OBJECT_TYPE, 'key'), new Parameter(OBJECT_TYPE, 'value')] as Parameter[])
     public static final String CACHE_ORIGINAL_METHOD_RETURN_VALUE_LOCAL_VARIABLE_NAME = '$_cache_originalMethodReturnValue'
-
-    /**
-     * The position of the transform. Before the transactional transform
-     */
-    public static final int POSITION = TenantTransform.POSITION + 150
-    @Override
-    int getOrder() {
-        return POSITION
-    }
 
     @Override
     protected String getRenamedMethodPrefix() {

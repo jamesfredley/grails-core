@@ -30,6 +30,7 @@ import org.codehaus.groovy.ast.VariableScope
 import org.codehaus.groovy.ast.expr.ArgumentListExpression
 import org.codehaus.groovy.ast.expr.CastExpression
 import org.codehaus.groovy.ast.expr.ClosureExpression
+import org.apache.grails.common.compiler.GroovyTransformOrder
 import org.codehaus.groovy.ast.expr.ConstantExpression
 import org.codehaus.groovy.ast.expr.Expression
 import org.codehaus.groovy.ast.expr.MethodCallExpression
@@ -63,7 +64,7 @@ import static org.codehaus.groovy.ast.tools.GeneralUtils.callX
  */
 @CompileStatic
 @GroovyASTTransformation(phase = CompilePhase.CANONICALIZATION)
-class RxScheduleIOTransformation extends AbstractMethodDecoratingTransformation implements Ordered {
+class RxScheduleIOTransformation extends AbstractMethodDecoratingTransformation {
     private static final Object APPLIED_MARKER = new Object()
     public static final String RENAMED_METHOD_PREFIX = '$rx__'
 
@@ -158,7 +159,7 @@ class RxScheduleIOTransformation extends AbstractMethodDecoratingTransformation 
     }
 
     @Override
-    int getOrder() {
-        return TenantTransform.POSITION - 100
+    int priority() {
+        return GroovyTransformOrder.RX_SCHEDULE_IO_ORDER
     }
 }

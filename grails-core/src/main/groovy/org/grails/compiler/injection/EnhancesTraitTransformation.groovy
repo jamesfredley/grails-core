@@ -22,6 +22,7 @@ import grails.artefact.Enhances
 import grails.compiler.traits.TraitInjector
 import groovy.transform.CompilationUnitAware
 import groovy.transform.CompileStatic
+import org.apache.grails.common.compiler.GroovyTransformOrder
 import org.apache.groovy.ast.tools.AnnotatedNodeUtils
 import org.codehaus.groovy.ast.*
 import org.codehaus.groovy.ast.expr.CastExpression
@@ -32,8 +33,6 @@ import org.codehaus.groovy.control.CompilationUnit
 import org.codehaus.groovy.control.CompilePhase
 import org.codehaus.groovy.control.SourceUnit
 import org.codehaus.groovy.transform.GroovyASTTransformation
-
-import java.lang.reflect.Modifier
 
 import static java.lang.reflect.Modifier.*
 
@@ -48,7 +47,6 @@ import static java.lang.reflect.Modifier.*
 class EnhancesTraitTransformation extends AbstractArtefactTypeAstTransformation implements CompilationUnitAware {
 
     private static final ClassNode MY_TYPE = new ClassNode(Enhances)
-
 
     CompilationUnit compilationUnit
 
@@ -104,9 +102,12 @@ class EnhancesTraitTransformation extends AbstractArtefactTypeAstTransformation 
 
     }
 
-    public boolean isTrait(ClassNode cNode) {
+    boolean isTrait(ClassNode cNode) {
         org.codehaus.groovy.transform.trait.Traits.isTrait(cNode) || cNode.name.endsWith('$Trait$Helper')
     }
 
-
+    @Override
+    int priority() {
+        GroovyTransformOrder.ENHANCES_ORDER
+    }
 }

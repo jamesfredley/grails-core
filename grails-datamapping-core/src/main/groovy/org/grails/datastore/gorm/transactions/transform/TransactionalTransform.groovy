@@ -20,6 +20,7 @@ import grails.gorm.transactions.ReadOnly
 import grails.gorm.transactions.Rollback
 import grails.gorm.transactions.Transactional
 import groovy.transform.CompileStatic
+import org.apache.grails.common.compiler.GroovyTransformOrder
 import org.codehaus.groovy.ast.*
 import org.codehaus.groovy.ast.expr.*
 import org.codehaus.groovy.ast.stmt.BlockStatement
@@ -94,7 +95,7 @@ import static org.grails.datastore.mapping.reflect.AstUtils.*
  */
 @CompileStatic
 @GroovyASTTransformation(phase = CompilePhase.CANONICALIZATION)
-class TransactionalTransform extends AbstractDatastoreMethodDecoratingTransformation implements Ordered {
+class TransactionalTransform extends AbstractDatastoreMethodDecoratingTransformation {
     private static final Set<String> ANNOTATION_NAME_EXCLUDES = new HashSet<String>([Transactional.class.getName(), "grails.transaction.Rollback", Rollback.class.getName(), NotTransactional.class.getName(), "grails.transaction.NotTransactional", "grails.gorm.transactions.ReadOnly"])
     public static final ClassNode MY_TYPE = new ClassNode(Transactional)
     public static final ClassNode READ_ONLY_TYPE = new ClassNode(ReadOnly)
@@ -106,10 +107,7 @@ class TransactionalTransform extends AbstractDatastoreMethodDecoratingTransforma
         new HashSet<String>([Transactional.simpleName, Rollback.simpleName, ReadOnly.simpleName])
     )
     public static final String GET_TRANSACTION_MANAGER_METHOD = "getTransactionManager"
-    /**
-     * The position of the transform in terms ordering
-     */
-    public static final int POSITION = 0
+
     public static final String RENAMED_METHOD_PREFIX = '$tt__'
 
     /**
@@ -133,11 +131,6 @@ class TransactionalTransform extends AbstractDatastoreMethodDecoratingTransforma
         }
         ann = findAnnotation(methodNode.getDeclaringClass(), ReadOnly)
         return ann
-    }
-
-    @Override
-    int getOrder() {
-        return POSITION
     }
 
     @Override
@@ -469,5 +462,10 @@ class TransactionalTransform extends AbstractDatastoreMethodDecoratingTransforma
     @Override
     protected String getRenamedMethodPrefix() {
         return RENAMED_METHOD_PREFIX
+    }
+
+    @Override
+    int priority() {
+        GroovyTransformOrder.TRANSACTIONAL_ORDER
     }
 }

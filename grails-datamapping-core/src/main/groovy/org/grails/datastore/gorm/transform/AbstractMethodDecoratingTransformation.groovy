@@ -60,7 +60,6 @@ abstract class AbstractMethodDecoratingTransformation extends AbstractGormASTTra
 
     @Override
     void visit(SourceUnit source, AnnotationNode annotationNode, AnnotatedNode annotatedNode) {
-
         if(annotatedNode instanceof MethodNode) {
             MethodNode methodNode = (MethodNode)annotatedNode
             Map<String, ClassNode> genericsSpec = GenericsUtils.createGenericsSpec(methodNode.declaringClass)

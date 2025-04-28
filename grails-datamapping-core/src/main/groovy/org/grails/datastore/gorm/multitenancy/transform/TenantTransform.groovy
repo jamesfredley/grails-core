@@ -23,6 +23,7 @@ import grails.gorm.multitenancy.Tenant
 import grails.gorm.multitenancy.TenantService
 import grails.gorm.multitenancy.WithoutTenant
 import groovy.transform.CompileStatic
+import org.apache.grails.common.compiler.GroovyTransformOrder
 import org.codehaus.groovy.ast.*
 import org.codehaus.groovy.ast.expr.ClassExpression
 import org.codehaus.groovy.ast.expr.ClosureExpression
@@ -35,7 +36,6 @@ import org.codehaus.groovy.control.SourceUnit
 import org.codehaus.groovy.transform.GroovyASTTransformation
 import org.grails.datastore.gorm.transactions.transform.TransactionalTransform
 import org.grails.datastore.gorm.transform.AbstractDatastoreMethodDecoratingTransformation
-import org.grails.datastore.mapping.core.Ordered
 import org.grails.datastore.mapping.multitenancy.exceptions.TenantNotFoundException
 import org.grails.datastore.mapping.reflect.AstUtils
 import org.grails.datastore.mapping.services.ServiceRegistry
@@ -55,7 +55,7 @@ import static org.grails.datastore.mapping.reflect.AstUtils.varThis
  */
 @CompileStatic
 @GroovyASTTransformation(phase = CompilePhase.CANONICALIZATION)
-class TenantTransform extends AbstractDatastoreMethodDecoratingTransformation implements Ordered {
+class TenantTransform extends AbstractDatastoreMethodDecoratingTransformation {
     private static final Object APPLIED_MARKER = new Object()
     private static final ClassExpression CURRENT_TENANT_ANNOTATION_TYPE_EXPR = classX(CurrentTenant)
     private static final ClassExpression TENANT_ANNOTATION_TYPE_EXPR = classX(Tenant)
@@ -67,10 +67,6 @@ class TenantTransform extends AbstractDatastoreMethodDecoratingTransformation im
 
     public static final String RENAMED_METHOD_PREFIX = '$mt__'
     public static final String VAR_TENANT_ID = "tenantId"
-    /**
-     * The position of the transform. Before the transactional transform
-     */
-    public static final int POSITION = TransactionalTransform.POSITION - 100
 
     private static final Parameter[] N0_PARAMETER = null
 
@@ -156,11 +152,6 @@ class TenantTransform extends AbstractDatastoreMethodDecoratingTransformation im
         return APPLIED_MARKER
     }
 
-    @Override
-    int getOrder() {
-        return POSITION
-    }
-
     /**
      * Whether the given node is Multi Tenant
      *
@@ -187,5 +178,10 @@ class TenantTransform extends AbstractDatastoreMethodDecoratingTransformation im
             }
         }
         return false
+    }
+
+    @Override
+    int priority() {
+        GroovyTransformOrder.TENANT_ORDER
     }
 }

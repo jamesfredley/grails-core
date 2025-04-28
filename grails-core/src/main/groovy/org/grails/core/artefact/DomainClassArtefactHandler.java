@@ -44,7 +44,7 @@ import java.net.URL;
  * @author Graeme Rocher
  * @author Marc Palmer (marc@anyware.co.uk)
  */
-public class DomainClassArtefactHandler extends ArtefactHandlerAdapter implements GrailsApplicationAware, Ordered {
+public class DomainClassArtefactHandler extends ArtefactHandlerAdapter implements GrailsApplicationAware {
 
     public static final String TYPE = "Domain";
     public static final String PLUGIN_NAME = "domainClass";
@@ -161,6 +161,6 @@ public class DomainClassArtefactHandler extends ArtefactHandlerAdapter implement
 
     @Override
     public int getOrder() {
-        return 1;
+        return Ordered.HIGHEST_PRECEDENCE;
     }
 }

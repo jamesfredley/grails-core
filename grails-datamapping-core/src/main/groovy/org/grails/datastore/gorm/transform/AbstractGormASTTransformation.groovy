@@ -28,6 +28,7 @@ import org.codehaus.groovy.control.CompilationUnit
 import org.codehaus.groovy.control.SourceUnit
 import org.codehaus.groovy.transform.ASTTransformation
 import org.codehaus.groovy.transform.AbstractASTTransformation
+import org.grails.datastore.mapping.core.Ordered
 
 /**
  * Abstract base class for GORM AST transformations
@@ -36,30 +37,29 @@ import org.codehaus.groovy.transform.AbstractASTTransformation
  * @since 6.1
  */
 @CompileStatic
-abstract class AbstractGormASTTransformation extends AbstractASTTransformation implements CompilationUnitAware,ASTTransformation {
+abstract class AbstractGormASTTransformation extends AbstractASTTransformation implements CompilationUnitAware, ASTTransformation, Ordered {
 
     CompilationUnit compilationUnit
 
     @Override
     final void visit(ASTNode[] astNodes, SourceUnit source) {
         if (!(astNodes[0] instanceof AnnotationNode) || !(astNodes[1] instanceof AnnotatedNode)) {
-            throw new RuntimeException("Internal error: wrong types: ${astNodes[0].getClass()} / ${astNodes[1].getClass()}");
+            throw new RuntimeException("Internal error: wrong types: ${astNodes[0].getClass()} / ${astNodes[1].getClass()}")
         }
 
-        AnnotatedNode annotatedNode = (AnnotatedNode) astNodes[1];
-        AnnotationNode annotationNode = (AnnotationNode) astNodes[0];
-
+        AnnotatedNode annotatedNode = (AnnotatedNode) astNodes[1]
+        AnnotationNode annotationNode = (AnnotationNode) astNodes[0]
 
         if (!isValidAnnotation(annotationNode, annotatedNode)) {
             return
         }
 
         Object appliedMarker = getAppliedMarker()
-        if( annotatedNode.getNodeMetaData(appliedMarker) == appliedMarker) {
+        if (annotatedNode.getNodeMetaData(appliedMarker) == appliedMarker) {
             return
         }
 
-        visit( source, annotationNode, annotatedNode )
+        visit(source, annotationNode, annotatedNode)
 
         annotatedNode.putNodeMetaData(appliedMarker, appliedMarker)
     }
@@ -74,4 +74,11 @@ abstract class AbstractGormASTTransformation extends AbstractASTTransformation i
 
     protected abstract Object getAppliedMarker()
 
+    @Override
+    int getOrder() {
+        // this is overridden here to ensure every class gives a unique order to ensure deterministic behavior
+        priority()
+    }
+
+    abstract int priority()
 }

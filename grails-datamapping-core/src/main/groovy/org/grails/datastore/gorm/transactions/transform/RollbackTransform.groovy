@@ -21,8 +21,7 @@ package org.grails.datastore.gorm.transactions.transform
 
 import grails.gorm.transactions.Rollback
 import groovy.transform.CompileStatic
-import org.codehaus.groovy.ast.AnnotatedNode
-import org.codehaus.groovy.ast.AnnotationNode
+import org.apache.grails.common.compiler.GroovyTransformOrder
 import org.codehaus.groovy.ast.ClassNode
 import org.codehaus.groovy.control.CompilePhase
 import org.codehaus.groovy.transform.GroovyASTTransformation
@@ -36,5 +35,10 @@ class RollbackTransform extends TransactionalTransform {
     @Override
     protected String getTransactionTemplateMethodName() {
         return "executeAndRollback"
+    }
+
+    @Override
+    int priority() {
+        GroovyTransformOrder.ROLLBACK_ORDER
     }
 }

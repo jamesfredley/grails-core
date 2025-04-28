@@ -19,7 +19,6 @@
 package grails.plugin.cache;
 
 import org.codehaus.groovy.transform.GroovyASTTransformationClass;
-import org.grails.datastore.gorm.transform.GormASTTransformationClass;
 
 import java.lang.annotation.*;
 
@@ -36,8 +35,7 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 @Inherited
 @Documented
-@GroovyASTTransformationClass("org.grails.datastore.gorm.transform.OrderedGormTransformation")
-@GormASTTransformationClass("org.grails.plugin.cache.compiler.CachePutTransformation")
+@GroovyASTTransformationClass("org.grails.plugin.cache.compiler.CachePutTransformation")
 public @interface CachePut {
 
 	/**

@@ -26,6 +26,7 @@ import org.codehaus.groovy.control.CompilePhase;
 import org.codehaus.groovy.control.SourceUnit;
 import org.codehaus.groovy.transform.ASTTransformation;
 import org.codehaus.groovy.transform.GroovyASTTransformation;
+import org.codehaus.groovy.transform.TransformWithPriority;
 
 import java.util.List;
 
@@ -36,7 +37,7 @@ import java.util.List;
  * @since 2.0
  */
 @GroovyASTTransformation(phase = CompilePhase.CANONICALIZATION)
-public abstract class AbstractArtefactTypeAstTransformation implements ASTTransformation {
+public abstract class AbstractArtefactTypeAstTransformation implements ASTTransformation, TransformWithPriority {
     protected void performInjectionOnArtefactType(SourceUnit sourceUnit, ClassNode cNode, String artefactType) {
         try {
             ClassInjector[] classInjectors = GrailsAwareInjectionOperation.getClassInjectors();

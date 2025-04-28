@@ -24,6 +24,7 @@ import grails.plugin.markup.view.MarkupViewTemplate
 import grails.views.compiler.ViewsTransform
 import groovy.transform.CompileStatic
 import groovy.transform.InheritConstructors
+import org.apache.grails.common.compiler.GroovyTransformOrder
 import org.codehaus.groovy.control.CompilePhase
 import org.codehaus.groovy.transform.GroovyASTTransformation
 import org.grails.core.io.support.GrailsFactoriesLoader
@@ -44,5 +45,10 @@ class MarkupViewsTransform extends ViewsTransform {
             ti.artefactTypes.contains(MarkupViewTemplate.TYPE)
         }
         return injectors
+    }
+
+    @Override
+    int priority() {
+        GroovyTransformOrder.VIEWS_MARKUP_ORDER
     }
 }
