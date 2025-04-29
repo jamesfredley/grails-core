@@ -1,9 +1,0 @@
-.DS_Store
-.gradle
-.idea
-multi
-build
-*.iml
-/wrapper
-react
-/vue

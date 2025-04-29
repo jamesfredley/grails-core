@@ -1,6 +1,0 @@
-.gradle
-.idea/
-build/
-*.iml
-**/node_modules/
-**/.DS_Store
