@@ -84,8 +84,7 @@ dependencies {
 
     runtimeOnly 'org.apache.groovy:groovy-ant'
     runtimeOnly 'org.apache.groovy:groovy-json'
-    runtimeOnly "org.apache.groovy:groovy-jmx:$groovyVersion", {
-        // TODO: For some reason, this version is not being resolved from grails-bom
+    runtimeOnly "org.apache.groovy:groovy-jmx", {
         // (Not sure why this library is needed in the first place)
     }
     runtimeOnly 'org.apache.groovy:groovy-xml'
