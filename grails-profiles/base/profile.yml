@@ -1,0 +1,38 @@
+description: The base profile extended by other profiles
+skeleton:
+    executable: ["**/gradlew*", "**/grailsw*"]
+    binaryExtensions: ['png','gif','jpg','jpeg','ico','icns','pdf','zip','jar','class']
+repositories:
+    - "https://repository.apache.org/content/groups/snapshots"
+    - "https://repo.grails.org/grails/core"
+build:
+    repositories:
+        - "https://repository.apache.org/content/groups/snapshots"
+        - "https://repo.grails.org/grails/core"
+    plugins:
+        - eclipse
+        - idea
+        - org.apache.grails.gradle.grails-app
+dependencies:
+    - scope: build
+      coords: "org.apache.grails:grails-gradle-plugins"
+    - scope: developmentOnly
+      coords: "org.webjars.npm:bootstrap"
+    - scope: developmentOnly
+      coords: "org.webjars.npm:bootstrap-icons"
+    - scope: developmentOnly
+      coords: "org.webjars.npm:jquery"
+    - scope: implementation
+      coords: "org.springframework.boot:spring-boot-starter-logging"
+    - scope: implementation
+      coords: "org.springframework.boot:spring-boot-starter-validation"
+    - scope: implementation
+      coords: "org.springframework.boot:spring-boot-autoconfigure"
+    - scope: implementation
+      coords: "org.springframework.boot:spring-boot-starter"
+    - scope: implementation
+      coords: "org.apache.grails:grails-core"
+    - scope: testImplementation
+      coords: "org.apache.grails:grails-testing-support-datamapping"
+    - scope: console
+      coords: "org.apache.grails:grails-console"

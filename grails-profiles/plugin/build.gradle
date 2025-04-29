@@ -1,0 +1,9 @@
+grailsPublish {
+    title = "Grails Plugin Profile"
+    desc = "A profile for all plugin profiles to extend from"
+    developers = [graemerocher:'Graeme Rocher']
+}    
+
+dependencies {
+    profileRuntimeOnly project(":base")
+}

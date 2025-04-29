@@ -1,0 +1,12 @@
+grailsPublish {
+    title = "Grails Web Plugin Profile"
+    desc = "A profile for Web plugins"
+    developers = [graemerocher:'Graeme Rocher']
+}    
+
+dependencies {
+    profileRuntimeOnly project(":plugin")
+    profileRuntimeOnly project(":web")
+}
+
+compileProfile.dependsOn(':web:profileJar', ':plugin:profileJar')

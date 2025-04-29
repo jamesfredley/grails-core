@@ -1,0 +1,48 @@
+description: Profile for REST API plugins
+skeleton:
+    excludes:
+        - grails-app/controllers/**/*.*
+        - grails-app/views/**/*.*
+        - grails-app/i18n/**/*.*
+features:
+    defaults: 
+        - hibernate5
+    required:
+        - json-views
+build:
+    plugins:
+        - org.grails.grails-plugin
+        - org.grails.grails-plugin-publish
+    excludes:
+        - org.apache.grails.gradle.grails-app
+        - org.apache.grails.gradle.grails-web
+        - war
+dependencies:
+    - scope: provided
+      coords: "org.springframework.boot:spring-boot-starter-tomcat"
+    - scope: implementation
+      coords: "org.apache.grails:grails-url-mappings"
+    - scope: implementation
+      coords: "org.apache.grails:grails-rest-transforms"
+    - scope: implementation
+      coords: "org.apache.grails:grails-codecs"
+    - scope: implementation
+      coords: "org.apache.grails:grails-interceptors"
+    - scope: implementation
+      coords: "org.apache.grails:grails-services"
+    - scope: implementation
+      coords: "org.apache.grails:grails-datasource"
+    - scope: implementation
+      coords: "org.apache.grails:grails-databinding"
+    - scope: implementation
+      coords: "org.apache.grails:grails-async"
+    - scope: implementation
+      coords: "org.apache.grails.web:grails-web-boot"
+    - scope: implementation
+      coords: "org.apache.grails:grails-logging"
+    - scope: testImplementation
+      coords: "org.apache.grails:grails-testing-support-web"
+    - scope: testImplementation
+      coords: "org.apache.grails:grails-testing-support-datamapping"
+    - scope: testImplementation
+      coords: "io.micronaut:micronaut-http-client:4.6.5"

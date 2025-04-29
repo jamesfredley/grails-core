@@ -1,0 +1,9 @@
+grailsPublish {
+    title = "Grails REST API Profile"
+    desc = "A profile for REST API applications"
+    developers = [graemerocher:'Graeme Rocher']
+}
+
+dependencies {
+    profileRuntimeOnly project(":base")
+}

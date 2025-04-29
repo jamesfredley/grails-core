@@ -1,0 +1,42 @@
+plugins {
+    id 'com.gradle.develocity' version '4.0.1'
+    id 'com.gradle.common-custom-user-data-gradle-plugin' version '2.2.1'
+}
+
+def isCI = System.getenv().containsKey('CI')
+def isLocal = !isCI
+
+develocity {
+    server = 'https://ge.grails.org'
+    buildScan {
+        tag('grails')
+        tag('grails-profiles')
+        publishing.onlyIf { it.authenticated }
+        uploadInBackground = isLocal
+    }
+}
+
+buildCache {
+    local { enabled = isLocal }
+    remote(develocity.buildCache) {
+        push = isCI
+        enabled = true
+    }
+}
+
+rootProject.name = 'grails-profiles'
+
+// 10 active profiles
+include 'angular'
+include 'base'
+include 'plugin'
+include 'profile'
+include 'react'
+include 'rest-api'
+include 'rest-api-plugin'
+include 'vue'
+include 'web'
+include 'web-plugin'
+
+// test
+// TODO

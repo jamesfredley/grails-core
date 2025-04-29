@@ -1,0 +1,10 @@
+grailsPublish {
+    title = "Vue.js Profile"
+    desc = "A profile for creating Grails applications with Vue.js"
+    developers = [zacharyklein:"Zachary Klein"]
+}
+dependencies {
+    profileRuntimeOnly project(":rest-api")
+}
+
+compileProfile.dependsOn(':rest-api:profileJar')

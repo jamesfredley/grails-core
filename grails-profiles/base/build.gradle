@@ -1,0 +1,6 @@
+grailsPublish {
+    title = "Grails Base Profile"
+    desc = "A profile for other profiles to extend from"
+    developers = [graemerocher:'Graeme Rocher']
+}
+

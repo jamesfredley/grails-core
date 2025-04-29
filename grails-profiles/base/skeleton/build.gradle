@@ -1,0 +1,33 @@
+buildscript {
+    repositories {
+@buildRepositories@
+        mavenCentral()
+    }
+    dependencies {
+        classpath platform("org.apache.grails:grails-bom:$grailsVersion")
+@buildDependencies@
+    }
+}
+
+version "0.1"
+group "@grails.app.group@"
+
+@buildPlugins@
+
+repositories {
+    mavenCentral()
+@repositories@
+}
+
+dependencies {
+    implementation platform("org.apache.grails:grails-bom:$grailsVersion")
+    developmentOnly("org.springframework.boot:spring-boot-devtools")
+    integrationTestImplementation testFixtures("org.apache.grails:grails-geb")
+@dependencies@
+}
+
+compileJava.options.release = 17
+
+tasks.withType(Test) {
+    useJUnitPlatform()
+}

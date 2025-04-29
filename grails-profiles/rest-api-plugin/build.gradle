@@ -1,0 +1,12 @@
+grailsPublish {
+	title = "Grails REST API Plugin Profile"
+	desc = "A profile for REST API plugins"
+	developers = [graemerocher:'Graeme Rocher']
+}    
+
+dependencies {
+    profileRuntimeOnly project(":plugin")
+    profileRuntimeOnly project(":rest-api")
+}
+
+compileProfile.dependsOn(':plugin:profileJar', ':rest-api:profileJar')

@@ -1,0 +1,9 @@
+grailsPublish {
+	title = "Grails Web Profile"
+	desc = "A profile for Web applications"
+	developers = [graemerocher:'Graeme Rocher']
+}
+
+dependencies {
+	profileRuntimeOnly project(":base")
+}

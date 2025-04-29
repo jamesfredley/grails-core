@@ -1,0 +1,1 @@
+This repository tests the creation of a Grails application using the [react profile](https://github.com/grails-profiles/react).
