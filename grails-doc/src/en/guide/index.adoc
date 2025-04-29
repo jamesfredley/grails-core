@@ -138,7 +138,7 @@ include::conf/config.adoc[]
 [[ymlOptions]]
 ==== Options for the yml format Config
 
-include::conf/config/ymlOptions.adoc[]
+include::conf/config/ymlPropertyOptions.adoc[]
 
 [[builtInOptions]]
 ==== Built in options
