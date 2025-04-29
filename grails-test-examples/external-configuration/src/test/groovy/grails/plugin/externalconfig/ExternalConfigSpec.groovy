@@ -245,7 +245,6 @@ class ExternalConfigSpec extends Specification implements GrailsUnitTest {
         getConfigProperty('yml.config') == 'expected-value-test'
     }
 
-    @Issue('https://github.com/sbglasius/external-config/issues/24')
     def "when getting config with wildcard files from tmp"() {
         given: "Three files in tmp, where two matches the pattern"
         def tmp = new File(System.getProperty('java.io.tmpdir'))
@@ -273,7 +272,6 @@ class ExternalConfigSpec extends Specification implements GrailsUnitTest {
         [file1, file2, file3]*.delete()
     }
 
-    @Issue('https://github.com/sbglasius/external-config/issues/24')
     @PendingFeatureIf(value={ os.windows }, reason = 'Wildcard is not working on windows OS')
     def "when getting config with wildcard files from user home"() {
         given: "Three files in home, where two matches the pattern"
