@@ -36,7 +36,7 @@
     <root level="ERROR">
         <appender-ref ref="CONSOLE"/>
     </root>
-    <logger name="grails.plugin.externalconfig" level="DEBUG"/>
+    <logger name="grails.config.external" level="DEBUG"/>
 
     <springProfile name="development">
         <logger name="StackTrace" level="ERROR" additivity="false"/>

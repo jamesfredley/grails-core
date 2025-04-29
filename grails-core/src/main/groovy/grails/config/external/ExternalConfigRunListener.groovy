@@ -40,7 +40,7 @@ import java.nio.file.Files
 import java.nio.file.Path
 
 @CompileStatic
-@Slf4j(category = 'org.grails.config.external.ExternalConfig')
+@Slf4j
 class ExternalConfigRunListener implements SpringApplicationRunListener {
 
     private ResourceLoader defaultResourceLoader = new DefaultResourceLoader()

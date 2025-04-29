@@ -128,7 +128,7 @@ Alternatively, you can add it to your `dependencies` block:
 
 === Advanced Usage: Debugging
 
-In the event that you need to debug external configuration, you can set the logging category `org.grails.config.external.ExternalConfig` to `DEBUG` in your logback.xml.
+In the event that you need to debug external configuration, you can enable logging for `grails.config.external` to `DEBUG` in your logback.xml.
 
 === Further Configuration Customization
 
