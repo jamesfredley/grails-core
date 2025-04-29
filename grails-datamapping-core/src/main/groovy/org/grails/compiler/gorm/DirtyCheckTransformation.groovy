@@ -63,6 +63,7 @@ class DirtyCheckTransformation implements ASTTransformation, CompilationUnitAwar
             return;
         }
 
+        System.out.println("Applying " + getClass().getSimpleName() + " to " + parent.getClass().getName());
         ClassNode cNode = (ClassNode) parent;
 
 

@@ -58,6 +58,7 @@ public abstract class AnnotatedNodeASTTransformation implements ASTTransformatio
 		this.sourceUnit = source;
 		List<AnnotationNode> annotationNodes = new ArrayList<>();
 		ClassVisitor classVisitor = new ClassVisitor(source, annotationNodes);
+		System.out.println("Applying " + getClass().getSimpleName() + " to " + source.getName());
 		for (ASTNode node : nodes) {
 			if (node instanceof ModuleNode) {
 				ModuleNode module = (ModuleNode) node;

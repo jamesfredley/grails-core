@@ -53,6 +53,8 @@ public class GroovyBeansTransformation implements ASTTransformation {
 
 	@Override
 	public void visit(ASTNode[] nodes, SourceUnit source) {
+
+		System.out.println("Applying " + getClass().getSimpleName() + " to " + source.getName());
 		for (ASTNode node : nodes) {
 			if (node instanceof ModuleNode) {
 				ModuleNode module = (ModuleNode) node;

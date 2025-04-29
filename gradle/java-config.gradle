@@ -38,7 +38,13 @@ tasks.withType(GroovyCompile).configureEach {
     groovyOptions.parameters = true
     options.encoding = 'UTF-8' // encoding needs to be the same since it's different across platforms
     options.fork = true
-    options.forkOptions.jvmArgs = ['-Xms128M', '-Xmx1G']
+    if (false) { // project.name.contains('grails-gsp')
+        options.forkOptions.jvmArgs = ['-Xms128M', '-Xmx1G', '-Xmx2g', '-Xdebug', '-Xnoagent', '-Djava.compiler=NONE',
+                                       '-Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=5006'
+        ]
+    } else {
+        options.forkOptions.jvmArgs = ['-Xms128M', '-Xmx1G']
+    }
 }
 
 // Grails determines the grails version via the META-INF/MANIFEST.MF file

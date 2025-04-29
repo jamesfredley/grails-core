@@ -288,6 +288,7 @@ abstract class ArchiveCommand extends OptionParsingCommand {
 		public void visit(ASTNode[] nodes, SourceUnit source) {
 			for (ASTNode node : nodes) {
 				if (node instanceof ModuleNode) {
+					System.out.println("Applying " + getClass().getSimpleName() + " to " + source.getName());
 					visitModule((ModuleNode) node);
 				}
 			}

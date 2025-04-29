@@ -85,6 +85,7 @@ class ViewsTransform implements ASTTransformation, CompilationUnitAware, Transfo
         if(!sourceName.endsWith("_$extension") && (dynamicPrefix != null && !sourceName.startsWith(dynamicPrefix))) {
             return
         }
+        System.out.println("Applying " + getClass().getSimpleName() + " to " + source.getName());
         for(cn in classes) {
             ClassNode classNode = (ClassNode)cn
             if(!classNode.getNodeMetaData(APPLIED)) {

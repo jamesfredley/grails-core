@@ -79,6 +79,9 @@ public class ArtefactTypeAstTransformation extends AbstractArtefactTypeAstTransf
         if(isApplied(cNode)) {
             return;
         }
+
+
+        System.out.println("Applying " + getClass().getSimpleName() + " to " + cNode.getName());
         
         String artefactType = resolveArtefactType(sourceUnit, node, cNode);
         if(artefactType != null) {

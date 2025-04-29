@@ -80,6 +80,7 @@ public class DelegateAsyncTransformation implements ASTTransformation, Transform
         AnnotatedNode parent = (AnnotatedNode) nodes[1];
         AnnotationNode annotationNode = (AnnotationNode) nodes[0];
 
+        System.out.println("Applying " + getClass().getSimpleName() + " to " + parent.getClass().getName());
         if (parent instanceof ClassNode) {
             Expression value = annotationNode.getMember("value");
             if (value instanceof ClassExpression) {

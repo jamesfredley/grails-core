@@ -59,6 +59,7 @@ abstract class AbstractGormASTTransformation extends AbstractASTTransformation i
             return
         }
 
+        System.out.println("Applying " + getClass().getSimpleName() + " to " + annotatedNode.getClass().getName());
         visit(source, annotationNode, annotatedNode)
 
         annotatedNode.putNodeMetaData(appliedMarker, appliedMarker)

@@ -76,6 +76,7 @@ class IntegrationTestAstTransformation implements ASTTransformation, TransformWi
         }
 
         AnnotatedNode parent = (AnnotatedNode) astNodes[1]
+        System.out.println("Applying " + getClass().getSimpleName() + " to " + parent.getClass().getName());
         AnnotationNode annotationNode = (AnnotationNode) astNodes[0]
         if (MY_TYPE != annotationNode.classNode || !(parent instanceof ClassNode)) {
             return

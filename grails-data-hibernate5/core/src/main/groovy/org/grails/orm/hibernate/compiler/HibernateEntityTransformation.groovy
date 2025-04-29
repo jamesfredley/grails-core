@@ -81,6 +81,9 @@ class HibernateEntityTransformation implements ASTTransformation, CompilationUni
 
         ClassNode cNode = (ClassNode) parent;
 
+
+        System.out.println("Applying " + getClass().getSimpleName() + " to " + parent.getClass().getName());
+
         visit(cNode, sourceUnit)
     }
 

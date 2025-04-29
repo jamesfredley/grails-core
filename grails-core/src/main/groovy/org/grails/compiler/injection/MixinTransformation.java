@@ -74,6 +74,9 @@ public class MixinTransformation implements ASTTransformation, TransformWithPrio
                 MY_TYPE_NAME + " not allowed for interfaces.");
         }
 
+
+        System.out.println("Applying " + getClass().getSimpleName() + " to " + parent.getClass().getName());
+
         ListExpression values = getListOfClasses(node);
 
         weaveMixinsIntoClass(classNode, values);

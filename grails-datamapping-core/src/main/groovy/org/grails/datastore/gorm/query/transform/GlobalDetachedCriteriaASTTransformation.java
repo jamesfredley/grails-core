@@ -54,6 +54,7 @@ public class GlobalDetachedCriteriaASTTransformation implements ASTTransformatio
         ModuleNode ast = source.getAST();
         List<ClassNode> classes = ast.getClasses();
         for (ClassNode aClass : classes) {
+            System.out.println("Applying " + getClass().getSimpleName() + " to " + aClass.getName());
             transformer.visitClass(aClass);
         }
     }

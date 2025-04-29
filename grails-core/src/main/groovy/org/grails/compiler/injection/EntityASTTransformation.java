@@ -65,6 +65,9 @@ public class EntityASTTransformation implements ASTTransformation, CompilationUn
                     MY_TYPE_NAME + " not allowed for interfaces.");
         }
 
+
+        System.out.println("Applying " + getClass().getSimpleName() + " to " + parent.getClass().getName());
+
         applyTransformation(sourceUnit, cNode);
 
     }

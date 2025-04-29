@@ -98,6 +98,8 @@ class GlobalGrailsClassInjectorTransformation implements ASTTransformation, Comp
         def pluginXmlFile = new File(compilationTargetDirectory, "META-INF/grails-plugin.xml")
 
         for (ClassNode classNode : classes) {
+            System.out.println("Applying " + getClass().getSimpleName() + " to " + classNode.getName());
+
             def projectName = classNode.getNodeMetaData("projectName")
             def projectVersion = classNode.getNodeMetaData("projectVersion")
             if (projectVersion == null) {
@@ -112,6 +114,7 @@ class GlobalGrailsClassInjectorTransformation implements ASTTransformation, Comp
                 pluginClassNode = classNode
 
                 if (!classNode.getProperty('version')) {
+                    System.out.println("\tAdding `version` property to " + classNode.getName())
                     classNode.addProperty(new PropertyNode('version', Modifier.PUBLIC, ClassHelper.make(Object), classNode, new ConstantExpression(projectVersion.toString()), null, null))
                 }
 
@@ -131,14 +134,17 @@ class GlobalGrailsClassInjectorTransformation implements ASTTransformation, Comp
             if (!GrailsResourceUtils.isGrailsResource(new UrlResource(url))) continue;
 
             if (projectName && projectVersion) {
+                System.out.println("\tAdding GrailsPlugin to " + classNode.getName())
                 GrailsASTUtils.addAnnotationOrGetExisting(classNode, GrailsPlugin, [name: GrailsNameUtils.getPropertyNameForLowerCaseHyphenSeparatedName(projectName.toString()), version: projectVersion])
             }
 
+            System.out.println("\tAuto importing Autowired for " + classNode.getName())
             classNode.getModule().addImport("Autowired", ClassHelper.make("org.springframework.beans.factory.annotation.Autowired"))
 
             for (ArtefactHandler handler in artefactHandlers) {
                 if (handler.isArtefact(classNode)) {
                     if (!classNode.getAnnotations(ARTEFACT_CLASS_NODE)) {
+                        System.out.println("\t\tFound Artifact ${handler.class.name}; adding Artefact annotation on class for " + classNode.getName())
                         transformedClasses.add classNodeName
                         def annotationNode = new AnnotationNode(new ClassNode(Artefact.class))
                         annotationNode.addMember("value", new ConstantExpression(handler.getType()))
@@ -150,6 +156,7 @@ class GlobalGrailsClassInjectorTransformation implements ASTTransformation, Comp
                                 ((CompilationUnitAware) injector).compilationUnit = compilationUnit
                             }
                         }
+                        System.out.println("\t\tApplying injectors [${injectors}] to ${classNode.name}")
                         ArtefactTypeAstTransformation.performInjection(source, classNode, injectors)
                         TraitInjectionUtils.processTraitsForNode(source, classNode, handler.getType(), compilationUnit)
                     }
@@ -160,6 +167,7 @@ class GlobalGrailsClassInjectorTransformation implements ASTTransformation, Comp
                 def globalClassInjectors = GrailsAwareInjectionOperation.globalClassInjectors
 
                 for (ClassInjector injector in globalClassInjectors) {
+                    System.out.println("\t\tApplying global injector [${injector.class.name}] to ${classNode.name}")
                     injector.performInjection(source, classNode)
                 }
             }

@@ -48,6 +48,7 @@ public class DetachedCriteriaASTTransformation implements ASTTransformation, Tra
     public void visit(ASTNode[] nodes, SourceUnit source) {
         DetachedCriteriaTransformer transformer = new DetachedCriteriaTransformer(source);
         AnnotatedNode parent = (AnnotatedNode) nodes[1];
+        System.out.println("Applying " + getClass().getSimpleName() + " to " + parent.getClass().getName());
         ClassNode cNode = (ClassNode) parent;
         transformer.visitClass(cNode);
     }

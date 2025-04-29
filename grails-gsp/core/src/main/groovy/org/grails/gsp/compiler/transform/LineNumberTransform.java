@@ -69,6 +69,8 @@ public class LineNumberTransform implements ASTTransformation, TransformWithPrio
         if (array != null) {
             LineNumberVisitor visitor = new LineNumberVisitor(array);
             for (ClassNode clazz : classes) {
+
+                System.out.println("Applying " + getClass().getSimpleName() + " to " + clazz.getClass().getName());
                 visitor.visitClass(clazz);
             }
         }

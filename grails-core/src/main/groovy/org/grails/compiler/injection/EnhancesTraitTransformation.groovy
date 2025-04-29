@@ -60,7 +60,7 @@ class EnhancesTraitTransformation extends AbstractArtefactTypeAstTransformation 
         }
 
         ClassNode cNode = (ClassNode) parent
-
+        System.out.println("Applying " + getClass().getSimpleName() + " to " + parent.getClass().getName());
 
         if(isTrait(cNode)) {
             def expr = ann.getMember("value")

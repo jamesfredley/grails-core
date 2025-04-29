@@ -63,6 +63,8 @@ public class DependencyAutoConfigurationTransformation implements ASTTransformat
 
 	@Override
 	public void visit(ASTNode[] nodes, SourceUnit source) {
+
+		System.out.println("Applying " + getClass().getSimpleName() + " to " + source.getName());
 		for (ASTNode astNode : nodes) {
 			if (astNode instanceof ModuleNode) {
 				visitModule((ModuleNode) astNode);

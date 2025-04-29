@@ -99,6 +99,7 @@ class LinkableTransform implements ASTTransformation, TransformWithPriority {
             return;
         }
 
+        System.out.println("Applying " + getClass().getSimpleName() + " to " + parent.getClass().getName());
         addLinkingMethods(parent)
     }
 

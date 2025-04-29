@@ -143,6 +143,7 @@ class GormEntityTransformation extends AbstractASTTransformation implements Comp
             return;
         }
 
+        System.out.println("Applying " + getClass().getSimpleName() + " to " + parent.getClass().getName());
         ClassNode cNode = (ClassNode) parent;
 
         visit(cNode, sourceUnit)

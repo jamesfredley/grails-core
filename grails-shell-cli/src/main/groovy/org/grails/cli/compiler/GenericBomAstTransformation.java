@@ -59,6 +59,8 @@ public abstract class GenericBomAstTransformation implements SpringBootAstTransf
 
 	@Override
 	public void visit(ASTNode[] nodes, SourceUnit source) {
+
+		System.out.println("Applying " + getClass().getSimpleName() + " to " + source.getName());
 		for (ASTNode astNode : nodes) {
 			if (astNode instanceof ModuleNode) {
 				visitModule((ModuleNode) astNode, getBomModule());

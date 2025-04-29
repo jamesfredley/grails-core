@@ -119,6 +119,7 @@ class ResourceTransform implements ASTTransformation, CompilationUnitAware, Tran
             return
         }
 
+        System.out.println("Applying " + getClass().getSimpleName() + " to " + parent.getClass().getName());
         String className = "${parent.name}${ControllerArtefactHandler.TYPE}"
         final File resource = IOUtils.findSourceFile(className)
         LinkableTransform.addLinkingMethods(parent)
