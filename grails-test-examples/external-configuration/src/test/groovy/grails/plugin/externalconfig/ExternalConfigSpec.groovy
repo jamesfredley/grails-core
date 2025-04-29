@@ -25,6 +25,7 @@ import org.grails.config.NavigableMap
 import org.grails.config.NavigableMapPropertySource
 import org.grails.testing.GrailsUnitTest
 import org.springframework.core.env.ConfigurableEnvironment
+import spock.lang.IgnoreIf
 import spock.lang.Issue
 import spock.lang.Specification
 import spock.lang.Unroll
@@ -256,7 +257,7 @@ class ExternalConfigSpec extends Specification implements GrailsUnitTest {
         file3.text = "config.value3 = 'from-c'"
 
         and: "Matching files in tmp"
-        addToEnvironment('grails.config.locations': ["file:${tmp}/file-*-config.groovy"])
+        addToEnvironment('grails.config.locations': ["file:${tmp}" + File.separator + "file-*-config.groovy"])
 
         when:
         listener.environmentPrepared(null, environment)
@@ -273,6 +274,7 @@ class ExternalConfigSpec extends Specification implements GrailsUnitTest {
     }
 
     @Issue('https://github.com/sbglasius/external-config/issues/24')
+    @IgnoreIf({ os.windows })  // Wildcard not working on windows OS
     def "when getting config with wildcard files from user home"() {
         given: "Three files in home, where two matches the pattern"
         def home = new File(System.getProperty('user.home'))
@@ -284,7 +286,7 @@ class ExternalConfigSpec extends Specification implements GrailsUnitTest {
         file3.text = "config.value3 = 'from-c'"
 
         and: "a pattern from user home"
-        addToEnvironment('grails.config.locations': ["~/file-*-config.groovy"])
+        addToEnvironment('grails.config.locations': [System.getProperty('user.home') + File.separator + "file-*-config.groovy"])
 
         when:
         listener.environmentPrepared(null, environment)
