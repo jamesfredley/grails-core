@@ -14,8 +14,8 @@ buildscript {
 }
 
 allprojects {
-    group 'org.apache.grails.profiles'
-    version project.projectVersion
+    group = 'org.apache.grails.profiles'
+    version = project.projectVersion
 }
 
 subprojects { Project subproject ->
