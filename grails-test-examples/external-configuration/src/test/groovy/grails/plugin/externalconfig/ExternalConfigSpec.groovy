@@ -286,7 +286,7 @@ class ExternalConfigSpec extends Specification implements GrailsUnitTest {
         file3.text = "config.value3 = 'from-c'"
 
         and: "a pattern from user home"
-        addToEnvironment('grails.config.locations': [System.getProperty('user.home') + File.separator + "file-*-config.groovy"])
+        addToEnvironment('grails.config.locations': ["~/file-*-config.groovy"])
 
         when:
         listener.environmentPrepared(null, environment)
