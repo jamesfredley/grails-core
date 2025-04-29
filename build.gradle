@@ -18,7 +18,7 @@ allprojects {
     version = project.projectVersion
 }
 
-subprojects { Project subproject ->
+subprojects {
     apply plugin: "groovy"
     apply plugin: "org.apache.grails.gradle.grails-profile"
 
@@ -41,7 +41,7 @@ subprojects { Project subproject ->
         developers = [graemerocher:'Graeme Rocher']
     }
 
-    if ( subproject.name != "base" ) {
+    if ( name != "base" ) {
         compileProfile.dependsOn(':base:profileJar')
     }
 }
