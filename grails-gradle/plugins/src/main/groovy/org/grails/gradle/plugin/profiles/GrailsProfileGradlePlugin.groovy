@@ -18,16 +18,20 @@
  */
 package org.grails.gradle.plugin.profiles
 
-import grails.util.BuildSettings
 import groovy.transform.CompileStatic
+import org.gradle.api.NamedDomainObjectProvider
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.gradle.api.artifacts.DependencyResolveDetails
+import org.gradle.api.Task
+import org.gradle.api.artifacts.Configuration
 import org.gradle.api.file.CopySpec
+import org.gradle.api.file.SyncSpec
 import org.gradle.api.plugins.BasePlugin
-import org.gradle.api.tasks.Copy
+import org.gradle.api.tasks.TaskProvider
 import org.gradle.api.tasks.bundling.Jar
 import org.grails.gradle.plugin.profiles.tasks.ProfileCompilerTask
+
+import java.nio.file.Files
 
 import static org.gradle.api.plugins.BasePlugin.BUILD_GROUP
 
@@ -48,103 +52,90 @@ class GrailsProfileGradlePlugin implements Plugin<Project> {
     void apply(Project project) {
         project.getPluginManager().apply(BasePlugin.class)
         project.configurations.create(CONFIGURATION_NAME)
-        def profileConfiguration = project.configurations.create(RUNTIME_CONFIGURATION)
 
-        profileConfiguration.resolutionStrategy.eachDependency {
-            DependencyResolveDetails details = (DependencyResolveDetails)it
-            def requested = details.requested
-            def group = requested.group
-            def version = requested.version
+        NamedDomainObjectProvider<Configuration> profileConfiguration = project.configurations.register(RUNTIME_CONFIGURATION)
 
-            if(!group || !version) {
-                group = group ?: "org.grails.profiles"
-                version = version ?: BuildSettings.grailsVersion
-
-                details.useTarget(group: group, name: requested.name,version:version)
-            }
-        }
-
-        def profileYml = project.file("profile.yml")
-
-        def commandsDir = project.file("commands")
-        def resourcesDir = new File(project.layout.buildDirectory.getAsFile().get(), "resources/profile")
-        def templatesDir = project.file("templates")
-        def skeletonsDir = project.file("skeleton")
-        def featuresDir = project.file("features")
-
-        def spec1 = project.copySpec { CopySpec spec ->
-            spec.from(commandsDir)
-            spec.exclude("*.groovy")
-            spec.into("commands")
-        }
-        def spec2 = project.copySpec { CopySpec spec ->
-            spec.from(templatesDir)
-            spec.into("templates")
-        }
-        def spec4 = project.copySpec { CopySpec spec ->
-            spec.from(featuresDir)
-            spec.into("features")
-        }
-        def spec3 = project.copySpec { CopySpec spec ->
-            spec.from(skeletonsDir)
-            spec.into("skeleton")
-        }
-
-        def processProfileResourcesTask = project.tasks.register("processProfileResources", Copy, { Copy c ->
-            c.group = "build"
-            c.with(spec1, spec2, spec3, spec4)
-            c.into(new File(resourcesDir, "/META-INF/grails-profile"))
-        })
-
-        def classsesDir = new File(project.layout.buildDirectory.getAsFile().get(), "classes/profile")
-        def compileProfileTask = project.tasks.register("compileProfile", ProfileCompilerTask, { ProfileCompilerTask task ->
+        TaskProvider<Task> processProfileResourcesTask = project.tasks.register("processProfileResources")
+        processProfileResourcesTask.configure { Task task ->
             task.group = "build"
-            task.profileDestinationDir = classsesDir
-            task.source = commandsDir
-            task.config = profileYml
-            if(templatesDir.exists()) {
-                task.templatesDir = templatesDir
+
+            task.doLast {
+                project.sync { SyncSpec sync ->
+                    sync.from(project.layout.projectDirectory.dir('commands')) { CopySpec s ->
+                        s.exclude('*.groovy')
+                        s.into('commands')
+                    }
+
+                    sync.from(project.layout.projectDirectory.dir('templates')) { CopySpec s ->
+                        s.into('templates')
+                    }
+
+                    sync.from(project.layout.projectDirectory.dir('features')) { CopySpec s ->
+                        s.into('features')
+                    }
+
+                    sync.from(project.layout.projectDirectory.dir('skeleton')) { CopySpec s ->
+                        s.into('skeleton')
+                    }
+
+                    sync.into(project.layout.buildDirectory.dir('resources/profile'))
+                }
             }
+        }
 
-            //TODO: we can probably use the project.configurations.runtimeClaspath.find { file -> file.name.contains('grails-shell-cli') to resolve the jar file location, but the runtime configuration should already contain it
-            task.classpath = project.configurations.getByName(RUNTIME_CONFIGURATION) // + project.files(IOUtils.findJarFile(GroovyScriptCommand))
-        })
+        TaskProvider<ProfileCompilerTask> compileTask = project.tasks.register('compileProfile', ProfileCompilerTask)
+        compileTask.configure { ProfileCompilerTask it ->
+            it.destinationDirectory.set project.layout.buildDirectory.dir('classes/profile')
+            it.config.set project.layout.projectDirectory.file('profile.yml')
+            it.source project.layout.projectDirectory.dir('commands')
+            it.templatesDirectory.set project.layout.projectDirectory.dir('templates')
+            it.classpath = profileConfiguration.get()
+        }
 
-        def profileJarTask = project.tasks.register("profileJar", Jar, { Jar jar ->
-            jar.dependsOn(processProfileResourcesTask, compileProfileTask)
-
-            def jarTask = project.tasks.findByName("jar")
-            if(jarTask){
-                jar.dependsOn(jarTask)
-            }
-
-            jar.from(resourcesDir)
-            jar.from(classsesDir)
-            jar.destinationDirectory.set(new File(project.layout.buildDirectory.getAsFile().get(), "libs"))
-            jar.setDescription("Assembles a jar archive containing the profile classes.")
+        TaskProvider<Jar> profileJarTask = project.tasks.register("profileJar", Jar)
+        profileJarTask.configure { Jar jar ->
             jar.setGroup(BUILD_GROUP)
+            jar.dependsOn(processProfileResourcesTask, compileTask, project.tasks.named('jar', Jar).orNull)
+
+            jar.from(project.files(project.layout.buildDirectory.dir('resources/profile'), project.layout.buildDirectory.dir('classes/profile')))
+            jar.destinationDirectory.set(project.layout.buildDirectory.dir('libs'))
+            jar.setDescription("Assembles a jar archive containing the profile classes.")
 
 //            ArchivePublishArtifact jarArtifact = new ArchivePublishArtifact(jar)
 //            project.artifacts.add(CONFIGURATION_NAME, jarArtifact)
-        })
+        }
 
-        project.tasks.register("sourcesProfileJar", Jar, { Jar jar ->
-            jar.from(commandsDir)
-            if(profileYml.exists()) {
-                jar.from(profileYml)
+        TaskProvider<Jar> sourcesJar = project.tasks.register("sourcesProfileJar", Jar)
+        sourcesJar.configure { Jar jar ->
+            jar.from(project.layout.projectDirectory.dir('commands'))
+            if (project.file("profile.yml").exists()) {
+                jar.from(project.file("profile.yml"))
             }
-            jar.from(templatesDir) { CopySpec spec ->
+            jar.from(project.layout.projectDirectory.dir('templates')) { CopySpec spec ->
                 spec.into("templates")
             }
-            jar.from(skeletonsDir) { CopySpec spec ->
+            jar.from(project.layout.projectDirectory.dir('skeleton')) { CopySpec spec ->
                 spec.into("skeleton")
             }
             jar.archiveClassifier.set("sources")
             jar.destinationDirectory.set(new File(project.layout.buildDirectory.getAsFile().get(), "libs"))
             jar.setDescription("Assembles a jar archive containing the profile sources.")
             jar.setGroup(BUILD_GROUP)
+        }
 
-        })
-        project.tasks.findByName("assemble").dependsOn profileJarTask
+        project.tasks.register('javadocProfileJar', Jar).configure { Jar jar ->
+            final File tempReadmeForJavadoc = Files.createTempFile('README', 'txt').toFile()
+            // https://central.sonatype.org/publish/requirements/#supply-javadoc-and-sources
+            tempReadmeForJavadoc << 'Profiles are templates and do not have javadoc.'
+            jar.from(tempReadmeForJavadoc)
+            jar.archiveClassifier.set('javadoc')
+            jar.destinationDirectory.set(new File(project.layout.buildDirectory.getAsFile().get(), 'libs'))
+            jar.setDescription('Assembles a jar archive containing the profile javadoc.')
+            jar.setGroup(BUILD_GROUP)
+        }
+
+        project.tasks.named("assemble").configure { Task it ->
+            it.dependsOn(profileJarTask)
+        }
     }
 }

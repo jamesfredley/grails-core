@@ -554,16 +554,19 @@ Note: if project properties are used, the properties must be defined prior to ap
             jar.archiveClassifier.set('tests')
         }
 
-        SourceSetContainer sourceSets = SourceSets.findSourceSets(project)
-        Collection<SourceSet> publishedSources = sourceSets.findAll { SourceSet sourceSet ->
-            (
-                    project.extensions.findByType(GrailsPublishExtension).publishTestSources ||
-                            sourceSet.name != SourceSet.TEST_SOURCE_SET_NAME
-            ) && !sourceSet.allSource.isEmpty()
-        }
-        if (!publishedSources) {
-            throw new RuntimeException("Cannot apply Grails Publish Plugin. Project ${project.name} does not have anything to publish.")
-        }
+        // TODO: Revisit this as an optional feature instead of forced, see @PendingFeature test case
+        // it's valid to publish boms, profiles, and projects that export only dependencies without any code
+        // so for now remove this and let the maven publish plugin fail if conditions aren't met
+//        SourceSetContainer sourceSets = SourceSets.findSourceSets(project)
+//        Collection<SourceSet> publishedSources = sourceSets.findAll { SourceSet sourceSet ->
+//            (
+//                    project.extensions.findByType(GrailsPublishExtension).publishTestSources ||
+//                            sourceSet.name != SourceSet.TEST_SOURCE_SET_NAME
+//            ) && !sourceSet.allSource.isEmpty()
+//        }
+//        if (!publishedSources) {
+//            throw new RuntimeException("Cannot apply Grails Publish Plugin. Project ${project.name} does not have anything to publish.")
+//        }
 
         registerValidationTask(project, "grailsPublishValidation") {
             Task groovyDocTask = project.tasks.findByName('groovydoc')

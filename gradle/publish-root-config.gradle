@@ -118,12 +118,18 @@ def publishedProjects = [
         'grails-data-mongodb-gson-templates',
         // wrapper
         'grails-wrapper-impl',
-        'grails-wrapper'
+        'grails-wrapper',
+        // profiles
+        'grails-profiles-base',
 ]
 
 subprojects {
     if (name in publishedProjects) {
-        // This has to be applied here in the root project
-        apply plugin: 'org.apache.grails.gradle.grails-publish'
+        // This has to be applied here in the root project due to the nexus plugin requirements
+        if (name.startsWith('grails-profiles')) {
+            apply plugin: 'org.apache.grails.gradle.grails-publish-profile'
+        } else {
+            apply plugin: 'org.apache.grails.gradle.grails-publish'
+        }
     }
 }

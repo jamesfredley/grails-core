@@ -24,12 +24,6 @@ subprojects {
 
     apply plugin: "org.apache.grails.gradle.grails-publish-profile"
 
-    repositories {
-        mavenCentral()
-        maven { url = 'https://repository.apache.org/content/groups/snapshots' }
-        maven { url = 'https://repo.grails.org/grails/core' }
-        // mavenLocal()  // for local testing, do not commit uncommented
-    }
 
     grailsPublish {
         githubSlug = 'grails/grails-profiles'

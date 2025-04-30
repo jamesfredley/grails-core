@@ -127,7 +127,7 @@ class MavenProfileRepository extends AbstractJarProfileRepository {
         if(!resolved) {
             List<Map> profiles = []
             resolutionContext.managedDependencies.each { Dependency dep ->
-                if (dep.artifact.groupId == "org.grails.profiles") {
+                if (dep.artifact.groupId == "org.apache.grails.profiles") {
                     profiles.add([group: dep.artifact.groupId, module: dep.artifact.artifactId])
                 }
             }

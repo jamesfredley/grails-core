@@ -1,6 +1,24 @@
-grailsPublish {
-    title = "Grails Base Profile"
-    desc = "A profile for other profiles to extend from"
-    developers = [graemerocher:'Graeme Rocher']
+plugins {
+    id 'groovy'
+    id 'org.apache.grails.gradle.grails-profile'
 }
 
+group = 'org.apache.grails.profiles'
+version = projectVersion
+
+ext {
+    pomTitle = 'Grails Base Profile'
+    pomDescription = 'A profile for other profiles to extend from'
+    developers = [graemerocher: 'Graeme Rocher']
+}
+
+dependencies {
+    profileRuntimeOnly platform(project(':grails-bom'))
+    profileRuntimeOnly project(':grails-shell-cli')
+    profileRuntimeOnly 'org.apache.groovy:groovy-jmx' // stop script 
+}
+
+apply {
+    from rootProject.layout.projectDirectory.file('gradle/profile-config.gradle')
+    from rootProject.layout.projectDirectory.file('gradle/publish-config.gradle')
+}

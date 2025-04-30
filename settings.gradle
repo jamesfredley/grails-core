@@ -1,3 +1,5 @@
+import org.apache.tools.ant.DirectoryScanner
+
 /*
  *  Licensed to the Apache Software Foundation (ASF) under one
  *  or more contributor license agreements.  See the NOTICE file
@@ -297,6 +299,10 @@ project(':grails-test-examples-mongodb-test-data-service').projectDir = new File
 include 'grails-test-examples-mongodb-gson-templates'
 project(':grails-test-examples-mongodb-gson-templates').projectDir = new File(settingsDir, 'grails-test-examples/mongodb/gson-templates')
 
+// profiles
+include 'grails-profiles-base'
+project(':grails-profiles-base').projectDir = file('grails-profiles/base')
+
 // Functional Tests
 include (
         'grails-test-examples-async-events-pubsub-demo',
@@ -355,3 +361,9 @@ project(':grails-test-examples-views-functional-tests-plugin').projectDir = file
 
 includeBuild ('./grails-gradle')
 
+// Due to https://github.com/gradle/gradle/issues/2986 , we can't change the global exclude for profiles, it must be done everywhere
+for (String pattern in DirectoryScanner.defaultExcludes) {
+    if (pattern.contains('gitignore') || pattern.contains('gitattributes')) {
+        DirectoryScanner.removeDefaultExclude(pattern)
+    }
+}
