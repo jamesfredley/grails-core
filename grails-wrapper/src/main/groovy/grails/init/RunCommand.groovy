@@ -1,6 +1,5 @@
 package grails.init
 
-
 import org.grails.cli.compiler.grape.DependencyResolutionContext
 import org.grails.cli.compiler.grape.MavenResolverGrapeEngine
 import org.grails.cli.compiler.grape.MavenResolverGrapeEngineFactory

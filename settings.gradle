@@ -153,7 +153,11 @@ include (
         'grails-testing-support-datamapping',
 
         // Test Report
-        'grails-data-test-report'
+        'grails-data-test-report',
+
+        // wrapper
+        'grails-wrapper-downloader',
+        'grails-wrapper'
 )
 
 // Instead of using : to separate nested projects, fix the project directories by setting the projectDir explicitly

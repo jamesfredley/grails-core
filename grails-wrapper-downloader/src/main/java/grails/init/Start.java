@@ -21,22 +21,22 @@ import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
 public class Start {
 
-    private static final String PROJECT_NAME = "grails7-wrapper";
-    private static final String WRAPPER_PATH = "/org/grails/" + PROJECT_NAME;
-    private static final String DEFAULT_GRAILS_CORE_ARTIFACTORY_BASE_URL = "https://repo.grails.org/grails/core";
+    private static final String PROJECT_NAME = "grails-wrapper";
+    private static final String WRAPPER_PATH = "/org/apache/grails/" + PROJECT_NAME;
+    private static final String GRAILS_MAVEN_REPO_BASE_URL = "https://repo1.maven.org/maven2/";
     private static final File WRAPPER_DIR = new File(System.getProperty("user.home") + "/.grails/wrapper");
     private static final File NO_VERSION_JAR = new File(WRAPPER_DIR, PROJECT_NAME + ".jar");
 
-    private static String getGrailsCoreArtifactoryBaseUrl() {
-        String baseUrl = System.getProperty("grails.core.artifactory.baseUrl");
+    private static String getMavenBaseUrl() {
+        String baseUrl = System.getProperty("grails.maven.repo.baseUrl");
         if (baseUrl != null) {
             return baseUrl;
         }
-        baseUrl = System.getenv("GRAILS_CORE_ARTIFACTORY_BASE_URL");
+        baseUrl = System.getenv("GRAILS_MAVEN_REPO_BASE_URL");
         if (baseUrl != null) {
             return baseUrl;
         }
-        return DEFAULT_GRAILS_CORE_ARTIFACTORY_BASE_URL;
+        return GRAILS_MAVEN_REPO_BASE_URL;
     }
 
     private static String getVersion() {
@@ -44,7 +44,7 @@ public class Start {
             SAXParserFactory factory = SAXParserFactory.newInstance();
             SAXParser saxParser = factory.newSAXParser();
             FindReleaseHandler findReleaseHandler = new FindReleaseHandler();
-            final String mavenMetadataFileUrl = getGrailsCoreArtifactoryBaseUrl() + WRAPPER_PATH + "/maven-metadata.xml";
+            final String mavenMetadataFileUrl = getMavenBaseUrl() + WRAPPER_PATH + "/maven-metadata.xml";
             HttpURLConnection conn = createHttpURLConnection(mavenMetadataFileUrl);
             saxParser.parse(conn.getInputStream(), findReleaseHandler);
             return findReleaseHandler.getVersion();
@@ -76,7 +76,7 @@ public class Start {
         if (WRAPPER_DIR.exists() || WRAPPER_DIR.mkdirs()) {
             try {
                 File downloadedJar = File.createTempFile(jarFileName, jarFileExtension);
-                final String wrapperUrl = getGrailsCoreArtifactoryBaseUrl() + WRAPPER_PATH + "/" + version + "/" + jarFileName + jarFileExtension;
+                final String wrapperUrl = getMavenBaseUrl() + WRAPPER_PATH + "/" + version + "/" + jarFileName + jarFileExtension;
                 HttpURLConnection conn = createHttpURLConnection(wrapperUrl);
                 success = downloadWrapperJar(downloadedJar, conn.getInputStream());
             } catch (Exception e) {
