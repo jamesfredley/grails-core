@@ -1,12 +1,24 @@
-grailsPublish {
-	title = "Grails REST API Plugin Profile"
-	desc = "A profile for REST API plugins"
-	developers = [graemerocher:'Graeme Rocher']
-}    
-
-dependencies {
-    profileRuntimeOnly project(":plugin")
-    profileRuntimeOnly project(":rest-api")
+plugins {
+	id 'groovy'
+	id 'org.apache.grails.gradle.grails-profile'
 }
 
-compileProfile.dependsOn(':plugin:profileJar', ':rest-api:profileJar')
+group = 'org.apache.grails.profiles'
+version = projectVersion
+
+ext {
+	pomArtifactId = 'rest-api-plugin'
+	pomTitle = 'Grails Profile - REST API Plugin'
+	pomDescription = 'A profile for REST API plugins'
+	developers = [graemerocher: 'Graeme Rocher']
+}
+
+dependencies {
+	profileRuntimeOnly platform(project(':grails-bom'))
+	profileRuntimeOnly project(':grails-profiles-plugin')
+	profileRuntimeOnly project(':grails-profiles-rest-api')
+}
+
+apply {
+	from rootProject.layout.projectDirectory.file('gradle/publish-config.gradle')
+}

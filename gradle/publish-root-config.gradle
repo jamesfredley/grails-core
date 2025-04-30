@@ -122,6 +122,11 @@ def publishedProjects = [
         // profiles
         'grails-profiles-base',
         'grails-profiles-profile',
+        'grails-profiles-plugin',
+        'grails-profiles-rest-api',
+        'grails-profiles-rest-api-plugin',
+        'grails-profiles-web',
+        'grails-profiles-web-plugin',
 ]
 
 subprojects {

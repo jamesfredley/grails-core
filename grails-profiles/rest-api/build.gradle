@@ -1,9 +1,23 @@
-grailsPublish {
-    title = "Grails REST API Profile"
-    desc = "A profile for REST API applications"
-    developers = [graemerocher:'Graeme Rocher']
+plugins {
+    id 'groovy'
+    id 'org.apache.grails.gradle.grails-profile'
+}
+
+group = 'org.apache.grails.profiles'
+version = projectVersion
+
+ext {
+    pomArtifactId = 'rest-api'
+    pomTitle = 'Grails Profile - REST API applications'
+    pomDescription = 'A profile for REST API applications'
+    developers = [graemerocher: 'Graeme Rocher']
 }
 
 dependencies {
-    profileRuntimeOnly project(":base")
+    profileRuntimeOnly platform(project(':grails-bom'))
+    profileRuntimeApi project(":grails-profiles-base")
+}
+
+apply {
+    from rootProject.layout.projectDirectory.file('gradle/publish-config.gradle')
 }

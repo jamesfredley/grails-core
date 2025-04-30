@@ -1,9 +1,23 @@
-grailsPublish {
-	title = "Grails Web Profile"
-	desc = "A profile for Web applications"
-	developers = [graemerocher:'Graeme Rocher']
+plugins {
+	id 'groovy'
+	id 'org.apache.grails.gradle.grails-profile'
+}
+
+group = 'org.apache.grails.profiles'
+version = projectVersion
+
+ext {
+	pomArtifactId = 'web'
+	pomTitle = 'Grails Profile - Web'
+	pomDescription = 'A profile for Web application'
+	developers = [graemerocher: 'Graeme Rocher']
 }
 
 dependencies {
-	profileRuntimeOnly project(":base")
+	profileRuntimeOnly platform(project(':grails-bom'))
+	profileRuntimeOnly project(':grails-profiles-base')
+}
+
+apply {
+	from rootProject.layout.projectDirectory.file('gradle/publish-config.gradle')
 }

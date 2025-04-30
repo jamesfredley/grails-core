@@ -8,7 +8,7 @@ version = projectVersion
 
 ext {
     pomArtifactId = 'base'
-    pomTitle = 'Grails Base Profile'
+    pomTitle = 'Grails Profile - Base'
     pomDescription = 'A profile for other profiles to extend from'
     developers = [graemerocher: 'Graeme Rocher']
 }
