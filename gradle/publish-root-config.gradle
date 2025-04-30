@@ -117,7 +117,7 @@ def publishedProjects = [
         'grails-data-mongodb',
         'grails-data-mongodb-gson-templates',
         // wrapper
-        'grails-wrapper-downloader',
+        'grails-wrapper-impl',
         'grails-wrapper'
 ]
 

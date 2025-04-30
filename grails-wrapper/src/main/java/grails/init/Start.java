@@ -19,11 +19,12 @@ import java.nio.file.Files;
 
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
+//TODO: snapshot locations need supported
 public class Start {
 
-    private static final String PROJECT_NAME = "grails-wrapper";
+    private static final String PROJECT_NAME = "grails-wrapper-impl";
     private static final String WRAPPER_PATH = "/org/apache/grails/" + PROJECT_NAME;
-    private static final String GRAILS_MAVEN_REPO_BASE_URL = "https://repo1.maven.org/maven2/";
+    private static final String GRAILS_RELEASE_MAVEN_REPO_BASE_URL = "https://repo1.maven.org/maven2/";
     private static final File WRAPPER_DIR = new File(System.getProperty("user.home") + "/.grails/wrapper");
     private static final File NO_VERSION_JAR = new File(WRAPPER_DIR, PROJECT_NAME + ".jar");
 
@@ -32,11 +33,11 @@ public class Start {
         if (baseUrl != null) {
             return baseUrl;
         }
-        baseUrl = System.getenv("GRAILS_MAVEN_REPO_BASE_URL");
+        baseUrl = System.getenv("GRAILS_RELEASE_MAVEN_REPO_BASE_URL");
         if (baseUrl != null) {
             return baseUrl;
         }
-        return GRAILS_MAVEN_REPO_BASE_URL;
+        return GRAILS_RELEASE_MAVEN_REPO_BASE_URL;
     }
 
     private static String getVersion() {

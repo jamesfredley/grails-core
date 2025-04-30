@@ -1,10 +1,13 @@
 plugins {
-    id 'groovy'
+    id 'java'
 }
 
+version = projectVersion
+group = 'org.apache.grails'
+
 ext {
-    pomTitle = 'Grails Wrapper'
-    pomDescription = 'Facilitates downloading the grails shell command to interact with a Grails project.'
+    pomTitle = 'Grails Wrapper Downloader'
+    pomDescription = 'Downloads necessary libraries for the Grails Wrapper'
     pomDevelopers = [
             'graemerocher'  : 'Graeme Rocher',
             'jeffscottbrown': 'Jeff Brown',
@@ -13,19 +16,7 @@ ext {
     cliProject = true
 }
 
-version = projectVersion
-group = 'org.apache.grails'
-
-dependencies {
-    implementation platform(project(':grails-bom'))
-    implementation project(':grails-shell-cli')
-    implementation "org.springframework.boot:spring-boot-cli"
-    implementation "org.apache.groovy:groovy"
-    implementation "org.apache.groovy:groovy-ant"
-    implementation "org.apache.groovy:groovy-templates"
-    // TODO: This is using an ancient version of the plexus-sec-dispatcher
-    implementation "org.sonatype.plexus:plexus-sec-dispatcher:$plexusSecDispatcherVersion"
-}
+// Intentionally no dependencies to prevent bloat
 
 apply {
     from rootProject.layout.projectDirectory.file('gradle/java-config.gradle')
@@ -33,18 +24,10 @@ apply {
 }
 
 tasks.named('jar', Jar).configure { Jar it ->
-    it.from {
-        (configurations.runtimeClasspath).collect {
-            it.isDirectory() ? it : zipTree(it)
-        }
-    }
+    it.archiveFileName = "grails-wrapper.jar"
     it.manifest {
-        attributes 'Main-Class': 'grails.init.RunCommand'
+        attributes 'Main-Class': 'grails.init.Start'
     }
-}
-
-tasks.named('groovydoc') { Task it ->
-    it.enabled = false
 }
 
 tasks.named('javadocJar') { Task it ->
