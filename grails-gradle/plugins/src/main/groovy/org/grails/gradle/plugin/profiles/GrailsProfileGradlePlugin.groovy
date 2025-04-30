@@ -57,7 +57,7 @@ class GrailsProfileGradlePlugin implements Plugin<Project> {
             def version = requested.version
 
             if(!group || !version) {
-                group = group ?: "org.grails.profiles"
+                group = group ?: "org.apache.grails.profiles"
                 version = version ?: BuildSettings.grailsVersion
 
                 details.useTarget(group: group, name: requested.name,version:version)
