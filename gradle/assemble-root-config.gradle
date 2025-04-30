@@ -85,7 +85,7 @@ class GrailsCreateStartScripts extends CreateStartScripts {
         generator.classpath = projectArtifacts + getClasspath().resolvedConfiguration.resolvedArtifacts.collect { artifact ->
             def dependency = artifact.moduleVersion.id
             String installedFile = "lib/$dependency.group/$dependency.name/jars/$artifact.file.name"
-            if (dependency.group.startsWith('org.apache.grails') && !project.file(installedFile).exists()) {
+            if (dependency.group.startsWith('org.apache.grails') && dependency.name != 'grails-gradle-model' && !project.file(installedFile).exists()) {
                 installedFile = "dist/$artifact.file.name"
             }
             installedFile
