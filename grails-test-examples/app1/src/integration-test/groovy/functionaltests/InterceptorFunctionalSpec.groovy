@@ -28,7 +28,6 @@ import spock.lang.PendingFeature
 class InterceptorFunctionalSpec extends ContainerGebSpec {
 
     @Issue('apache/grails-core#9434')
-    @PendingFeature(reason = 'text does not match')
     void "Test that an interceptor exception is handled correctly"() {
         when:
         go '/errors/throwErrorInInterceptor'
