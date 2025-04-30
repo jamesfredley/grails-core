@@ -1,9 +1,0 @@
-grailsPublish {
-    title = "Angular Profile"
-    desc = "A profile for creating applications with Angular"
-    developers = [jameskleeh:"James Kleeh",willbuck:"Will Buck",puneetbehl:"Puneet Behl"]
-}
-
-dependencies {
-    profileRuntimeOnly project(":rest-api")
-}

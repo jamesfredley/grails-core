@@ -1,1 +1,0 @@
-# Grails Angular Profile
