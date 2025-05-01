@@ -30,11 +30,7 @@ Create **USER_HOME/.grails/settings.groovy**
         profiles {
             repositories {
             mavenLocal()
-            grailsCentral {
-                url = "https://repo.grails.org/grails/core"
-                snapshotsEnabled = true
-                }
-            }
+            mavenCentral()
             apacheSnapshot {
                 url = "https://repository.apache.org/content/groups/snapshots"
                 snapshotsEnabled = true
@@ -45,7 +41,6 @@ Create **USER_HOME/.grails/settings.groovy**
 
 
 ### Publish profiles to mavenLocal()
-    clone https://github.com/apache/grails-profiles
     ./gradlew build
     ./gradlew publishToMavenLocal
 

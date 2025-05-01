@@ -49,9 +49,11 @@ class RunCommand {
 
         GroovyClassLoader groovyClassLoader = new GroovyClassLoader(RunCommand.classLoader)
 
-        List<RepositoryConfiguration> repositoryConfigurations = [new RepositoryConfiguration("grailsCentral", new URI("https://repo.grails.org/grails/core"), true)]
-        if (groovyVersion && groovyVersion.endsWith("SNAPSHOT")) {
-            repositoryConfigurations.add(new RepositoryConfiguration("JFrog OSS snapshot repo", new URI("https://oss.jfrog.org/oss-snapshot-local"), true))
+        List<RepositoryConfiguration> repositoryConfigurations = [new RepositoryConfiguration("mavenCentral", new URI("https://repo1.maven.org/maven2"), true)]
+
+        // Only add snapshot repository when grailsVersion is not set or groovyVersion or grailsVersion ends in SNAPSHOT
+        if (!grailsVersion || grailsVersion.endsWith("SNAPSHOT") || groovyVersion?.endsWith("SNAPSHOT")) {
+            repositoryConfigurations.add(new RepositoryConfiguration("apacheSnapshot", new URI("https://repository.apache.org/content/groups/snapshots"), true))
         }
 
         MavenResolverGrapeEngine grapeEngine = MavenResolverGrapeEngineFactory.create(groovyClassLoader, repositoryConfigurations, new DependencyResolutionContext(), false)
