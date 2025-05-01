@@ -4,14 +4,8 @@ Consolidated Home for Grails Profiles
 ## How to configure local development environment for Grails Profiles testing
 
 ### Build the latest grails-shell CLI snapshot
-    clone https://github.com/apache/grails-core
+
     ./gradlew assemble
-    unzip build/distributions/grails-7.0.0-SNAPSHOT.zip
-    bin/grails
-
-### Profiles version
-
-Verify **profiles.version** in grails-core/dependencies.gradle matches version from https://github.com/apache/grails-profiles
 
 ### Configure grails-shell CLI to use mavenLocal() profiles
 
