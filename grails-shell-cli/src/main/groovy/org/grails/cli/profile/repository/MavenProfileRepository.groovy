@@ -139,7 +139,7 @@ class MavenProfileRepository extends AbstractJarProfileRepository {
                 grapeEngine.grab(profile)
             }
 
-            def localData = new File(System.getProperty("user.home"),"/.m2/repository/org/grails/profiles")
+            def localData = new File(System.getProperty("user.home"),"/.m2/repository/org/apache/grails/profiles")
             if(localData.exists()) {
                 localData.eachDir { File dir ->
                     if(!dir.name.startsWith('.')) {
