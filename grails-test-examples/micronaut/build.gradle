@@ -77,7 +77,7 @@ dependencies {
     implementation 'org.webjars.npm:jquery'
 
     console 'org.apache.grails:grails-console'
-    profile 'org.grails.profiles:web'
+    profile 'org.apache.grails.profiles:web'
     runtimeOnly 'com.h2database:h2'
     runtimeOnly 'org.apache.tomcat:tomcat-jdbc'
     runtimeOnly 'jakarta.xml.bind:jakarta.xml.bind-api'
