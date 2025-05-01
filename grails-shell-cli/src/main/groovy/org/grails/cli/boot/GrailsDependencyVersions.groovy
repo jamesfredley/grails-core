@@ -68,7 +68,8 @@ class GrailsDependencyVersions implements DependencyManagement {
         def grape = Grape.getInstance()
         grape.addResolver([name:"mavenCentral", root:"https://repo1.maven.org/maven2"] as Map<String, Object>)
 
-        if (Environment.grailsVersion?.endsWith("SNAPSHOT")) {
+        // Only add snapshot repository when grailsVersion is not set or it ends in SNAPSHOT
+        if (!Environment.grailsVersion || Environment.grailsVersion.endsWith("SNAPSHOT")) {
             grape.addResolver([name:"apacheSnapshot", root:" https://repository.apache.org/content/groups/snapshots"] as Map<String, Object>)
         }
         grape

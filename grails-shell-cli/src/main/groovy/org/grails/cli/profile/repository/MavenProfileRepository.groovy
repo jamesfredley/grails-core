@@ -60,7 +60,8 @@ class MavenProfileRepository extends AbstractJarProfileRepository {
     }
 
     MavenProfileRepository() {
-        this(Environment.grailsVersion?.endsWith("SNAPSHOT") ? [DEFAULT_REPO, APACHE_SNAPSHOT] : [DEFAULT_REPO])
+        // Only add snapshot repository when grailsVersion is not set or it ends in SNAPSHOT
+        this((!Environment.grailsVersion || Environment.grailsVersion.endsWith("SNAPSHOT")) ? [DEFAULT_REPO, APACHE_SNAPSHOT] : [DEFAULT_REPO])
     }
 
     @Override
