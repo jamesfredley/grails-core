@@ -1,20 +1,18 @@
 /*
- *  Licensed to the Apache Software Foundation (ASF) under one
- *  or more contributor license agreements.  See the NOTICE file
- *  distributed with this work for additional information
- *  regarding copyright ownership.  The ASF licenses this file
- *  to you under the Apache License, Version 2.0 (the
- *  "License"); you may not use this file except in compliance
- *  with the License.  You may obtain a copy of the License at
+ *  Licensed to the Apache Software Foundation (ASF) under one or more
+ *  contributor license agreements.  See the NOTICE file distributed with
+ *  this work for additional information regarding copyright ownership.
+ *  The ASF licenses this file to You under the Apache License, Version 2.0
+ *  (the "License"); you may not use this file except in compliance with
+ *  the License.  You may obtain a copy of the License at
  *
- *    https://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
- *  Unless required by applicable law or agreed to in writing,
- *  software distributed under the License is distributed on an
- *  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- *  KIND, either express or implied.  See the License for the
- *  specific language governing permissions and limitations
- *  under the License.
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
  */
 package org.grails.gradle.plugin.profiles
 
@@ -31,6 +29,7 @@ import org.gradle.api.attributes.Usage
 import org.gradle.api.component.AdhocComponentWithVariants
 import org.gradle.api.component.ConfigurationVariantDetails
 import org.gradle.api.file.CopySpec
+import org.gradle.api.file.Directory
 import org.gradle.api.file.SyncSpec
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.plugins.BasePlugin
@@ -108,6 +107,22 @@ class GrailsProfileGradlePlugin implements Plugin<Project> {
         TaskProvider<Task> processProfileResourcesTask = project.tasks.register("processProfileResources")
         processProfileResourcesTask.configure { Task task ->
             task.group = "build"
+            task.inputs.dir(project.provider {
+                def directory = project.layout.projectDirectory.dir('commands')
+                directory.asFile.exists() ? directory : null
+            }).optional().skipWhenEmpty()
+            task.inputs.dir(project.provider {
+                def directory = project.layout.projectDirectory.dir('templates')
+                directory.asFile.exists() ? directory : null
+            }).optional().skipWhenEmpty()
+            task.inputs.dir(project.provider {
+                def directory = project.layout.projectDirectory.dir('features')
+                directory.asFile.exists() ? directory : null
+            }).optional().skipWhenEmpty()
+            task.inputs.dir(project.provider {
+                def directory = project.layout.projectDirectory.dir('skeleton')
+                directory.asFile.exists() ? directory : null
+            }).optional().skipWhenEmpty()
 
             task.doLast {
                 project.sync { SyncSpec sync ->
@@ -137,8 +152,46 @@ class GrailsProfileGradlePlugin implements Plugin<Project> {
         compileTask.configure { ProfileCompilerTask it ->
             it.destinationDirectory.set project.layout.buildDirectory.dir('classes/profile')
             it.config.set project.layout.projectDirectory.file('profile.yml')
-            it.source project.layout.projectDirectory.dir('commands')
-            it.templatesDirectory.set project.layout.projectDirectory.dir('templates')
+            // The profile task serves 2 purposes, it compiles the groovy files & it generates the profile.yml
+            // for this reason the source must be set to include all possible files
+            it.source project.provider {
+                def commandsDirectory = project.layout.projectDirectory.dir('commands')
+                def templatesDirectory = project.layout.projectDirectory.dir('templates')
+                def skeletonDirectory = project.layout.projectDirectory.dir('skeleton')
+
+                List<Directory> dirs = []
+                if (commandsDirectory.asFile.exists()) {
+                    dirs << commandsDirectory
+                }
+                if (templatesDirectory.asFile.exists()) {
+                    dirs << templatesDirectory
+                }
+                if (skeletonDirectory.asFile.exists()) {
+                    dirs << skeletonDirectory
+                }
+                project.files(dirs)
+            }
+            it.templatesDirectory.set project.provider {
+                def templatesDirectory = project.layout.projectDirectory.dir('templates')
+                if (templatesDirectory.asFile.exists()) {
+                    return templatesDirectory
+                }
+                return null
+            }
+            it.skeletonDirectory.set project.provider {
+                def skeletonDirectory = project.layout.projectDirectory.dir('skeleton')
+                if (skeletonDirectory.asFile.exists()) {
+                    return skeletonDirectory
+                }
+                return null
+            }
+            it.commandsDirectory.set project.provider {
+                def commandsDirectory = project.layout.projectDirectory.dir('commands')
+                if (commandsDirectory.asFile.exists()) {
+                    return commandsDirectory
+                }
+                return null
+            }
             it.classpath = runtimeOnlyConfiguration.get()
         }
 

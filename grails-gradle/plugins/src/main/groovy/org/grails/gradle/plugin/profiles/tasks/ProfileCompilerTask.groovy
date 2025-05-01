@@ -1,20 +1,18 @@
 /*
- *  Licensed to the Apache Software Foundation (ASF) under one
- *  or more contributor license agreements.  See the NOTICE file
- *  distributed with this work for additional information
- *  regarding copyright ownership.  The ASF licenses this file
- *  to you under the Apache License, Version 2.0 (the
- *  "License"); you may not use this file except in compliance
- *  with the License.  You may obtain a copy of the License at
+ *  Licensed to the Apache Software Foundation (ASF) under one or more
+ *  contributor license agreements.  See the NOTICE file distributed with
+ *  this work for additional information regarding copyright ownership.
+ *  The ASF licenses this file to You under the Apache License, Version 2.0
+ *  (the "License"); you may not use this file except in compliance with
+ *  the License.  You may obtain a copy of the License at
  *
- *    https://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
- *  Unless required by applicable law or agreed to in writing,
- *  software distributed under the License is distributed on an
- *  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- *  KIND, either express or implied.  See the License for the
- *  specific language governing permissions and limitations
- *  under the License.
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
  */
 package org.grails.gradle.plugin.profiles.tasks
 
@@ -77,6 +75,8 @@ class ProfileCompilerTask extends AbstractCompile {
         profileFile = objectFactory.fileProperty().convention(project.layout.buildDirectory.file('classes/profile/META-INF/grails-profile/profile.yml'))
         config = objectFactory.fileProperty()
         templatesDirectory = objectFactory.directoryProperty()
+        skeletonDirectory = objectFactory.directoryProperty()
+        commandsDirectory = objectFactory.directoryProperty()
     }
 
     @OutputDirectory
@@ -94,6 +94,18 @@ class ProfileCompilerTask extends AbstractCompile {
     @PathSensitive(PathSensitivity.RELATIVE)
     @Optional
     final DirectoryProperty templatesDirectory
+
+    @InputDirectory
+    @PathSensitive(PathSensitivity.RELATIVE)
+    @Optional
+    final DirectoryProperty skeletonDirectory
+
+    @InputDirectory
+    @PathSensitive(PathSensitivity.RELATIVE)
+    @Optional
+    final DirectoryProperty commandsDirectory
+
+    // commands map to source property
 
     private Yaml createYamlHandler() {
         def options = new DumperOptions()
@@ -132,12 +144,12 @@ class ProfileCompilerTask extends AbstractCompile {
             profileData.put('extends', dependencies.join(','))
         }
 
-        Set<File> groovySourceFiles = getSource().files.findAll { File f ->
+        List<File> groovySourceFiles = (commandsDirectory.getOrNull()?.files()?.findAll { File f ->
             f.name.endsWith('.groovy')
-        }
-        Set<File> ymlSourceFiles = getSource().files.findAll { File f ->
+        } ?: []) as List<File>
+        List<File> ymlSourceFiles = (commandsDirectory.getOrNull()?.files()?.findAll { File f ->
             f.name.endsWith('.yml')
-        }
+        } ?: []) as List<File>
 
         Map<String, String> commandNames = [:]
         for (File f in groovySourceFiles) {
@@ -203,8 +215,7 @@ class ProfileCompilerTask extends AbstractCompile {
             importCustomizer.addStarImports('grails.codegen.model')
             configuration.addCompilationCustomizers(importCustomizer, new ASTTransformationCustomizer(new GroovyScriptCommandTransform()))
 
-            for (source in groovySourceFiles) {
-
+            for (File source in groovySourceFiles) {
                 CompilationUnit compilationUnit = new CompilationUnit(configuration)
                 configuration.compilationCustomizers.clear()
                 configuration.compilationCustomizers.addAll(importCustomizer, new ASTTransformationCustomizer(new GroovyScriptCommandTransform()))
