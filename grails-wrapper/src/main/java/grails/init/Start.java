@@ -24,7 +24,7 @@ public class Start {
 
     private static final String PROJECT_NAME = "grails-wrapper-impl";
     private static final String WRAPPER_PATH = "/org/apache/grails/" + PROJECT_NAME;
-    private static final String GRAILS_RELEASE_MAVEN_REPO_BASE_URL = "https://repo1.maven.org/maven2/";
+    private static final String GRAILS_RELEASE_MAVEN_REPO_BASE_URL = "https://repo.maven.org/maven2";
     private static final File WRAPPER_DIR = new File(System.getProperty("user.home") + "/.grails/wrapper");
     private static final File NO_VERSION_JAR = new File(WRAPPER_DIR, PROJECT_NAME + ".jar");
 

@@ -33,7 +33,7 @@ class RunCommand {
 
         GroovyClassLoader groovyClassLoader = new GroovyClassLoader(RunCommand.classLoader)
 
-        List<RepositoryConfiguration> repositoryConfigurations = [new RepositoryConfiguration("mavenCentral", new URI("https://repo1.maven.org/maven2"), true)]
+        List<RepositoryConfiguration> repositoryConfigurations = [new RepositoryConfiguration("mavenCentral", new URI("https://repo.maven.org/maven2"), true)]
         if (groovyVersion?.endsWith("SNAPSHOT") || grailsVersion?.endsWith("SNAPSHOT")) {
             repositoryConfigurations.add(new RepositoryConfiguration("apacheSnapshot", new URI("https://repository.apache.org/content/groups/snapshots"), true))
         }
