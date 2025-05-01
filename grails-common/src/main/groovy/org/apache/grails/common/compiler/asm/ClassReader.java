@@ -1,40 +1,24 @@
-/***
- * ASM: a very small and fast Java bytecode manipulation framework
- * Copyright (c) 2000-2011 INRIA, France Telecom
- * All rights reserved.
+/*
+ *  Licensed to the Apache Software Foundation (ASF) under one or more
+ *  contributor license agreements.  See the NOTICE file distributed with
+ *  this work for additional information regarding copyright ownership.
+ *  The ASF licenses this file to You under the Apache License, Version 2.0
+ *  (the "License"); you may not use this file except in compliance with
+ *  the License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the distribution.
- * 3. Neither the name of the copyright holders nor the names of its
- *    contributors may be used to endorse or promote products derived from
- *    this software without specific prior written permission.
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
- * THE POSSIBILITY OF SUCH DAMAGE.
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
  */
-package org.grails.datastore.gorm.utils;
-
+package org.apache.grails.common.compiler.asm;
 
 import org.springframework.asm.*;
-
 import java.io.IOException;
 import java.io.InputStream;
-
 
 /**
  * A Java class parser to make a {@link org.springframework.asm.ClassVisitor} visit an existing class.
@@ -116,22 +100,22 @@ class ClassReader {
     /**
      * The type of CONSTANT_MethodHandle constant pool items.
      */
-    private static final int HANDLE = 15;
+    static final int HANDLE = 15;
 
     /**
      * The type of CONSTANT_InvokeDynamic constant pool items.
      */
-    private static final int INDY = 18;
+    static final int INDY = 18;
 
     /**
      * True to enable signatures support.
      */
-    private static final boolean SIGNATURES = true;
+    static final boolean SIGNATURES = true;
 
     /**
      * True to enable annotations support.
      */
-    private static final boolean ANNOTATIONS = true;
+    static final boolean ANNOTATIONS = true;
 
 
     /**
@@ -141,7 +125,7 @@ class ClassReader {
      * {@link MethodVisitor#visitLineNumber visitLineNumber} methods will not be
      * called.
      */
-    static final int SKIP_DEBUG = 2;
+    public static final int SKIP_DEBUG = 2;
 
     /**
      * The class to be parsed. <i>The content of this array must not be
@@ -176,7 +160,7 @@ class ClassReader {
      * Start index of the class header information (access, name...) in
      * {@link #b b}.
      */
-    private final int header;
+    public final int header;
 
     // ------------------------------------------------------------------------
     // Constructors
@@ -202,7 +186,7 @@ class ClassReader {
      * @param len
      *            the length of the class data.
      */
-    private ClassReader(final byte[] b, final int off, final int len) {
+    public ClassReader(final byte[] b, final int off, final int len) {
         this.b = b;
         // checks the class version
 		/* SPRING PATCH: REMOVED FOR FORWARD COMPATIBILITY WITH JDK 9
@@ -258,6 +242,72 @@ class ClassReader {
     }
 
     /**
+     * Returns the class's access flags (see {@link Opcodes}). This value may
+     * not reflect Deprecated and Synthetic flags when bytecode is before 1.5
+     * and those flags are represented by attributes.
+     *
+     * @return the class access flags
+     *
+     * @see ClassVisitor#visit(int, int, String, String, String, String[])
+     */
+    public int getAccess() {
+        return readUnsignedShort(header);
+    }
+
+    /**
+     * Returns the internal name of the class (see
+     * {@link Type#getInternalName() getInternalName}).
+     *
+     * @return the internal class name
+     *
+     * @see ClassVisitor#visit(int, int, String, String, String, String[])
+     */
+    public String getClassName() {
+        return readClass(header + 2, new char[maxStringLength]);
+    }
+
+    /**
+     * Returns the internal of name of the super class (see
+     * {@link Type#getInternalName() getInternalName}). For interfaces, the
+     * super class is {@link Object}.
+     *
+     * @return the internal name of super class, or <tt>null</tt> for
+     *         {@link Object} class.
+     *
+     * @see ClassVisitor#visit(int, int, String, String, String, String[])
+     */
+    public String getSuperName() {
+        return readClass(header + 4, new char[maxStringLength]);
+    }
+
+    /**
+     * Returns the internal names of the class's interfaces (see
+     * {@link Type#getInternalName() getInternalName}).
+     *
+     * @return the array of internal names for all implemented interfaces or
+     *         <tt>null</tt>.
+     *
+     * @see ClassVisitor#visit(int, int, String, String, String, String[])
+     */
+    public String[] getInterfaces() {
+        int index = header + 6;
+        int n = readUnsignedShort(index);
+        String[] interfaces = new String[n];
+        if (n > 0) {
+            char[] buf = new char[maxStringLength];
+            for (int i = 0; i < n; ++i) {
+                index += 2;
+                interfaces[i] = readClass(index, buf);
+            }
+        }
+        return interfaces;
+    }
+
+
+
+
+
+    /**
      * Constructs a new {@link ClassReader} object.
      *
      * @param is
@@ -267,6 +317,20 @@ class ClassReader {
      */
     public ClassReader(final InputStream is) throws IOException {
         this(readClass(is, false));
+    }
+
+    /**
+     * Constructs a new {@link ClassReader} object.
+     *
+     * @param name
+     *            the binary qualified name of the class to be read.
+     * @throws IOException
+     *             if an exception occurs during reading.
+     */
+    public ClassReader(final String name) throws IOException {
+        this(readClass(
+                ClassLoader.getSystemResourceAsStream(name.replace('.', '/')
+                        + ".class"), true));
     }
 
     /**
@@ -671,6 +735,32 @@ class ClassReader {
         return v;
     }
 
+
+    /**
+     * Returns the label corresponding to the given offset. The default
+     * implementation of this method creates a label for the given offset if it
+     * has not been already created.
+     *
+     * @param offset
+     *            a bytecode offset in a method.
+     * @param labels
+     *            the already created labels, indexed by their offset. If a
+     *            label already exists for offset this method must not create a
+     *            new one. Otherwise it must store the new label in this array.
+     * @return a non null Label, which must be equal to labels[offset].
+     */
+    protected Label readLabel(int offset, Label[] labels) {
+        // SPRING PATCH: leniently handle offset mismatch
+        if (offset >= labels.length) {
+            return new Label();
+        }
+        // END OF PATCH
+        if (labels[offset] == null) {
+            labels[offset] = new Label();
+        }
+        return labels[offset];
+    }
+
     /**
      * Returns the start index of the attribute_info structure of this class.
      *
@@ -725,17 +815,17 @@ class ClassReader {
      *            and the length of the attribute, are not taken into account
      *            here.
      * @param labels
-     *            the labels of the method's code, or <code>null</code> if the
+     *            the labels of the method's code, or <tt>null</tt> if the
      *            attribute to be read is not a code attribute.
-     * @return the attribute that has been read, or <code>null</code> to skip this
+     * @return the attribute that has been read, or <tt>null</tt> to skip this
      *         attribute.
      */
     private Attribute readAttribute(final Attribute[] attrs, final String type,
                                     final int off, final int len, final char[] buf, final int codeOff,
                                     final Label[] labels) {
-        for (Attribute attr : attrs) {
-            if (attr.type.equals(type)) {
-                return attr.read(this, off, len, buf, codeOff, labels);
+        for (int i = 0; i < attrs.length; ++i) {
+            if (attrs[i].type.equals(type)) {
+                return attrs[i].read(this, off, len, buf, codeOff, labels);
             }
         }
         return new Attribute(type).read(this, off, len, null, -1, null);
@@ -751,7 +841,7 @@ class ClassReader {
      *            the start index of the value to be read in {@link #b b}.
      * @return the read value.
      */
-    private int readByte(final int index) {
+    public int readByte(final int index) {
         return b[index] & 0xFF;
     }
 
@@ -764,9 +854,23 @@ class ClassReader {
      *            the start index of the value to be read in {@link #b b}.
      * @return the read value.
      */
-    private int readUnsignedShort(final int index) {
+    public int readUnsignedShort(final int index) {
         byte[] b = this.b;
         return ((b[index] & 0xFF) << 8) | (b[index + 1] & 0xFF);
+    }
+
+    /**
+     * Reads a signed short value in {@link #b b}. <i>This method is intended
+     * for {@link Attribute} sub classes, and is normally not needed by class
+     * generators or adapters.</i>
+     *
+     * @param index
+     *            the start index of the value to be read in {@link #b b}.
+     * @return the read value.
+     */
+    public short readShort(final int index) {
+        byte[] b = this.b;
+        return (short) (((b[index] & 0xFF) << 8) | (b[index + 1] & 0xFF));
     }
 
     /**
@@ -778,7 +882,7 @@ class ClassReader {
      *            the start index of the value to be read in {@link #b b}.
      * @return the read value.
      */
-    private int readInt(final int index) {
+    public int readInt(final int index) {
         byte[] b = this.b;
         return ((b[index] & 0xFF) << 24) | ((b[index + 1] & 0xFF) << 16)
                 | ((b[index + 2] & 0xFF) << 8) | (b[index + 3] & 0xFF);
@@ -793,7 +897,7 @@ class ClassReader {
      *            the start index of the value to be read in {@link #b b}.
      * @return the read value.
      */
-    private long readLong(final int index) {
+    public long readLong(final int index) {
         long l1 = readInt(index);
         long l0 = readInt(index + 4) & 0xFFFFFFFFL;
         return (l1 << 32) | l0;
@@ -812,7 +916,7 @@ class ClassReader {
      *            sufficiently large. It is not automatically resized.
      * @return the String corresponding to the specified UTF8 item.
      */
-    String readUTF8(int index, final char[] buf) {
+    public String readUTF8(int index, final char[] buf) {
         int item = readUnsignedShort(index);
         if (index == 0 || item == 0) {
             return null;
@@ -887,7 +991,7 @@ class ClassReader {
      *            sufficiently large. It is not automatically resized.
      * @return the String corresponding to the specified class item.
      */
-    String readClass(final int index, final char[] buf) {
+    public String readClass(final int index, final char[] buf) {
         // computes the start index of the CONSTANT_Class item in b
         // and reads the CONSTANT_Utf8 item designated by
         // the first two bytes of this CONSTANT_Class item
@@ -908,7 +1012,7 @@ class ClassReader {
      *         {@link String}, {@link Type} or {@link Handle} corresponding to
      *         the given constant pool item.
      */
-    Object readConst(final int item, final char[] buf) {
+    public Object readConst(final int item, final char[] buf) {
         int index = items[item];
         switch (b[index - 1]) {
             case INT:
