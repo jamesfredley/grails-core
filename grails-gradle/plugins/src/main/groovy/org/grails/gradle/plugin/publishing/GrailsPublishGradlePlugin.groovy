@@ -1,20 +1,18 @@
 /*
- *  Licensed to the Apache Software Foundation (ASF) under one
- *  or more contributor license agreements.  See the NOTICE file
- *  distributed with this work for additional information
- *  regarding copyright ownership.  The ASF licenses this file
- *  to you under the Apache License, Version 2.0 (the
- *  "License"); you may not use this file except in compliance
- *  with the License.  You may obtain a copy of the License at
+ *  Licensed to the Apache Software Foundation (ASF) under one or more
+ *  contributor license agreements.  See the NOTICE file distributed with
+ *  this work for additional information regarding copyright ownership.
+ *  The ASF licenses this file to You under the Apache License, Version 2.0
+ *  (the "License"); you may not use this file except in compliance with
+ *  the License.  You may obtain a copy of the License at
  *
- *    https://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
- *  Unless required by applicable law or agreed to in writing,
- *  software distributed under the License is distributed on an
- *  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- *  KIND, either express or implied.  See the License for the
- *  specific language governing permissions and limitations
- *  under the License.
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
  */
 package org.grails.gradle.plugin.publishing
 
@@ -544,6 +542,11 @@ Note: if project properties are used, the properties must be defined prior to ap
         }
 
         project.tasks.register('testSourcesJar', Jar).configure { Jar jar ->
+            jar.onlyIf {
+                project.provider {
+                    project.extensions.findByType(GrailsPublishExtension).publishTestSources
+                }
+            }
             jar.dependsOn('testClasses')
             jar.reproducibleFileOrder = true
             jar.preserveFileTimestamps = false
@@ -554,16 +557,19 @@ Note: if project properties are used, the properties must be defined prior to ap
             jar.archiveClassifier.set('tests')
         }
 
-        SourceSetContainer sourceSets = SourceSets.findSourceSets(project)
-        Collection<SourceSet> publishedSources = sourceSets.findAll { SourceSet sourceSet ->
-            (
-                    project.extensions.findByType(GrailsPublishExtension).publishTestSources ||
-                            sourceSet.name != SourceSet.TEST_SOURCE_SET_NAME
-            ) && !sourceSet.allSource.isEmpty()
-        }
-        if (!publishedSources) {
-            throw new RuntimeException("Cannot apply Grails Publish Plugin. Project ${project.name} does not have anything to publish.")
-        }
+        // TODO: Revisit this as an optional feature instead of forced, see @PendingFeature test case
+        // it's valid to publish boms, profiles, and projects that export only dependencies without any code
+        // so for now remove this and let the maven publish plugin fail if conditions aren't met
+//        SourceSetContainer sourceSets = SourceSets.findSourceSets(project)
+//        Collection<SourceSet> publishedSources = sourceSets.findAll { SourceSet sourceSet ->
+//            (
+//                    project.extensions.findByType(GrailsPublishExtension).publishTestSources ||
+//                            sourceSet.name != SourceSet.TEST_SOURCE_SET_NAME
+//            ) && !sourceSet.allSource.isEmpty()
+//        }
+//        if (!publishedSources) {
+//            throw new RuntimeException("Cannot apply Grails Publish Plugin. Project ${project.name} does not have anything to publish.")
+//        }
 
         registerValidationTask(project, "grailsPublishValidation") {
             Task groovyDocTask = project.tasks.findByName('groovydoc')

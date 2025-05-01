@@ -30,6 +30,7 @@ import org.gradle.api.artifacts.result.DependencyResult
 import org.gradle.api.artifacts.result.ResolvedDependencyResult
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.RegularFileProperty
+import org.gradle.api.internal.artifacts.dependencies.DefaultProjectDependencyConstraint
 import org.gradle.api.provider.MapProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.*
@@ -124,6 +125,12 @@ abstract class ExtractDependenciesTask extends DefaultTask {
             String groupId = constraint.module.group as String
             String artifactId = constraint.module.name as String
             String artifactVersion = constraint.version as String
+
+            //TODO: need to look for project property ? or manually find the project?
+            if (constraint instanceof DefaultProjectDependencyConstraint) {
+                DefaultProjectDependencyConstraint pConstraint = (DefaultProjectDependencyConstraint) constraint
+                artifactId = pConstraint.projectDependency.dependencyProject.findProperty('pomArtifactId') ?: artifactId
+            }
 
             ExtractedDependencyConstraint extractConstraint = propertyNameCalculator.calculate(groupId, artifactId, artifactVersion, false) ?: new ExtractedDependencyConstraint(groupId: groupId, artifactId: artifactId, version: artifactVersion)
             extractConstraint.source = project.name

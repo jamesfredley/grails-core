@@ -201,3 +201,27 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
+--------------------------------------------------------------------------
+
+BSD License
+
+The following classes within this product:
+
+    org.apache.grails.common.compiler.asm.Attribute
+    org.apache.grails.common.compiler.asm.ByteVector
+    org.apache.grails.common.compiler.asm.ClassReader
+    org.apache.grails.common.compiler.asm.Context
+    org.apache.grails.common.compiler.asm.TypePath
+
+--------------------------------------------------------------------------
+
+Public Domain
+
+The following classes within this product:
+
+    org.grails.web.json.JSONArray
+    org.grails.web.json.JSONObject
+    org.grails.web.json.JSONTokener
+    org.grails.web.json.JSONWriter
+
+--------------------------------------------------------------------------

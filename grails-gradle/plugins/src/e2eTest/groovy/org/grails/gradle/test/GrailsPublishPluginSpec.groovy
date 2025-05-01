@@ -574,6 +574,8 @@ class GrailsPublishPluginSpec extends GradleSpecification {
         bf.buildResult.output.contains("Grails Publish Plugin requires the Java Plugin to be applied to the project.")
     }
 
+    @PendingFeature
+    // because it could be valid to publish only dependencies, sources may not exist. disable this test for now
     def "project without sources fails grailsPublish apply"() {
         given:
         Path projectDir = createProjectDir("invalid-sources")

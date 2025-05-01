@@ -1,3 +1,5 @@
+import org.apache.tools.ant.DirectoryScanner
+
 /*
  *  Licensed to the Apache Software Foundation (ASF) under one
  *  or more contributor license agreements.  See the NOTICE file
@@ -153,7 +155,11 @@ include (
         'grails-testing-support-datamapping',
 
         // Test Report
-        'grails-data-test-report'
+        'grails-data-test-report',
+
+        // wrapper
+        'grails-wrapper-impl',
+        'grails-wrapper'
 )
 
 // Instead of using : to separate nested projects, fix the project directories by setting the projectDir explicitly
@@ -293,6 +299,28 @@ project(':grails-test-examples-mongodb-test-data-service').projectDir = new File
 include 'grails-test-examples-mongodb-gson-templates'
 project(':grails-test-examples-mongodb-gson-templates').projectDir = new File(settingsDir, 'grails-test-examples/mongodb/gson-templates')
 
+// profiles
+include 'grails-profiles-base'
+project(':grails-profiles-base').projectDir = file('grails-profiles/base')
+
+include 'grails-profiles-profile'
+project(':grails-profiles-profile').projectDir = file('grails-profiles/profile')
+
+include 'grails-profiles-plugin'
+project(':grails-profiles-plugin').projectDir = file('grails-profiles/plugin')
+
+include 'grails-profiles-rest-api'
+project(':grails-profiles-rest-api').projectDir = file('grails-profiles/rest-api')
+
+include 'grails-profiles-rest-api-plugin'
+project(':grails-profiles-rest-api-plugin').projectDir = file('grails-profiles/rest-api-plugin')
+
+include 'grails-profiles-web'
+project(':grails-profiles-web').projectDir = file('grails-profiles/web')
+
+include 'grails-profiles-web-plugin'
+project(':grails-profiles-web-plugin').projectDir = file('grails-profiles/web-plugin')
+
 // Functional Tests
 include (
         'grails-test-examples-async-events-pubsub-demo',
@@ -351,3 +379,9 @@ project(':grails-test-examples-views-functional-tests-plugin').projectDir = file
 
 includeBuild ('./grails-gradle')
 
+// Due to https://github.com/gradle/gradle/issues/2986 , we can't change the global exclude for profiles, it must be done everywhere
+for (String pattern in DirectoryScanner.defaultExcludes) {
+    if (pattern.contains('gitignore') || pattern.contains('gitattributes')) {
+        DirectoryScanner.removeDefaultExclude(pattern)
+    }
+}

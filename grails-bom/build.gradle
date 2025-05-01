@@ -62,7 +62,7 @@ dependencies {
         }
 
         for (Project subproject : rootProject.subprojects) {
-            if (subproject.path == project.path || subproject.name in testProjects || subproject.name in docProjects) {
+            if (subproject.path == project.path || subproject.name in testProjects || subproject.name in docProjects || subproject.name in cliProjects) {
                 continue // ignore self & test projects
             }
 

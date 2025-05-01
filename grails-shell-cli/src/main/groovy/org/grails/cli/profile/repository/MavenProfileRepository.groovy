@@ -18,6 +18,7 @@
  */
 package org.grails.cli.profile.repository
 
+import grails.util.Environment
 import groovy.transform.CompileDynamic
 import groovy.transform.CompileStatic
 import groovy.xml.XmlSlurper
@@ -39,7 +40,8 @@ import org.grails.cli.compiler.grape.DependencyResolutionFailedException
 @CompileStatic
 class MavenProfileRepository extends AbstractJarProfileRepository {
 
-    public static final GrailsRepositoryConfiguration DEFAULT_REPO = new GrailsRepositoryConfiguration("grailsCentral", new URI("https://repo.grails.org/grails/core"), true)
+    public static final GrailsRepositoryConfiguration DEFAULT_REPO = new GrailsRepositoryConfiguration("mavenCentral", new URI("https://repo1.maven.org/maven2"), true)
+    public static final GrailsRepositoryConfiguration APACHE_SNAPSHOT = new GrailsRepositoryConfiguration("apacheSnapshot", new URI("https://repository.apache.org/content/groups/snapshots"), true)
 
     List<GrailsRepositoryConfiguration> repositoryConfigurations
     AetherGrapeEngine grapeEngine
@@ -58,7 +60,8 @@ class MavenProfileRepository extends AbstractJarProfileRepository {
     }
 
     MavenProfileRepository() {
-        this([DEFAULT_REPO])
+        // Only add snapshot repository when grailsVersion is not set or it ends in SNAPSHOT
+        this((!Environment.grailsVersion || Environment.grailsVersion.endsWith("SNAPSHOT")) ? [DEFAULT_REPO, APACHE_SNAPSHOT] : [DEFAULT_REPO])
     }
 
     @Override
@@ -127,7 +130,7 @@ class MavenProfileRepository extends AbstractJarProfileRepository {
         if(!resolved) {
             List<Map> profiles = []
             resolutionContext.managedDependencies.each { Dependency dep ->
-                if (dep.artifact.groupId == "org.grails.profiles") {
+                if (dep.artifact.groupId == "org.apache.grails.profiles") {
                     profiles.add([group: dep.artifact.groupId, module: dep.artifact.artifactId])
                 }
             }
@@ -137,7 +140,7 @@ class MavenProfileRepository extends AbstractJarProfileRepository {
                 grapeEngine.grab(profile)
             }
 
-            def localData = new File(System.getProperty("user.home"),"/.m2/repository/org/grails/profiles")
+            def localData = new File(System.getProperty("user.home"),"/.m2/repository/org/apache/grails/profiles")
             if(localData.exists()) {
                 localData.eachDir { File dir ->
                     if(!dir.name.startsWith('.')) {
