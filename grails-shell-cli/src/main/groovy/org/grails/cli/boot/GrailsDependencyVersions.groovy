@@ -18,7 +18,6 @@
  */
 package org.grails.cli.boot
 
-import grails.util.Environment
 import groovy.grape.Grape
 import groovy.grape.GrapeEngine
 import groovy.transform.CompileDynamic
@@ -66,12 +65,7 @@ class GrailsDependencyVersions implements DependencyManagement {
 
     static GrapeEngine getDefaultEngine() {
         def grape = Grape.getInstance()
-        grape.addResolver([name:"mavenCentral", root:"https://repo1.maven.org/maven2"] as Map<String, Object>)
-
-        // Only add snapshot repository when grailsVersion is not set or it ends in SNAPSHOT
-        if (!Environment.grailsVersion || Environment.grailsVersion.endsWith("SNAPSHOT")) {
-            grape.addResolver([name:"apacheSnapshot", root:" https://repository.apache.org/content/groups/snapshots"] as Map<String, Object>)
-        }
+        grape.addResolver([name:"apacheRepository", root:"https://repository.apache.org/content/groups/public"] as Map<String, Object>)
         grape
     }
 
