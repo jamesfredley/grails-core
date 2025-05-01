@@ -18,6 +18,7 @@
  */
 package org.grails.cli.profile.repository
 
+import grails.util.Environment
 import groovy.transform.CompileDynamic
 import groovy.transform.CompileStatic
 import groovy.xml.XmlSlurper
@@ -39,7 +40,8 @@ import org.grails.cli.compiler.grape.DependencyResolutionFailedException
 @CompileStatic
 class MavenProfileRepository extends AbstractJarProfileRepository {
 
-    public static final GrailsRepositoryConfiguration DEFAULT_REPO = new GrailsRepositoryConfiguration("grailsCentral", new URI("https://repo.grails.org/grails/core"), true)
+    public static final GrailsRepositoryConfiguration DEFAULT_REPO = new GrailsRepositoryConfiguration("mavenCentral", new URI("https://repo1.maven.org/maven2"), true)
+    public static final GrailsRepositoryConfiguration APACHE_SNAPSHOT = new GrailsRepositoryConfiguration("apacheSnapshot", new URI("https://repository.apache.org/content/groups/snapshots"), true)
 
     List<GrailsRepositoryConfiguration> repositoryConfigurations
     AetherGrapeEngine grapeEngine
@@ -58,7 +60,7 @@ class MavenProfileRepository extends AbstractJarProfileRepository {
     }
 
     MavenProfileRepository() {
-        this([DEFAULT_REPO])
+        this(Environment.grailsVersion?.endsWith("SNAPSHOT") ? [DEFAULT_REPO, APACHE_SNAPSHOT] : [DEFAULT_REPO])
     }
 
     @Override
