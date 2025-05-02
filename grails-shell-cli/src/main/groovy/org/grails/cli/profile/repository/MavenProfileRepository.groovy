@@ -18,6 +18,7 @@
  */
 package org.grails.cli.profile.repository
 
+import grails.util.Environment
 import groovy.transform.CompileDynamic
 import groovy.transform.CompileStatic
 import groovy.xml.XmlSlurper
@@ -40,6 +41,7 @@ import org.grails.cli.profile.Profile
 class MavenProfileRepository extends AbstractJarProfileRepository {
 
     public static final GrailsRepositoryConfiguration DEFAULT_REPO = new GrailsRepositoryConfiguration("apacheRepository", new URI("https://repository.apache.org/content/groups/public"), true)
+    public static final GrailsRepositoryConfiguration MAVEN_CENTRAL = new GrailsRepositoryConfiguration("mavenCentral", new URI("https://repo1.maven.org/maven2"), false)
 
     List<GrailsRepositoryConfiguration> repositoryConfigurations
     MavenResolverGrapeEngine grapeEngine
@@ -58,7 +60,9 @@ class MavenProfileRepository extends AbstractJarProfileRepository {
     }
 
     MavenProfileRepository() {
-        this([DEFAULT_REPO])
+        // Use apache repository with SNAPSHOTS when grailsVersion is not set or it ends in SNAPSHOT
+        // otherwise use only mavenCentral
+        this((!Environment.grailsVersion || Environment.grailsVersion.endsWith("SNAPSHOT")) ? [DEFAULT_REPO] : [MAVEN_CENTRAL])
     }
 
     @Override
