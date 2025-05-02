@@ -214,9 +214,6 @@ class GrailsProfileGradlePlugin implements Plugin<Project> {
             jar.from(project.files(project.layout.buildDirectory.dir('resources/profile'), project.layout.buildDirectory.dir('classes/profile')))
             jar.destinationDirectory.set(project.layout.buildDirectory.dir('libs'))
             jar.description = 'Assembles a jar archive containing the profile classes.'
-
-//            ArchivePublishArtifact jarArtifact = new ArchivePublishArtifact(jar)
-//            project.artifacts.add(CONFIGURATION_NAME, jarArtifact)
         }
 
         TaskProvider<Jar> sourcesJarTask = project.tasks.register('sourcesProfileJar', Jar)
