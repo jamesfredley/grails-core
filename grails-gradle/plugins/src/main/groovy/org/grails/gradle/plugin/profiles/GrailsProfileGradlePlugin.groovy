@@ -55,8 +55,8 @@ class GrailsProfileGradlePlugin implements Plugin<Project> {
 
     static final String USAGE_PROFILE_NAME = 'profile-runtime'
     static final String COMPONENT_NAME = 'profile'
-    static final String RUNTIME_API_CONFIGURATION = 'profileRuntimeApi'
-    static final String RUNTIME_ONLY_CONFIGURATION = 'profileRuntimeOnly'
+    static final String RUNTIME_API_CONFIGURATION = 'profileRuntimeApi' // to add dependencies for that profile's scripts
+    static final String RUNTIME_ONLY_CONFIGURATION = 'profileRuntimeOnly' // to be used to extend profiles
 
     private final SoftwareComponentFactory softwareComponentFactory
     private final ObjectFactory objectFactory

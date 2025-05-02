@@ -29,6 +29,7 @@ import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.FileVisitDetails
 import org.gradle.api.file.RegularFile
 import org.gradle.api.file.RegularFileProperty
+import org.gradle.api.internal.artifacts.dependencies.DefaultProjectDependency
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.plugins.BasePlugin
 import org.gradle.api.tasks.CacheableTask
@@ -139,7 +140,13 @@ class ProfileCompilerTask extends AbstractCompile {
         if (!profileData.containsKey('extends')) {
             List<String> dependencies = []
             project.configurations.named(GrailsProfileGradlePlugin.RUNTIME_ONLY_CONFIGURATION).get().allDependencies.all() { Dependency d ->
-                dependencies.add("${d.group}:${d.name}:${d.version}".toString())
+                String profileName = d.name
+                if (d instanceof DefaultProjectDependency) {
+                    DefaultProjectDependency projectDependency = (DefaultProjectDependency) d
+                    profileName = projectDependency.dependencyProject.findProperty('pomArtifactId') ?: profileName
+                }
+
+                dependencies.add("${d.group}:${profileName}:${d.version}".toString())
             }
             profileData.put('extends', dependencies.join(','))
         }
