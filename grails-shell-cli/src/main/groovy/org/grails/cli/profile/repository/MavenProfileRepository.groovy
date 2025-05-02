@@ -25,10 +25,10 @@ import org.eclipse.aether.artifact.Artifact
 import org.eclipse.aether.artifact.DefaultArtifact
 import org.eclipse.aether.graph.Dependency
 import org.grails.cli.boot.GrailsDependencyVersions
-import org.grails.cli.profile.Profile
-import org.grails.cli.compiler.grape.AetherGrapeEngine
 import org.grails.cli.compiler.grape.DependencyResolutionContext
 import org.grails.cli.compiler.grape.DependencyResolutionFailedException
+import org.grails.cli.compiler.grape.MavenResolverGrapeEngine
+import org.grails.cli.profile.Profile
 
 /**
  *  Resolves profiles from a configured list of repositories using Aether
@@ -42,7 +42,7 @@ class MavenProfileRepository extends AbstractJarProfileRepository {
     public static final GrailsRepositoryConfiguration DEFAULT_REPO = new GrailsRepositoryConfiguration("apacheRepository", new URI("https://repository.apache.org/content/groups/public"), true)
 
     List<GrailsRepositoryConfiguration> repositoryConfigurations
-    AetherGrapeEngine grapeEngine
+    MavenResolverGrapeEngine grapeEngine
     GroovyClassLoader classLoader
     DependencyResolutionContext resolutionContext
     GrailsDependencyVersions profileDependencyVersions
@@ -52,7 +52,7 @@ class MavenProfileRepository extends AbstractJarProfileRepository {
         this.repositoryConfigurations = repositoryConfigurations
         classLoader = new GroovyClassLoader(Thread.currentThread().contextClassLoader)
         resolutionContext = new DependencyResolutionContext()
-        this.grapeEngine = GrailsAetherGrapeEngineFactory.create(classLoader, repositoryConfigurations, resolutionContext)
+        this.grapeEngine = GrailsMavenResolverGrapeEngineFactory.create(classLoader, repositoryConfigurations, resolutionContext)
         profileDependencyVersions = new GrailsDependencyVersions(grapeEngine)
         resolutionContext.addDependencyManagement(profileDependencyVersions)
     }
