@@ -69,7 +69,7 @@ startScripts.configure { CreateStartScripts t ->
         t.windowsScript.text = t.windowsScript.text
                 .replace('%APP_HOME%\\lib\\', '%APP_HOME%\\')
                 .replace('"%APP_HOME%\\lib\\', '"%APP_HOME%\\')
-                .replace('SET APP_HOME=%DIRNAME%..', 'SET APP_HOME=%DIRNAME%')
+                .replace('%DIRNAME%..', '%DIRNAME%')
     }
 }
 
