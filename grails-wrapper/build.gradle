@@ -17,6 +17,7 @@
 
 plugins {
     id 'java'
+    id 'distribution'
 }
 
 version = projectVersion
@@ -31,6 +32,7 @@ ext {
             'puneetbehl'    : 'Puneet Behl'
     ]
     cliProject = true
+    startMainClass = 'grails.init.Start'
 }
 
 // Intentionally no dependencies to prevent bloat
@@ -40,9 +42,59 @@ apply {
     from rootProject.layout.projectDirectory.file('gradle/publish-config.gradle')
 }
 
-tasks.named('jar', Jar).configure { Jar it ->
-    it.archiveFileName = "grails-wrapper.jar"
+// It's surprisingly hard to generate start scripts and *not* have them nested into a bin / lib directory
+// rather than defining the application and then having to add tasks to rework it, just define a distribution and
+// create the scripts in the right location from the start
+TaskProvider<Jar> jarTask = tasks.named('jar', Jar)
+jarTask.configure { Jar it ->
+    it.archiveFileName = "${project.name}.jar" as String
     it.manifest {
-        attributes 'Main-Class': 'grails.init.Start'
+        attributes 'Main-Class': project.property('startMainClass')
     }
+}
+
+TaskProvider<CreateStartScripts> startScripts = tasks.register('createStartScripts', CreateStartScripts)
+startScripts.configure { CreateStartScripts t ->
+    t.outputDir = layout.buildDirectory.dir('generated-scripts').get().asFile
+    t.applicationName = 'grailsw'
+    t.mainClass = project.findProperty('startMainClass') as String
+    t.classpath = files(jarTask)
+
+    // See gradle tickets such as for lib https://github.com/gradle/gradle/issues/7033
+    doLast {
+        t.unixScript.text = t.unixScript.text
+                .replace('$APP_HOME/lib/', '$APP_HOME/')
+                .replace('"${APP_HOME:-./}.."', '"${APP_HOME:-./}"')
+
+        t.windowsScript.text = t.windowsScript.text
+                .replace('%APP_HOME%\\lib\\', '%APP_HOME%\\')
+                .replace('"%APP_HOME%\\lib\\', '"%APP_HOME%\\')
+                .replace('%DIRNAME%..', '%DIRNAME%')
+    }
+}
+
+project.extensions.getByType(DistributionContainer).configureEach {
+    it.contents {
+        from(jarTask) {
+            into ''
+        }
+
+        from(startScripts) {
+            into ''
+            fileMode = 0755
+        }
+    }
+}
+
+tasks.named('assemble').configure {
+    it.dependsOn(startScripts)
+}
+tasks.named('installDist').configure {
+    it.dependsOn startScripts
+}
+tasks.named('distZip').configure {
+    dependsOn startScripts
+}
+tasks.named('distTar').configure {
+    dependsOn startScripts
 }
