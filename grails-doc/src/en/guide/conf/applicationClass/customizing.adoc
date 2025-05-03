@@ -1,0 +1,56 @@
+////
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+https://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+////
+
+There are several ways in which you can customize the `Application` class.
+
+
+=== Customizing Scanning
+
+
+By default Grails will scan all known source directories for controllers, domain class etc., however if there are packages in other JAR files you wish to scan you can do so by overriding the `packageNames()` method of the `Application` class:
+
+[source,groovy]
+----
+class Application extends GrailsAutoConfiguration {
+    @Override
+    Collection<String> packageNames() {
+        super.packageNames() + ['my.additional.package']
+    }
+
+    ...
+}
+----
+
+
+=== Registering Additional Beans
+
+
+The `Application` class can also be used as a source for Spring bean definitions, simply define a method annotated with the {springapi}org/springframework/context/annotation/Bean.html[Bean] and the returned object will become a Spring bean. The name of the method is used as the bean name:
+
+[source,groovy]
+----
+class Application extends GrailsAutoConfiguration {
+    @Bean
+    MyType myBean() {
+        return new MyType()
+    }
+
+    ...
+}
+----

@@ -1,3 +1,21 @@
+/*
+ *  Licensed to the Apache Software Foundation (ASF) under one
+ *  or more contributor license agreements.  See the NOTICE file
+ *  distributed with this work for additional information
+ *  regarding copyright ownership.  The ASF licenses this file
+ *  to you under the Apache License, Version 2.0 (the
+ *  "License"); you may not use this file except in compliance
+ *  with the License.  You may obtain a copy of the License at
+ *
+ *    https://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing,
+ *  software distributed under the License is distributed on an
+ *  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ *  KIND, either express or implied.  See the License for the
+ *  specific language governing permissions and limitations
+ *  under the License.
+ */
 package grails.test.mixin
 
 import grails.artefact.Artefact
@@ -212,7 +230,7 @@ class GRAILS9863UrlMappings {
 
 class GRAILS9863UrlMappingsSpec extends Specification implements UrlMappingsUnitTest<GRAILS9863UrlMappings> {
 
-    @Issue("https://github.com/grails/grails-core/issues/9863")
+    @Issue('https://github.com/apache/grails-core/issues/9863')
     void testGRAILS9863() {
         when:
         assertReverseUrlMapping("/p/user", controller:"user", action:"index", plugin:"sample")
@@ -312,7 +330,7 @@ class ResourceTestUrlMappingsSpec extends Specification implements UrlMappingsUn
         [PersonController]
     }
 
-    @Issue('https://github.com/grails/grails-core/issues/9065')
+    @Issue('https://github.com/apache/grails-core/issues/9065')
     void testResourcesUrlMapping() {
         when:
         request.method = 'GET'
@@ -369,7 +387,7 @@ class ExceptionTestUrlMappingsSpec extends Specification implements UrlMappingsU
         [ExceptionTestErrorsController]
     }
 
-    @Issue('https://github.com/grails/grails-core/issues/10226')
+    @Issue('https://github.com/apache/grails-core/issues/10226')
     void testExceptionUrlMapping() {
         when:
         assertForwardUrlMapping(500, controller: 'exceptionTestErrors', action: 'handleNullPointer', exception: new NullPointerException())

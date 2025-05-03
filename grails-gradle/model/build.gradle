@@ -1,0 +1,126 @@
+/*
+ *  Licensed to the Apache Software Foundation (ASF) under one
+ *  or more contributor license agreements.  See the NOTICE file
+ *  distributed with this work for additional information
+ *  regarding copyright ownership.  The ASF licenses this file
+ *  to you under the Apache License, Version 2.0 (the
+ *  "License"); you may not use this file except in compliance
+ *  with the License.  You may obtain a copy of the License at
+ *
+ *    https://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing,
+ *  software distributed under the License is distributed on an
+ *  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ *  KIND, either express or implied.  See the License for the
+ *  specific language governing permissions and limitations
+ *  under the License.
+ */
+
+plugins {
+    id 'groovy'
+    id 'java-library'
+    id 'project-report'
+    id 'maven-publish'
+}
+
+version = projectVersion
+group = 'org.apache.grails.gradle'
+
+dependencies {
+    implementation platform(project(':grails-gradle-bom'))
+
+    // compile grails-gradle-model with the Groovy version provided by Gradle
+    // to ensure build compatibility with Gradle, currently Groovy 3.0.x
+    // when used by grails-gradle-plugin
+    // see: https://docs.gradle.org/current/userguide/compatibility.html#groovy
+    compileOnly 'org.codehaus.groovy:groovy'
+    compileOnly 'org.codehaus.groovy:groovy-xml'
+
+    testImplementation 'org.codehaus.groovy:groovy-test-junit5'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api'
+    testImplementation 'org.junit.platform:junit-platform-runner'
+
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
+
+    implementation 'org.springframework:spring-context'
+    implementation 'org.springframework.boot:spring-boot-autoconfigure', {
+        // impl: org.springframework.boot.env.YamlPropertySourceLoader
+    }
+
+    compileOnly 'jline:jline' // for profile compilation
+
+    api 'org.yaml:snakeyaml'
+
+    // Logging
+    api 'org.slf4j:slf4j-api'
+    api 'org.slf4j:jcl-over-slf4j'
+
+    // Testing
+    testImplementation 'org.codehaus.groovy:groovy'
+    testImplementation 'org.codehaus.groovy:groovy-xml'
+    testImplementation 'org.slf4j:slf4j-simple'
+    testImplementation('org.spockframework:spock-core') {
+        transitive = false
+    }
+    // Required by Spock's Mocking
+    testRuntimeOnly 'net.bytebuddy:byte-buddy'
+    testImplementation 'org.objenesis:objenesis'
+}
+
+apply {
+    from rootProject.layout.projectDirectory.file('gradle/docs-config.gradle')
+    from rootProject.layout.projectDirectory.file('gradle/java-config.gradle')
+    from rootProject.layout.projectDirectory.file('gradle/test-config.gradle')
+}
+
+publishing {
+    if (!isReleaseVersion) {
+        repositories {
+            maven {
+                credentials {
+                    username = System.getenv('MAVEN_PUBLISH_USERNAME')
+                    password = System.getenv('MAVEN_PUBLISH_PASSWORD')
+                }
+                url = System.getenv('MAVEN_PUBLISH_URL') ?: 'https://repository.apache.org/content/repositories/snapshots'
+            }
+        }
+    }
+
+    publications {
+        maven(MavenPublication) {
+            groupId = project.group
+            artifactId = project.name
+
+            from components.java
+
+            pom {
+                name = 'Grails Gradle Model'
+                description = 'Classes to support the Grails Gradle Plugins'
+
+                url = 'https://github.com/apache/grails-core'
+
+                licenses {
+                    license {
+                        name = 'The Apache Software License, Version 2.0'
+                        url = 'https://www.apache.org/licenses/LICENSE-2.0.txt'
+                        distribution = 'repo'
+                    }
+                }
+
+                scm {
+                    url = 'scm:git@github.com:apache/grails-core.git'
+                    connection = 'scm:git@github.com:apache/grails-core.git'
+                    developerConnection = 'scm:git@github.com:apache/grails-core.git'
+                }
+
+                developers {
+                    developer {
+                        id = 'graemerocher'
+                        name = 'Graeme Rocher'
+                    }
+                }
+            }
+        }
+    }
+}

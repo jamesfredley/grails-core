@@ -1,0 +1,81 @@
+////
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+https://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+////
+
+
+== test-app
+
+
+
+=== Purpose
+
+
+Runs all Grails unit and integration tests and generates reports. The command returns appropriate response codes for embedding with continuous integration servers.
+
+
+=== Examples
+
+
+[source,groovy]
+----
+grails test-app
+grails test-app Foo
+grails test-app Foo Bar
+----
+
+
+=== Description
+
+
+Usage:
+[source,groovy]
+----
+grails <<environment>>* test-app <<names>>* [-unit|-integration]
+----
+
+Fired Events:
+
+
+Executes the Grails unit and integration tests located in the `src/test/groovy` and `src/integration-test/groovy` directories. By default all tests are executed, but you can specify the names of the tests (without the "Tests" or other test type suffix) as argument to the command:
+
+[source,groovy]
+----
+grails test-app *Foo*
+grails test-app *Foo* *Bar*
+----
+
+The first example will execute a test called `FooSpec.groovy` whilst the second will execute `FooSpec.groovy` and `BarSpec.groovy` if they exist.
+
+The task of finding tests that match the pattern you provide is passed to Gradle. Take a look at the section in their docs titled link:https://docs.gradle.org/current/userguide/java_plugin.html#test_filtering[Test filtering] for more information.
+
+You can also choose to only run the unit or integration tests:
+
+[source,groovy]
+----
+grails test-app -unit
+grails test-app -integration
+----
+
+If you only wish to re-run failed tests use the -rerun flag
+
+[source,groovy]
+----
+grails test-app -rerun
+----
+
+See the link:{guidePath}/testing.html[Testing] section for examples on how to combine the different options to target tests.

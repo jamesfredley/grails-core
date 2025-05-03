@@ -1,28 +1,32 @@
 /*
- * Copyright 2014-2024 the original author or authors.
+ *  Licensed to the Apache Software Foundation (ASF) under one
+ *  or more contributor license agreements.  See the NOTICE file
+ *  distributed with this work for additional information
+ *  regarding copyright ownership.  The ASF licenses this file
+ *  to you under the Apache License, Version 2.0 (the
+ *  "License"); you may not use this file except in compliance
+ *  with the License.  You may obtain a copy of the License at
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ *    https://www.apache.org/licenses/LICENSE-2.0
  *
- *      https://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ *  Unless required by applicable law or agreed to in writing,
+ *  software distributed under the License is distributed on an
+ *  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ *  KIND, either express or implied.  See the License for the
+ *  specific language governing permissions and limitations
+ *  under the License.
  */
 package org.grails.compiler.injection
+
 import grails.compiler.ast.AstTransformer
 import grails.compiler.ast.GrailsArtefactClassInjector
-import grails.core.GrailsApplication
 import grails.dev.Support
 import grails.io.ResourceUtils
 import grails.util.BuildSettings
 import groovy.transform.CompileDynamic
 import groovy.transform.CompileStatic
 import org.apache.groovy.ast.tools.AnnotatedNodeUtils
+import org.codehaus.groovy.ast.AnnotationNode
 import org.codehaus.groovy.ast.ClassHelper
 import org.codehaus.groovy.ast.ClassNode
 import org.codehaus.groovy.ast.expr.ArgumentListExpression
@@ -30,12 +34,10 @@ import org.codehaus.groovy.ast.expr.ClassExpression
 import org.codehaus.groovy.ast.expr.ConstantExpression
 import org.codehaus.groovy.ast.expr.ListExpression
 import org.codehaus.groovy.ast.expr.MethodCallExpression
-import org.codehaus.groovy.ast.expr.PropertyExpression
 import org.codehaus.groovy.ast.stmt.BlockStatement
 import org.codehaus.groovy.ast.stmt.ExpressionStatement
 import org.codehaus.groovy.ast.stmt.ReturnStatement
 import org.codehaus.groovy.ast.stmt.Statement
-import org.codehaus.groovy.ast.tools.GeneralUtils
 import org.codehaus.groovy.classgen.GeneratorContext
 import org.codehaus.groovy.control.SourceUnit
 import org.grails.core.artefact.ApplicationArtefactHandler
@@ -44,6 +46,7 @@ import org.grails.io.support.UrlResource
 import org.springframework.util.ClassUtils
 import static org.codehaus.groovy.ast.tools.GeneralUtils.*
 import java.lang.reflect.Modifier
+
 /**
  * Injector for the 'Application' class
  *
@@ -54,8 +57,12 @@ import java.lang.reflect.Modifier
 @AstTransformer
 class ApplicationClassInjector implements GrailsArtefactClassInjector {
 
-    public static final String EXCLUDE_MEMBER = "exclude"
-    public static final List<String> EXCLUDED_AUTO_CONFIGURE_CLASSES = ['org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration', 'org.springframework.boot.autoconfigure.reactor.ReactorAutoConfiguration', 'org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration']
+    public static final String EXCLUDE_MEMBER = 'exclude'
+    public static final List<String> EXCLUDED_AUTO_CONFIGURE_CLASSES = [
+            'org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration',
+            'org.springframework.boot.autoconfigure.reactor.ReactorAutoConfiguration',
+            'org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration'
+    ]
 
     ApplicationArtefactHandler applicationArtefactHandler = new ApplicationArtefactHandler()
 
@@ -113,30 +120,34 @@ class ApplicationClassInjector implements GrailsArtefactClassInjector {
                     }
                 }
 
-                def classLoader = getClass().classLoader
-                if(ClassUtils.isPresent('jakarta.servlet.ServletContext', classLoader)) {
-                    GrailsASTUtils.addAnnotationOrGetExisting(classNode, ClassHelper.make(classLoader.loadClass('org.springframework.web.servlet.config.annotation.EnableWebMvc')))
+                // Add @SpringBootConfiguration so that the Application class is picked up by @SpringBootTest
+                addAnnotation('org.springframework.boot.SpringBootConfiguration', classNode)?.with {
+                    GrailsASTUtils.addExpressionToAnnotationMember(it, 'proxyBeanMethods', constX(false))
                 }
-                if(ClassUtils.isPresent('org.springframework.boot.autoconfigure.EnableAutoConfiguration', classLoader) ) {
-                    def enableAutoConfigurationAnnotation = GrailsASTUtils.addAnnotationOrGetExisting(classNode, ClassHelper.make(classLoader.loadClass('org.springframework.boot.autoconfigure.EnableAutoConfiguration')))
-
-                    for(autoConfigureClassName in EXCLUDED_AUTO_CONFIGURE_CLASSES) {
-                        if(ClassUtils.isPresent(autoConfigureClassName, classLoader)) {
-                            def autoConfigClassExpression = new ClassExpression(ClassHelper.make(classLoader.loadClass(autoConfigureClassName)))
-                            GrailsASTUtils.addExpressionToAnnotationMember(enableAutoConfigurationAnnotation, EXCLUDE_MEMBER, autoConfigClassExpression)
-                        }
+                addAnnotation('org.springframework.web.servlet.config.annotation.EnableWebMvc', classNode, 'jakarta.servlet.ServletContext')
+                addAnnotation('org.springframework.boot.autoconfigure.EnableAutoConfiguration', classNode)?.with {
+                    for (excludeClassName in EXCLUDED_AUTO_CONFIGURE_CLASSES) {
+                        GrailsASTUtils.addExpressionToAnnotationMember(it, 'excludeName', constX(excludeClassName))
                     }
                 }
             }
         }
     }
 
-
-
     @Override
     boolean shouldInject(URL url) {
         if(url == null) return false
         def res = new UrlResource(url)
         return GrailsResourceUtils.isGrailsResource(res) && res.filename == "Application.groovy"
+    }
+
+    private AnnotationNode addAnnotation(String annotationClassName, ClassNode classNode, String conditionalClass = null) {
+        def classLoader = getClass().classLoader
+        if (ClassUtils.isPresent(conditionalClass ?: annotationClassName, classLoader)) {
+            return GrailsASTUtils.addAnnotationOrGetExisting(classNode, ClassHelper.make(
+                    classLoader.loadClass(annotationClassName)
+            ))
+        }
+        return null
     }
 }

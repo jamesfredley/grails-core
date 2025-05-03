@@ -1,0 +1,54 @@
+////
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+https://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+////
+
+
+== stop-app
+
+
+
+=== Purpose
+
+
+Stops a running Grails application in an embedded servlet container.
+
+NOTE: This command will work in development mode only.
+
+
+=== Examples
+
+
+[source,groovy]
+----
+grails stop-app
+grails stop-app --port=9090 --host=mywebsite
+----
+
+
+=== Description
+
+
+Arguments:
+
+* `port` - Specifies the port which the Grails application is running on (defaults to 8080 for HTTP or 8443 for HTTPS)
+* `host` - Specifies the host the Grails application is bound to
+
+Supported system properties:
+
+* `server.port` - Same as `port` argument.
+* `server.address` - Same as `host` argument.

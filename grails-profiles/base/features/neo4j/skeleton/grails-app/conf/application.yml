@@ -1,0 +1,6 @@
+grails:
+    neo4j:
+        type: embedded
+        location: build/data/neo4j
+        # username: ""
+        # password: ""

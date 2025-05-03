@@ -1,0 +1,9 @@
+description: Adds Asset Pipeline to a Grails Plugin for packaging
+build:
+    plugins:
+        - asset-pipeline
+dependencies:
+    - scope: build
+      coords: 'com.bertramlabs.plugins:asset-pipeline-gradle'
+    - scope: runtimeOnly
+      coords: "com.bertramlabs.plugins:asset-pipeline-grails"

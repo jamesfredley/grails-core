@@ -1,51 +1,99 @@
+/*
+ *  Licensed to the Apache Software Foundation (ASF) under one
+ *  or more contributor license agreements.  See the NOTICE file
+ *  distributed with this work for additional information
+ *  regarding copyright ownership.  The ASF licenses this file
+ *  to you under the Apache License, Version 2.0 (the
+ *  "License"); you may not use this file except in compliance
+ *  with the License.  You may obtain a copy of the License at
+ *
+ *    https://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing,
+ *  software distributed under the License is distributed on an
+ *  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ *  KIND, either express or implied.  See the License for the
+ *  specific language governing permissions and limitations
+ *  under the License.
+ */
+
+plugins {
+    id 'groovy'
+    id 'java-library'
+    id 'project-report'
+}
+
+version = projectVersion
+group = 'org.apache.grails'
+
 dependencies {
-    compileOnly "org.aspectj:aspectjrt", "org.aspectj:aspectjweaver"
-    api "jakarta.inject:jakarta.inject-api"
-    api "jakarta.persistence:jakarta.persistence-api"
-    api "jakarta.annotation:jakarta.annotation-api"
 
-    implementation "com.github.ben-manes.caffeine:caffeine"
-    api("org.springframework.boot:spring-boot")
-    api "org.springframework:spring-core"
-    api "org.springframework:spring-tx"
-    api "org.springframework:spring-beans"
-    api "org.springframework:spring-context"
-    api "org.springframework.boot:spring-boot-autoconfigure"
+    implementation platform(project(':grails-bom'))
 
-    compileOnly "org.springframework:spring-test"
-    compileOnly "org.apache.groovy:groovy-templates"
+    compileOnly 'org.aspectj:aspectjrt'
+    compileOnly 'org.aspectj:aspectjweaver'
+    api 'jakarta.inject:jakarta.inject-api'
+    api 'jakarta.persistence:jakarta.persistence-api'
+    api 'jakarta.annotation:jakarta.annotation-api'
 
-    api project(":grails-bootstrap")
-    api project(":grails-spring")
+    implementation 'com.github.ben-manes.caffeine:caffeine'
+    api 'org.apache.groovy:groovy'
+    api 'org.springframework.boot:spring-boot'
+    api 'org.springframework:spring-core'
+    api 'org.springframework:spring-tx'
+    api 'org.springframework:spring-beans'
+    api 'org.springframework:spring-context'
+    api 'org.springframework.boot:spring-boot-autoconfigure'
 
-    // This only needs the datastore version property because of how source jars are being created.
-    // Build will succeed, but assemble will fail without this because of task ordering in gradle.
-    api "org.grails:grails-datastore-core:${project['grails-datastore.version']}"
+    compileOnly 'org.springframework:spring-test'
+    compileOnly 'org.apache.groovy:groovy-templates'
 
-    testImplementation "org.springframework:spring-jdbc"
+    api project(':grails-common')
+    api project(':grails-bootstrap')
+    api project(':grails-spring')
 
-    testImplementation "org.hamcrest:hamcrest"
+    api project(':grails-datastore-core')
 
-    testRuntimeOnly "com.h2database:h2"
-    testRuntimeOnly "com.fasterxml.jackson.core:jackson-databind"
+    testImplementation 'org.springframework:spring-jdbc'
+
+    testImplementation 'org.hamcrest:hamcrest'
+
+    testRuntimeOnly 'com.h2database:h2'
+    testRuntimeOnly 'com.fasterxml.jackson.core:jackson-databind'
+
+    testImplementation 'org.apache.groovy:groovy-test-junit5'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api'
+    testImplementation 'org.junit.platform:junit-platform-runner'
+
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
+
+    // Logging
+    api 'org.slf4j:slf4j-api'
+    api 'org.slf4j:jcl-over-slf4j'
+
+    // Testing
+    testImplementation 'org.slf4j:slf4j-simple'
+    testImplementation('org.spockframework:spock-core') { transitive = false }
+    // Required by Spock's Mocking
+    testRuntimeOnly 'net.bytebuddy:byte-buddy'
+    testImplementation 'org.objenesis:objenesis'
 }
 
-def writeProps = tasks.register('writeGrailsProperties', WriteProperties) {
-    outputFile = file("${buildDir}/grails.build.properties")
-    property("grails.version", project.version)
+TaskProvider<WriteProperties> writeProps = tasks.register('writeGrailsProperties', WriteProperties)
+writeProps.configure { WriteProperties it ->
+    it.destinationFile = project.layout.buildDirectory.file('grails.build.properties')
+    it.property('grails.version', project.version)
 }
 
-tasks.named('processResources') {
-    from writeProps
+tasks.named('processResources', ProcessResources).configure { ProcessResources it ->
+    it.from writeProps
 }
 
-eclipse {
-    classpath {
-       file {
-           whenMerged { classpath ->
-                // don't add global ASTs since the source code is in this project and that causes greclipse compilation to fail
-                classpath.entries.find { entry -> entry.kind == 'src' && entry.path == "src/main/resources" }?.excludes=["META-INF/services/org.codehaus.groovy.transform.ASTTransformation"]
-           }
-       }
-    }
+apply {
+    // java-configuration must be applied first since tasks are now lazy registered
+    from rootProject.layout.projectDirectory.file('gradle/java-config.gradle')
+    from rootProject.layout.projectDirectory.file('gradle/assemble-config.gradle')
+    from rootProject.layout.projectDirectory.file('gradle/docs-config.gradle')
+    from rootProject.layout.projectDirectory.file('gradle/publish-config.gradle')
+    from rootProject.layout.projectDirectory.file('gradle/test-config.gradle')
 }

@@ -1,17 +1,20 @@
 /*
- * Copyright 2004-2005 the original author or authors.
+ *  Licensed to the Apache Software Foundation (ASF) under one
+ *  or more contributor license agreements.  See the NOTICE file
+ *  distributed with this work for additional information
+ *  regarding copyright ownership.  The ASF licenses this file
+ *  to you under the Apache License, Version 2.0 (the
+ *  "License"); you may not use this file except in compliance
+ *  with the License.  You may obtain a copy of the License at
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ *    https://www.apache.org/licenses/LICENSE-2.0
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ *  Unless required by applicable law or agreed to in writing,
+ *  software distributed under the License is distributed on an
+ *  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ *  KIND, either express or implied.  See the License for the
+ *  specific language governing permissions and limitations
+ *  under the License.
  */
 package grails.core;
 
@@ -63,11 +66,11 @@ import org.springframework.util.StringUtils;
 /**
  * Default implementation of the GrailsApplication interface that manages application loading,
  * state, and artefact instances.
- * <p/>
+ * <p>
  * Upon loading this GrailsApplication will inspect each class using its registered ArtefactHandler instances. Each
  * ArtefactHandler provides knowledge about the conventions used to establish its artefact type. For example
  * controllers use the ControllerArtefactHandler to establish this knowledge.
- * <p/>
+ * <p>
  * New ArtefactHandler instances can be registered with the GrailsApplication thus allowing application extensibility.
  *
  * @author Marc Palmer
@@ -627,8 +630,8 @@ public class DefaultGrailsApplication extends AbstractGrailsApplication implemen
      * @param methodName The name of the method
      * @param args       The arguments to the method
      * @return The return value of the method
-     * TODO Need to add matches for add<Artefact>Class(java.lang.Class) and add<Artefact>Class(GrailsClass)
      */
+    // TODO Need to add matches for add<Artefact>Class(java.lang.Class) and add<Artefact>Class(GrailsClass)
     @Override
     public Object invokeMethod(String methodName, Object args) {
 
