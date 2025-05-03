@@ -19,12 +19,13 @@
 
 configurations.register('documentation')
 dependencies {
-    add('documentation', platform("org.apache.grails:grails-gradle-bom:${projectVersion}"))
+    add('documentation', platform("org.apache.grails:grails-bom:${projectVersion}"))
     add('documentation', 'org.fusesource.jansi:jansi')
     add('documentation', 'jline:jline')
     add('documentation', 'com.github.javaparser:javaparser-core')
-    add('documentation', 'org.codehaus.groovy:groovy')
-    add('documentation', 'org.codehaus.groovy:groovy-ant')
-    add('documentation', 'org.codehaus.groovy:groovy-docgenerator')
-    add('documentation', 'org.codehaus.groovy:groovy-templates')
+    add('documentation', 'org.apache.groovy:groovy')
+    add('documentation', 'org.apache.groovy:groovy-groovydoc')
+    add('documentation', 'org.apache.groovy:groovy-ant')
+    add('documentation', 'org.apache.groovy:groovy-docgenerator')
+    add('documentation', 'org.apache.groovy:groovy-templates')
 }
