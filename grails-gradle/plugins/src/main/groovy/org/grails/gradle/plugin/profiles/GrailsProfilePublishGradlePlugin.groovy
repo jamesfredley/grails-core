@@ -19,20 +19,16 @@
 package org.grails.gradle.plugin.profiles
 
 import groovy.transform.CompileStatic
-import org.gradle.api.Action
+import org.gradle.api.GradleException
 import org.gradle.api.Project
-import org.gradle.api.XmlProvider
-import org.gradle.api.artifacts.Dependency
-import org.gradle.api.artifacts.DependencySet
-import org.gradle.api.publish.maven.MavenPom
+import org.gradle.api.attributes.Usage
+import org.gradle.api.model.ObjectFactory
 import org.gradle.api.publish.maven.MavenPublication
 import org.gradle.api.publish.maven.tasks.GenerateMavenPom
 import org.gradle.api.tasks.bundling.Jar
 import org.grails.gradle.plugin.publishing.GrailsPublishGradlePlugin
 
-import java.nio.file.Files
-
-import static org.gradle.api.plugins.BasePlugin.BUILD_GROUP
+import javax.inject.Inject
 
 /**
  * A plugin for publishing profiles
@@ -43,20 +39,22 @@ import static org.gradle.api.plugins.BasePlugin.BUILD_GROUP
 @CompileStatic
 class GrailsProfilePublishGradlePlugin extends GrailsPublishGradlePlugin {
 
+    private final ObjectFactory objectFactory
+
+    @Inject
+    GrailsProfilePublishGradlePlugin(ObjectFactory objectFactory) {
+        this.objectFactory = objectFactory
+    }
+
     @Override
     void apply(Project project) {
         super.apply(project)
-        final File tempReadmeForJavadoc = Files.createTempFile('README', 'txt').toFile()
-        tempReadmeForJavadoc << 'https://central.sonatype.org/publish/requirements/#supply-javadoc-and-sources'
-        project.tasks.register('javadocProfileJar', Jar, { Jar jar ->
-            jar.from(tempReadmeForJavadoc)
-            jar.archiveClassifier.set('javadoc')
-            jar.destinationDirectory.set(new File(project.layout.buildDirectory.getAsFile().get(), 'libs'))
-            jar.setDescription('Assembles a jar archive containing the profile javadoc.')
-            jar.setGroup(BUILD_GROUP)
-        })
 
         project.afterEvaluate { evaluated ->
+            if (!project.plugins.hasPlugin(GrailsProfileGradlePlugin)) {
+                throw new GradleException('Only profile projects can be published using the Grails Profile Publish Plugin. Apply the profile plugin first.')
+            }
+
             evaluated.tasks.withType(GenerateMavenPom).each { generateMavenPomTask ->
                 generateMavenPomTask.dependsOn(project.tasks.withType(Jar))
             }
@@ -65,7 +63,7 @@ class GrailsProfilePublishGradlePlugin extends GrailsPublishGradlePlugin {
 
     @Override
     protected Map<String, String> getDefaultExtraArtifact(Project project) {
-        [source    : "${project.buildDir}/classes/profile/META-INF/grails-profile/profile.yml".toString(),
+        [source    : project.layout.buildDirectory.file('classes/profile/META-INF/grails-profile/profile.yml').get().asFile.toString(),
          classifier: defaultClassifier,
          extension : 'yml']
     }
@@ -77,35 +75,18 @@ class GrailsProfilePublishGradlePlugin extends GrailsPublishGradlePlugin {
 
     @Override
     protected void doAddArtefact(Project project, MavenPublication publication) {
-        publication.artifact(project.tasks.findByName('profileJar'))
-        publication.artifact(project.tasks.findByName('sourcesProfileJar'))
-        publication.artifact(project.tasks.findByName('javadocProfileJar'))
+        publication.from(project.components.named(GrailsProfileGradlePlugin.COMPONENT_NAME).get())
+        publication.artifact(project.tasks.named('profileJar'))
+        publication.artifact(project.tasks.named('sourcesProfileJar'))
+        publication.artifact(project.tasks.named('javadocProfileJar'))
 
-        publication.pom(new Action<MavenPom>() {
-            @Override
-            void execute(MavenPom mavenPom) {
-                mavenPom.withXml(new Action<XmlProvider>() {
-                    @Override
-                    void execute(XmlProvider xml) {
-                        Node dependenciesNode = xml.asNode().appendNode('dependencies')
-
-                        DependencySet dependencySet = project.configurations[GrailsProfileGradlePlugin.RUNTIME_CONFIGURATION].allDependencies
-
-                        for (Dependency dependency : dependencySet) {
-                            Node dependencyNode = dependenciesNode.appendNode('dependency')
-                            dependencyNode.appendNode('groupId', dependency.group)
-                            dependencyNode.appendNode('artifactId', dependency.name)
-                            dependencyNode.appendNode('version', dependency.version)
-                            dependencyNode.appendNode('scope', GrailsProfileGradlePlugin.RUNTIME_CONFIGURATION)
-                        }
-                    }
-                })
+        publication.versionMapping {
+            it.variant(Usage.USAGE_ATTRIBUTE, objectFactory.named(Usage, GrailsProfileGradlePlugin.USAGE_PROFILE_NAME)) {
+                it.fromResolutionOf(GrailsProfileGradlePlugin.RUNTIME_API_CONFIGURATION)
             }
-        })
-    }
-
-    @Override
-    protected validateProjectPublishable(Project project) {
-        // no-op
+            it.variant(Usage.USAGE_ATTRIBUTE, objectFactory.named(Usage, GrailsProfileGradlePlugin.USAGE_PROFILE_NAME)) {
+                it.fromResolutionOf(GrailsProfileGradlePlugin.RUNTIME_ONLY_CONFIGURATION)
+            }
+        }
     }
 }

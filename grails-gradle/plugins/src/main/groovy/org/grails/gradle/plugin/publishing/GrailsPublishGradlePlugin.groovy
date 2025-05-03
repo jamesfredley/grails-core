@@ -1,20 +1,18 @@
 /*
- *  Licensed to the Apache Software Foundation (ASF) under one
- *  or more contributor license agreements.  See the NOTICE file
- *  distributed with this work for additional information
- *  regarding copyright ownership.  The ASF licenses this file
- *  to you under the Apache License, Version 2.0 (the
- *  "License"); you may not use this file except in compliance
- *  with the License.  You may obtain a copy of the License at
+ *  Licensed to the Apache Software Foundation (ASF) under one or more
+ *  contributor license agreements.  See the NOTICE file distributed with
+ *  this work for additional information regarding copyright ownership.
+ *  The ASF licenses this file to You under the Apache License, Version 2.0
+ *  (the "License"); you may not use this file except in compliance with
+ *  the License.  You may obtain a copy of the License at
  *
- *    https://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
- *  Unless required by applicable law or agreed to in writing,
- *  software distributed under the License is distributed on an
- *  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- *  KIND, either express or implied.  See the License for the
- *  specific language governing permissions and limitations
- *  under the License.
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
  */
 package org.grails.gradle.plugin.publishing
 
@@ -25,19 +23,26 @@ import io.github.gradlenexus.publishplugin.NexusPublishPlugin
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.Task
+import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.DuplicatesStrategy
-import org.gradle.api.plugins.*
+import org.gradle.api.plugins.ExtensionContainer
+import org.gradle.api.plugins.ExtraPropertiesExtension
+import org.gradle.api.plugins.JavaPlatformExtension
+import org.gradle.api.plugins.JavaPluginExtension
+import org.gradle.api.plugins.PluginManager
 import org.gradle.api.publish.maven.MavenPublication
 import org.gradle.api.publish.maven.plugins.MavenPublishPlugin
-import org.gradle.api.tasks.SourceSet
 import org.gradle.api.tasks.SourceSetContainer
 import org.gradle.api.tasks.TaskContainer
 import org.gradle.api.tasks.TaskProvider
 import org.gradle.api.tasks.bundling.Jar
+import org.gradle.api.tasks.javadoc.Groovydoc
 import org.gradle.plugins.signing.Sign
 import org.gradle.plugins.signing.SigningExtension
 import org.gradle.plugins.signing.SigningPlugin
 import org.grails.gradle.plugin.util.SourceSets
+
+import static org.gradle.api.plugins.BasePlugin.BUILD_GROUP
 
 /**
  * A plugin to ease publishing Grails related artifacts - including source, groovydoc (as javadoc jars), and plugins
@@ -462,11 +467,12 @@ Note: if project properties are used, the properties must be defined prior to ap
             return null
         }
 
-        if (!project.sourceSets.main.hasProperty('groovy')) {
+        SourceSetContainer sourceSets = SourceSets.findSourceSets(project)
+        if (!sourceSets.main.hasProperty('groovy')) {
             return null
         }
 
-        String pluginXml = "${project.sourceSets.main.groovy.getClassesDirectory().get().getAsFile()}/META-INF/grails-plugin.xml".toString()
+        String pluginXml = "${sourceSets.main.groovy.getClassesDirectory().get().getAsFile()}/META-INF/grails-plugin.xml".toString()
         new File(pluginXml).exists() ? [
                 source    : pluginXml,
                 classifier: getDefaultClassifier(),
@@ -499,47 +505,78 @@ Note: if project properties are used, the properties must be defined prior to ap
             it.withSourcesJar()
         }
 
-        final TaskContainer taskContainer = project.tasks
-        taskContainer.named('javadocJar', Jar).configure { Jar task ->
-            project.rootProject.logger.info("Configuring javadocJar task for project {} to include groovydoc", project.name)
-            Task groovyDocTask = taskContainer.findByName('groovydoc')
+        final TaskContainer tasks = project.tasks
+        tasks.named('javadoc').configure {
+            Task groovyDocTask = tasks.findByName('groovydoc')
             if (groovyDocTask) {
-                task.dependsOn groovyDocTask
-
-                task.duplicatesStrategy = DuplicatesStrategy.INCLUDE
-                task.from groovyDocTask.outputs
+                project.rootProject.logger.info("Configuring javadocJar task for project {} to include groovydoc", project.name)
+                it.enabled = false
             }
-
-            task.outputs.cacheIf { true }
         }
 
-        taskContainer.named('sourcesJar', Jar).configure { Jar task ->
+        tasks.named('javadocJar', Jar).configure { Jar jar ->
+            jar.reproducibleFileOrder = true
+            jar.preserveFileTimestamps = false
+            jar.dirMode = 0755 // To avoid platform specific defaults
+            jar.fileMode = 0644 // to avoid platform specific defaults
+
+            Groovydoc groovyDocTask = tasks.findByName('groovydoc')
+            if (groovyDocTask) {
+                jar.dependsOn(groovyDocTask)
+
+                // Ensure the java source set is included in the groovydoc source set
+                SourceSetContainer sourceSets = project.extensions.getByType(SourceSetContainer)
+                groovyDocTask.source(project.files(sourceSets.main.java.srcDirs))
+
+                ConfigurableFileCollection groovyDocFiles = project.files(groovyDocTask.destinationDir)
+                jar.from(groovyDocFiles)
+                jar.inputs.files(groovyDocFiles)
+            }
+        }
+
+        tasks.named('sourcesJar', Jar).configure { Jar jar ->
             SourceSetContainer sourceSets = SourceSets.findSourceSets(project)
-            task.duplicatesStrategy = DuplicatesStrategy.INCLUDE
+            jar.reproducibleFileOrder = true
+            jar.preserveFileTimestamps = false
+            jar.dirMode = 0755 // To avoid platform specific defaults
+            jar.fileMode = 0644 // to avoid platform specific defaults
+            jar.duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+
             // don't only include main, but any source set
-            task.from sourceSets.collect { it.allSource }
-
-            task.outputs.cacheIf { true }
+            jar.from sourceSets.collect { it.allSource }
+            jar.inputs.files(sourceSets.collect { it.allSource })
         }
 
-        project.tasks.register('testSourcesJar', Jar).configure {
-            it.dependsOn('testClasses')
-            it.from project.sourceSets.test.output
-            it.archiveClassifier.set('tests')
-
-            it.outputs.cacheIf { true }
+        project.tasks.register('testSourcesJar', Jar).configure { Jar jar ->
+            jar.onlyIf {
+                project.extensions.findByType(GrailsPublishExtension).publishTestSources &&
+                        !jar.source.files.isEmpty()
+            }
+            jar.dependsOn('testClasses')
+            jar.reproducibleFileOrder = true
+            jar.preserveFileTimestamps = false
+            jar.dirMode = 0755 // To avoid platform specific defaults
+            jar.fileMode = 0644 // to avoid platform specific defaults
+            SourceSetContainer sourceSets = SourceSets.findSourceSets(project)
+            jar.from sourceSets.test.output
+            jar.inputs.files(sourceSets.test.output)
+            jar.archiveClassifier.set('tests')
+            jar.group = BUILD_GROUP
         }
 
-        SourceSetContainer sourceSets = SourceSets.findSourceSets(project)
-        Collection<SourceSet> publishedSources = sourceSets.findAll { SourceSet sourceSet ->
-            (
-                    project.extensions.findByType(GrailsPublishExtension).publishTestSources ||
-                            sourceSet.name != SourceSet.TEST_SOURCE_SET_NAME
-            ) && !sourceSet.allSource.isEmpty()
-        }
-        if (!publishedSources) {
-            throw new RuntimeException("Cannot apply Grails Publish Plugin. Project ${project.name} does not have anything to publish.")
-        }
+        // TODO: Revisit this as an optional feature instead of forced, see @PendingFeature test case
+        // it's valid to publish boms, profiles, and projects that export only dependencies without any code
+        // so for now remove this and let the maven publish plugin fail if conditions aren't met
+//        SourceSetContainer sourceSets = SourceSets.findSourceSets(project)
+//        Collection<SourceSet> publishedSources = sourceSets.findAll { SourceSet sourceSet ->
+//            (
+//                    project.extensions.findByType(GrailsPublishExtension).publishTestSources ||
+//                            sourceSet.name != SourceSet.TEST_SOURCE_SET_NAME
+//            ) && !sourceSet.allSource.isEmpty()
+//        }
+//        if (!publishedSources) {
+//            throw new RuntimeException("Cannot apply Grails Publish Plugin. Project ${project.name} does not have anything to publish.")
+//        }
 
         registerValidationTask(project, "grailsPublishValidation") {
             Task groovyDocTask = project.tasks.findByName('groovydoc')

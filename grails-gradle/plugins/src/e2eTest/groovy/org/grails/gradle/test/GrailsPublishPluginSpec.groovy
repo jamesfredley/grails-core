@@ -485,7 +485,7 @@ class GrailsPublishPluginSpec extends GradleSpecification {
                 repositories {
                     maven { url "\${System.getenv('LOCAL_MAVEN_PATH')}\" }
                     maven { url = 'https://repo.grails.org/grails/core' }
-                    maven { url = 'https://repository.apache.org/content/repositories/snapshots' }
+                    maven { url = 'https://repository.apache.org/content/groups/snapshots' }
                 }
                 dependencies {
                     classpath "org.apache.grails:grails-gradle-plugins:\$grailsGradlePluginVersion"
@@ -500,7 +500,7 @@ class GrailsPublishPluginSpec extends GradleSpecification {
         
             repositories {
                 maven { url = 'https://repo.grails.org/grails/core' }
-                maven { url = 'https://repository.apache.org/content/repositories/snapshots' }
+                maven { url = 'https://repository.apache.org/content/groups/snapshots' }
             }
 
             dependencies {
@@ -554,7 +554,7 @@ class GrailsPublishPluginSpec extends GradleSpecification {
                 repositories {
                     maven { url "\${System.getenv('LOCAL_MAVEN_PATH')}\" }
                     maven { url = 'https://repo.grails.org/grails/core' }
-                    maven { url = 'https://repository.apache.org/content/repositories/snapshots' }
+                    maven { url = 'https://repository.apache.org/content/groups/snapshots' }
                 }
                 dependencies {
                     classpath "org.apache.grails:grails-gradle-plugins:\$grailsGradlePluginVersion"
@@ -574,6 +574,8 @@ class GrailsPublishPluginSpec extends GradleSpecification {
         bf.buildResult.output.contains("Grails Publish Plugin requires the Java Plugin to be applied to the project.")
     }
 
+    @PendingFeature
+    // because it could be valid to publish only dependencies, sources may not exist. disable this test for now
     def "project without sources fails grailsPublish apply"() {
         given:
         Path projectDir = createProjectDir("invalid-sources")
@@ -589,7 +591,7 @@ class GrailsPublishPluginSpec extends GradleSpecification {
                 repositories {
                     maven { url "\${System.getenv('LOCAL_MAVEN_PATH')}\" }
                     maven { url = 'https://repo.grails.org/grails/core' }                    
-                    maven { url = 'https://repository.apache.org/content/repositories/snapshots' }
+                    maven { url = 'https://repository.apache.org/content/groups/snapshots' }
                 }
                 dependencies {
                     classpath "org.apache.grails:grails-gradle-plugins:\$grailsGradlePluginVersion"
@@ -702,7 +704,8 @@ class GrailsPublishPluginSpec extends GradleSpecification {
 
         File javadocJar = artifacts.find{ it.name.endsWith("javadoc.jar") }
         javadocJar
-        findJarFileEntry("TestJava.html", javadocJar)
+        findJarFileEntry("DefaultPackage/TestJava.html", javadocJar)
+        findJarFileEntry("another/TestOtherJava.html", javadocJar)
         findJarFileEntry("org/grails/example/MyProject.html", javadocJar)
 
         File sourcesJar = artifacts.find{ it.name.endsWith("sources.jar") }
@@ -753,7 +756,8 @@ class GrailsPublishPluginSpec extends GradleSpecification {
 
         File javadocJar = artifacts.find{ it.name.endsWith("javadoc.jar") }
         javadocJar
-        findJarFileEntry("TestJava.html", javadocJar)
+        findJarFileEntry("DefaultPackage/TestJava.html", javadocJar)
+        findJarFileEntry("another/TestOtherJava.html", javadocJar)
         findJarFileEntry("org/grails/example/MyProject.html", javadocJar)
 
         File sourcesJar = artifacts.find{ it.name.endsWith("sources.jar") }
@@ -817,7 +821,8 @@ class GrailsPublishPluginSpec extends GradleSpecification {
 
         File javadocJar = artifacts.find{ it.name.endsWith("javadoc.jar") }
         javadocJar
-        findJarFileEntry("TestJava.html", javadocJar)
+        findJarFileEntry("TestJava.html", javadocJar) // TODO: Unfortunately, groovydoc seems to always put this under DefaultPackage, while javadoc does not
+        findJarFileEntry("another/TestOtherJava.html", javadocJar)
 
         File sourcesJar = artifacts.find{ it.name.endsWith("sources.jar") }
         sourcesJar
@@ -859,7 +864,8 @@ class GrailsPublishPluginSpec extends GradleSpecification {
 
         File javadocJar = artifacts.find{ it.name.endsWith("javadoc.jar") }
         javadocJar
-        findJarFileEntry("TestJava.html", javadocJar)
+        findJarFileEntry("DefaultPackage/TestJava.html", javadocJar)
+        findJarFileEntry("another/TestOtherJava.html", javadocJar)
 
         File sourcesJar = artifacts.find{ it.name.endsWith("sources.jar") }
         sourcesJar
@@ -905,7 +911,8 @@ class GrailsPublishPluginSpec extends GradleSpecification {
 
         File javadocJar = artifacts.find{ it.name.endsWith("javadoc.jar") }
         javadocJar
-        findJarFileEntry("TestJava.html", javadocJar)
+        findJarFileEntry("DefaultPackage/TestJava.html", javadocJar)
+        findJarFileEntry("another/TestOtherJava.html", javadocJar)
         findJarFileEntry("org/grails/example/SubProject1.html", javadocJar)
         !findJarFileEntry("org/grails/example/SubProject2.html", javadocJar)
 
@@ -956,7 +963,8 @@ class GrailsPublishPluginSpec extends GradleSpecification {
 
         File javadocJar = artifacts.find{ it.name.endsWith("javadoc.jar") }
         javadocJar
-        findJarFileEntry("TestJava.html", javadocJar)
+        findJarFileEntry("DefaultPackage/TestJava.html", javadocJar)
+        findJarFileEntry("another/TestOtherJava.html", javadocJar)
         findJarFileEntry("org/grails/example/SubProject1.html", javadocJar)
         !findJarFileEntry("org/grails/example/SubProject2.html", javadocJar)
 
@@ -1004,7 +1012,8 @@ class GrailsPublishPluginSpec extends GradleSpecification {
 
         File javadocJar = artifacts.find{ it.name.endsWith("javadoc.jar") }
         javadocJar
-        findJarFileEntry("TestJava.html", javadocJar)
+        findJarFileEntry("DefaultPackage/TestJava.html", javadocJar)
+        findJarFileEntry("another/TestOtherJava.html", javadocJar)
         findJarFileEntry("org/grails/example/MyProject.html", javadocJar)
 
         File sourcesJar = artifacts.find{ it.name.endsWith("sources.jar") }

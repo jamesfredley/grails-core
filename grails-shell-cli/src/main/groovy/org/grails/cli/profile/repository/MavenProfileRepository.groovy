@@ -18,6 +18,7 @@
  */
 package org.grails.cli.profile.repository
 
+import grails.util.Environment
 import groovy.transform.CompileDynamic
 import groovy.transform.CompileStatic
 import groovy.xml.XmlSlurper
@@ -25,10 +26,10 @@ import org.eclipse.aether.artifact.Artifact
 import org.eclipse.aether.artifact.DefaultArtifact
 import org.eclipse.aether.graph.Dependency
 import org.grails.cli.boot.GrailsDependencyVersions
-import org.grails.cli.profile.Profile
-import org.grails.cli.compiler.grape.AetherGrapeEngine
 import org.grails.cli.compiler.grape.DependencyResolutionContext
 import org.grails.cli.compiler.grape.DependencyResolutionFailedException
+import org.grails.cli.compiler.grape.MavenResolverGrapeEngine
+import org.grails.cli.profile.Profile
 
 /**
  *  Resolves profiles from a configured list of repositories using Aether
@@ -39,10 +40,11 @@ import org.grails.cli.compiler.grape.DependencyResolutionFailedException
 @CompileStatic
 class MavenProfileRepository extends AbstractJarProfileRepository {
 
-    public static final GrailsRepositoryConfiguration DEFAULT_REPO = new GrailsRepositoryConfiguration("grailsCentral", new URI("https://repo.grails.org/grails/core"), true)
+    public static final GrailsRepositoryConfiguration DEFAULT_REPO = new GrailsRepositoryConfiguration("apacheRepository", new URI("https://repository.apache.org/content/groups/public"), true)
+    public static final GrailsRepositoryConfiguration MAVEN_CENTRAL = new GrailsRepositoryConfiguration("mavenCentral", new URI("https://repo1.maven.org/maven2"), false)
 
     List<GrailsRepositoryConfiguration> repositoryConfigurations
-    AetherGrapeEngine grapeEngine
+    MavenResolverGrapeEngine grapeEngine
     GroovyClassLoader classLoader
     DependencyResolutionContext resolutionContext
     GrailsDependencyVersions profileDependencyVersions
@@ -52,13 +54,15 @@ class MavenProfileRepository extends AbstractJarProfileRepository {
         this.repositoryConfigurations = repositoryConfigurations
         classLoader = new GroovyClassLoader(Thread.currentThread().contextClassLoader)
         resolutionContext = new DependencyResolutionContext()
-        this.grapeEngine = GrailsAetherGrapeEngineFactory.create(classLoader, repositoryConfigurations, resolutionContext)
+        this.grapeEngine = GrailsMavenResolverGrapeEngineFactory.create(classLoader, repositoryConfigurations, resolutionContext)
         profileDependencyVersions = new GrailsDependencyVersions(grapeEngine)
         resolutionContext.addDependencyManagement(profileDependencyVersions)
     }
 
     MavenProfileRepository() {
-        this([DEFAULT_REPO])
+        // Use apache repository with SNAPSHOTS when grailsVersion is not set or it ends in SNAPSHOT
+        // otherwise use only mavenCentral
+        this((!Environment.grailsVersion || Environment.grailsVersion.endsWith("SNAPSHOT")) ? [DEFAULT_REPO] : [MAVEN_CENTRAL])
     }
 
     @Override
@@ -127,7 +131,7 @@ class MavenProfileRepository extends AbstractJarProfileRepository {
         if(!resolved) {
             List<Map> profiles = []
             resolutionContext.managedDependencies.each { Dependency dep ->
-                if (dep.artifact.groupId == "org.grails.profiles") {
+                if (dep.artifact.groupId == "org.apache.grails.profiles") {
                     profiles.add([group: dep.artifact.groupId, module: dep.artifact.artifactId])
                 }
             }
@@ -137,7 +141,7 @@ class MavenProfileRepository extends AbstractJarProfileRepository {
                 grapeEngine.grab(profile)
             }
 
-            def localData = new File(System.getProperty("user.home"),"/.m2/repository/org/grails/profiles")
+            def localData = new File(System.getProperty("user.home"),"/.m2/repository/org/apache/grails/profiles")
             if(localData.exists()) {
                 localData.eachDir { File dir ->
                     if(!dir.name.startsWith('.')) {

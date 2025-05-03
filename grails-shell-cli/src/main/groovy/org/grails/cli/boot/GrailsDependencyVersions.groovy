@@ -18,6 +18,7 @@
  */
 package org.grails.cli.boot
 
+import grails.util.Environment
 import groovy.grape.Grape
 import groovy.grape.GrapeEngine
 import groovy.transform.CompileDynamic
@@ -51,7 +52,7 @@ class GrailsDependencyVersions implements DependencyManagement {
     }
 
     GrailsDependencyVersions(GrapeEngine grape) {
-        this(grape, [group: "org.grails", module: "grails-bom", version: GrailsDependencyVersions.package.implementationVersion, type: "pom"])
+        this(grape, [group: "org.apache.grails", module: "grails-bom", version: GrailsDependencyVersions.package.implementationVersion, type: "pom"])
     }
 
     GrailsDependencyVersions(GrapeEngine grape, Map<String, String> bomCoords) {
@@ -65,7 +66,16 @@ class GrailsDependencyVersions implements DependencyManagement {
 
     static GrapeEngine getDefaultEngine() {
         def grape = Grape.getInstance()
-        grape.addResolver([name:"grailsCentral", root:"https://repo.grails.org/grails/core"] as Map<String, Object>)
+
+        // Use apache repository with SNAPSHOTS when grailsVersion is not set or it ends in SNAPSHOT
+        // otherwise use only mavenCentral
+        if (!Environment.grailsVersion || Environment.grailsVersion.endsWith("SNAPSHOT")) {
+            grape.addResolver([name:"apacheRepository", root:"https://repository.apache.org/content/groups/public"] as Map<String, Object>)
+        }
+        else {
+            grape.addResolver([name:"mavenCentral", root:"https://repo1.maven.org/maven2"] as Map<String, Object>)
+        }
+
         grape
     }
 

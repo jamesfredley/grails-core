@@ -37,7 +37,7 @@ dependencies {
     implementation "org.apache.grails:grails-rest-transforms"
     implementation "org.apache.grails:grails-services"
     implementation "org.apache.grails:grails-url-mappings"
-    implementation "org.apache.grails.web:grails-web-boot"
+    implementation "org.apache.grails:grails-web-boot"
     implementation "org.apache.grails:grails-gsp"
     implementation "org.apache.grails:grails-data-hibernate5"
     implementation "org.apache.grails:grails-scaffolding"
@@ -71,7 +71,7 @@ build.gradle, using Gradle Platforms:
 [source,groovy]
 ----
 dependencies {
-    implementation platform("org.grails:grails-bom:$grailsVersion")
+    implementation platform("org.apache.grails:grails-bom:{GrailsVersion}")
     // all other dependencies
 }
 ----
@@ -81,7 +81,7 @@ build.gradle, using Spring dependency management plugin:
 ----
 dependencyManagement {
     imports {
-        mavenBom 'org.grails:grails-bom:' + grailsVersion
+        mavenBom 'org.apache.grails:grails-bom:{GrailsVersion}'
     }
     applyMavenExclusions false
 }

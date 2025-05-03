@@ -84,10 +84,6 @@ dependencies {
 
     runtimeOnly 'org.apache.groovy:groovy-ant'
     runtimeOnly 'org.apache.groovy:groovy-json'
-    runtimeOnly "org.apache.groovy:groovy-jmx:$groovyVersion", {
-        // TODO: For some reason, this version is not being resolved from grails-bom
-        // (Not sure why this library is needed in the first place)
-    }
     runtimeOnly 'org.apache.groovy:groovy-xml'
 
     api project(':grails-bootstrap')
@@ -103,6 +99,8 @@ dependencies {
     api 'org.springframework.boot:spring-boot-cli'
     compileOnly 'jakarta.servlet:jakarta.servlet-api'
     implementation "org.apache.maven:maven-resolver-provider:$apacheMavenVersion"
+    // TODO: replace ServiceLocator with RepositorySystemSupplier
+    // implementation "org.apache.maven:maven-resolver-supplier:$apacheMavenVersion"
     compileOnly "net.sf.jopt-simple:jopt-simple:$joptSimpleVersion"
 
     implementation("org.apache.maven:maven-settings-builder:$apacheMavenVersion") {

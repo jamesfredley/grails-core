@@ -48,6 +48,8 @@ ext {
     ]
     testProjects = [ /* Will be populated by subprojects loop below */]
     docProjects = [ /* Will be populated by subprojects loop below */]
+    cliProjects = [ /* Will be populated by subprojects loop below */]
+    profileProjects = [ /* Will be populated by subprojects loop below */]
 }
 
 allprojects {
@@ -72,16 +74,19 @@ subprojects {
         rootProject.ext['docProjects'] << name
     }
 
+    if (name.startsWith('grails-wrapper')) {
+        rootProject.ext['cliProjects'] << name
+    }
+
+    if (name.startsWith('grails-profiles')) {
+        rootProject.ext['profileProjects'] << name
+    }
+
     configurations.configureEach {
         resolutionStrategy {
             def cacheHours = isCiBuild ? 0 : 24
             cacheDynamicVersionsFor(cacheHours, 'hours')
             cacheChangingModulesFor(cacheHours, 'hours')
-            eachDependency { DependencyResolveDetails details ->
-                if (details.requested.group == 'org.apache.groovy') {
-                    details.useVersion(groovyVersion)
-                }
-            }
         }
     }
 

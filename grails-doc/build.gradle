@@ -29,7 +29,7 @@ plugins {
 // Make sure doc projects are evaluated last so they pick up all projects with documentation since they are dynamically
 // found by the aggregateGroovydoc task
 rootProject.subprojects
-        .findAll { !(it.name in testProjects) && it.name != project.name }
+        .findAll { !(it.name in testProjects) && it.name != project.name && !(it.name in cliProjects) && !(it.name in profileProjects) }
         .each { project.evaluationDependsOn(it.path) }
 
 compileJava.options.release = javaVersion.toInteger()
@@ -146,6 +146,7 @@ tasks.register('dist', Zip).configure { Zip it ->
 }
 
 tasks.register('createReleaseDropdown', AddReleaseDropDown).configure { AddReleaseDropDown it ->
+    it.group = 'documentation'
     it.dependsOn 'publishGuide'
 
     it.inputFiles = project.layout.buildDirectory.files('original-guide/guide/single.html')
@@ -240,7 +241,7 @@ tasks.register('generateBomDocumentation').configure { Task it ->
     it.dependsOn(':grails-bom:extractConstraints')
 
     it.description = 'Generates an AsciiDoc table listing Group, Artifact, and Version for project dependencies.'
-    it.group = 'Reporting'
+    it.group = 'documentation'
 
     it.inputs.files(project(':grails-bom').layout.projectDirectory.asFileTree)
     it.outputs.file(project.layout.projectDirectory.file('src/en/ref/Versions/Grails BOM.adoc'))
@@ -266,10 +267,12 @@ tasks.register('generateBomDocumentation').configure { Task it ->
 
 tasks.register('generateGuide').configure { Task task ->
     task.dependsOn('createReleaseDropdown')
+    task.group = 'documentation'
 }
 
 tasks.register('docs', Sync).configure { Sync it ->
     it.dependsOn 'aggregateGroovydoc', 'generateGuide', ':grails-data-docs-stage:docs'
+    it.group = 'documentation'
 
     def manualDocsDir = project.layout.buildDirectory.dir('modified-guide')
     def apiDocsDir = project.layout.buildDirectory.dir('combined-api')

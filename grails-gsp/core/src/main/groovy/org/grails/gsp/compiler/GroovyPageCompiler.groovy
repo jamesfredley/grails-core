@@ -21,6 +21,7 @@ package org.grails.gsp.compiler
 import grails.config.ConfigMap
 import org.apache.commons.logging.LogFactory
 import org.apache.commons.logging.Log
+import org.apache.grails.common.properties.PropertyFileUtils
 import org.codehaus.groovy.control.CompilationUnit
 import org.codehaus.groovy.control.CompilerConfiguration
 import org.codehaus.groovy.control.Phases
@@ -158,6 +159,7 @@ class GroovyPageCompiler {
                 viewregistryFile.withOutputStream { viewsOut ->
                     views.store(viewsOut, "Precompiled views for ${packagePrefix}")
                 }
+                PropertyFileUtils.makePropertiesFileReproducible(viewregistryFile)
             } finally {
                 // eventListener?.triggerEvent("StatusUpdate", "Shutting Down ThreadPool")
                 threadPool.shutdown()
