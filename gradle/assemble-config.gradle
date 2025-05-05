@@ -19,14 +19,13 @@
 
 tasks.register('installToHomeDist').configure { Task task ->
     task.inputs.files(tasks.named('jar'))
-    task.inputs.files(tasks.named('sourcesJar'))
-    task.inputs.files(tasks.named('javadocJar'))
     task.outputs.dir(distInstallDir)
 
     doLast {
         copy {
             it.from layout.buildDirectory.dir('libs')
             it.into distInstallDir
+            it.exclude '*sources.jar', '*-javadoc.jar'
         }
     }
 }
