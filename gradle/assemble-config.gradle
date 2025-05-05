@@ -23,11 +23,9 @@ tasks.register('installToHomeDist').configure { Task task ->
 
     doLast {
         copy {
-            it.from layout.buildDirectory.dir('libs').map { it.asFileTree.matching {
-                include '**/*.jar'
-                exclude '**/*-sources.jar', '**/*-javadoc.jar'
-            } }
+            it.from layout.buildDirectory.dir('libs')
             it.into distInstallDir
+            it.exclude '*sources.jar', '*-javadoc.jar'
         }
     }
 }
