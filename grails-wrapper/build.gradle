@@ -56,6 +56,10 @@ jarTask.configure { Jar it ->
 TaskProvider<CreateStartScripts> startScripts = tasks.register('createStartScripts', CreateStartScripts)
 startScripts.configure { CreateStartScripts t ->
     t.outputDir = layout.buildDirectory.dir('generated-scripts').get().asFile
+
+    t.inputs.files(rootProject.tasks.named('syncCliDependencies'))
+    t.outputs.dir(t.outputDir.absolutePath)
+
     t.applicationName = 'grailsw'
     t.mainClass = project.findProperty('startMainClass') as String
     t.classpath = files(jarTask)
