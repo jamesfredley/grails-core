@@ -1,3 +1,22 @@
+@*
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+https://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+*@
+
 @import java.util.function.Function
 @import org.grails.forge.application.ApplicationType
 @import org.grails.forge.build.dependencies.CoordinateResolver
@@ -17,7 +36,8 @@ ApplicationType applicationType,
 Project project,
 Function<String, Coordinate> coordinateResolver,
 Features features,
-GradleBuild gradleBuild
+GradleBuild gradleBuild,
+String grailsVersion
 )
 
 @seleniumVersion => {@coordinateResolver.apply("selenium-api").getVersion()}
@@ -27,9 +47,10 @@ GradleBuild gradleBuild
 buildscript {
     repositories {
         mavenCentral()
-        // TODO: only include on when grailsVersion is a snapshot
-        maven { url "https://repository.apache.org/content/groups/snapshots/" }
-        maven { url "https://repo.grails.org/grails/core" }
+@if (grailsVersion.endsWith("SNAPSHOT")) {
+        maven { url = 'https://repository.apache.org/content/groups/snapshots' }
+}
+        maven { url = 'https://repo.grails.org/grails/core' }
     }
     dependencies { // Not Published to Gradle Plugin Portal
     @for (GradleDependency dependency : gradleBuild.getBuildscriptDependencies()) {
@@ -69,9 +90,10 @@ apply from: "gradle/asciidoc.gradle"
 
 repositories {
     mavenCentral()
-    // TODO: only include on when grailsVersion is a snapshot
-    maven { url "https://repository.apache.org/content/groups/snapshots/" }
-    maven { url "https://repo.grails.org/grails/core" }
+@if (grailsVersion.endsWith("SNAPSHOT")) {
+    maven { url = 'https://repository.apache.org/content/groups/snapshots' }
+}
+    maven { url = 'https://repo.grails.org/grails/core' }
 }
 
 @dependencies.template(applicationType, project, features, gradleBuild)
