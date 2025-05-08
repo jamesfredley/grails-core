@@ -41,7 +41,7 @@ jobs:
     if: github.event_name != 'pull_request'
     needs: [build]
     env:
-      IMAGE_NAME: ghcr.io/${{ github.repository_owner }}/${{ github.repository }}/${{ secrets.GCP_APP_NAME }}:next
+      IMAGE_NAME: ghcr.io/${{ github.repository }}/${{ secrets.GCP_APP_NAME }}:next
     steps:
       - name: "🔑 Login"
         uses: google-github-actions/setup-gcloud@77e7a554d41e2ee56fc945c52dfd3f33d12def9a
@@ -100,7 +100,7 @@ jobs:
     if: github.event_name != 'pull_request'
     needs: [build]
     env:
-      IMAGE_NAME: ghcr.io/${{ github.repository_owner }}/${{ github.repository }}/${{ secrets.GCP_APP_NAME }}-analytics:next
+      IMAGE_NAME: ghcr.io/${{ github.repository }}/${{ secrets.GCP_APP_NAME }}-analytics:next
     steps:
       - name: "🔑 Login"
         uses: google-github-actions/setup-gcloud@77e7a554d41e2ee56fc945c52dfd3f33d12def9a
