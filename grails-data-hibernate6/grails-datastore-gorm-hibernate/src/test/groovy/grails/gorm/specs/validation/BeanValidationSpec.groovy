@@ -1,0 +1,40 @@
+package grails.gorm.specs.validation
+
+import grails.gorm.annotation.Entity
+import grails.gorm.specs.HibernateGormDatastoreSpec
+import grails.gorm.transactions.Rollback
+import jakarta.validation.constraints.Digits
+import org.hibernate.validator.constraints.NotBlank
+
+/**
+ * Created by graemerocher on 07/04/2017.
+ */
+class BeanValidationSpec extends HibernateGormDatastoreSpec {
+
+    @Override
+    List getDomainClasses() {
+        [Bean]
+    }
+
+    @Rollback
+    void "test bean validation API validate on save"() {
+        given:"A an invalid instance"
+        Bean bean = new Bean(name:"", price:600.12034)
+        when:"the bean is saved"
+        bean.save()
+
+        then:"the errors are correct"
+        bean.hasErrors()
+        bean.errors.allErrors.size() == 2
+        bean.errors.hasFieldErrors("price")
+        bean.errors.hasFieldErrors("name")
+    }
+}
+
+@Entity
+class Bean {
+    @NotBlank
+    String name
+    @Digits(integer = 6, fraction = 2)
+    BigDecimal price
+}

@@ -1,0 +1,52 @@
+package grails.gorm.specs.hasmany
+
+import grails.gorm.annotation.Entity
+import grails.gorm.specs.HibernateGormDatastoreSpec
+import grails.gorm.transactions.Rollback
+import org.grails.datastore.mapping.proxy.ProxyHandler
+import org.grails.orm.hibernate.HibernateDatastore
+import spock.lang.AutoCleanup
+import spock.lang.Shared
+import spock.lang.Specification
+
+class ListCollectionSpec extends HibernateGormDatastoreSpec {
+
+    @Override
+    List getDomainClasses() {
+        [Animal,Leg]
+    }
+
+    @Rollback
+    void "test legs are not loaded eagerly"() {
+        given:
+        new Animal(name: "Chloe")
+            .addToLegs(new Leg())
+            .addToLegs(new Leg())
+            .addToLegs(new Leg())
+            .addToLegs(new Leg())
+            .save(flush: true, failOnError: true)
+        setupClass.hibernateDatastore.currentSession.flush()
+        setupClass.hibernateDatastore.currentSession.clear()
+        ProxyHandler ph = setupClass.hibernateDatastore.mappingContext.proxyHandler
+
+        when:
+        Animal animal = Animal.load(1)
+        animal = ph.unwrap(animal)
+
+        then:
+        ph.isProxy(animal.legs) && !ph.isInitialized(animal.legs)
+    }
+}
+
+@Entity
+class Animal {
+    String name
+
+    List legs
+    static hasMany = [legs: Leg]
+}
+
+@Entity
+class Leg {
+
+}
