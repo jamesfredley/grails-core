@@ -25,8 +25,6 @@ import jakarta.annotation.Nonnull
 import org.grails.datastore.mapping.core.Session
 import org.grails.datastore.mapping.model.PersistentEntity
 import org.grails.orm.hibernate.cfg.PropertyConfig
-
-import spock.lang.Ignore
 import spock.lang.Issue
 
 /**
@@ -35,15 +33,9 @@ import spock.lang.Issue
 //TODO 2025-04-17 CompositeId not working
 class GlobalConstraintWithCompositeIdSpec extends HibernateGormDatastoreSpec {
 
-    @Override
-    List getDomainClasses() {
-        [ParentB, ChildB, DomainB]
-    }
-
-
-    Session configure() {
-        ConfigObject grailsConfig = new ConfigObject()
-        Map config = [
+    def setupSpec() {
+        manager.domainClasses.addAll([ParentB, ChildB, DomainB])
+        manager.grailsConfig = [
                 'dataSource.url'                 : "jdbc:tc:postgresql:latest:///dev_db",
                 'dataSource.dbCreate'            : 'create-drop',
                 'dataSource.formatSql'           : 'true',
@@ -56,8 +48,6 @@ class GlobalConstraintWithCompositeIdSpec extends HibernateGormDatastoreSpec {
                     '*'(nullable: true)
                 }
         ]
-        grailsConfig.putAll(config)
-        setupClass.setup(((TEST_CLASSES + getDomainClasses()) as Set) as List, grailsConfig, true)
     }
 
     @Rollback
@@ -77,7 +67,7 @@ class GlobalConstraintWithCompositeIdSpec extends HibernateGormDatastoreSpec {
     @Issue('https://github.com/grails/grails-data-mapping/issues/877')
     void "test global constraints with unique constraint"() {
         given:
-        PersistentEntity entity = setupClass.hibernateDatastore.mappingContext.getPersistentEntity(DomainB.name)
+        PersistentEntity entity = manager.hibernateDatastore.mappingContext.getPersistentEntity(DomainB.name)
         PropertyConfig nameProp = entity.getPropertyByName('name').mapping.mappedForm
         PropertyConfig someOtherConfig = entity.getPropertyByName('someOther').mapping.mappedForm
         expect:

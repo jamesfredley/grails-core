@@ -10,9 +10,8 @@ import spock.lang.Ignore
 //TODO Closure alias not working
 class DetachCriteriaSubquerySpec extends HibernateGormDatastoreSpec {
 
-    @Override
-    List getDomainClasses() {
-        return [User, Group, GroupAssignment, Organisation]
+    def setupSpec() {
+        manager.domainClasses.addAll([User, Group, GroupAssignment, Organisation])
     }
 
 //    @Ignore("Exists Query broken")
@@ -63,7 +62,7 @@ class DetachCriteriaSubquerySpec extends HibernateGormDatastoreSpec {
         when:
         def orgDetachedCritera = Organisation.where { name == 'A' || name == 'B' }
         def organisations = orgDetachedCritera.list()
-        DetachedCriteria<User> criteria = User.where {inList('organisation', orgDetachedCritera)}
+        DetachedCriteria<User> criteria = User.where { inList('organisation', orgDetachedCritera) }
         List<User> result = criteria.list()
         result = criteria.list()
 

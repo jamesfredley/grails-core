@@ -30,9 +30,8 @@ import org.hibernate.validator.constraints.NotBlank
  */
 class BeanValidationSpec extends HibernateGormDatastoreSpec {
 
-    @Override
-    List getDomainClasses() {
-        [Bean]
+    def setupSpec() {
+        manager.domainClasses.addAll([Bean])
     }
 
     @Rollback

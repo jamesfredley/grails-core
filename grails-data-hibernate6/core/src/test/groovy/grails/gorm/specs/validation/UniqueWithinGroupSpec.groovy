@@ -31,9 +31,8 @@ import spock.lang.Issue
 @Issue('https://github.com/grails/gorm-hibernate5/issues/36')
 class UniqueWithinGroupSpec extends HibernateGormDatastoreSpec {
 
-    @Override
-    List getDomainClasses() {
-        [Thing]
+    def setupSpec() {
+        manager.domainClasses.addAll([Thing])
     }
 
     @Rollback

@@ -22,21 +22,15 @@ import grails.gorm.annotation.Entity
 import grails.gorm.dirty.checking.DirtyCheck
 import grails.gorm.specs.HibernateGormDatastoreSpec
 import grails.gorm.transactions.Rollback
-import org.grails.orm.hibernate.HibernateDatastore
-import org.grails.orm.hibernate.HibernateDatastoreSpec
-import spock.lang.AutoCleanup
 import spock.lang.Issue
-import spock.lang.Shared
-import spock.lang.Specification
 
 /**
  * Created by graemerocher on 03/05/2017.
  */
 class HibernateDirtyCheckingSpec extends HibernateGormDatastoreSpec {
 
-    @Override
-    List getDomainClasses() {
-        [Person]
+    def setupSpec() {
+        manager.domainClasses.addAll([Person])
     }
 
     @Rollback
@@ -96,7 +90,7 @@ class HibernateDirtyCheckingSpec extends HibernateGormDatastoreSpec {
         person.address.listDirtyPropertyNames().isEmpty()
 
         when:
-        setupClass.hibernateDatastore.sessionFactory.currentSession.clear()
+        manager.hibernateDatastore.sessionFactory.currentSession.clear()
         person = Person.first()
 
         then:
@@ -107,7 +101,7 @@ class HibernateDirtyCheckingSpec extends HibernateGormDatastoreSpec {
     void "test dirty checking on boolean true -> false"() {
         given: 'a new person'
         new Person(name: 'John', occupation: 'Grails developer', employed: true).save(flush: true)
-        setupClass.hibernateDatastore.sessionFactory.currentSession.clear()
+        manager.hibernateDatastore.sessionFactory.currentSession.clear()
         Person person = Person.first()
 
         when:
@@ -120,7 +114,7 @@ class HibernateDirtyCheckingSpec extends HibernateGormDatastoreSpec {
 
         when:
         person.save(flush: true)
-        setupClass.hibernateDatastore.sessionFactory.currentSession.clear()
+        manager.hibernateDatastore.sessionFactory.currentSession.clear()
         person = Person.first()
 
         then:
@@ -131,7 +125,7 @@ class HibernateDirtyCheckingSpec extends HibernateGormDatastoreSpec {
     void "test dirty checking on boolean false -> true"() {
         given: 'a new person'
         new Person(name: 'John', occupation: 'Grails developer', employed: false).save(flush: true)
-        setupClass.hibernateDatastore.sessionFactory.currentSession.clear()
+        manager.hibernateDatastore.sessionFactory.currentSession.clear()
         Person person = Person.first()
 
         when:
@@ -144,7 +138,7 @@ class HibernateDirtyCheckingSpec extends HibernateGormDatastoreSpec {
 
         when:
         person.save(flush: true)
-        setupClass.hibernateDatastore.sessionFactory.currentSession.clear()
+        manager.hibernateDatastore.sessionFactory.currentSession.clear()
         person = Person.first()
 
         then:

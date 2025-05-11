@@ -12,8 +12,6 @@ class DetachedCriteriaProjectionAliasSpec extends HibernateGormDatastoreSpec {
     def entity1
     def entity2
 
-
-
     @Transactional
     def setup() {
         entity1 = new Entity1(field1: 'E1').save(flush:true)
@@ -23,8 +21,8 @@ class DetachedCriteriaProjectionAliasSpec extends HibernateGormDatastoreSpec {
         new DetachedEntity( entityId: entity1.id, field: 'DE2').save(flush:true)
     }
 
-    List getDomainClasses() {
-        [Entity1,Entity2,DetachedEntity]
+    def setupSpec() {
+        manager.domainClasses.addAll([Entity1, Entity2, DetachedEntity])
     }
 
     @Rollback
@@ -63,7 +61,7 @@ class DetachedCriteriaProjectionAliasSpec extends HibernateGormDatastoreSpec {
             "in"("entityId", detachedCriteria)
         }
 
-        SessionFactory sessionFactory = this.setupClass.sessionFactory
+        SessionFactory sessionFactory = this.manager.sessionFactory
         def hql = """
 select
         de1_0.id,

@@ -16,7 +16,6 @@
  *  specific language governing permissions and limitations
  *  under the License.
  */
-
 package grails.gorm.specs
 
 import grails.gorm.specs.entities.Club

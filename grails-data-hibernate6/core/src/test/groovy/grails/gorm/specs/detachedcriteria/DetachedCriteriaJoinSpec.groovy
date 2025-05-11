@@ -10,9 +10,8 @@ import org.grails.orm.hibernate.query.HibernateQuery
 
 class DetachedCriteriaJoinSpec  extends HibernateGormDatastoreSpec {
 
-    @Override
-    List getDomainClasses() {
-        [Team, Club]
+    def setupSpec() {
+        manager.domainClasses.addAll([Team, Club])
     }
 
     def "check if count works as expected"() {
@@ -39,7 +38,7 @@ class DetachedCriteriaJoinSpec  extends HibernateGormDatastoreSpec {
                 join('club', JoinType.INNER)
                 createAlias('club','c')
             }
-            HibernateQuery query = HibernateGormDatastoreSpec.session.createQuery(Team)
+        HibernateQuery query = manager.session.createQuery(Team)
             
             DynamicFinder.applyDetachedCriteria(query,dc)
             def joinType = query.hibernateCriteria.joinTypes['club']
@@ -53,7 +52,7 @@ class DetachedCriteriaJoinSpec  extends HibernateGormDatastoreSpec {
                 join('club', JoinType.LEFT)
                 createAlias('club','c')
             }
-            HibernateQuery query = HibernateGormDatastoreSpec.session.createQuery(Team)
+        HibernateQuery query = manager.session.createQuery(Team)
 
             DynamicFinder.applyDetachedCriteria(query,dc)
             def joinType = query.hibernateCriteria.joinTypes["club"]
@@ -67,7 +66,7 @@ class DetachedCriteriaJoinSpec  extends HibernateGormDatastoreSpec {
                 join('club', JoinType.RIGHT)
                 createAlias('club','c')
             }
-            HibernateQuery query = HibernateGormDatastoreSpec.session.createQuery(Team)
+        HibernateQuery query = manager.session.createQuery(Team)
 
             DynamicFinder.applyDetachedCriteria(query,dc)
             def joinType = query.hibernateCriteria.joinTypes["club"]

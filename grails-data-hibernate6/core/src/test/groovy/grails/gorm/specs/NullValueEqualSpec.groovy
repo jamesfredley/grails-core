@@ -5,15 +5,15 @@ import org.apache.grails.data.testing.tck.domains.TestEntity
 
 class NullValueEqualSpec extends HibernateGormDatastoreSpec {
 
-    List getDomainClasses() {
-        [TestEntity, ChildEntity]
+    def setupSpec() {
+        manager.domainClasses.addAll([TestEntity, ChildEntity])
     }
 
     void "test null value in equal and not equal"() {
         when:
-        new TestEntity(name:"Fred", age: null).save(failOnError: true)
-        new TestEntity(name:"Bob", age: 11).save(failOnError: true)
-        new TestEntity(name:"Jack", age: null).save(flush:true, failOnError: true)
+        new TestEntity(name: "Fred", age: null).save(failOnError: true)
+        new TestEntity(name: "Bob", age: 11).save(failOnError: true)
+        new TestEntity(name: "Jack", age: null).save(flush: true, failOnError: true)
 
         then:
         TestEntity.countByAge(11) == 1

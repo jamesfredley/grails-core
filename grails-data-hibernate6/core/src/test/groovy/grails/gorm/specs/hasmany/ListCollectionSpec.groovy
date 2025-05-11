@@ -22,16 +22,11 @@ import grails.gorm.annotation.Entity
 import grails.gorm.specs.HibernateGormDatastoreSpec
 import grails.gorm.transactions.Rollback
 import org.grails.datastore.mapping.proxy.ProxyHandler
-import org.grails.orm.hibernate.HibernateDatastore
-import spock.lang.AutoCleanup
-import spock.lang.Shared
-import spock.lang.Specification
 
 class ListCollectionSpec extends HibernateGormDatastoreSpec {
 
-    @Override
-    List getDomainClasses() {
-        [Animal,Leg]
+    def setupSpec() {
+        manager.domainClasses.addAll([Animal, Leg])
     }
 
     @Rollback
@@ -43,9 +38,9 @@ class ListCollectionSpec extends HibernateGormDatastoreSpec {
             .addToLegs(new Leg())
             .addToLegs(new Leg())
             .save(flush: true, failOnError: true)
-        setupClass.hibernateDatastore.currentSession.flush()
-        setupClass.hibernateDatastore.currentSession.clear()
-        ProxyHandler ph = setupClass.hibernateDatastore.mappingContext.proxyHandler
+        manager.hibernateDatastore.currentSession.flush()
+        manager.hibernateDatastore.currentSession.clear()
+        ProxyHandler ph = manager.hibernateDatastore.mappingContext.proxyHandler
 
         when:
         Animal animal = Animal.load(1)

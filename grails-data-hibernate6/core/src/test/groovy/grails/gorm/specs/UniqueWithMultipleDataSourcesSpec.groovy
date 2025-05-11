@@ -20,12 +20,9 @@ package grails.gorm.specs
 
 import grails.gorm.annotation.Entity
 import grails.gorm.transactions.Rollback
-import org.grails.datastore.mapping.core.DatastoreUtils
 import org.grails.datastore.mapping.core.Session
 import org.grails.datastore.mapping.core.connections.ConnectionSource
-import org.grails.orm.hibernate.HibernateDatastore
 import org.hibernate.dialect.H2Dialect
-import org.springframework.transaction.PlatformTransactionManager
 import spock.lang.*
 
 /**
@@ -33,14 +30,9 @@ import spock.lang.*
  */
 class UniqueWithMultipleDataSourcesSpec extends HibernateGormDatastoreSpec {
 
-    @Override
-    List getDomainClasses() {
-        [Abc]
-    }
-
-    Session configure() {
-        ConfigObject grailsConfig = new ConfigObject()
-        Map config = [
+    def setupSpec() {
+        manager.domainClasses.addAll([Abc])
+        manager.grailsConfig = [
                 'dataSource.url'        : "jdbc:h2:mem:grailsDB;LOCK_TIMEOUT=10000",
                 'dataSource.dbCreate'   : 'update',
                 'dataSource.dialect'    : H2Dialect.name,
@@ -51,10 +43,7 @@ class UniqueWithMultipleDataSourcesSpec extends HibernateGormDatastoreSpec {
                 'hibernate.hbm2ddl.auto': 'create',
                 'dataSources.second'    : [url: "jdbc:h2:mem:second;LOCK_TIMEOUT=10000"],
         ]
-        grailsConfig.putAll(config)
-        setupClass.setup(((TEST_CLASSES + getDomainClasses()) as Set) as List, grailsConfig, true)
     }
-
 
     @Rollback
     @Issue('https://github.com/grails/grails-core/issues/10481')

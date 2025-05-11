@@ -23,9 +23,8 @@ class DetachedCriteriaProjectionSpec extends HibernateGormDatastoreSpec {
         new DetachedEntity(entityId: entity1.id, field: 'def').save(flush:true)
     }
 
-    @Override
-    List getDomainClasses(){
-        return [Entity1, Entity2, DetachedEntity]
+    def setupSpec() {
+        manager.domainClasses.addAll([Entity1, Entity2, DetachedEntity])
     }
 
     @Rollback

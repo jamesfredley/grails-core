@@ -30,8 +30,8 @@ import spock.lang.Issue
 @Issue('https://github.com/grails/grails-data-mapping/issues/1004')
 class UniqueWithHasOneSpec extends HibernateGormDatastoreSpec {
 
-    List getDomainClasses() {
-        [Foo,Bar]
+    def setupSpec() {
+        manager.domainClasses.addAll([Foo, Bar])
     }
 
     @Rollback

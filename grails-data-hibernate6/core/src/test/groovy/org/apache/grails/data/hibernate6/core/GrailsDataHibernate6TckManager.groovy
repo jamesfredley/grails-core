@@ -48,6 +48,8 @@ class GrailsDataHibernate6TckManager extends GrailsDataTckManager {
     TransactionStatus transactionStatus
     HibernateMappingContextConfiguration hibernateConfig
     ApplicationContext applicationContext
+    ConfigObject grailsConfig = new ConfigObject()
+    boolean isTransactional = true
 
     @Override
     void setup(Class<? extends Specification> spec) {
@@ -57,16 +59,12 @@ class GrailsDataHibernate6TckManager extends GrailsDataTckManager {
 
     @Override
     Session createSession() {
-        ConfigObject grailsConfig = new ConfigObject()
-        boolean isTransactional = true
-
-        System.setProperty('hibernate5.gorm.suite', "true")
+        System.setProperty('hibernate6.gorm.suite', "true")
         grailsApplication = new DefaultGrailsApplication(domainClasses as Class[], new GroovyClassLoader(GrailsDataHibernate6TckManager.getClassLoader()))
+        grailsConfig.dataSource.dbCreate = "create-drop"
         if (grailsConfig) {
             grailsApplication.config.putAll(grailsConfig)
         }
-
-        grailsConfig.dataSource.dbCreate = "create-drop"
         hibernateDatastore = new HibernateDatastore(DatastoreUtils.createPropertyResolver(grailsConfig), domainClasses as Class[])
         transactionManager = hibernateDatastore.getTransactionManager()
         sessionFactory = hibernateDatastore.sessionFactory
@@ -95,10 +93,10 @@ class GrailsDataHibernate6TckManager extends GrailsDataTckManager {
             transactionManager.rollback(tx)
         }
         if (hibernateSession != null) {
-            SessionFactoryUtils.closeSession( (org.hibernate.Session)hibernateSession )
+            SessionFactoryUtils.closeSession((org.hibernate.Session) hibernateSession)
         }
 
-        if(hibernateConfig != null) {
+        if (hibernateConfig != null) {
             hibernateConfig = null
         }
         if (hibernateDatastore != null) {
@@ -109,7 +107,7 @@ class GrailsDataHibernate6TckManager extends GrailsDataTckManager {
         hibernateSession = null
         transactionManager = null
         sessionFactory = null
-        if(applicationContext instanceof DisposableBean) {
+        if (applicationContext instanceof DisposableBean) {
             applicationContext.destroy()
         }
         applicationContext = null
@@ -124,7 +122,10 @@ class GrailsDataHibernate6TckManager extends GrailsDataTckManager {
         } catch (e) {
             // already closed, ignore
         } finally {
-            try { sql?.close() } catch (ignored) {}
+            try {
+                sql?.close()
+            } catch (ignored) {
+            }
         }
     }
 }

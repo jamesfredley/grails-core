@@ -10,9 +10,10 @@ import spock.lang.Ignore
 
 class HibernateGormStaticApiTest extends HibernateGormDatastoreSpec{
 
-    List getDomainClasses() {
-        [Account, Transaction, Whatever ]
+    def setupSpec() {
+        manager.domainClasses.addAll([Account, Transaction, Whatever])
     }
+
     Account fredAccount
     Account barneyAccount
     Account jamesAccount

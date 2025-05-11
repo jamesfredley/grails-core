@@ -24,7 +24,6 @@ import grails.gorm.hibernate.mapping.MappingBuilder
 import grails.gorm.specs.HibernateGormDatastoreSpec
 import grails.gorm.transactions.Rollback
 import jakarta.annotation.Nonnull
-import spock.lang.Ignore
 import spock.lang.Issue
 
 /**
@@ -34,10 +33,9 @@ import spock.lang.Issue
 class CompositeIdWithDeepOneToManyMappingSpec extends HibernateGormDatastoreSpec {
 
     @Override
-    List getDomainClasses() {
-        [GrandParent, Parent, Child]
+    def setupSpec() {
+        manager.domainClasses.addAll([GrandParent, Parent, Child])
     }
-
 
     @Rollback
     @Issue('https://github.com/grails/grails-data-mapping/issues/660')

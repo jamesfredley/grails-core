@@ -31,17 +31,15 @@ import java.sql.ResultSet
  */
 class IdentityEnumTypeSpec extends HibernateGormDatastoreSpec {
 
-    @Override
-    List getDomainClasses() {
-        [EnumEntityDomain, FooWithEnum]
+    def setupSpec() {
+        manager.domainClasses.addAll([EnumEntityDomain, FooWithEnum])
     }
-
 
     @Rollback
     void "test identity enum type"() {
         when:
         new EnumEntityDomain(status: EnumEntityDomain.Status.FOO).save(flush: true)
-        DataSource ds = setupClass.hibernateDatastore.connectionSources.defaultConnectionSource.dataSource
+        DataSource ds = manager.hibernateDatastore.connectionSources.defaultConnectionSource.dataSource
         ResultSet resultSet = ds.getConnection().prepareStatement('select status from enum_entity_domain').executeQuery()
 
         then:
@@ -54,7 +52,7 @@ class IdentityEnumTypeSpec extends HibernateGormDatastoreSpec {
     void "test identity enum type 2"() {
         when:
         new FooWithEnum(name: "blah", mySuperValue: XEnum.X__TWO).save(flush: true)
-        DataSource ds = setupClass.hibernateDatastore.connectionSources.defaultConnectionSource.dataSource
+        DataSource ds = manager.hibernateDatastore.connectionSources.defaultConnectionSource.dataSource
         ResultSet resultSet = ds.getConnection().prepareStatement('select my_super_value from foo_with_enum').executeQuery()
 
         then:

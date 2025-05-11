@@ -31,10 +31,9 @@ import spock.lang.Issue
  */
 class CompositeIdWithManyToOneAndSequenceSpec extends HibernateGormDatastoreSpec {
 
-    List getDomainClasses() {
-        [Tooth, ToothDisease]
+    def setupSpec() {
+        manager.domainClasses.addAll([Tooth, ToothDisease])
     }
-
 
     @Rollback
     @Issue('https://github.com/grails/grails-data-mapping/issues/835')

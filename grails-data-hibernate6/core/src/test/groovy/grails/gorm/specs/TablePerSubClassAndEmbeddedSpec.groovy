@@ -31,11 +31,9 @@ import spock.lang.Ignore
 @ApplyDetachedCriteriaTransform
 class TablePerSubClassAndEmbeddedSpec extends HibernateGormDatastoreSpec {
 
-    @Override
-    List getDomainClasses() {
-        [Company, Vendor]
+    def setupSpec() {
+        manager.domainClasses.addAll([Company, Vendor])
     }
-
 
     @Rollback
     void 'test table per subclass with embedded entity'() {

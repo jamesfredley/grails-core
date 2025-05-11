@@ -44,9 +44,8 @@ import spock.lang.*
 //TODO: CreatedUsers sql is being run, but not added to the EcmMask instance
 class TwoUnidirectionalHasManySpec extends HibernateGormDatastoreSpec {
 
-    @Override
-    List getDomainClasses() {
-        [EcmMask,EcmMaskJpa,User2,User]
+    def setupSpec() {
+        manager.domainClasses.addAll([EcmMask, EcmMaskJpa, User2, User])
     }
 
     @Rollback

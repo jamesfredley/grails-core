@@ -29,8 +29,8 @@ import org.grails.datastore.gorm.query.transform.ApplyDetachedCriteriaTransform
 //TODO: How to create an alias inside a closure
 class SubqueryAliasSpec extends HibernateGormDatastoreSpec {
 
-    List getDomainClasses() {
-        [Club, Team]
+    def setupSpec() {
+        manager.domainClasses.addAll([Club, Team])
     }
 
     void "Test subquery with root alias"() {
