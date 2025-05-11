@@ -2,9 +2,9 @@ package grails.gorm.specs.hibernatequery
 
 import grails.gorm.DetachedCriteria
 import grails.gorm.specs.HibernateGormDatastoreSpec
-import grails.gorm.tests.*
 import grails.persistence.Entity
 import jakarta.persistence.criteria.JoinType
+import org.apache.grails.data.testing.tck.domains.*
 import org.grails.datastore.mapping.query.Query
 import org.grails.orm.hibernate.AbstractHibernateSession
 import org.grails.orm.hibernate.HibernateDatastore
@@ -31,7 +31,7 @@ class HibernateQuerySpec extends HibernateGormDatastoreSpec {
     }
 
     List getDomainClasses() {
-        [Person,Pet, EagerOwner]
+        [Person, Pet, EagerOwner]
     }
 
     def equals() {

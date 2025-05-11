@@ -1,20 +1,23 @@
 package grails.gorm.specs
 
-import grails.gorm.tests.*
-import grails.gorm.tests.GormDatastoreSpec
+import org.apache.grails.data.hibernate6.core.GrailsDataHibernate6TckManager
+import org.apache.grails.data.testing.tck.base.GrailsDataTckSpec
+import org.apache.grails.data.testing.tck.domains.ChildEntity
+import org.apache.grails.data.testing.tck.domains.ClassWithListArgBeforeValidate
+import org.apache.grails.data.testing.tck.domains.ClassWithNoArgBeforeValidate
+import org.apache.grails.data.testing.tck.domains.ClassWithOverloadedBeforeValidate
+import org.apache.grails.data.testing.tck.domains.TestEntity
 import org.springframework.transaction.support.TransactionSynchronizationManager
 
 /**
  * Tests validation semantics.
  */
-class ValidationSpec extends GormDatastoreSpec {
+class ValidationSpec extends GrailsDataTckSpec<GrailsDataHibernate6TckManager> {
 
-    @Override
-    List getDomainClasses() {
-        return [ClassWithListArgBeforeValidate, ClassWithNoArgBeforeValidate,
-                ClassWithOverloadedBeforeValidate]
+    void setupSpec() {
+        manager.domainClasses.addAll([ClassWithListArgBeforeValidate, ClassWithNoArgBeforeValidate,
+                                      ClassWithOverloadedBeforeValidate])
     }
-
 
     void "Test validate() method"() {
         // test assumes name cannot be blank
@@ -22,7 +25,7 @@ class ValidationSpec extends GormDatastoreSpec {
         def t
 
         when:
-        t = new TestEntity(name:"")
+        t = new TestEntity(name: "")
         boolean validationResult = t.validate()
         def errors = t.errors
 
@@ -41,12 +44,11 @@ class ValidationSpec extends GormDatastoreSpec {
 
 
     void "Test that validate is called on save()"() {
-
         given:
         def t
 
         when:
-        t = new TestEntity(name:"")
+        t = new TestEntity(name: "")
 
         then:
         t.save() == null
@@ -57,7 +59,7 @@ class ValidationSpec extends GormDatastoreSpec {
         t.clearErrors()
         t.name = "Bob"
         t.age = 45
-        t.child = new ChildEntity(name:"Fred")
+        t.child = new ChildEntity(name: "Fred")
         t = t.save()
 
         then:
@@ -135,21 +137,21 @@ class ValidationSpec extends GormDatastoreSpec {
         def t
 
         when:
-        session.disconnect()
+        manager.session.disconnect()
         def resource
-        if (TransactionSynchronizationManager.hasResource(session.datastore.sessionFactory)) {
-            resource = TransactionSynchronizationManager.unbindResource(session.datastore.sessionFactory)
+        if (TransactionSynchronizationManager.hasResource(manager.session.datastore.sessionFactory)) {
+            resource = TransactionSynchronizationManager.unbindResource(manager.session.datastore.sessionFactory)
         }
 
-        t = new TestEntity(name:"")
+        t = new TestEntity(name: "")
 
         then:
-        TransactionSynchronizationManager.getResource(session.datastore.sessionFactory) == null
+        TransactionSynchronizationManager.getResource(manager.session.datastore.sessionFactory) == null
         t.save() == null
         t.hasErrors() == true
 
         when:
-        TransactionSynchronizationManager.bindResource(session.datastore.sessionFactory, resource)
+        TransactionSynchronizationManager.bindResource(manager.session.datastore.sessionFactory, resource)
 
         then:
         1 == t.errors.allErrors.size()
@@ -159,7 +161,7 @@ class ValidationSpec extends GormDatastoreSpec {
         t.clearErrors()
         t.name = "Bob"
         t.age = 45
-        t.child = new ChildEntity(name:"Fred")
+        t.child = new ChildEntity(name: "Fred")
         t = t.save(flush: true)
 
         then:

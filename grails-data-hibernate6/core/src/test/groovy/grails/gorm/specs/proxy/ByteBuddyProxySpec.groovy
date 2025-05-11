@@ -1,29 +1,48 @@
+/*
+ *  Licensed to the Apache Software Foundation (ASF) under one
+ *  or more contributor license agreements.  See the NOTICE file
+ *  distributed with this work for additional information
+ *  regarding copyright ownership.  The ASF licenses this file
+ *  to you under the Apache License, Version 2.0 (the
+ *  "License"); you may not use this file except in compliance
+ *  with the License.  You may obtain a copy of the License at
+ *
+ *    https://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing,
+ *  software distributed under the License is distributed on an
+ *  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ *  KIND, either express or implied.  See the License for the
+ *  specific language governing permissions and limitations
+ *  under the License.
+ */
 package grails.gorm.specs.proxy
 
 import grails.gorm.specs.entities.Club
-import grails.gorm.specs.HibernateGormDatastoreSpec
 import grails.gorm.specs.entities.Team
+import org.apache.grails.data.hibernate6.core.GrailsDataHibernate6TckManager
+import org.apache.grails.data.testing.tck.base.GrailsDataTckSpec
 import org.grails.datastore.mapping.reflect.ClassUtils
 import org.grails.orm.hibernate.proxy.HibernateProxyHandler
-import spock.lang.Ignore
 import spock.lang.PendingFeatureIf
+import spock.lang.Shared
 
 /**
- * Contains misc proxy tests using Hibenrate defaults, which is ByteBuddy.
+ * Contains misc proxy tests using Hibernate defaults, which is ByteBuddy.
  * These should all be passing for Gorm to be operating correctly with Groovy.
  */
-//TODO Are we still supporting Proxies?
-class ByteBuddyProxySpec extends HibernateGormDatastoreSpec {
-    static HibernateProxyHandler proxyHandler = new HibernateProxyHandler()
+// TODO: are we still supporting proxies?
+class ByteBuddyProxySpec extends GrailsDataTckSpec<GrailsDataHibernate6TckManager> {
+    void setupSpec() {
+        manager.domainClasses.addAll([Team, Club])
+    }
+
+    @Shared
+    HibernateProxyHandler proxyHandler = new HibernateProxyHandler()
 
     //to show test that fail that should succeed set this to true. or uncomment the
     // testImplementation "org.yakworks:hibernate-groovy-proxy:$yakworksHibernateGroovyProxy" to see pass
     boolean runPending = ClassUtils.isPresent("yakworks.hibernate.proxy.ByteBuddyGroovyInterceptor")
-
-    @Override
-    List getDomainClasses() {
-        [Team, Club]
-    }
 
     Team createATeam(){
         Club c = new Club(name: "DOOM Club").save(failOnError:true)
@@ -35,7 +54,7 @@ class ByteBuddyProxySpec extends HibernateGormDatastoreSpec {
     void "getId and id property checks dont initialize proxy if in a CompileStatic method"() {
         when:
         Team team = createATeam()
-        session.clear()
+        manager.session.clear()
         //TODO load is broken
 //        team = Team.load(team.id)
         team = Team.list().find { it.id == team.id }
@@ -52,7 +71,7 @@ class ByteBuddyProxySpec extends HibernateGormDatastoreSpec {
     void "getId and id dont initialize proxy"() {
         when:"load proxy"
         Team team = createATeam()
-        session.clear()
+        manager.session.clear()
         team = Team.load(team.id)
 
         then:"The asserts on getId and id should not initialize proxy"
@@ -72,7 +91,7 @@ class ByteBuddyProxySpec extends HibernateGormDatastoreSpec {
     void "truthy check on instance should not initialize proxy"() {
         when:"load proxy"
         Team team = createATeam()
-        session.clear()
+        manager.session.clear()
         team = Team.load(team.id)
 
         then:"The asserts on the intance should not init proxy"
@@ -88,7 +107,7 @@ class ByteBuddyProxySpec extends HibernateGormDatastoreSpec {
     void "id checks on association should not initialize its proxy"() {
         when:"load instance"
         Team team = createATeam()
-        session.clear()
+        manager.session.clear()
         team = Team.load(team.id)
 
         then:"The asserts on the intance should not init proxy"
@@ -111,7 +130,7 @@ class ByteBuddyProxySpec extends HibernateGormDatastoreSpec {
     void "isDirty should not intialize the association proxy"() {
         when:"load instance"
         Team team = createATeam()
-        session.clear()
+        manager.session.clear()
         team = Team.load(team.id)
 
         then:"The asserts on the intance should not init proxy"

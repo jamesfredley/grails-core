@@ -1,23 +1,20 @@
 package grails.gorm.specs.proxy
 
-
-import grails.gorm.tests.GormDatastoreSpec
-import grails.gorm.tests.Location
+import org.apache.grails.data.hibernate6.core.GrailsDataHibernate6TckManager
+import org.apache.grails.data.testing.tck.base.GrailsDataTckSpec
+import org.apache.grails.data.testing.tck.domains.Location
 import org.grails.datastore.gorm.proxy.GroovyProxyFactory
-import spock.lang.Ignore
 
 /**
  * @author graemerocher
  */
 //TODO Are we still supporting Proxies?
-class GroovyProxySpec extends GormDatastoreSpec {
-
+class GroovyProxySpec extends GrailsDataTckSpec<GrailsDataHibernate6TckManager> {
     void "Test creation and behavior of Groovy proxies"() {
-
         given:
-        session.mappingContext.proxyFactory = new GroovyProxyFactory()
-        def id = new Location(name:"United Kingdom", code:"UK").save(flush:true)?.id
-        session.clear()
+        manager.session.mappingContext.proxyFactory = new GroovyProxyFactory()
+        def id = new Location(name: "United Kingdom", code: "UK").save(flush: true)?.id
+        manager.session.clear()
 
         when:
         def location = Location.proxy(id)

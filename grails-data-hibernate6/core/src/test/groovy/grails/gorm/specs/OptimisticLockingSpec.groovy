@@ -1,16 +1,35 @@
+/*
+ *  Licensed to the Apache Software Foundation (ASF) under one
+ *  or more contributor license agreements.  See the NOTICE file
+ *  distributed with this work for additional information
+ *  regarding copyright ownership.  The ASF licenses this file
+ *  to you under the Apache License, Version 2.0 (the
+ *  "License"); you may not use this file except in compliance
+ *  with the License.  You may obtain a copy of the License at
+ *
+ *    https://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing,
+ *  software distributed under the License is distributed on an
+ *  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ *  KIND, either express or implied.  See the License for the
+ *  specific language governing permissions and limitations
+ *  under the License.
+ */
 package grails.gorm.specs
 
-import grails.gorm.tests.*
+import org.apache.grails.data.testing.tck.domains.OptLockNotVersioned
+import org.apache.grails.data.testing.tck.domains.OptLockVersioned
+import org.apache.grails.data.hibernate6.core.GrailsDataHibernate6TckManager
+import org.apache.grails.data.testing.tck.base.GrailsDataTckSpec
 import org.springframework.orm.hibernate5.HibernateOptimisticLockingFailureException
-
 
 /**
  * @author Burt Beckwith
  */
-class OptimisticLockingSpec extends GormDatastoreSpec {
+class OptimisticLockingSpec extends GrailsDataTckSpec<GrailsDataHibernate6TckManager> {
 
     void "Test versioning"() {
-
         given:
         def o = new OptLockVersioned(name: 'locked')
 
@@ -21,7 +40,7 @@ class OptimisticLockingSpec extends GormDatastoreSpec {
         o.version == 0
 
         when:
-        session.clear()
+        manager.session.clear()
         o = OptLockVersioned.get(o.id)
         o.name = 'Fred'
         o.save flush: true
@@ -30,7 +49,7 @@ class OptimisticLockingSpec extends GormDatastoreSpec {
         o.version == 1
 
         when:
-        session.clear()
+        manager.session.clear()
         o = OptLockVersioned.get(o.id)
 
         then:
@@ -42,9 +61,9 @@ class OptimisticLockingSpec extends GormDatastoreSpec {
 
         given:
         def o = new OptLockVersioned(name: 'locked').save(flush: true)
-        session.clear()
-        setupClass.transactionManager.commit setupClass.transactionStatus
-        setupClass.transactionStatus = null
+        manager.session.clear()
+        manager.transactionManager.commit manager.transactionStatus
+        manager.transactionStatus = null
 
         when:
         OptLockVersioned.withTransaction {
@@ -66,7 +85,7 @@ class OptimisticLockingSpec extends GormDatastoreSpec {
             o.name += ' in main session'
             o.save(flush: true)
 
-            session.clear()
+            manager.session.clear()
             o = OptLockVersioned.get(o.id)
         }
         then:
@@ -76,9 +95,9 @@ class OptimisticLockingSpec extends GormDatastoreSpec {
     void "Test optimistic locking disabled with 'version false'"() {
         given:
         def o = new OptLockNotVersioned(name: 'locked').save(flush: true)
-        session.clear()
-        setupClass.transactionManager.commit setupClass.transactionStatus
-        setupClass.transactionStatus = null
+        manager.session.clear()
+        manager.transactionManager.commit manager.transactionStatus
+        manager.transactionStatus = null
 
         when:
         def ex
@@ -104,7 +123,7 @@ class OptimisticLockingSpec extends GormDatastoreSpec {
                 e.printStackTrace()
             }
 
-            session.clear()
+            manager.session.clear()
             o = OptLockNotVersioned.get(o.id)
 
         }

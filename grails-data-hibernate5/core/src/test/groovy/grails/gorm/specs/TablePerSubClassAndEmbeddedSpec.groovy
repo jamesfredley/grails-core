@@ -36,31 +36,34 @@ import spock.lang.Specification
 @ApplyDetachedCriteriaTransform
 class TablePerSubClassAndEmbeddedSpec extends Specification {
 
-    @Shared @AutoCleanup HibernateDatastore hibernateDatastore = new HibernateDatastore(Company, Vendor)
-    @Shared PlatformTransactionManager transactionManager = hibernateDatastore.getTransactionManager()
+    @Shared
+    @AutoCleanup
+    HibernateDatastore hibernateDatastore = new HibernateDatastore(Company, Vendor)
+    @Shared
+    PlatformTransactionManager transactionManager = hibernateDatastore.getTransactionManager()
 
     @Rollback
     void 'test table per subclass with embedded entity'() {
-        given:"some test data"
+        given: "some test data"
         Vendor vendor = new Vendor(name: "Blah")
         vendor.address = new Address(address: "somewhere", city: "Youngstown", state: "OH", zip: "44555")
-        vendor.save(failOnError:true, flush:true)
+        vendor.save(failOnError: true, flush: true)
 
-        when:"a query executed"
+        when: "a query executed"
         def results = Vendor.where {
 //            like 'address.zip', '%44%' ?
             address.zip =~ '%44%'
         }.list(max: 10, offset: 0)
 
-        then:"the results are correct"
+        then: "the results are correct"
         results.size() == 1
     }
 
     void "test transform query with embedded entity"() {
-        when:"A query is parsed that queries the embedded entity"
+        when: "A query is parsed that queries the embedded entity"
         def gcl = new GroovyClassLoader()
         DetachedCriteria criteria = gcl.parseClass('''
-import grails.gorm.tests.*
+import grails.gorm.specs.*
 
 Vendor.where {
     address.zip =~ '%44%'
@@ -68,7 +71,7 @@ Vendor.where {
 }
 ''').newInstance().run()
 
-        then:"The criteria contains the correct criterion"
+        then: "The criteria contains the correct criterion"
         criteria.criteria[0] instanceof DetachedAssociationCriteria
         criteria.criteria[0].association.name == 'address'
         criteria.criteria[0].criteria[0].property == 'zip'
@@ -86,15 +89,17 @@ class Company {
         address nullable: true
     }
     static mapping = {
-        tablePerSubclass  true
+        tablePerSubclass true
     }
 }
+
 @Entity
 class Vendor extends Company {
 
     static constraints = {
     }
 }
+
 class Address {
     String address
     String city

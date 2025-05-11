@@ -1,3 +1,22 @@
+/*
+ *  Licensed to the Apache Software Foundation (ASF) under one
+ *  or more contributor license agreements.  See the NOTICE file
+ *  distributed with this work for additional information
+ *  regarding copyright ownership.  The ASF licenses this file
+ *  to you under the Apache License, Version 2.0 (the
+ *  "License"); you may not use this file except in compliance
+ *  with the License.  You may obtain a copy of the License at
+ *
+ *    https://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing,
+ *  software distributed under the License is distributed on an
+ *  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ *  KIND, either express or implied.  See the License for the
+ *  specific language governing permissions and limitations
+ *  under the License.
+ */
+
 package grails.gorm.specs.compositeid
 
 import grails.gorm.annotation.Entity
@@ -16,7 +35,7 @@ class CompositeIdWithDeepOneToManyMappingSpec extends HibernateGormDatastoreSpec
 
     @Override
     List getDomainClasses() {
-       [GrandParent, Parent, Child]
+        [GrandParent, Parent, Child]
     }
 
 
@@ -27,9 +46,8 @@ class CompositeIdWithDeepOneToManyMappingSpec extends HibernateGormDatastoreSpec
         def grandParent = new GrandParent(luckyNumber: 7, name: "Fred")
         def parent = new Parent(name: "Bob")
         grandParent.addToParents(parent)
-        parent.addToChildren(new Child(name:"Chuck"))
-        grandParent.save(flush:true)
-
+        parent.addToChildren(new Child(name: "Chuck"))
+        grandParent.save(flush: true)
 
         then:
         Parent.count == 1
@@ -43,7 +61,7 @@ class CompositeIdWithDeepOneToManyMappingSpec extends HibernateGormDatastoreSpec
 class Child implements Serializable, Comparable<Child> {
     String name
 
-    static belongsTo= [parent: Parent]
+    static belongsTo = [parent: Parent]
 
     static mapping = MappingBuilder.define {
         composite('parent', 'name')
@@ -60,10 +78,10 @@ class Parent implements Serializable, Comparable<Parent> {
     String name
     TreeSet<Child> children
 
-    static belongsTo= [grandParent: GrandParent]
-    static hasMany= [children: Child]
+    static belongsTo = [grandParent: GrandParent]
+    static hasMany = [children: Child]
 
-    static mapping= MappingBuilder.define {
+    static mapping = MappingBuilder.define {
         composite('grandParent', 'name') cascade('all')
     }
 
@@ -79,9 +97,9 @@ class GrandParent implements Serializable {
     Integer luckyNumber
     TreeSet<Parent> parents
 
-    static hasMany= [parents: Parent]
+    static hasMany = [parents: Parent]
 
-    static mapping= MappingBuilder.define {
+    static mapping = MappingBuilder.define {
         composite('name', 'luckyNumber') cascade("all")
 
     }

@@ -34,26 +34,30 @@ import spock.lang.Specification
 @ApplyDetachedCriteriaTransform
 class SubqueryAliasSpec extends Specification {
 
-    @AutoCleanup @Shared HibernateDatastore datastore = new HibernateDatastore(
+    @AutoCleanup
+    @Shared
+    HibernateDatastore datastore = new HibernateDatastore(
             Club, Team
     )
 
-    @Shared PlatformTransactionManager transactionManager = datastore.getTransactionManager()
+    @Shared
+    PlatformTransactionManager transactionManager = datastore.getTransactionManager()
 
     @Rollback
     void "Test subquery with root alias"() {
         given:
         Club c = new Club(name: "Manchester United").save()
-        new Team(name: "First Team", club: c).save(flush:true)
+        new Team(name: "First Team", club: c).save(flush: true)
 
         when:
         Team t = Team.where {
             def t = Team
             name == "First Team"
-            exists(Club.where {
-                id == t.club
-            }.property('name'))
-
+            exists(
+                    Club.where {
+                        id == t.club
+                    }.property('name')
+            )
         }.find()
 
         then:

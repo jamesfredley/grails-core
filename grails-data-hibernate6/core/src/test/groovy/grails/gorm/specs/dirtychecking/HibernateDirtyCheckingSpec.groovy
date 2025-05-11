@@ -1,3 +1,21 @@
+/*
+ *  Licensed to the Apache Software Foundation (ASF) under one
+ *  or more contributor license agreements.  See the NOTICE file
+ *  distributed with this work for additional information
+ *  regarding copyright ownership.  The ASF licenses this file
+ *  to you under the Apache License, Version 2.0 (the
+ *  "License"); you may not use this file except in compliance
+ *  with the License.  You may obtain a copy of the License at
+ *
+ *    https://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing,
+ *  software distributed under the License is distributed on an
+ *  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ *  KIND, either express or implied.  See the License for the
+ *  specific language governing permissions and limitations
+ *  under the License.
+ */
 package grails.gorm.specs.dirtychecking
 
 import grails.gorm.annotation.Entity
@@ -23,9 +41,9 @@ class HibernateDirtyCheckingSpec extends HibernateGormDatastoreSpec {
 
     @Rollback
     @Issue('https://github.com/grails/grails-core/issues/10613')
-    void    "Test that presence of beforeInsert doesn't impact dirty properties"() {
+    void "Test that presence of beforeInsert doesn't impact dirty properties"() {
         given: 'a new person'
-        def person = new Person(name: 'John', occupation: 'Grails developer').save(flush:true)
+        def person = new Person(name: 'John', occupation: 'Grails developer').save(flush: true)
 
         when: 'the name is changed'
         person.name = 'Dave'
@@ -38,7 +56,7 @@ class HibernateDirtyCheckingSpec extends HibernateGormDatastoreSpec {
         !person.isDirty('occupation')
 
         when:
-        person.save(flush:true)
+        person.save(flush: true)
 
         then:
         person.getPersistentValue('name') == "Dave"
@@ -61,7 +79,7 @@ class HibernateDirtyCheckingSpec extends HibernateGormDatastoreSpec {
     //TODO Embedded class not working
     void "test dirty checking on embedded"() {
         given: 'a new person'
-        Person person = new Person(name: 'John', occupation: 'Grails developer', address: new Address(street: "Old Town", zip: "1234")).save(flush:true)
+        Person person = new Person(name: 'John', occupation: 'Grails developer', address: new Address(street: "Old Town", zip: "1234")).save(flush: true)
 
         when: 'the name is changed'
         person.address.street = "New Town"
@@ -71,7 +89,7 @@ class HibernateDirtyCheckingSpec extends HibernateGormDatastoreSpec {
         person.address.hasChanged("street")
 
         when:
-        person.save(flush:true)
+        person.save(flush: true)
 
         then:
         !person.address.hasChanged()
@@ -101,7 +119,7 @@ class HibernateDirtyCheckingSpec extends HibernateGormDatastoreSpec {
         person.isDirty('employed')
 
         when:
-        person.save(flush:true)
+        person.save(flush: true)
         setupClass.hibernateDatastore.sessionFactory.currentSession.clear()
         person = Person.first()
 
@@ -125,7 +143,7 @@ class HibernateDirtyCheckingSpec extends HibernateGormDatastoreSpec {
         person.isDirty('employed')
 
         when:
-        person.save(flush:true)
+        person.save(flush: true)
         setupClass.hibernateDatastore.sessionFactory.currentSession.clear()
         person = Person.first()
 
@@ -147,7 +165,7 @@ class Person {
     static embedded = ['address']
 
     static constraints = {
-        address nullable:true
+        address nullable: true
     }
 
     def beforeInsert() {

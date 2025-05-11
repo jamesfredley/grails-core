@@ -26,6 +26,6 @@ import grails.gorm.annotation.Entity
 @Entity
 class Player {
     String name
-    static belongsTo = [team:Team]
-    static hasOne = [contract:Contract]
+    static belongsTo = [team: Team]
+    static hasOne = [contract: Contract]
 }

@@ -1,3 +1,22 @@
+/*
+ *  Licensed to the Apache Software Foundation (ASF) under one
+ *  or more contributor license agreements.  See the NOTICE file
+ *  distributed with this work for additional information
+ *  regarding copyright ownership.  The ASF licenses this file
+ *  to you under the Apache License, Version 2.0 (the
+ *  "License"); you may not use this file except in compliance
+ *  with the License.  You may obtain a copy of the License at
+ *
+ *    https://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing,
+ *  software distributed under the License is distributed on an
+ *  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ *  KIND, either express or implied.  See the License for the
+ *  specific language governing permissions and limitations
+ *  under the License.
+ */
+
 package grails.gorm.specs.compositeid
 
 import grails.gorm.annotation.Entity
@@ -12,84 +31,84 @@ import spock.lang.Specification
 @Rollback
 class CompositeIdCriteria extends Specification {
 
-  @Shared
-  @AutoCleanup
-  HibernateDatastore datastore = new HibernateDatastore(CompositeIdToMany, CompositeIdSimple, Author, Book)
+    @Shared
+    @AutoCleanup
+    HibernateDatastore datastore = new HibernateDatastore(CompositeIdToMany, CompositeIdSimple, Author, Book)
 
-  @Issue("https://github.com/grails/gorm-hibernate5/issues/234")
-  def "test that composite to-many properties can be queried using JPA"() {
-    Author _author = new Author(name:"Author").save()
-    Book _book = new Book(title:"Book").save()
-    CompositeIdToMany compositeIdToMany = new CompositeIdToMany(author:_author, book:_book).save(failOnError:true, flush:true)
+    @Issue("https://github.com/grails/gorm-hibernate5/issues/234")
+    def "test that composite to-many properties can be queried using JPA"() {
+        Author _author = new Author(name: "Author").save()
+        Book _book = new Book(title: "Book").save()
+        CompositeIdToMany compositeIdToMany = new CompositeIdToMany(author: _author, book: _book).save(failOnError: true, flush: true)
 
-    def criteriaBuilder = datastore.sessionFactory.criteriaBuilder
-    def criteriaQuery = criteriaBuilder.createQuery()
-    def root = criteriaQuery.from(CompositeIdToMany)
-    criteriaQuery.select(root)
-    criteriaQuery.where(criteriaBuilder.equal(root.get("author"), _author))
-    def query = datastore.sessionFactory.currentSession.createQuery(criteriaQuery)
+        def criteriaBuilder = datastore.sessionFactory.criteriaBuilder
+        def criteriaQuery = criteriaBuilder.createQuery()
+        def root = criteriaQuery.from(CompositeIdToMany)
+        criteriaQuery.select(root)
+        criteriaQuery.where(criteriaBuilder.equal(root.get("author"), _author))
+        def query = datastore.sessionFactory.currentSession.createQuery(criteriaQuery)
 
-    expect:
-    query.list() == [compositeIdToMany]
-  }
+        expect:
+        query.list() == [compositeIdToMany]
+    }
 
-  def "test that composite can be queried using JPA"() {
-    CompositeIdSimple compositeIdSimple = new CompositeIdSimple(name:"name", age:2l).save(failOnError:true, flush:true)
+    def "test that composite can be queried using JPA"() {
+        CompositeIdSimple compositeIdSimple = new CompositeIdSimple(name: "name", age: 2l).save(failOnError: true, flush: true)
 
-    def criteriaBuilder = datastore.sessionFactory.criteriaBuilder
-    def criteriaQuery = criteriaBuilder.createQuery()
-    def root = criteriaQuery.from(CompositeIdSimple)
-    criteriaQuery.select(root)
-    criteriaQuery.where(criteriaBuilder.equal(root.get("name"), "name"))
-    def query = datastore.sessionFactory.currentSession.createQuery(criteriaQuery)
+        def criteriaBuilder = datastore.sessionFactory.criteriaBuilder
+        def criteriaQuery = criteriaBuilder.createQuery()
+        def root = criteriaQuery.from(CompositeIdSimple)
+        criteriaQuery.select(root)
+        criteriaQuery.where(criteriaBuilder.equal(root.get("name"), "name"))
+        def query = datastore.sessionFactory.currentSession.createQuery(criteriaQuery)
 
-    expect:
-    query.list() == [compositeIdSimple]
-  }
+        expect:
+        query.list() == [compositeIdSimple]
+    }
 
-  @Issue("https://github.com/grails/grails-data-mapping/issues/1351")
-  def "test that composite to-many can be used in criteria"() {
-    Author _author = new Author(name:"Author").save()
-    Book _book = new Book(title:"Book").save()
-    CompositeIdToMany compositeIdToMany = new CompositeIdToMany(author:_author, book:_book).save(failOnError:true, flush:true)
+    @Issue("https://github.com/grails/grails-data-mapping/issues/1351")
+    def "test that composite to-many can be used in criteria"() {
+        Author _author = new Author(name: "Author").save()
+        Book _book = new Book(title: "Book").save()
+        CompositeIdToMany compositeIdToMany = new CompositeIdToMany(author: _author, book: _book).save(failOnError: true, flush: true)
 
-    expect:
-    CompositeIdToMany.createCriteria().list {
-      author {
-        eq('id', _author.id)
-      }
-    } == [compositeIdToMany]
-  }
+        expect:
+        CompositeIdToMany.createCriteria().list {
+            author {
+                eq('id', _author.id)
+            }
+        } == [compositeIdToMany]
+    }
 }
 
 @Entity
 class Author {
-  String name
+    String name
 }
 
 @Entity
 class Book {
-  String title
+    String title
 }
 
 @Entity
 class CompositeIdToMany implements Serializable {
-  Author author
-  Book book
+    Author author
+    Book book
 
-  static mapping = MappingBuilder.define {
-    composite("author", "book")
-  }
+    static mapping = MappingBuilder.define {
+        composite("author", "book")
+    }
 }
 
 @Entity
 class CompositeIdSimple implements Serializable {
-  String name
-  Long age
+    String name
+    Long age
 
-  static mapping = MappingBuilder.define {
-    composite("name", "age")
-  }
+    static mapping = MappingBuilder.define {
+        composite("name", "age")
+    }
 }
 
 

@@ -27,7 +27,7 @@ import org.springframework.orm.hibernate5.HibernateOptimisticLockingFailureExcep
 /**
  * @author Burt Beckwith
  */
-class HibernateOptimisticLockingSpec extends GrailsDataTckSpec<GrailsDataHibernate5TckManager> {
+class OptimisticLockingSpec extends GrailsDataTckSpec<GrailsDataHibernate5TckManager> {
 
     void "Test optimistic locking"() {
 

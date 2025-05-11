@@ -27,5 +27,5 @@ import grails.gorm.annotation.Entity
 @Entity
 class Contract {
     BigDecimal salary
-    static belongsTo = [player:Player]
+    static belongsTo = [player: Player]
 }
