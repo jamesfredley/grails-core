@@ -109,6 +109,8 @@ def publishedProjects = [
         'grails-data-hibernate5-dbmigration',
         'grails-data-hibernate5-core',
         'grails-data-hibernate5',
+        // hibernate6
+        'grails-data-hibernate6-core',
         // mongodb
         'grails-data-mongodb-spring-boot',
         'grails-data-mongodb-core',

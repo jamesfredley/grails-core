@@ -22,17 +22,13 @@ dependencies {
     add('testRuntimeOnly', 'org.junit.platform:junit-platform-launcher')
 }
 
-tasks.named('compileTestGroovy', GroovyCompile) {
-    groovyOptions.forkOptions.jvmArgs = ['-Xmx768m']
-}
-
 tasks.withType(Test).configureEach {
     onlyIf {
         ![
                 'onlyFunctionalTests',
                 'onlyHibernate5Tests',
-                'onlyHibernate6Tests',
-                'skipMongodbTests',
+                'skipHibernate6Tests',
+                'onlyMongodbTests',
                 'onlyCoreTests',
                 'skipTests'
         ].find {
@@ -41,19 +37,34 @@ tasks.withType(Test).configureEach {
     }
 
     useJUnitPlatform()
-    maxParallelForks = configuredTestParallel
-    jvmArgs = ['-Xmx768M']
-    afterSuite {
-        System.out.print('.')
-        System.out.flush()
-    }
+    systemProperty('hibernate6.gorm.suite', System.getProperty('hibernate6.gorm.suite') ?: true)
+    reports.html.required = !System.getenv('CI')
+    reports.junitXml.required = !System.getenv('CI')
     testLogging {
         events('passed', 'skipped', 'failed')
+        showExceptions = true
         exceptionFormat = 'full'
         showCauses = true
-        showExceptions = true
         showStackTraces = true
+
+        // set options for log level DEBUG and INFO
+        debug {
+            events('started', 'passed', 'skipped', 'failed', 'standardOut', 'standardError')
+            exceptionFormat = 'full'
+        }
+        info.events = debug.events
+        info.exceptionFormat = debug.exceptionFormat
     }
-    // Used in the TCK test to selectively enable/disable tests
-    systemProperty('mongodb.gorm.suite', 'true')
+    afterTest { desc, result ->
+        logger.quiet(' -- Executed test {} [{}] with result: {}', desc.name, desc.className, result.resultType)
+    }
+    afterSuite { desc, result ->
+        if (!desc.parent) { // will match the outermost suite
+            def output = "Results: ${result.resultType} (${result.testCount} tests, ${result.successfulTestCount} successes, ${result.failedTestCount} failures, ${result.skippedTestCount} skipped)"
+            def startItem = '|  ', endItem = '  |'
+            def repeatLength = startItem.length() + output.length() + endItem.length()
+            def dashes = '-' * repeatLength
+            logger.quiet('\n{}\n{}{}{}\n{}', dashes, startItem, output, endItem, dashes)
+        }
+    }
 }

@@ -24,6 +24,7 @@ e2eTestTask.configure { Test it ->
         ![
                 'onlyFunctionalTests',
                 'onlyHibernate5Tests',
+                'onlyHibernate6Tests',
                 'onlyMongodbTests',
                 'skipTests'
         ].find {
