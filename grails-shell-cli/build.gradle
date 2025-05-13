@@ -37,6 +37,9 @@ dependencies {
 
     implementation platform(project(':grails-bom'))
 
+    // For the .grails home helpers
+    implementation project(':grails-wrapper')
+
     // compile grails-shell-cli with the Groovy version provided by Gradle
     // to ensure build compatibility with Gradle, currently Groovy 3.0.x
     // when used by grails-gradle-plugin
