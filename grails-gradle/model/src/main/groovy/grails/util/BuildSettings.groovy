@@ -176,12 +176,6 @@ class BuildSettings {
      */
     public static final String CONVERT_CLOSURES_KEY = "grails.compile.artefacts.closures.convert"
 
-
-    /**
-     * The location of the local Grails installation. Will be null if not known
-     */
-    public static final File GRAILS_HOME = System.getProperty('grails.home') ? new File(System.getProperty('grails.home')) : null
-
     /**
      * The base directory of the project
      */

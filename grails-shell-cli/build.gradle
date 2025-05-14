@@ -138,7 +138,7 @@ apply {
 }
 
 extensions.configure(JavaApplication) {
-    it.applicationName = 'grails'
+    it.applicationName = 'grails-shell-cli'
     it.mainClass = 'org.grails.cli.GrailsCli'
     it.applicationDefaultJvmArgs = ['-XX:+TieredCompilation', '-XX:TieredStopAtLevel=1', '-XX:CICompilerCount=3']
     it.applicationDistribution.with {
@@ -150,7 +150,7 @@ extensions.configure(JavaApplication) {
 
 tasks.named('startScripts').configure { it ->
     it.doLast {
-        File win  = project.layout.buildDirectory.file("scripts/grails.bat").get().asFile
+        File win = project.layout.buildDirectory.file("scripts/grails-shell-cli.bat").get().asFile
         win.text = win.text.replaceFirst(/(?m)^set CLASSPATH=.*$/,'set CLASSPATH=%APP_HOME%\\\\lib\\\\*')
     }
 }
