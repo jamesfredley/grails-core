@@ -23,13 +23,10 @@ plugins {
 }
 
 ext {
-    pomTitle = 'Apache Grails® Wrapper'
+    pomTitle = 'Apache Grails® CLI'
     pomDescription = 'Facilitates running the grails-shell-cli or grails-forge-cli to interact with a Grails project.'
     pomDevelopers = [
-            'graemerocher'  : 'Graeme Rocher',
-            'jeffscottbrown': 'Jeff Brown',
-            'puneetbehl'    : 'Puneet Behl',
-            'jdaugherty'    : 'James Daugherty'
+            'jdaugherty': 'James Daugherty'
     ]
     cliProject = true
     startMainClass = 'org.apache.grails.cli.DelegatingShellApplication'
