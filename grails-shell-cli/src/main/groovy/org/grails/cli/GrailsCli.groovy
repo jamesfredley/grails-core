@@ -224,7 +224,7 @@ class GrailsCli {
 
         if (mainCommandLine.hasOption(CommandLine.HELP_ARGUMENT) || mainCommandLine.hasOption('h')) {
             profileRepository = createMavenProfileRepository()
-            def cmd = CommandRegistry.getCommand("help", profileRepository)
+            def cmd = CommandRegistry.instance.getCommand("help", profileRepository)
             cmd.handle(createExecutionContext(mainCommandLine))
             exit(0)
         }
@@ -244,14 +244,14 @@ class GrailsCli {
                 def console = GrailsConsole.getInstance()
                 // force resolve of all profiles
                 profileRepository.getAllProfiles()
-                def commandNames = CommandRegistry.findCommands(profileRepository).collect() { Command cmd -> cmd.name }
+                def commandNames = CommandRegistry.instance.findCommands(profileRepository).collect() { Command cmd -> cmd.name }
                 console.reader.addCompleter(new StringsCompleter(commandNames))
-                console.reader.addCompleter(new CommandCompleter(CommandRegistry.findCommands(profileRepository)))
+                console.reader.addCompleter(new CommandCompleter(CommandRegistry.instance.findCommands(profileRepository)))
                 profile = [handleCommand: { ExecutionContext context ->
 
                     def cl = context.commandLine
                     def name = cl.commandName
-                    def cmd = CommandRegistry.getCommand(name, profileRepository)
+                    def cmd = CommandRegistry.instance.getCommand(name, profileRepository)
                     if (cmd != null) {
                         return executeCommandWithArgumentValidation(cmd, cl)
                     } else {
@@ -263,7 +263,7 @@ class GrailsCli {
                 startInteractiveMode(console)
                 return 0
             }
-            def cmd = CommandRegistry.getCommand(mainCommandLine.commandName, profileRepository)
+            def cmd = CommandRegistry.instance.getCommand(mainCommandLine.commandName, profileRepository)
             if (cmd) {
                 return executeCommandWithArgumentValidation(cmd, mainCommandLine) ? 0 : 1
             } else {
