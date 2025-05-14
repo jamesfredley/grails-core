@@ -49,7 +49,7 @@ class CommandRegistry {
             registeredCommands[command.name] = command
         }
 
-        Iterator<CommandFactory> commandFactories = ServiceLoader.load(CommandFactory).iterator()
+        Iterator<CommandFactory> commandFactories = ServiceLoader.load(CommandFactory, getClass().getClassLoader()).iterator()
         while(commandFactories.hasNext()) {
             CommandFactory commandFactory = commandFactories.next()
             registeredCommandFactories << commandFactory
