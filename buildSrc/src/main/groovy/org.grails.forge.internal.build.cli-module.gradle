@@ -22,7 +22,6 @@ plugins {
     id "application"
     id "com.github.johnrengelman.shadow"
     id "org.grails.forge.rocker"
-    id "io.sdkman.vendors"
 }
 
 sourceSets {

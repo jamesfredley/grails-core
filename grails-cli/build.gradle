@@ -20,6 +20,7 @@ plugins {
     id 'groovy'
     id 'distribution'
     id 'com.gradleup.shadow' version '8.3.6'
+    id "io.sdkman.vendors"
 }
 
 ext {
@@ -184,4 +185,19 @@ tasks.named('installDist').configure {
 }
 tasks.named('distTar').configure {
     dependsOn cliStartScripts, forgeCliStartScripts, shellCliStartScripts, jarTask, shadowJarTask, rootProject.project(':grails-forge-cli').tasks.named('exploded')
+}
+
+sdkman {
+    api = "https://vendors.sdkman.io"
+    consumerKey = System.getenv("GVM_SDKVENDOR_KEY") ?: project.hasProperty("gvmSdkvendorKey") ? project.gvmSdkvendorKey : ''
+    consumerToken = System.getenv("GVM_SDKVENDOR_TOKEN") ?: project.hasProperty("gvmSdkvendorToken") ? project.gvmSdkvendorToken : ''
+    candidate = "grails"
+    version = project.version
+    hashtag = "#grailsfw"
+    platforms = [
+            "MAC_ARM64":"https://github.com/apache/grails-forge/releases/download/v${project.version}/grails-cli-v${project.version}.zip",
+            "MAC_OSX":"https://github.com/apache/grails-forge/releases/download/v${project.version}/grails-cli-v${project.version}.zip",
+            "WINDOWS_64":"https://github.com/apache/grails-forge/releases/download/v${project.version}/grails-cli-v${project.version}.zip",
+            "LINUX_64":"https://github.com/apache/grails-forge/releases/download/v${project.version}/grails-cli-v${project.version}.zip"
+    ]
 }
