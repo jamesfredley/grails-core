@@ -67,7 +67,7 @@ nohttp {
 }
 
 repositories {
-    maven { url = 'https://repo.grails.org/grails/core' }
+    maven { url = 'https://repo.grails.org/grails/restricted' }
     mavenCentral()
 }
 
