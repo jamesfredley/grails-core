@@ -49,15 +49,15 @@ jobs:
         run: |
           cp grails-forge-cli/build/distributions/grails-forge-cli-*.zip forge-cli.zip
           unzip forge-cli -d tmp
-          mv tmp/forge-cli-* tmp/forge-cli
+          mv tmp/grails-forge-cli-* tmp/forge-cli
           ./tmp/forge-cli/bin/grails-forge-cli --version
       - name: "✅ Verify Combined CLI"
         if: success()
         run: |
           cp grails-cli/build/distributions/grails-cli-*.zip cli.zip
-          unzip cli -d tmp
-          mv tmp/grails-cli-* tmp/cli
-          ./tmp/cli/grails --version
+          unzip cli -d tmp1
+          mv tmp1/grails-cli-* tmp1/cli
+          ./tmp1/cli/grails --version
       - name: "📤 Upload CLI Zip to Workflow Summary Page"
         if: ${{ matrix.java == '17' }}
         uses: actions/upload-artifact@v4
