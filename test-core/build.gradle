@@ -58,5 +58,12 @@ dependencies {
 }
 
 tasks.withType(Test).configureEach {
+    onlyIf {
+        ![
+                'skipTests'
+        ].find {
+            project.hasProperty(it)
+        }
+    }
     forkEvery = 10
 }
