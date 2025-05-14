@@ -53,7 +53,7 @@ If you encounter out of memory errors when trying to run the install target, try
 See [RELEASE.md](RELEASE.md).
 
 ## Friends of Apache Grails Open Collective
-As an independent initiative, we have set up an open collective for Apache Grails:
+As an independent initiative, community members have set up an open collective for Apache Grails:
 
 https://opencollective.com/friends-of-grails
 
