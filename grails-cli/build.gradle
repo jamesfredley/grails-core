@@ -36,7 +36,7 @@ version = projectVersion
 group = 'org.apache.grails'
 
 repositories {
-    // mavenLocal()
+    mavenLocal()
     mavenCentral()
     gradlePluginPortal()
     maven { url = 'https://repo.grails.org/grails/restricted' }
@@ -77,12 +77,52 @@ shadowJarTask.configure { ShadowJar it ->
     it.archiveClassifier.set('')
 }
 
-TaskProvider<CreateStartScripts> startScripts = tasks.register('createStartScripts', CreateStartScripts)
-startScripts.configure { CreateStartScripts t ->
+TaskProvider<CreateStartScripts> cliStartScripts = tasks.register('createCliStartScripts', CreateStartScripts)
+cliStartScripts.configure { CreateStartScripts t ->
     t.dependsOn jarTask, shadowJarTask
-    t.outputDir = layout.buildDirectory.dir('generated-scripts').get().asFile
+    t.outputDir = layout.buildDirectory.dir('generated-cli-scripts').get().asFile
     t.applicationName = 'grails'
     t.mainClass = project.findProperty('startMainClass') as String
+    t.classpath = files(shadowJarTask)
+
+    // See gradle tickets such as for lib https://github.com/gradle/gradle/issues/7033
+    doLast {
+        t.unixScript.text = t.unixScript.text
+                .replace('$APP_HOME/lib/', "\$APP_HOME/.grails/${grailsVersion}/")
+                .replace('"${APP_HOME:-./}.."', '"${APP_HOME:-./}"')
+
+        t.windowsScript.text = t.windowsScript.text
+                .replace('%APP_HOME%\\lib\\', "%APP_HOME%\\.grails\\${grailsVersion}\\")
+                .replace('%DIRNAME%..', '%DIRNAME%')
+    }
+}
+
+TaskProvider<CreateStartScripts> shellCliStartScripts = tasks.register('createShellCliStartScripts', CreateStartScripts)
+shellCliStartScripts.configure { CreateStartScripts t ->
+    t.dependsOn jarTask, shadowJarTask
+    t.outputDir = layout.buildDirectory.dir('generated-shell-cli-scripts').get().asFile
+    t.applicationName = 'grails-shell-cli'
+    t.mainClass = 'org.grails.cli.GrailsCli'
+    t.classpath = files(shadowJarTask)
+
+    // See gradle tickets such as for lib https://github.com/gradle/gradle/issues/7033
+    doLast {
+        t.unixScript.text = t.unixScript.text
+                .replace('$APP_HOME/lib/', "\$APP_HOME/.grails/${grailsVersion}/")
+                .replace('"${APP_HOME:-./}.."', '"${APP_HOME:-./}"')
+
+        t.windowsScript.text = t.windowsScript.text
+                .replace('%APP_HOME%\\lib\\', "%APP_HOME%\\.grails\\${grailsVersion}\\")
+                .replace('%DIRNAME%..', '%DIRNAME%')
+    }
+}
+
+TaskProvider<CreateStartScripts> forgeCliStartScripts = tasks.register('createForgeCliStartScripts', CreateStartScripts)
+forgeCliStartScripts.configure { CreateStartScripts t ->
+    t.dependsOn jarTask, shadowJarTask
+    t.outputDir = layout.buildDirectory.dir('generated-forge-cli-scripts').get().asFile
+    t.applicationName = 'grails-forge-cli'
+    t.mainClass = 'org.grails.forge.cli.Application'
     t.classpath = files(shadowJarTask)
 
     // See gradle tickets such as for lib https://github.com/gradle/gradle/issues/7033
@@ -103,22 +143,36 @@ project.extensions.getByType(DistributionContainer).configureEach {
             into ".grails/${grailsVersion}"
         }
 
-        from(startScripts) {
+        from(cliStartScripts) {
             into ''
             fileMode = 0755
         }
+
+        from(shellCliStartScripts) {
+            into ''
+            fileMode = 0755
+        }
+
+        from(forgeCliStartScripts) {
+            into ''
+            fileMode = 0755
+        }
+
+        from(rootProject.layout.projectDirectory.file('LICENSE')) { it.into '' }
+        from(rootProject.layout.projectDirectory.file('NOTICE')) { it.into '' }
+        from(rootProject.layout.projectDirectory.file('INSTALL')) { it.into '' }
     }
 }
 
 tasks.named('assemble').configure {
-    it.dependsOn(startScripts)
+    it.dependsOn cliStartScripts, forgeCliStartScripts, shellCliStartScripts
 }
 tasks.named('installDist').configure {
-    it.dependsOn startScripts
+    it.dependsOn cliStartScripts, forgeCliStartScripts, shellCliStartScripts
 }
 tasks.named('distZip').configure {
-    dependsOn startScripts, jarTask, shadowJarTask
+    dependsOn cliStartScripts, forgeCliStartScripts, shellCliStartScripts, jarTask, shadowJarTask
 }
 tasks.named('distTar').configure {
-    dependsOn startScripts, jarTask, shadowJarTask
+    dependsOn cliStartScripts, forgeCliStartScripts, shellCliStartScripts, jarTask, shadowJarTask
 }
