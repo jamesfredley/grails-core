@@ -16,6 +16,10 @@
  */
 package grails.init;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+
 public enum GrailsReleaseType {
     RELEASE,
     RC,
@@ -24,5 +28,11 @@ public enum GrailsReleaseType {
 
     boolean isSnapshot() {
         return this == SNAPSHOT;
+    }
+
+    public List<GrailsReleaseType> upTo() {
+        return Arrays.stream(GrailsReleaseType.values())
+                .filter(e -> e.ordinal() <= this.ordinal())
+                .collect(Collectors.toList());
     }
 }

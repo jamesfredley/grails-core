@@ -45,8 +45,8 @@ public class Start {
         Authenticator.setDefault(new SystemPropertiesAuthenticator());
 
         try {
-            List<GrailsReleaseType> allowedTypes = getAllowedReleaseTypes();
             GrailsVersion preferredGrailsVersion = getPreferredGrailsVersion();
+            List<GrailsReleaseType> allowedTypes = getAllowedReleaseTypes(preferredGrailsVersion);
 
             GrailsUpdater updater = new GrailsUpdater(allowedTypes, preferredGrailsVersion);
             boolean forceUpdate = (args.length > 0 && args[0].trim().equals("update-wrapper"));
@@ -54,7 +54,9 @@ public class Start {
             boolean updated = false;
             String[] adjustedArgs = args;
             if (forceUpdate || updater.needsUpdating()) {
-                System.out.println("Updating Grails wrapper...");
+                String allowTypesString = allowedTypes.stream().map(GrailsReleaseType::name).collect(Collectors.joining(","));
+                System.out.printf("Updating Grails wrapper, allowed versions to update to are [%s]...%n", allowTypesString);
+
                 updated = updater.update();
 
                 // remove "update-wrapper" command argument
@@ -118,10 +120,23 @@ public class Start {
         return null;
     }
 
-    private static List<GrailsReleaseType> getAllowedReleaseTypes() {
+    private static List<GrailsReleaseType> getAllowedReleaseTypes(GrailsVersion preferredVersion) {
         String raw = System.getenv("GRAILS_WRAPPER_ALLOWED_TYPES");
         if (raw == null || raw.trim().isEmpty()) {
-            return null;
+            if (preferredVersion != null) {
+                //inside a grails project pull the equivalent version type or newer
+                return preferredVersion.releaseType.upTo();
+            } else {
+                String grailsVersion = Start.class.getPackage().getImplementationVersion();
+                GrailsVersion myVersion = new GrailsVersion(grailsVersion);
+
+                if (myVersion.releaseType != GrailsReleaseType.RELEASE) {
+                    return Arrays.asList(GrailsReleaseType.values());
+                }
+
+                // Only consider releases unless this wrapper
+                return List.of(GrailsReleaseType.RELEASE);
+            }
         }
 
         return Arrays.stream(raw.split(","))
