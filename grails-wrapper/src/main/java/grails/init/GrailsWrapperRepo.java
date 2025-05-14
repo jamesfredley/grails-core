@@ -50,7 +50,7 @@ public class GrailsWrapperRepo {
 
     static GrailsWrapperRepo getSelectedRepo() {
         GrailsWrapperRepo repo = new GrailsWrapperRepo();
-        repo.repoPath = "org/apache/grails/" + GrailsHome.CLI_COMBINED_PROJECT_NAME;
+        repo.repoPath = "org/apache/grails/" + GrailsWrapperHome.CLI_COMBINED_PROJECT_NAME;
 
         String configured = getConfiguredMavenUrl();
         if (configured != null) {

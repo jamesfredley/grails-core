@@ -31,12 +31,12 @@ import java.util.Properties;
 import java.util.stream.Collectors;
 
 /**
- * The purpose of this class is to download the expanded Grails wrapper jars into GRAILS_HOME (`.grails` in the project root)
+ * The purpose of this class is to download the expanded Grails wrapper jars into GRAILS_WRAPPER_HOME (`.grails` in the project root)
  * This class is not meant to be distributed as part of SDKMAN since we'll distribute the expanded jars with it.
  * After downloading the jars, it will delegate to the downloaded grails-cli project.
  *
  * There are 3 ways this class can be used:
- * 1. in testing a grails release (run from a non-project directory) // will require GRAILS_HOME to be manually set
+ * 1. in testing a grails release (run from a non-project directory) // requires GRAILS_REPO_URL set to ~/.m2/repository
  * 2. running from a non-project directory (end user usage)
  * 3. running from inside a grails project
  */
@@ -68,7 +68,7 @@ public class Start {
             }
 
             URLClassLoader child = new URLClassLoader(new URL[]{updater.getExecutedJarFile().toURI().toURL()});
-            Class<?> classToLoad = Class.forName("grails.init.RunCommand", true, child);
+            Class<?> classToLoad = Class.forName("org.apache.grails.cli.DelegatingShellApplication", true, child);
             Method main = classToLoad.getMethod("main", String[].class);
             main.invoke(null, (Object[]) adjustedArgs);
         } catch (Exception e) {

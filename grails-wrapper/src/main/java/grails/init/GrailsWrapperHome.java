@@ -24,9 +24,9 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
 
-public class GrailsHome {
+public class GrailsWrapperHome {
     public static final String CLI_COMBINED_PROJECT_NAME = "grails-cli";
-    public static final List<String> GRAILS_HOME_MARKERS = List.of("settings.gradle", "gradlew", "gradlew.bat");
+    public static final List<String> GRAILS_MARKERS = List.of("settings.gradle", "gradlew", "gradlew.bat");
 
     public final File home;
     public final File wrapperDirectory;
@@ -34,7 +34,7 @@ public class GrailsHome {
     public final List<GrailsReleaseType> allowedReleaseTypes;
     public final GrailsVersion latestVersion;
 
-    public GrailsHome(List<GrailsReleaseType> allowedReleaseTypes, String forcedGrailsHome) throws IOException {
+    public GrailsWrapperHome(List<GrailsReleaseType> allowedReleaseTypes, String forcedGrailsHome) throws IOException {
         home = findGrailsHome(forcedGrailsHome).getCanonicalFile();
         this.allowedReleaseTypes = allowedReleaseTypes == null ? new ArrayList<>() : allowedReleaseTypes;
 
@@ -43,7 +43,7 @@ public class GrailsHome {
             wrapperDirectory.mkdirs();
         }
         else if(!wrapperDirectory.isDirectory()) {
-            throw new IllegalStateException("GRAILS_HOME must contain a wrapper directory. File exists instead at " + wrapperDirectory.getAbsolutePath());
+            throw new IllegalStateException("GRAILS_WRAPPER_HOME must contain a wrapper directory. File exists instead at " + wrapperDirectory.getAbsolutePath());
         }
 
         versions = determineVersions();
@@ -137,7 +137,7 @@ public class GrailsHome {
     }
 
     /**
-     * Finds the available versions in the GRAILS_HOME directory; sorted by smallest version to largest
+     * Finds the available versions in the GRAILS_WRAPPER_HOME directory; sorted by smallest version to largest
      */
     private List<GrailsVersion> determineVersions() {
         File[] children = wrapperDirectory.listFiles();
@@ -172,11 +172,11 @@ public class GrailsHome {
      * Locate the “Grails" home by:
      * 1. using the specified home
      * 2. using the environment variable
-     * 3. Looking in the current directory for a GRAILS_HOME_MARKERS or for a .grails directory
+     * 3. Looking in the current directory for a GRAILS_MARKERS or for a .grails directory
      * and all parent directories.  If none, is found, the current directory will be returned.
      * There is a special case for the current directory if inside of the grails core repository.
      *
-     * @return the GRAILS_HOME directory
+     * @return the GRAILS_WRAPPER_HOME directory
      * @throws IOException if canonicalization fails
      */
     public static File findGrailsHome(String grailsHomeOverride) throws IOException {
@@ -184,12 +184,21 @@ public class GrailsHome {
             return validateGrailsHome(grailsHomeOverride, "Specified Grails Home");
         }
 
-        String environmentOverride = System.getenv("GRAILS_HOME");
+        String environmentOverride = System.getenv("GRAILS_WRAPPER_HOME");
         if (environmentOverride != null && !environmentOverride.isEmpty()) {
-            return validateGrailsHome(environmentOverride, "GRAILS_HOME environment variable");
+            return validateGrailsHome(environmentOverride, "GRAILS_WRAPPER_HOME environment variable");
         }
 
-        return locateGrailsHome(new File("."));
+        // TODO: this previously allowed grails home to be in the grails project directory, but may no longer be needed
+        //return locateGrailsHome(new File("."));
+
+        File userHome = new File(System.getProperty("user.home")).getCanonicalFile();
+        File grailsHome = new File(userHome, ".grails");
+        if (grailsHome.exists() && !grailsHome.isDirectory()) {
+            throw new IllegalStateException("Grails Wrapper Home [" + grailsHome + "] is not a directory.");
+        }
+        grailsHome.mkdirs();
+        return grailsHome;
     }
 
     private static File validateGrailsHome(String possibleGrailsHome, String description) {
@@ -216,7 +225,7 @@ public class GrailsHome {
     }
 
     /**
-     * Locate the “Grails" home by first looking in `directory` for a GRAILS_HOME_MARKERS or for a .grails directory
+     * Locate the “Grails" home by first looking in `directory` for a GRAILS_MARKERS or for a .grails directory
      * and all parent directories.  If none, is found, the original directory will be returned.  Short circuit on the
      * home directory to avoid traversing into the root if possible.
      *
@@ -226,7 +235,7 @@ public class GrailsHome {
      */
     private static File locateGrailsHome(File directory) throws IOException {
         if (directory == null) {
-            throw new IllegalArgumentException("Cannot search for GRAILS_HOME from a null directory.");
+            throw new IllegalArgumentException("Cannot search for GRAILS_WRAPPER_HOME from a null directory.");
         }
 
         File userHome = new File(System.getProperty("user.home")).getCanonicalFile();
@@ -254,7 +263,7 @@ public class GrailsHome {
                 return originalDirectory;
             }
 
-            for (String name : GRAILS_HOME_MARKERS) {
+            for (String name : GRAILS_MARKERS) {
                 if (exists(searchDirectory, name)) {
                     return searchDirectory;
                 }

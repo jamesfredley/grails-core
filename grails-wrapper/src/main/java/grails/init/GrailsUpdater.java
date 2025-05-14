@@ -30,13 +30,14 @@ import java.net.URL;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
 public class GrailsUpdater {
 
-    private final GrailsHome grailsHome;
+    private final GrailsWrapperHome grailsWrapperHome;
     private final GrailsVersion preferredVersion;
     private GrailsVersion updatedVersion;
 
@@ -45,7 +46,7 @@ public class GrailsUpdater {
     }
 
     public GrailsUpdater(List<GrailsReleaseType> allowedTypes, GrailsVersion preferredVersion, String possibleGrailsHome) throws IOException {
-        grailsHome = new GrailsHome(allowedTypes, possibleGrailsHome);
+        grailsWrapperHome = new GrailsWrapperHome(allowedTypes, possibleGrailsHome);
         this.preferredVersion = preferredVersion;
     }
 
@@ -58,11 +59,11 @@ public class GrailsUpdater {
             return updatedVersion;
         }
 
-        return grailsHome.latestVersion;
+        return grailsWrapperHome.latestVersion;
     }
 
     public File getExecutedJarFile() {
-        return grailsHome.getWrapperImplementation(grailsHome.getVersionDirectory(getSelectedVersion()));
+        return grailsWrapperHome.getWrapperImplementation(grailsWrapperHome.getVersionDirectory(getSelectedVersion()));
     }
 
     /**
@@ -71,13 +72,13 @@ public class GrailsUpdater {
      *
      */
     public boolean needsUpdating() {
-        File jarFile = grailsHome.getLatestWrapperImplementation();
+        File jarFile = grailsWrapperHome.getLatestWrapperImplementation();
         if(jarFile == null) {
             return true;
         }
 
         if(preferredVersion != null) {
-            if(!grailsHome.versions.contains(preferredVersion)) {
+            if (!grailsWrapperHome.versions.contains(preferredVersion)) {
                 return true;
             }
 
@@ -129,8 +130,8 @@ public class GrailsUpdater {
     private boolean updateJar(GrailsWrapperRepo repo, GrailsVersion version, String snapshotVersion) {
         boolean success = false;
 
-        final String localJarFilename = GrailsHome.CLI_COMBINED_PROJECT_NAME + "-" + version.version;
-        final String remoteJarFilename = snapshotVersion != null ? GrailsHome.CLI_COMBINED_PROJECT_NAME + "-" + snapshotVersion : GrailsHome.CLI_COMBINED_PROJECT_NAME + "-" + version.version;
+        final String localJarFilename = GrailsWrapperHome.CLI_COMBINED_PROJECT_NAME + "-" + version.version;
+        final String remoteJarFilename = snapshotVersion != null ? GrailsWrapperHome.CLI_COMBINED_PROJECT_NAME + "-" + snapshotVersion : GrailsWrapperHome.CLI_COMBINED_PROJECT_NAME + "-" + version.version;
         final String jarFileExtension = ".jar";
 
         try {
@@ -158,22 +159,27 @@ public class GrailsUpdater {
         return success;
     }
 
-    private boolean downloadWrapperJar(GrailsVersion toKeep, File downloadJarLocation, InputStream inputStream) throws IOException {
+    private boolean downloadWrapperJar(GrailsVersion version, File downloadJarLocation, InputStream inputStream) throws IOException {
         ReadableByteChannel rbc = Channels.newChannel(inputStream);
         try (FileOutputStream fos = new FileOutputStream(downloadJarLocation)) {
             fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
         }
 
         try {
-            grailsHome.cleanupOtherVersions(toKeep);
+            grailsWrapperHome.cleanupOtherVersions(version);
         }
         catch(Exception e) {
             System.err.println("Unable to cleanup old versions of the wrapper");
             e.printStackTrace();
         }
 
-        File directory = grailsHome.getVersionDirectory(toKeep);
-        Files.move(downloadJarLocation.getAbsoluteFile().toPath(), new File(directory, downloadJarLocation.getName()).getAbsoluteFile().toPath(), REPLACE_EXISTING);
+        File directory = grailsWrapperHome.getVersionDirectory(version);
+        if (!directory.exists()) {
+            directory.mkdirs();
+        }
+        Path jarFile = new File(directory, GrailsWrapperHome.CLI_COMBINED_PROJECT_NAME + "-" + version.version + ".jar").toPath();
+        System.out.println("...Moving downloaded jar to: " + jarFile.toAbsolutePath());
+        Files.move(downloadJarLocation.getAbsoluteFile().toPath(), jarFile, REPLACE_EXISTING);
 
         return true;
     }
@@ -215,7 +221,7 @@ public class GrailsUpdater {
     }
 
     private String fetchSnapshotForVersion(GrailsWrapperRepo repo, GrailsVersion baseVersion) throws IOException, SAXException, ParserConfigurationException {
-        System.out.println("A Grails snapshot version has been detected.  Downloading latest snapshot.");
+        System.out.println("...A Grails snapshot version has been detected.  Downloading latest snapshot.");
 
         SAXParserFactory factory = SAXParserFactory.newInstance();
         SAXParser saxParser = factory.newSAXParser();
