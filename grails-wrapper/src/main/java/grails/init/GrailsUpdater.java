@@ -152,7 +152,7 @@ public class GrailsUpdater {
                 inputStream = conn.getInputStream();
             }
 
-            success = downloadWrapperJar(version, downloadedJar, inputStream);
+            success = downloadWrapperJar(version, downloadedJar, inputStream, repo.isFile);
         } catch (Exception e) {
             System.err.println("There was an error downloading the wrapper jar");
             e.printStackTrace();
@@ -160,7 +160,7 @@ public class GrailsUpdater {
         return success;
     }
 
-    private boolean downloadWrapperJar(GrailsVersion version, File downloadJarLocation, InputStream inputStream) throws IOException {
+    private boolean downloadWrapperJar(GrailsVersion version, File downloadJarLocation, InputStream inputStream, boolean isLocal) throws IOException {
         ReadableByteChannel rbc = Channels.newChannel(inputStream);
         try (FileOutputStream fos = new FileOutputStream(downloadJarLocation)) {
             fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
@@ -179,7 +179,7 @@ public class GrailsUpdater {
             directory.mkdirs();
         }
         Path jarFile = new File(directory, GrailsWrapperHome.CLI_COMBINED_PROJECT_NAME + "-" + version.version + ".jar").toPath();
-        System.out.println("...Moving downloaded jar to: " + jarFile.toAbsolutePath());
+        System.out.println("...Moving " + (isLocal ? "local" : "remotely") + " downloaded jar to: " + jarFile.toAbsolutePath());
         Files.move(downloadJarLocation.getAbsoluteFile().toPath(), jarFile, REPLACE_EXISTING);
 
         return true;
