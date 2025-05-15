@@ -160,7 +160,7 @@ public class CodeGenConfig {
                             .map(Feature::getName)
                             .collect(Collectors.toList()));
 
-                    consoleOutput.warning("This project is using Grails CLI v2 but is still using the v1 grails-forge-cli.yml format");
+                    consoleOutput.warning("This project is using Grails Forge CLI v2 but is still using the v1 grails-forge-cli.yml format");
                     consoleOutput.warning("To replace the configuration with the new format, run `grails update-cli-config`");
                 }
 

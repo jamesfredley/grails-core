@@ -1,105 +1,202 @@
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+
 /*
- *  Licensed to the Apache Software Foundation (ASF) under one
- *  or more contributor license agreements.  See the NOTICE file
- *  distributed with this work for additional information
- *  regarding copyright ownership.  The ASF licenses this file
- *  to you under the Apache License, Version 2.0 (the
- *  "License"); you may not use this file except in compliance
- *  with the License.  You may obtain a copy of the License at
+ *  Licensed to the Apache Software Foundation (ASF) under one or more
+ *  contributor license agreements.  See the NOTICE file distributed with
+ *  this work for additional information regarding copyright ownership.
+ *  The ASF licenses this file to You under the Apache License, Version 2.0
+ *  (the "License"); you may not use this file except in compliance with
+ *  the License.  You may obtain a copy of the License at
  *
- *    https://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
- *  Unless required by applicable law or agreed to in writing,
- *  software distributed under the License is distributed on an
- *  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- *  KIND, either express or implied.  See the License for the
- *  specific language governing permissions and limitations
- *  under the License.
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
  */
-
 plugins {
-    id "org.grails.forge.internal.build.cli-module"
-    id 'org.graalvm.buildtools.native' version '0.10.6'
-}
-
-sourceSets {
-    main {
-        rocker {
-            srcDir("src/main/java")
-        }
-    }
+    id 'groovy'
+    id 'distribution'
+    id 'com.gradleup.shadow'
+    id "io.sdkman.vendors"
 }
 
 ext {
-    picocliVersion = '4.7.5'
+    pomTitle = 'Apache Grails® CLI'
+    pomDescription = 'Facilitates running the grails-shell-cli or grails-forge-cli to interact with a Grails project.'
+    pomDevelopers = [
+            'jdaugherty': 'James Daugherty'
+    ]
+    cliProject = true
+    startMainClass = 'org.apache.grails.cli.DelegatingShellApplication'
 }
 
-configurations.all {
-    resolutionStrategy {
-        // prevent fatJar result containing multiple versions of picocli
-        force("info.picocli:picocli:$picocliVersion")
-    }
-}
+version = projectVersion
+group = 'org.apache.grails'
 
-configurations {
-    generateConfig
+repositories {
+//    mavenLocal()
+    mavenCentral()
+    gradlePluginPortal()
+    maven { url = 'https://repo.grails.org/grails/restricted' }
+    maven { url = 'https://repository.apache.org/content/groups/snapshots' }
 }
 
 dependencies {
-    annotationProcessor "io.micronaut:micronaut-inject-java"
-    annotationProcessor "io.micronaut:micronaut-graal"
-    api project(":grails-forge-core")
-    api "info.picocli:picocli:$picocliVersion"
-    api "info.picocli:picocli-shell-jline3:$picocliVersion"
-    api "com.fizzed:rocker-runtime:$rockerVersion"
-    implementation "org.slf4j:slf4j-nop:$slf4jVersion"
-    implementation "org.fusesource.jansi:jansi:$jansiVersion"
-    implementation "org.yaml:snakeyaml:$snakeyamlVersion"
-    implementation "jakarta.inject:jakarta.inject-api:$jakartaInjectVersion"
-    implementation "org.shredzone.acme4j:acme4j-client:$acme4jClientVersion"
-    implementation "org.shredzone.acme4j:acme4j-utils:$acme4jUtilsVersion"
-    generateConfig "info.picocli:picocli-codegen:$picocliVersion"
-    compileOnly "com.google.code.findbugs:jsr305"
-    compileOnly "org.graalvm.nativeimage:svm"
-    testImplementation "io.micronaut.picocli:micronaut-picocli"
-    testImplementation "org.testcontainers:spock"
-    testImplementation "org.reflections:reflections:$reflectionsVersion"
-}
+    implementation platform("org.apache.grails:grails-bom:$grailsVersion")
 
-graalvmNative {
-    toolchainDetection = false
+    // shell-cli dependencies
+    implementation 'org.apache.grails:grails-shell-cli'
+    implementation 'org.springframework.boot:spring-boot-cli'
+    implementation 'org.apache.groovy:groovy'
+    implementation 'org.apache.groovy:groovy-ant'
+    implementation 'org.apache.groovy:groovy-templates'
 
-    binaries {
-        main {
-            // Main options
-            sharedLibrary = false
-            imageName = "grails"
-            buildArgs(
-                "--add-exports=org.graalvm.nativeimage.builder/com.oracle.svm.core.configure=ALL-UNNAMED",
-                "--add-exports=org.graalvm.nativeimage.builder/com.oracle.svm.core.jdk=ALL-UNNAMED",
-                "--add-exports=org.graalvm.nativeimage.builder/com.oracle.svm.core.jni=ALL-UNNAMED",
-                "--add-exports=org.graalvm.sdk/org.graalvm.nativeimage.impl=ALL-UNNAMED",
-                "-H:+ReportExceptionStackTraces"
-            )
-            if (project.hasProperty("musl")) {
-                logger.lifecycle("Using musl libc")
-                buildArgs("--libc=musl", "--static")
-            }
-            mainClass = "org.grails.forge.cli.Application"
-        }
+    // The commands are pulled from the shellCliDependencies in the shell project, but they are not in the shell jar file,
+    // so they must be added here. To keep the jar file smaller, only a subset is included here
+    implementation 'org.apache.grails:grails-core' // for ApplicationContextCommandFactory to lookup commands
+    implementation 'org.apache.grails:grails-url-mappings' // for UrlMappingsReportCommand
+    // profiles will add additional libraries as needed to surface commands
+
+    // forge dependencies
+    implementation project(':grails-forge-cli'), {
+        exclude group: 'org.slf4j', module: 'slf4j-nop'
     }
 }
 
-application {
-    mainClass = "org.grails.forge.cli.Application"
+apply {
+    from rootProject.layout.projectDirectory.file('gradle/java-config.gradle')
+    from rootProject.layout.projectDirectory.file('gradle/publish-config.gradle')
 }
 
-rocker {
-    postProcessing = ['org.grails.forge.rocker.plugin.WhitespaceProcessor']
+// It's surprisingly hard to generate start scripts and *not* have them nested into a bin / lib directory
+// rather than defining the application and then having to add tasks to rework it, just define a distribution and
+// create the scripts in the right location from the start
+TaskProvider<Jar> jarTask = tasks.named('jar', Jar)
+jarTask.configure { Jar it ->
+    it.manifest {
+        attributes 'Main-Class': project.property('startMainClass')
+    }
 }
 
-startScripts {
-    applicationName = 'grails'
+TaskProvider<Jar> shadowJarTask = tasks.named('shadowJar', ShadowJar)
+shadowJarTask.configure { ShadowJar it ->
+    it.archiveClassifier.set('')
+
+    // services & custom grails.factories have to be merged since commands can be created from both sources
+    it.mergeServiceFiles()
+    it.mergeServiceFiles('META-INF/grails.factories')
+}
+
+TaskProvider<CreateStartScripts> cliStartScripts = tasks.register('createCliStartScripts', CreateStartScripts)
+cliStartScripts.configure { CreateStartScripts t ->
+    t.dependsOn jarTask, shadowJarTask
+    t.outputDir = layout.buildDirectory.dir('generated-cli-scripts').get().asFile
+    t.applicationName = 'grails'
+    t.mainClass = project.findProperty('startMainClass') as String
+    t.classpath = files(shadowJarTask)
+
+    // See gradle tickets such as for lib https://github.com/gradle/gradle/issues/7033
+    doLast {
+        t.unixScript.text = t.unixScript.text
+                .replace('$APP_HOME/lib/', "\$APP_HOME/.grails/${grailsVersion}/")
+                .replace('"${APP_HOME:-./}.."', '"${APP_HOME:-./}"')
+
+        t.windowsScript.text = t.windowsScript.text
+                .replace('%APP_HOME%\\lib\\', "%APP_HOME%\\.grails\\${grailsVersion}\\")
+                .replace('%DIRNAME%..', '%DIRNAME%')
+    }
+}
+
+TaskProvider<CreateStartScripts> shellCliStartScripts = tasks.register('createShellCliStartScripts', CreateStartScripts)
+shellCliStartScripts.configure { CreateStartScripts t ->
+    t.dependsOn jarTask, shadowJarTask
+    t.outputDir = layout.buildDirectory.dir('generated-shell-cli-scripts').get().asFile
+    t.applicationName = 'grails-shell-cli'
+    t.mainClass = 'org.grails.cli.GrailsCli'
+    t.classpath = files(shadowJarTask)
+
+    // See gradle tickets such as for lib https://github.com/gradle/gradle/issues/7033
+    doLast {
+        t.unixScript.text = t.unixScript.text
+                .replace('$APP_HOME/lib/', "\$APP_HOME/.grails/${grailsVersion}/")
+                .replace('"${APP_HOME:-./}.."', '"${APP_HOME:-./}"')
+
+        t.windowsScript.text = t.windowsScript.text
+                .replace('%APP_HOME%\\lib\\', "%APP_HOME%\\.grails\\${grailsVersion}\\")
+                .replace('%DIRNAME%..', '%DIRNAME%')
+    }
+}
+
+TaskProvider<CreateStartScripts> forgeCliStartScripts = tasks.register('createForgeCliStartScripts', CreateStartScripts)
+forgeCliStartScripts.configure { CreateStartScripts t ->
+    t.dependsOn jarTask, shadowJarTask
+    t.outputDir = layout.buildDirectory.dir('generated-forge-cli-scripts').get().asFile
+    t.applicationName = 'grails-forge-cli'
+    t.mainClass = 'org.grails.forge.cli.Application'
+    t.classpath = files(shadowJarTask)
+
+    // See gradle tickets such as for lib https://github.com/gradle/gradle/issues/7033
+    doLast {
+        t.unixScript.text = t.unixScript.text
+                .replace('$APP_HOME/lib/', "\$APP_HOME/.grails/${grailsVersion}/")
+                .replace('"${APP_HOME:-./}.."', '"${APP_HOME:-./}"')
+
+        t.windowsScript.text = t.windowsScript.text
+                .replace('%APP_HOME%\\lib\\', "%APP_HOME%\\.grails\\${grailsVersion}\\")
+                .replace('%DIRNAME%..', '%DIRNAME%')
+    }
+}
+
+project.extensions.getByType(DistributionContainer).configureEach {
+    it.contents {
+        from(shadowJarTask) {
+            into ".grails/${grailsVersion}"
+        }
+
+        from(cliStartScripts) {
+            into ''
+            fileMode = 0755
+        }
+
+        from(shellCliStartScripts) {
+            into ''
+            fileMode = 0755
+        }
+
+        from(forgeCliStartScripts) {
+            into ''
+            fileMode = 0755
+        }
+
+        from(rootProject.project(':grails-forge-cli').layout.buildDirectory.file('exploded/bin/grails_forge_cli_completion')) {
+            into ''
+            fileMode = 0755
+        }
+
+        from(rootProject.layout.projectDirectory.file('LICENSE')) { it.into '' }
+        from(rootProject.layout.projectDirectory.file('NOTICE')) { it.into '' }
+        from(rootProject.layout.projectDirectory.file('INSTALL')) { it.into '' }
+    }
+}
+
+def distZipTask = tasks.named('distZip')
+distZipTask.configure {
+    dependsOn cliStartScripts, forgeCliStartScripts, shellCliStartScripts, jarTask, shadowJarTask, rootProject.project(':grails-forge-cli').tasks.named('exploded')
+}
+tasks.named('build').configure {
+    it.dependsOn(distZipTask)
+}
+tasks.named('assemble').configure {
+    it.dependsOn cliStartScripts, forgeCliStartScripts, shellCliStartScripts, rootProject.project(':grails-forge-cli').tasks.named('exploded')
+}
+tasks.named('installDist').configure {
+    it.dependsOn cliStartScripts, forgeCliStartScripts, shellCliStartScripts
+}
+tasks.named('distTar').configure {
+    dependsOn cliStartScripts, forgeCliStartScripts, shellCliStartScripts, jarTask, shadowJarTask, rootProject.project(':grails-forge-cli').tasks.named('exploded')
 }
 
 sdkman {
@@ -110,9 +207,9 @@ sdkman {
     version = project.version
     hashtag = "#grailsfw"
     platforms = [
-            "MAC_ARM64":"https://github.com/apache/grails-forge/releases/download/v${project.version}/grails-darwin-aarch64-v${project.version}.zip",
-            "MAC_OSX":"https://github.com/apache/grails-forge/releases/download/v${project.version}/grails-darwin-amd64-v${project.version}.zip",
-            "WINDOWS_64":"https://github.com/apache/grails-forge/releases/download/v${project.version}/grails-win-amd64-v${project.version}.zip",
-            "LINUX_64":"https://github.com/apache/grails-forge/releases/download/v${project.version}/grails-linux-amd64-v${project.version}.zip"
+            "MAC_ARM64":"https://github.com/apache/grails-forge/releases/download/v${project.version}/grails-cli-v${project.version}.zip",
+            "MAC_OSX":"https://github.com/apache/grails-forge/releases/download/v${project.version}/grails-cli-v${project.version}.zip",
+            "WINDOWS_64":"https://github.com/apache/grails-forge/releases/download/v${project.version}/grails-cli-v${project.version}.zip",
+            "LINUX_64":"https://github.com/apache/grails-forge/releases/download/v${project.version}/grails-cli-v${project.version}.zip"
     ]
 }

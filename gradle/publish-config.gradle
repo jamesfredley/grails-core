@@ -17,30 +17,16 @@
  *  under the License.
  */
 
-plugins {
-    id 'org.grails.forge.internal.base-module'
-}
+import org.grails.gradle.plugin.publishing.GrailsPublishExtension
 
-dependencies {
-    annotationProcessor platform("io.micronaut:micronaut-bom:$micronautVersion")
-    implementation platform("io.micronaut:micronaut-bom:$micronautVersion")
-    annotationProcessor "io.micronaut:micronaut-inject-java"
-    testAnnotationProcessor platform("io.micronaut:micronaut-bom:$micronautVersion")
-    testAnnotationProcessor "io.micronaut:micronaut-inject-java"
-}
-
-tasks.withType(Test).configureEach {
-    onlyIf {
-        ![
-                'skipTests'
-        ].find {
-            project.hasProperty(it)
-        }
-    }
-    testLogging {
-        exceptionFormat = 'full'
-    }
-    forkEvery = 100
-    maxParallelForks = Runtime.runtime.availableProcessors().intdiv(2) ?: 1
-    maxHeapSize = "2G"
+extensions.configure(GrailsPublishExtension) {
+    // Explicit `it` is required here
+    it.artifactId = findProperty('pomArtifactId') ?: project.name
+    it.githubSlug = findProperty('githubSlug')
+    it.license.name = 'Apache-2.0'
+    it.title = findProperty('pomTitle') ?: 'Apache Grails® Application Forge'
+    it.desc = findProperty('pomDescription') ?: 'Generates Apache Grails applications'
+    it.developers = findProperty('pomDevelopers') as Map<String, String> ?: [puneetbehl: 'Peter Behl']
+    it.pomCustomization = findProperty('pomCustomization') as Closure
+    it.publishTestSources = findProperty('pomPublishTestSources') ?: false
 }

@@ -3,7 +3,7 @@
 * Create an environment variable `GRAILS_HOME` which points to the installation directory i.e. `C:\grails`
 * Update the `PATH` environment variable, append `%GRAILS_HOME%\bin`.
 
-You should now be able to run the Grails CLI from the command prompt as follows:
+You should now be able to run the Grails Forge CLI from the command prompt as follows:
 
 [source,bash]
 ----

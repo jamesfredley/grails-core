@@ -22,9 +22,8 @@ plugins {
     id "org.grails.forge.rocker"
 }
 
-ext {
-    picocliVersion = '4.7.5'
-}
+version = project.projectVersion
+group = "org.apache.grails.forge"
 
 sourceSets {
     test {
@@ -47,7 +46,7 @@ configurations {
 dependencies {
 //    testImplementation project(":test-utils")
     testImplementation project(":grails-forge-core")
-    testImplementation project(":grails-cli")
+    testImplementation project(":grails-forge-cli")
     testImplementation "ch.qos.logback:logback-classic:$logbackClassicVersion"
     testImplementation "io.micronaut.picocli:micronaut-picocli"
     implementation "io.micronaut:micronaut-inject-groovy:$micronautVersion"
@@ -55,5 +54,12 @@ dependencies {
 }
 
 tasks.withType(Test).configureEach {
+    onlyIf {
+        ![
+                'skipTests'
+        ].find {
+            project.hasProperty(it)
+        }
+    }
     forkEvery = 10
 }
