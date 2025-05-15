@@ -35,21 +35,38 @@ import java.util.List;
 
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
+/**
+ * Handles updating the grails-cli shadowJar under `~/.grails/wrapper`
+ */
 public class GrailsUpdater {
 
     private final GrailsWrapperHome grailsWrapperHome;
     private final GrailsVersion preferredVersion;
     private GrailsVersion updatedVersion;
 
+    /**
+     * @param allowedTypes     the release types that are allowed to be updated to
+     * @param preferredVersion the preferred version to update to
+     * @throws IOException if canonicalizing the grails home fails
+     */
     public GrailsUpdater(List<GrailsReleaseType> allowedTypes, GrailsVersion preferredVersion) throws IOException {
         this(allowedTypes, preferredVersion, null);
     }
 
+    /**
+     * @param allowedTypes the release types that are allowed to be updated to
+     * @param preferredVersion the preferred version to update to
+     * @param possibleGrailsHome a possible directory for the grails home
+     * @throws IOException if canonicalizing the grails home fails
+     */
     public GrailsUpdater(List<GrailsReleaseType> allowedTypes, GrailsVersion preferredVersion, String possibleGrailsHome) throws IOException {
         grailsWrapperHome = new GrailsWrapperHome(allowedTypes, possibleGrailsHome);
         this.preferredVersion = preferredVersion;
     }
 
+    /**
+     * @return the `grails-cli` version that was selected by this updater
+     */
     public GrailsVersion getSelectedVersion() {
         if(preferredVersion != null) {
             return preferredVersion;
@@ -62,15 +79,16 @@ public class GrailsUpdater {
         return grailsWrapperHome.latestVersion;
     }
 
+    /**
+     * @return the jar file for the `grails-cli` verison that was selected by this updater`
+     */
     public File getExecutedJarFile() {
         GrailsVersion selectedVersion = getSelectedVersion();
         return grailsWrapperHome.getWrapperImplementation(selectedVersion, grailsWrapperHome.getVersionDirectory(selectedVersion));
     }
 
     /**
-     * Reasons the grails wrapper may need updating:
-     * 1. the expanded wrapper jar does not exist
-     *
+     * @return true if the updater should update the `grails-cli` shadowJar
      */
     public boolean needsUpdating() {
         File jarFile = grailsWrapperHome.getLatestWrapperImplementation();
@@ -90,6 +108,11 @@ public class GrailsUpdater {
         return false;
     }
 
+    /**
+     * Fetches the selectedVersion and if it already exists, replaces the jar file.
+     *
+     * @return true if an update was performed, false otherwise
+     */
     public boolean update() {
         GrailsWrapperRepo repo = GrailsWrapperRepo.getSelectedRepo();
 

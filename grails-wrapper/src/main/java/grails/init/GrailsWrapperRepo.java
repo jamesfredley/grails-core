@@ -18,6 +18,9 @@ package grails.init;
 
 import java.io.File;
 
+/**
+ * Helper class to locate the remote or local repository for the `grails-cli`
+ */
 public class GrailsWrapperRepo {
     private String baseUrl;
     private String repoPath;
@@ -27,18 +30,39 @@ public class GrailsWrapperRepo {
     private GrailsWrapperRepo() {
     }
 
+    /**
+     * @return the base url of the given repository
+     */
     String getUrl() {
         return join(baseUrl, repoPath);
     }
 
+    /**
+     * Get the path to the root metadata file in the configured repository
+     *
+     * @return the url to the root metadata-maven.xml file
+     */
     String getRootMetadataUrl() {
         return join(getUrl(), metadataName);
     }
 
+    /**
+     * Given a grails version, get the path to the version specific metadata file in the configured repository
+     *
+     * @param version the desired grails version
+     * @return the url to the version specific metadata-maven.xml file
+     */
     String getMetadataUrl(GrailsVersion version) {
         return join(getUrl(), version.version, metadataName);
     }
 
+    /**
+     * Given a grails version & a file name, get the path to that file in the configured repository
+     *
+     * @param version the grails version
+     * @param name    the file name of the `grails-cli` jar
+     * @return the file url to the `grails-cli` jar
+     */
     String getFileUrl(GrailsVersion version, String name) {
         return join(getUrl(), version.version, name);
 
@@ -48,6 +72,9 @@ public class GrailsWrapperRepo {
         return String.join(isFile ? File.separator : "/", elements);
     }
 
+    /**
+     * @return the repo the wrapper should look for the `grails-cli` jar
+     */
     static GrailsWrapperRepo getSelectedRepo() {
         GrailsWrapperRepo repo = new GrailsWrapperRepo();
         repo.repoPath = "org/apache/grails/" + GrailsWrapperHome.CLI_COMBINED_PROJECT_NAME;
@@ -71,6 +98,9 @@ public class GrailsWrapperRepo {
         return repo;
     }
 
+    /**
+     * @return the override maven repository if configured via the property `grails.repo.url` or environment variable `GRAILS_REPO_URL`
+     */
     static String getConfiguredMavenUrl() {
         String baseUrl = System.getProperty("grails.repo.url");
         if (baseUrl != null) {

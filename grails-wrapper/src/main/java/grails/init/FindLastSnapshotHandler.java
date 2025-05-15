@@ -19,6 +19,9 @@ package grails.init;
 import org.xml.sax.Attributes;
 import org.xml.sax.helpers.DefaultHandler;
 
+/**
+ * A SAX handler to parse the metadata-maven.xml file and extract the latest snapshot version
+ */
 public class FindLastSnapshotHandler extends DefaultHandler {
 
     private boolean insideSnapshotVersion = false;

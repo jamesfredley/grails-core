@@ -20,16 +20,25 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * The type of releases that a Grails version may represent
+ */
 public enum GrailsReleaseType {
     RELEASE,
     RC,
     MILESTONE,
     SNAPSHOT;
 
+    /**
+     * @return true if this is a snapshot release
+     */
     boolean isSnapshot() {
         return this == SNAPSHOT;
     }
 
+    /**
+     * @return this release type and all higher priority release types
+     */
     public List<GrailsReleaseType> upTo() {
         return Arrays.stream(GrailsReleaseType.values())
                 .filter(e -> e.ordinal() <= this.ordinal())

@@ -21,7 +21,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Assists in parsing grails versions & sorting them by priority
+ * Assists in parsing grails versions and sorting them by priority
  */
 public class GrailsVersion implements Comparable<GrailsVersion> {
     private static final Pattern VERSION_PATTERN = Pattern.compile("^(\\d+)[.](\\d+)[.](.*)$");
@@ -38,6 +38,9 @@ public class GrailsVersion implements Comparable<GrailsVersion> {
     public final GrailsReleaseType releaseType;
     public final int patchNumber;
 
+    /**
+     * @param version the grails version number
+     */
     GrailsVersion(String version) {
         this.version = version;
 

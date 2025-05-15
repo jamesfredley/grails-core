@@ -24,6 +24,9 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
 
+/**
+ * Helper class for managing the `grails-cli` jar files in the Grails Wrapper home directory.
+ */
 public class GrailsWrapperHome {
     public static final String CLI_COMBINED_PROJECT_NAME = "grails-cli";
 
