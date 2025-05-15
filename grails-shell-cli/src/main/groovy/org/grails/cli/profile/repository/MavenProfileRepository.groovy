@@ -38,8 +38,8 @@ import org.grails.cli.profile.Profile
 @CompileStatic
 class MavenProfileRepository extends AbstractJarProfileRepository {
 
-    public static final GrailsRepositoryConfiguration GRAILS_REPO = new GrailsRepositoryConfiguration("grailsRepo", new URI("https://repo.grails.org/grails/restricted"), true)
-    public static final GrailsRepositoryConfiguration APACHE_REPO = new GrailsRepositoryConfiguration("apacheRepository", new URI("https://repository.apache.org/content/groups/public"), true)
+    public static final GrailsRepositoryConfiguration GRAILS_REPO = new GrailsRepositoryConfiguration('grailsRepo', new URI('https://repo.grails.org/grails/restricted'), true)
+    public static final GrailsRepositoryConfiguration APACHE_REPO = new GrailsRepositoryConfiguration('apacheRepository', new URI('https://repository.apache.org/content/groups/public'), true)
 
     List<GrailsRepositoryConfiguration> repositoryConfigurations
     MavenResolverGrapeEngine grapeEngine

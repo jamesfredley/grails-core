@@ -41,6 +41,7 @@ import java.util.stream.Collectors;
  * 3. running from inside a grails project
  */
 public class Start {
+
     public static void main(String[] args) {
         Authenticator.setDefault(new SystemPropertiesAuthenticator());
 

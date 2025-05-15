@@ -20,7 +20,9 @@ import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-// Assists in parsing grails versions & sorting them by priority
+/**
+ * Assists in parsing grails versions & sorting them by priority
+ */
 public class GrailsVersion implements Comparable<GrailsVersion> {
     private static final Pattern VERSION_PATTERN = Pattern.compile("^(\\d+)[.](\\d+)[.](.*)$");
 

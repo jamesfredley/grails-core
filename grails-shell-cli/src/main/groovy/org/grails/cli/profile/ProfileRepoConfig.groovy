@@ -39,25 +39,25 @@ class ProfileRepoConfig {
             for (repoName in profileRepos.keySet()) {
                 def data = profileRepos.get(repoName)
                 if (data instanceof Map) {
-                    String uri = data.get("url") as String
+                    String uri = data.get('url') as String
                     def snapshots = data.get('snapshotsEnabled')
                     if (uri != null) {
                         boolean enableSnapshots = snapshots != null ? Boolean.valueOf(snapshots.toString()) : false
-                        final String username = data.get('username') as String
-                        final String password = data.get('password') as String
-                        repos << new ProfileRepoConfig(name: repoName as String, url: uri, snapshots: enableSnapshots, username: username as String, password: password as String)
+                        String username = data.get('username') as String
+                        String password = data.get('password') as String
+                        repos << new ProfileRepoConfig(name: repoName as String, url: uri, snapshots: enableSnapshots, username: username, password: password)
                     }
                 }
             }
         }
 
         // If the repo url from the wrapper is set, then the wrapper has been configured for a local install, so honor it as a valid source
-        String repoUrl = System.getProperty("grails.repo.url") ?: System.getenv('GRAILS_REPO_URL')
+        String repoUrl = System.getProperty('grails.repo.url') ?: System.getenv('GRAILS_REPO_URL')
         if (repoUrl) {
-            repos << new ProfileRepoConfig(name: "grails-override-repo", url: fixRepoUrl(repoUrl), snapshots: Environment.grailsVersion.endsWith("SNAPSHOT"))
+            repos << new ProfileRepoConfig(name: 'grails-override-repo', url: fixRepoUrl(repoUrl), snapshots: Environment.grailsVersion.endsWith('SNAPSHOT'))
         }
 
-        repos
+        return repos
     }
 
     private static String fixRepoUrl(String repoUrl) {
@@ -74,6 +74,6 @@ class ProfileRepoConfig {
             return repoUrl
         }
 
-        Paths.get(repoUrl).toUri().toString()
+        return Paths.get(repoUrl).toUri().toString()
     }
 }
