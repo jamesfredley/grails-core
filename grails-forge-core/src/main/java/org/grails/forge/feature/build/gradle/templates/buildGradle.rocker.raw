@@ -50,7 +50,7 @@ buildscript {
 @if (grailsVersion.endsWith("SNAPSHOT")) {
         maven { url = 'https://repository.apache.org/content/groups/snapshots' }
 }
-        maven { url = 'https://repo.grails.org/grails/core' }
+        maven { url = 'https://repo.grails.org/grails/restricted' }
     }
     dependencies { // Not Published to Gradle Plugin Portal
     @for (GradleDependency dependency : gradleBuild.getBuildscriptDependencies()) {
@@ -93,7 +93,7 @@ repositories {
 @if (grailsVersion.endsWith("SNAPSHOT")) {
     maven { url = 'https://repository.apache.org/content/groups/snapshots' }
 }
-    maven { url = 'https://repo.grails.org/grails/core' }
+    maven { url = 'https://repo.grails.org/grails/restricted' }
 }
 
 @dependencies.template(applicationType, project, features, gradleBuild)
