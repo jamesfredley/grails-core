@@ -223,6 +223,9 @@ jobs:
           MAVEN_PUBLISH_USERNAME: ${{ secrets.NEXUS_USER }}
           MAVEN_PUBLISH_PASSWORD: ${{ secrets.NEXUS_PW  }}
         run: ./gradlew publish
+      - name: "🔨 Create Grails Wrapper Distribution Zip"
+        run: >
+          ./gradlew :grails-wrapper:distZip
       - name: "✅ Verify grails-wrapper"
         if: success()
         run: |
