@@ -35,6 +35,14 @@ sourceSets {
     }
 }
 
+configurations {
+    grailsWrapper {
+        canBeResolved = true
+        canBeConsumed = false
+        transitive = false
+    }
+}
+
 dependencies {
     api platform("io.micronaut:micronaut-bom:$micronautVersion")
     api "com.fizzed:rocker-runtime:$rockerVersion"
@@ -48,6 +56,8 @@ dependencies {
     implementation "org.apache.commons:commons-compress:$commonsCompressVersion"
     compileOnly "com.google.code.findbugs:jsr305"
     testImplementation "org.codehaus.groovy:groovy-yaml"
+
+    grailsWrapper "org.apache.grails.profiles:base:$grailsVersion@jar"
 }
 
 
@@ -67,11 +77,33 @@ nohttp {
 }
 
 repositories {
+//    mavenLocal()
     maven { url = 'https://repo.grails.org/grails/restricted' }
+    maven { url = 'https://repository.apache.org/content/groups/snapshots' }
     mavenCentral()
+}
+
+TaskProvider<Sync> copyGrailsWrapper = tasks.register('copyGrailsWrapper', Sync)
+copyGrailsWrapper.configure { Sync it ->
+    it.inputs.files(configurations.grailsWrapper)
+    it.includeEmptyDirs = false
+
+    it.from(zipTree(configurations.grailsWrapper.singleFile)) {
+        include 'META-INF/grails-profile/skeleton/grailsw',
+                'META-INF/grails-profile/skeleton/grailsw.bat',
+                'META-INF/grails-profile/skeleton/grails-wrapper.jar'
+        eachFile { details -> details.path = details.name } // flatten
+    }
+    it.into(layout.projectDirectory.dir('src/main/resources/grails-wrapper'))
 }
 
 apply {
     from rootProject.layout.projectDirectory.file('gradle/java-config.gradle')
     from rootProject.layout.projectDirectory.file('gradle/publish-config.gradle')
+}
+
+['processResources', 'sourcesJar', 'spotlessJavaMisc', 'checkstyleNohttp'].each { name ->
+    tasks.named(name).configure {
+        it.dependsOn copyGrailsWrapper
+    }
 }
