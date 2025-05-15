@@ -28,6 +28,9 @@ class DelegatingShellApplication {
         // grails-forge-cli does not implement picocli compliant commands (they can't be nested because they're beans that micronaut expects to create)
 
         Tuple2<Boolean, String[]> info = determineForge(args)
+
+        // force the classloader to this jar file instead of the wrapper jar if it's being invoked indirectly
+        Thread.currentThread().contextClassLoader = DelegatingShellApplication.classLoader
         info.v1 ? Application.main(info.v2) : GrailsCli.main(info.v2)
     }
 
