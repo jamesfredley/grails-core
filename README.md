@@ -63,6 +63,14 @@ build will pass.
 
 See [RELEASE.md](RELEASE.md).
 
+## Friends of Apache Grails Open Collective
+As an independent initiative, community members have set up an open collective for Apache Grails:
+
+https://opencollective.com/friends-of-grails
+
+This initiative is designed to complement the Apache project and the many contributions we get from our great community and supporters.
+
+
 ## License
 
 Grails and Groovy are licensed under the terms of the [Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.html).
