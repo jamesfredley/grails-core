@@ -52,7 +52,7 @@ class GrailsDependencyVersions implements DependencyManagement {
     }
 
     GrailsDependencyVersions(GrapeEngine grape) {
-        this(grape, [group: "org.apache.grails", module: "grails-bom", version: Environment.getGrailsVersion(), type: "pom"])
+        this(grape, [group: "org.apache.grails", module: "grails-bom", version: Environment.grailsVersion, type: "pom"])
     }
 
     GrailsDependencyVersions(GrapeEngine grape, Map<String, String> bomCoords) {
