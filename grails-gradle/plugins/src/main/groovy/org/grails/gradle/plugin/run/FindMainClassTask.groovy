@@ -53,7 +53,7 @@ class FindMainClassTask extends DefaultTask {
 
         def bootRunTask = project.tasks.findByName('bootRun')
         if (!bootRunTask || !bootRunTask.enabled) {
-            project.logger.info('The bootRun task will not so this must not be a runnable grails application. Skipping finding main class.')
+            project.logger.info('The bootRun task does not exist or is disabled, so this must not be a runnable grails application. Skipping finding main class.')
             return
         }
 
