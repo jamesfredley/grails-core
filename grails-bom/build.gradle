@@ -171,10 +171,4 @@ pluginManager.withPlugin('maven-publish') {
             }
         }
     }
-
-//    project.afterEvaluate {
-//        tasks.named('assemble').configure {
-//            dependsOn tasks.named('publishMavenPublicationToLocalBomRepository')
-//        }
-//    }
 }
