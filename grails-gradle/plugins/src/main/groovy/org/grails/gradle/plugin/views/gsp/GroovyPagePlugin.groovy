@@ -19,6 +19,7 @@ package org.grails.gradle.plugin.views.gsp
 import groovy.transform.CompileStatic
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.file.CopySpec
 import org.gradle.api.file.Directory
 import org.gradle.api.file.DuplicatesStrategy
 import org.gradle.api.file.FileCollection
@@ -88,8 +89,9 @@ class GroovyPagePlugin implements Plugin<Project> {
             war.dependsOn compileGroovyPages
             war.duplicatesStrategy = DuplicatesStrategy.EXCLUDE
             if (war.name == 'bootWar') {
-                war.from(destDir)
-                war.into("WEB-INF/classes")
+                war.from(destDir) { CopySpec it ->
+                    it.into("WEB-INF/classes")
+                }
             } else if (war.name == 'war') {
                 war.from destDir
             }
@@ -106,8 +108,9 @@ class GroovyPagePlugin implements Plugin<Project> {
             jar.duplicatesStrategy = DuplicatesStrategy.EXCLUDE
             if (!(jar instanceof War)) {
                 if (jar.name == 'bootJar') {
-                    jar.from(destDir)
-                    jar.into("BOOT-INF/classes")
+                    jar.from(destDir) { CopySpec it ->
+                        it.into("BOOT-INF/classes")
+                    }
                 } else if (jar.name == 'jar') {
                     jar.from destDir
                 }
