@@ -1,3 +1,21 @@
+/*
+ *  Licensed to the Apache Software Foundation (ASF) under one
+ *  or more contributor license agreements.  See the NOTICE file
+ *  distributed with this work for additional information
+ *  regarding copyright ownership.  The ASF licenses this file
+ *  to you under the Apache License, Version 2.0 (the
+ *  "License"); you may not use this file except in compliance
+ *  with the License.  You may obtain a copy of the License at
+ *
+ *    https://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing,
+ *  software distributed under the License is distributed on an
+ *  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ *  KIND, either express or implied.  See the License for the
+ *  specific language governing permissions and limitations
+ *  under the License.
+ */
 package org.grails.web.servlet.mvc
 
 import grails.testing.web.UrlMappingsUnitTest
@@ -6,6 +24,7 @@ import grails.web.mapping.mvc.exceptions.CannotRedirectException
 import org.grails.web.util.GrailsApplicationAttributes
 import grails.artefact.Artefact
 import grails.web.mapping.mvc.RedirectEventListener
+import org.springframework.http.HttpStatus
 import spock.lang.Specification
 
 /**
@@ -250,6 +269,50 @@ class RedirectMethodTests extends Specification implements UrlMappingsUnitTest<U
         c.testNoController()
         then:
         "/little-brown-bottle/thankyou" ==  response.redirectedUrl
+    }
+
+    void "test temporary redirect"() {
+        when:
+        def c = new RedirectController()
+        webRequest.controllerName = 'redirect'
+        c.toActionTemporaryRedirect()
+        
+        then: "should use HTTP 307 Temporary Redirect"
+        HttpStatus.TEMPORARY_REDIRECT.value() == response.status
+        "/redirect/foo" == response.redirectedUrl
+    }
+
+    void "test permanent redirect"() {
+        when:
+        def c = new RedirectController() 
+        webRequest.controllerName = 'redirect'
+        c.toActionPermanentRedirect()
+        
+        then: "should use HTTP 308 Permanent Redirect"
+        HttpStatus.PERMANENT_REDIRECT.value() == response.status
+        "/redirect/foo" == response.redirectedUrl
+    }
+
+    void "test moved temporary redirect"() {
+        when:
+        def c = new RedirectController()
+        webRequest.controllerName = 'redirect'
+        c.toActionMovedTemporary()
+
+        then: "should use HTTP 302 Moved Temporary"
+        HttpStatus.MOVED_TEMPORARILY.value() == response.status
+        "/redirect/foo" == response.redirectedUrl
+    }
+
+    void "test moved permanent redirect"() {
+        when:
+        def c = new RedirectController()
+        webRequest.controllerName = 'redirect'
+        c.toActionMovedPermanent()
+
+        then: "should use HTTP 301 Moved Permanent"
+        HttpStatus.MOVED_PERMANENTLY.value() == response.status
+        "/redirect/foo" == response.redirectedUrl
     }
 
     static class UrlMappings {

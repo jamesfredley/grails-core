@@ -1,47 +1,49 @@
-buildscript {
-    repositories {
-        maven { url = 'https://repo.grails.org/grails/core' }
-        mavenCentral()
-    }
-    dependencies {
-        classpath "org.grails:grails-gradle-plugin:${project['grails-gradle-plugin.version']}"
-    }
-}
-
-plugins {
-    id 'groovy'
-    id 'war'
-    id 'idea'
-    id 'eclipse'
-}
+/*
+ *  Licensed to the Apache Software Foundation (ASF) under one
+ *  or more contributor license agreements.  See the NOTICE file
+ *  distributed with this work for additional information
+ *  regarding copyright ownership.  The ASF licenses this file
+ *  to you under the Apache License, Version 2.0 (the
+ *  "License"); you may not use this file except in compliance
+ *  with the License.  You may obtain a copy of the License at
+ *
+ *    https://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing,
+ *  software distributed under the License is distributed on an
+ *  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ *  KIND, either express or implied.  See the License for the
+ *  specific language governing permissions and limitations
+ *  under the License.
+ */
 
 version = rootProject.version
 group = 'pubsub.demo'
 
-apply plugin: 'org.grails.grails-web'
-apply plugin: "org.grails.grails-gsp"
+apply plugin: 'org.apache.grails.gradle.grails-web'
 
-apply plugin: 'java'
-compileJava.options.release = 17
+// The grails-gson Gradle plugin is not needed for running the functional tests.
+// It is applied as a smoke test to check that compiling gson-views
+// for production does not fail during build task.
+apply plugin: 'org.apache.grails.gradle.grails-gson'
 
 dependencies {
     implementation platform(project(':grails-bom'))
 
-    implementation "org.grails.plugins:async"
-    implementation "org.grails.plugins:events"
+    implementation 'org.apache.grails:grails-async'
+    implementation 'org.apache.grails:grails-events'
 
-    implementation "org.grails:grails-core"
-    implementation "org.grails:grails-logging"
-    implementation "org.grails:grails-plugin-databinding"
-    implementation "org.grails:grails-plugin-interceptors"
-    implementation "org.grails:grails-plugin-rest"
-    implementation "org.grails:grails-plugin-services"
-    implementation "org.grails:grails-plugin-url-mappings"
-    implementation "org.grails:grails-web-boot"
+    implementation 'org.apache.grails:grails-core'
+    implementation 'org.apache.grails:grails-logging'
+    implementation 'org.apache.grails:grails-databinding'
+    implementation 'org.apache.grails:grails-interceptors'
+    implementation 'org.apache.grails:grails-rest-transforms'
+    implementation 'org.apache.grails:grails-services'
+    implementation 'org.apache.grails:grails-url-mappings'
+    implementation 'org.apache.grails:grails-web-boot'
 
-    implementation "org.grails.plugins:gsp"
-    implementation 'org.grails.plugins:views-json'
-    implementation 'org.grails.plugins:hibernate5'
+    implementation 'org.apache.grails:grails-views-gson'
+    implementation 'org.apache.grails:grails-data-hibernate5'
 
     implementation 'org.springframework.boot:spring-boot-autoconfigure'
     implementation 'org.springframework.boot:spring-boot-starter'
@@ -52,13 +54,16 @@ dependencies {
     runtimeOnly 'org.fusesource.jansi:jansi'
     runtimeOnly 'com.zaxxer:HikariCP'
 
-    testImplementation 'io.micronaut.serde:micronaut-serde-jackson:2.10.2'
-    testImplementation 'io.micronaut:micronaut-http-client:4.6.5'
-    testImplementation 'org.grails:grails-web-testing-support'
+    testImplementation "io.micronaut.serde:micronaut-serde-jackson:$micronautSerdeJacksonVersion"
+    testImplementation "io.micronaut:micronaut-http-client:$micronautVersion"
+    testImplementation 'org.apache.grails:grails-testing-support-web'
 }
 
 bootRun {
     mainClass = 'pubsub.demo.Application'
 }
 
-apply from: rootProject.file('gradle/functional-test-project.gradle')
+apply {
+    from rootProject.layout.projectDirectory.file('gradle/functional-test-config.gradle')
+    from rootProject.layout.projectDirectory.file('gradle/java-config.gradle')
+}

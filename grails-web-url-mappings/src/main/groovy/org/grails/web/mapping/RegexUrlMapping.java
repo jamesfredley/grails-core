@@ -1,17 +1,20 @@
 /*
- * Copyright 2004-2005 Graeme Rocher
+ *  Licensed to the Apache Software Foundation (ASF) under one
+ *  or more contributor license agreements.  See the NOTICE file
+ *  distributed with this work for additional information
+ *  regarding copyright ownership.  The ASF licenses this file
+ *  to you under the Apache License, Version 2.0 (the
+ *  "License"); you may not use this file except in compliance
+ *  with the License.  You may obtain a copy of the License at
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ *    https://www.apache.org/licenses/LICENSE-2.0
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ *  Unless required by applicable law or agreed to in writing,
+ *  software distributed under the License is distributed on an
+ *  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ *  KIND, either express or implied.  See the License for the
+ *  specific language governing permissions and limitations
+ *  under the License.
  */
 package org.grails.web.mapping;
 
@@ -46,12 +49,11 @@ import java.util.regex.PatternSyntaxException;
 /**
  * <p>A UrlMapping implementation that takes a Grails URL pattern and turns it into a regex matcher so that
  * URLs can be matched and information captured from the match.</p>
- * <p/>
+ * <p>
  * <p>A Grails URL pattern is not a regex, but is an extension to the form defined by Apache Ant and used by
  * Spring AntPathMatcher. Unlike regular Ant paths Grails URL patterns allow for capturing groups in the form:</p>
- * <p/>
+ * <p>
  * <code>/blog/(*)&#47;**</code>
- * <p/>
  * <p>The parenthesis define a capturing group. This implementation transforms regular Ant paths into regular expressions
  * that are able to use capturing groups</p>
  *
@@ -720,14 +722,16 @@ public class RegexUrlMapping extends AbstractUrlMapping {
 
     /**
      * Compares this {@link UrlMapping} instance with the specified {@link UrlMapping} instance and deals with URL mapping precedence rules.
-     * <p> URL Mapping Precedence Order </p>
-     * <ol> Less wildcard tokens.
+     * <p>URL Mapping Precedence Order
+     * <p>Less wildcard tokens:
+     * <ol>
      * <li> /foo          &lt;- match
      * <li> /foo/(*) </li>
      * <li> /foo/(*)/bar/  &lt;- match
      * <li> /foo/(*)/(*) </li>
      * </ol>
-     * <ol> More static tokens.
+     * <p>More static tokens:
+     * <ol>
      * <li> /foo/(*)/bar   &lt;- match
      * <li> /foo/(*) </li>
      * </ol>

@@ -1,3 +1,18 @@
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#     https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 name: "Java CI"
 on:
   push:
@@ -9,38 +24,50 @@ on:
       - '[4-9]+.[0-9]+.x'
       - '[3-9]+.[3-9]+.x'
   workflow_dispatch:
+env:
+  # To prevent throttling of GitHub API usage, include the GitHub token as an environment variable
+  # as the build will use it when fetching git tags in CreateReleaseDropDown.groovy
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 jobs:
-  skip_check:
-    runs-on: ubuntu-latest
-    outputs:
-      found_skip_publish: ${{ steps.check_prevent_property.outputs.value }}
-    permissions:
-      contents: read
-    steps:
-      - name: "📥 Checkout repository"
-        uses: actions/checkout@v4
-      - name: "🔍 Check if we should skip publish"
-        id: check_prevent_property
-        run: |
-          if grep -q '^preventSnapshotPublish=true' gradle.properties; then
-            echo "value=true" >> $GITHUB_OUTPUT
-          else
-            echo "value=false" >> $GITHUB_OUTPUT
-          fi
-  build:
-    name: 'Build'
-    needs: skip_check
-    permissions:
-      contents: read  #  to fetch code (actions/checkout)
+  buildGradle:
+    name: 'Build Gradle Plugins'
     strategy:
       fail-fast: false
       matrix:
-        java: [17, 21, 23]
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        java: [ 17, 21 ]
+    runs-on: ubuntu-24.04
+    steps:
+      - name: "📥 Checkout repository"
+        uses: actions/checkout@v4
+      - name: 'Ensure Common Build Date' # to ensure a reproducible build
+        run: echo "SOURCE_DATE_EPOCH=$(git log -1 --pretty=%ct)" >> "$GITHUB_ENV"
+      - name: "☕️ Setup JDK"
+        uses: actions/setup-java@v4
+        with:
+          distribution: liberica
+          java-version: ${{ matrix.java }}
+      - name: "🐘 Setup Gradle"
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          develocity-access-key: ${{ secrets.GRAILS_DEVELOCITY_ACCESS_KEY  }}
+      - name: "🔨 Build project"
+        working-directory: 'grails-gradle'
+        run: >
+          ./gradlew build
+          --continue --stacktrace
+  build:
+    name: 'Build Grails-Core'
+    strategy:
+      fail-fast: false
+      matrix:
+        java: [ 17, 21, 24 ]
+        os: [ ubuntu-latest, windows-latest, macos-latest ]
     runs-on: ${{ matrix.os }}
     steps:
       - name: "📥 Checkout repository"
         uses: actions/checkout@v4
+      - name: 'Ensure Common Build Date' # to ensure a reproducible build
+        run: echo "SOURCE_DATE_EPOCH=$(git log -1 --pretty=%ct)" >> "$GITHUB_ENV"
       - name: "☕️ Setup JDK"
         uses: actions/setup-java@v4
         with:
@@ -49,26 +76,26 @@ jobs:
       - name: "🐘 Setup Gradle"
         uses: gradle/actions/setup-gradle@v4
         with:
-          develocity-access-key: ${{ secrets.GRADLE_ENTERPRISE_ACCESS_KEY }}
+          develocity-access-key: ${{ secrets.GRAILS_DEVELOCITY_ACCESS_KEY  }}
       - name: "🔨 Build project"
-        id: build
-        env:
-          DEVELOCITY_BUILD_CACHE_NODE_USER: ${{ secrets.GRADLE_ENTERPRISE_BUILD_CACHE_NODE_USER }}
-          DEVELOCITY_BUILD_CACHE_NODE_KEY: ${{ secrets.GRADLE_ENTERPRISE_BUILD_CACHE_NODE_KEY }}
-        run: ./gradlew build assemble groovydoc -PskipFunctionalTests --continue
+        run: >
+          ./gradlew build :grails-shell-cli:installDist groovydoc
+          --continue --stacktrace
+          -PskipFunctionalTests
+          -PskipMongodbTests
+          -PskipHibernate5Tests
   functional:
     name: "Functional Tests"
-    needs: skip_check
-    permissions:
-      contents: read  #  to fetch code (actions/checkout)
     strategy:
       fail-fast: false
       matrix:
-        java: [ '17', '21', '23' ]
-    runs-on: ubuntu-latest
+        java: [ 17, 21, 24 ]
+    runs-on: ubuntu-24.04
     steps:
       - name: "📥 Checkout repository"
         uses: actions/checkout@v4
+      - name: 'Ensure Common Build Date' # to ensure a reproducible build
+        run: echo "SOURCE_DATE_EPOCH=$(git log -1 --pretty=%ct)" >> "$GITHUB_ENV"
       - name: "☕️ Setup JDK"
         uses: actions/setup-java@v4
         with:
@@ -77,21 +104,81 @@ jobs:
       - name: "🐘 Setup Gradle"
         uses: gradle/actions/setup-gradle@v4
         with:
-          develocity-access-key: ${{ secrets.GRADLE_ENTERPRISE_ACCESS_KEY }}
-      - name: "🔨 Functional Tests"
+          develocity-access-key: ${{ secrets.GRAILS_DEVELOCITY_ACCESS_KEY  }}
+      - name: "🏃 Run Functional Tests"
+        run: >
+          ./gradlew bootJar check
+          --continue --stacktrace
+          -PonlyFunctionalTests
+          -PskipHibernate5Tests
+          -PskipMongodbTests
+  mongodbFunctional:
+    name: "Mongodb Functional Tests"
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        java: [ 17, 21 ]
+        mongodb-version: [ '5.0', '6.0', '7.0', '8.0' ]
+    steps:
+      - name: "📥 Checkout the repository"
+        uses: actions/checkout@v4
+      - name: 'Ensure Common Build Date' # to ensure a reproducible build
+        run: echo "SOURCE_DATE_EPOCH=$(git log -1 --pretty=%ct)" >> "$GITHUB_ENV"
+      - name: "☕️ Setup JDK"
+        uses: actions/setup-java@v4
+        with:
+          distribution: liberica
+          java-version: ${{ matrix.java }}
+      - name: "🐘 Setup Gradle"
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          develocity-access-key: ${{ secrets.GRAILS_DEVELOCITY_ACCESS_KEY }}
+      - name: "🏃 Run Functional Tests"
         env:
-          DEVELOCITY_BUILD_CACHE_NODE_USER: ${{ secrets.GRADLE_ENTERPRISE_BUILD_CACHE_NODE_USER }}
-          DEVELOCITY_BUILD_CACHE_NODE_KEY: ${{ secrets.GRADLE_ENTERPRISE_BUILD_CACHE_NODE_KEY }}
-        run: ./gradlew build -PonlyFunctionalTests
-  publish:
-    if: github.event_name == 'push' && needs.skip_check.outputs.found_skip_publish != 'true'
-    needs: [build, functional]
-    permissions:
-      contents: read # limit to read access
-    runs-on: ubuntu-latest
+          GITHUB_MAVEN_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
+        run: >
+          ./gradlew bootJar cleanTest check
+          --continue --stacktrace
+          -PonlyMongodbTests
+          -PmongodbContainerVersion=${{ matrix.mongodb-version }}
+  hibernate5Functional:
+    name: "Hibernate5 Functional Tests"
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        java: [ 17, 21 ]
+    steps:
+      - name: "📥 Checkout the repository"
+        uses: actions/checkout@v4
+      - name: 'Ensure Common Build Date' # to ensure a reproducible build
+        run: echo "SOURCE_DATE_EPOCH=$(git log -1 --pretty=%ct)" >> "$GITHUB_ENV"
+      - name: "☕️ Setup JDK"
+        uses: actions/setup-java@v4
+        with:
+          distribution: liberica
+          java-version: ${{ matrix.java }}
+      - name: "🐘 Setup Gradle"
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          develocity-access-key: ${{ secrets.GRAILS_DEVELOCITY_ACCESS_KEY }}
+      - name: "🏃 Run Functional Tests"
+        env:
+          GITHUB_MAVEN_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
+        run: >
+          ./gradlew bootJar cleanTest check
+          --continue --stacktrace
+          -PonlyHibernate5Tests
+  publishGradle:
+    if: github.repository_owner == 'apache' && github.event_name == 'push'
+    needs: [ buildGradle ]
+    runs-on: ubuntu-24.04
     steps:
       - name: "📥 Checkout repository"
         uses: actions/checkout@v4
+      - name: 'Ensure Common Build Date' # to ensure a reproducible build
+        run: echo "SOURCE_DATE_EPOCH=$(git log -1 --pretty=%ct)" >> "$GITHUB_ENV"
       - name: "☕️ Setup JDK"
         uses: actions/setup-java@v4
         with:
@@ -100,36 +187,101 @@ jobs:
       - name: "🐘 Setup Gradle"
         uses: gradle/actions/setup-gradle@v4
         with:
-          develocity-access-key: ${{ secrets.GRADLE_ENTERPRISE_ACCESS_KEY }}
-      - name: "📤 Publish Snapshot Artifacts to Artifactory (repo.grails.org/libs-snapshot-local)"
-        id: publish
+          develocity-access-key: ${{ secrets.GRAILS_DEVELOCITY_ACCESS_KEY  }}
+      - name: "📤 Publish Gradle Snapshot Artifacts"
         env:
-          ARTIFACTORY_USERNAME: ${{ secrets.ARTIFACTORY_USERNAME }}
-          ARTIFACTORY_PASSWORD: ${{ secrets.ARTIFACTORY_PASSWORD }}
-          DEVELOCITY_BUILD_CACHE_NODE_USER: ${{ secrets.GRADLE_ENTERPRISE_BUILD_CACHE_NODE_USER }}
-          DEVELOCITY_BUILD_CACHE_NODE_KEY: ${{ secrets.GRADLE_ENTERPRISE_BUILD_CACHE_NODE_KEY }}
+          GRAILS_PUBLISH_RELEASE: 'false'
+          MAVEN_PUBLISH_URL: ${{ secrets.GRAILS_NEXUS_PUBLISH_SNAPSHOT_URL }}
+          MAVEN_PUBLISH_USERNAME: ${{ secrets.NEXUS_USER }}
+          MAVEN_PUBLISH_PASSWORD: ${{ secrets.NEXUS_PW  }}
+        working-directory: 'grails-gradle'
         run: >
-          ./gradlew
+          ./gradlew publish
           -Dorg.gradle.internal.publish.checksums.insecure=true
-          publish
-  docs:
-    if: github.event_name == 'push' && needs.skip_check.outputs.found_skip_publish != 'true'
-    needs: publish
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read # limit to read access
+  publish:
+    if: github.repository_owner == 'apache' && github.event_name == 'push'
+    needs: [ publishGradle, build, functional, hibernate5Functional, mongodbFunctional ]
+    runs-on: ubuntu-24.04
     steps:
-      - name: "📝 Store the target branch"
-        id: extract_branch
-        run: |
-          echo "Determining Target Branch"
-          TARGET_BRANCH=${GITHUB_REF#refs/heads/}
-          echo $TARGET_BRANCH
-          echo "value=${TARGET_BRANCH}" >> $GITHUB_OUTPUT
-      - name: "📡 Invoke the grails-doc release workflow"
-        uses: benc-uk/workflow-dispatch@e2e5e9a103e331dad343f381a29e654aea3cf8fc # v1.2.4 (Use commit sha as this is a 3rd party action)
+      - name: "📥 Checkout repository"
+        uses: actions/checkout@v4
+      - name: 'Ensure Common Build Date' # to ensure a reproducible build
+        run: echo "SOURCE_DATE_EPOCH=$(git log -1 --pretty=%ct)" >> "$GITHUB_ENV"
+      - name: "☕️ Setup JDK"
+        uses: actions/setup-java@v4
         with:
-          workflow: Java CI
-          repo: grails/grails-doc
-          ref: ${{ steps.extract_branch.outputs.value }}
-          token: ${{ secrets.GH_TOKEN }}
+          distribution: liberica
+          java-version: 17
+      - name: "🐘 Setup Gradle"
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          develocity-access-key: ${{ secrets.GRAILS_DEVELOCITY_ACCESS_KEY  }}
+      - name: "📤 Publish Grails-Core Snapshot Artifacts"
+        env:
+          GRAILS_PUBLISH_RELEASE: 'false'
+          MAVEN_PUBLISH_URL: ${{ secrets.GRAILS_NEXUS_PUBLISH_SNAPSHOT_URL }}
+          MAVEN_PUBLISH_USERNAME: ${{ secrets.NEXUS_USER }}
+          MAVEN_PUBLISH_PASSWORD: ${{ secrets.NEXUS_PW  }}
+        run: ./gradlew publish
+      - name: "🔨 Create Grails Wrapper Distribution Zip"
+        run: >
+          ./gradlew :grails-wrapper:distZip
+      - name: "✅ Verify grails-wrapper"
+        if: success()
+        run: |
+          cp grails-wrapper/build/distributions/grails-wrapper-*.zip build/wrapper.zip
+          cd build
+          unzip wrapper -d tmp
+          mv tmp/grails-wrapper-* tmp/wrapper
+          ./tmp/wrapper/grailsw --version
+      - name: "📤 Upload Wrapper Zip to Workflow Summary Page"
+        uses: actions/upload-artifact@v4
+        with:
+          name: grails-wrapper-snapshot
+          path: build/tmp/wrapper/
+  docs:
+    if: github.repository_owner == 'apache' && github.event_name == 'push'
+    needs: [ publish ]
+    runs-on: ubuntu-24.04
+    steps:
+      - name: "📥 Checkout the repository"
+        uses: actions/checkout@v4
+      - name: 'Ensure Common Build Date' # to ensure a reproducible build
+        run: echo "SOURCE_DATE_EPOCH=$(git log -1 --pretty=%ct)" >> "$GITHUB_ENV"
+      - name: "🔀 Store current branch name"
+        run: |
+          TARGET_BRANCH="${GITHUB_BASE_REF:-${GITHUB_REF#refs/heads/}}"
+          echo "TARGET_BRANCH=${TARGET_BRANCH}" >> $GITHUB_ENV
+          echo "Target Branch: ${TARGET_BRANCH}"
+      - name: "📅 Set current date as env variable"
+        run: |
+          NOW=$(date +'%Y-%m-%dT%H%M%S')
+          echo "NOW=${NOW}" >> $GITHUB_ENV
+          echo "Current date: ${NOW}"
+      - name: "☕️ Setup JDK"
+        uses: actions/setup-java@v4
+        with:
+          distribution: liberica
+          java-version: 17
+      - name: "🐘 Setup Gradle"
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          develocity-access-key: ${{ secrets.GRAILS_DEVELOCITY_ACCESS_KEY }}
+      - name: "🔨 Build Snapshot Documentation"
+        run: >
+          ./gradlew grails-doc:build
+          -PgithubBranch=${{ env.TARGET_BRANCH }}
+      - name: "📤 Upload Generated Docs to Workflow Result Page"
+        uses: actions/upload-artifact@v4
+        with:
+          name: grails-docs-${{ env.NOW }}.zip
+          path: ./build/distributions/*.zip
+          compression-level: 0 # Already a zip
+      - name: "🚀 Publish to Github Pages"
+        if: github.event_name == 'push'
+        uses: apache/grails-github-actions/deploy-github-pages@asf
+        env:
+          GH_TOKEN: ${{ secrets.GRAILS_GHTOKEN }}
+          GRADLE_PUBLISH_RELEASE: 'false'
+          SOURCE_FOLDER: grails-doc/build/docs
+          TARGET_REPOSITORY: 'apache/grails-doc'

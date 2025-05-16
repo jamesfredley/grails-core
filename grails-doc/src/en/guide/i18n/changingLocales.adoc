@@ -1,0 +1,69 @@
+////
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+https://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+////
+
+By default, the user locale is detected from the incoming `Accept-Language` header. You can provide users the capability to switch locales by simply passing a parameter called `lang` to Grails as a request parameter:
+
+[source,groovy]
+----
+/book/list?lang=es
+----
+
+Grails will automatically switch the user's locale and subsequent requests will use the switched locale.
+
+By default, Grails uses {springapi}org/springframework/web/servlet/i18n/SessionLocaleResolver.html[SessionLocaleResolver] as the `localeResolver` bean.
+
+You can change the default locale easily: 
+
+[source,groovy]
+.grails-app/conf/spring/resources.groovy
+----
+import org.springframework.web.servlet.i18n.SessionLocaleResolver
+
+beans = {
+    localeResolver(SessionLocaleResolver) {
+        defaultLocale= new Locale('es')
+    }
+}
+----
+
+Other `localeResolver` are available. For example, you could use save the switched locale in a Cookie:
+
+[source,groovy]
+.grails-app/conf/spring/resources.groovy
+----
+import org.springframework.web.servlet.i18n.CookieLocaleResolver
+
+beans = {
+    localeResolver(CookieLocaleResolver) {
+        defaultLocale= new Locale('es')
+    }
+}
+----
+
+Or fix the locale:
+
+[source,groovy]
+.grails-app/conf/spring/resources.groovy
+----
+import org.springframework.web.servlet.i18n.FixedLocaleResolver
+
+beans = {
+    localeResolver(FixedLocaleResolver, new Locale('de'))
+}
+----

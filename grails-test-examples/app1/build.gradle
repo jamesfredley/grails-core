@@ -1,53 +1,57 @@
-buildscript {
-    repositories {
-        maven { url "https://repo.grails.org/grails/core" }
-        mavenCentral()
-    }
-    dependencies {
-        classpath "org.grails:grails-gradle-plugin:${project['grails-gradle-plugin.version']}"
-        classpath "com.bertramlabs.plugins:asset-pipeline-gradle:${project['asset-pipeline-gradle.version']}"
-    }
-}
+/*
+ *  Licensed to the Apache Software Foundation (ASF) under one
+ *  or more contributor license agreements.  See the NOTICE file
+ *  distributed with this work for additional information
+ *  regarding copyright ownership.  The ASF licenses this file
+ *  to you under the Apache License, Version 2.0 (the
+ *  "License"); you may not use this file except in compliance
+ *  with the License.  You may obtain a copy of the License at
+ *
+ *    https://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing,
+ *  software distributed under the License is distributed on an
+ *  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ *  KIND, either express or implied.  See the License for the
+ *  specific language governing permissions and limitations
+ *  under the License.
+ */
 
-version "0.1"
-group "functionaltests"
+version = '0.1'
+group = 'functionaltests'
 
-apply plugin: "war"
-apply plugin: "asset-pipeline"
-apply plugin: "org.grails.grails-web"
-apply plugin: "org.grails.grails-gsp"
+apply plugin: 'asset-pipeline'
+apply plugin: 'org.apache.grails.gradle.grails-web'
 
-assets {
-    minifyJs = true
-    minifyCss = true
-}
-
-apply plugin: 'java'
-compileJava.options.release = 17
+// The grails-gsp Gradle plugin is not needed for running the functional tests.
+// It is applied as a smoke test to check that compiling gsp
+// for production does not fail during build task.
+apply plugin: 'org.apache.grails.gradle.grails-gsp'
 
 dependencies {
     implementation platform(project(':grails-bom'))
 
-    implementation "org.springframework.boot:spring-boot-starter-logging"
-    implementation "org.springframework.boot:spring-boot-starter-actuator"
-    implementation "org.springframework.boot:spring-boot-autoconfigure"
-    implementation "org.springframework.boot:spring-boot-starter-tomcat"
-    implementation "org.grails:grails-dependencies"
-    implementation "org.grails:grails-web-boot"
-    implementation "org.grails:grails-core"
+    implementation 'org.springframework.boot:spring-boot-starter-logging'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'org.springframework.boot:spring-boot-autoconfigure'
+    implementation 'org.springframework.boot:spring-boot-starter-tomcat'
+    implementation 'org.apache.grails:grails-dependencies'
+    implementation 'org.apache.grails:grails-web-boot'
+    implementation 'org.apache.grails:grails-core'
 
-    implementation "org.grails.plugins:hibernate5"
-    implementation "org.grails.plugins:cache"
-    implementation "org.grails.plugins:scaffolding"
+    implementation 'org.apache.grails:grails-data-hibernate5'
+    implementation 'org.apache.grails:grails-cache'
+    implementation 'org.apache.grails:grails-scaffolding'
+    implementation 'org.webjars.npm:jquery'
 
-    runtimeOnly "com.bertramlabs.plugins:asset-pipeline-grails"
-    runtimeOnly "org.grails.plugins:fields"
-    runtimeOnly "org.apache.tomcat:tomcat-jdbc"
+    runtimeOnly 'com.bertramlabs.plugins:asset-pipeline-grails'
+    runtimeOnly 'org.apache.grails:grails-fields'
+    runtimeOnly 'org.apache.tomcat:tomcat-jdbc'
 
-    testImplementation "org.grails:grails-web-testing-support"
-    testImplementation "org.grails:grails-gorm-testing-support"
+    testImplementation 'org.apache.grails:grails-testing-support-web'
+    testImplementation 'org.apache.grails:grails-testing-support-datamapping'
 
-    console "org.grails:grails-console"
+    console 'org.apache.grails:grails-console'
     testImplementation "io.micronaut:micronaut-http-client:$micronautVersion"
     testImplementation "io.micronaut.serde:micronaut-serde-jackson:$micronautSerdeJacksonVersion"
 
@@ -55,10 +59,10 @@ dependencies {
     implementation project(':grails-test-examples-plugins-loadsecond')
     implementation project(':grails-test-examples-plugins-loadafter')
 
-    integrationTestImplementation testFixtures("org.grails.plugins:geb")
+    integrationTestImplementation testFixtures('org.apache.grails:grails-geb')
 }
 
-tasks.withType(org.gradle.api.tasks.JavaExec) {
+tasks.withType(JavaExec).configureEach {
     systemProperty('REPLACE_ME', 'test')
     systemProperty('foo.bar', 'test')
     // jvmArgs '-javaagent:agent.jar'
@@ -72,4 +76,8 @@ test {
 //compileGroovy.groovyOptions.fork = true
 //compileGroovy.groovyOptions.forkOptions.jvmArgs = ['-Xdebug', '-Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=5005']
 
-apply from: rootProject.file('gradle/functional-test-project.gradle')
+apply {
+    from rootProject.layout.projectDirectory.file('gradle/functional-test-config.gradle')
+    from rootProject.layout.projectDirectory.file('gradle/java-config.gradle')
+    from rootProject.layout.projectDirectory.file('gradle/test-webjar-asset-config.gradle')
+}
