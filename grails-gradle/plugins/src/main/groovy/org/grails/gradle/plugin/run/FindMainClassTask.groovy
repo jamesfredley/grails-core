@@ -31,6 +31,7 @@ import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.SourceSet
 import org.gradle.api.tasks.SourceSetOutput
 import org.gradle.api.tasks.TaskAction
+import org.grails.gradle.plugin.core.GrailsPluginGradlePlugin
 import org.grails.gradle.plugin.util.SourceSets
 import org.grails.io.support.MainClassFinder
 import org.springframework.boot.gradle.dsl.SpringBootExtension
@@ -124,6 +125,12 @@ class FindMainClassTask extends DefaultTask {
                 if (mainClass != null) {
                     mainClassFile.text = mainClass
                 } else {
+                    if (project.plugins.hasPlugin(GrailsPluginGradlePlugin)) {
+                        // this is ok if the project is a plugin because it's likely not going to be a runnable grails app
+                        project.logger.lifecycle("WARNING: this plugin project does not have an Application.class and thus the bootJar / bootRun will be invalid.")
+                        return null
+                    }
+
                     throw new RuntimeException("Could not find Application main class. Please set 'springBoot.mainClass' or disable BootJar & BootArchive tasks.")
                 }
             }

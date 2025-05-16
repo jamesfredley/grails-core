@@ -14,12 +14,6 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-
-import org.springframework.boot.gradle.tasks.bundling.BootArchive
-import org.springframework.boot.gradle.tasks.bundling.BootJar
-
-
-
 plugins {
     id 'java-library'
     id 'java-test-fixtures'
@@ -65,15 +59,6 @@ dependencies {
 
     // Added to be able to resolve the geb version from the BOM in the resolveVersions task
     compileOnly 'org.gebish:geb-spock'
-}
-
-// geb can't build a valid bootJar because it isn't an application, it's only a plugin
-tasks.withType(BootJar).configureEach {
-    it.enabled = false
-}
-
-tasks.withType(BootArchive).configureEach {
-    it.enabled = false
 }
 
 apply {
