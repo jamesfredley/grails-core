@@ -1,26 +1,30 @@
 /*
- *  Licensed to the Apache Software Foundation (ASF) under one
- *  or more contributor license agreements.  See the NOTICE file
- *  distributed with this work for additional information
- *  regarding copyright ownership.  The ASF licenses this file
- *  to you under the Apache License, Version 2.0 (the
- *  "License"); you may not use this file except in compliance
- *  with the License.  You may obtain a copy of the License at
+ *  Licensed to the Apache Software Foundation (ASF) under one or more
+ *  contributor license agreements.  See the NOTICE file distributed with
+ *  this work for additional information regarding copyright ownership.
+ *  The ASF licenses this file to You under the Apache License, Version 2.0
+ *  (the "License"); you may not use this file except in compliance with
+ *  the License.  You may obtain a copy of the License at
  *
- *    https://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
- *  Unless required by applicable law or agreed to in writing,
- *  software distributed under the License is distributed on an
- *  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- *  KIND, either express or implied.  See the License for the
- *  specific language governing permissions and limitations
- *  under the License.
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
  */
 package org.grails.taglib;
 
 import groovy.lang.Binding;
 
-import java.util.*;
+import java.util.AbstractSet;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Abstract super class for GroovyPage bindings
@@ -177,7 +181,7 @@ public abstract class AbstractTemplateVariableBinding extends Binding {
     }
 
     protected static class BindingMapEntry implements Map.Entry {
-        private AbstractTemplateVariableBinding binding;
+        private final AbstractTemplateVariableBinding binding;
 
         private Object key;
         private Object value;
@@ -211,10 +215,9 @@ public abstract class AbstractTemplateVariableBinding extends Binding {
             if (obj == this) {
                 return true;
             }
-            if (!(obj instanceof Map.Entry)) {
+            if (!(obj instanceof Map.Entry other)) {
                 return false;
             }
-            Map.Entry other = (Map.Entry) obj;
             return
                     (getKey() == null ? other.getKey() == null : getKey().equals(other.getKey())) &&
                             (getValue() == null ? other.getValue() == null : getValue().equals(other.getValue()));

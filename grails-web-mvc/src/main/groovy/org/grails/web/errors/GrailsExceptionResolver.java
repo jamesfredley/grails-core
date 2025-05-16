@@ -1,59 +1,59 @@
 /*
- *  Licensed to the Apache Software Foundation (ASF) under one
- *  or more contributor license agreements.  See the NOTICE file
- *  distributed with this work for additional information
- *  regarding copyright ownership.  The ASF licenses this file
- *  to you under the Apache License, Version 2.0 (the
- *  "License"); you may not use this file except in compliance
- *  with the License.  You may obtain a copy of the License at
+ *  Licensed to the Apache Software Foundation (ASF) under one or more
+ *  contributor license agreements.  See the NOTICE file distributed with
+ *  this work for additional information regarding copyright ownership.
+ *  The ASF licenses this file to You under the Apache License, Version 2.0
+ *  (the "License"); you may not use this file except in compliance with
+ *  the License.  You may obtain a copy of the License at
  *
- *    https://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
- *  Unless required by applicable law or agreed to in writing,
- *  software distributed under the License is distributed on an
- *  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- *  KIND, either express or implied.  See the License for the
- *  specific language governing permissions and limitations
- *  under the License.
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
  */
 package org.grails.web.errors;
 
 import grails.config.Config;
 import grails.config.Settings;
+import grails.core.GrailsApplication;
+import grails.core.support.GrailsApplicationAware;
 import grails.util.Environment;
-
-import java.io.IOException;
-import java.util.*;
-
+import grails.web.mapping.UrlMappingInfo;
+import grails.web.mapping.UrlMappingsHolder;
+import grails.web.mapping.exceptions.UrlMappingException;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-
-import grails.web.mapping.exceptions.UrlMappingException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.codehaus.groovy.control.CompilationFailedException;
-import grails.core.GrailsApplication;
-import org.grails.exceptions.reporting.DefaultStackTraceFilterer;
+import org.codehaus.groovy.runtime.InvokerInvocationException;
 import org.grails.core.exceptions.GrailsRuntimeException;
-import org.grails.exceptions.reporting.StackTraceFilterer;
-import grails.core.support.GrailsApplicationAware;
-import grails.web.mapping.UrlMappingInfo;
 import org.grails.exceptions.ExceptionUtils;
+import org.grails.exceptions.reporting.DefaultStackTraceFilterer;
+import org.grails.exceptions.reporting.StackTraceFilterer;
 import org.grails.web.mapping.DefaultUrlMappingInfo;
 import org.grails.web.mapping.UrlMappingUtils;
-import grails.web.mapping.UrlMappingsHolder;
-import org.grails.web.util.GrailsApplicationAttributes;
 import org.grails.web.servlet.mvc.exceptions.GrailsMVCException;
+import org.grails.web.util.GrailsApplicationAttributes;
 import org.grails.web.util.WebUtils;
-import org.codehaus.groovy.runtime.InvokerInvocationException;
 import org.springframework.beans.BeanUtils;
 import org.springframework.web.context.ServletContextAware;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.ViewResolver;
 import org.springframework.web.servlet.handler.SimpleMappingExceptionResolver;
+
+import java.io.IOException;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Wraps any runtime exceptions with a GrailsWrappedException instance.
@@ -65,7 +65,7 @@ public class GrailsExceptionResolver extends SimpleMappingExceptionResolver impl
     public static final String EXCEPTION_ATTRIBUTE = WebUtils.EXCEPTION_ATTRIBUTE;
 
     protected static final Log LOG = LogFactory.getLog(GrailsExceptionResolver.class);
-    protected static final String LINE_SEPARATOR = System.getProperty("line.separator");
+    protected static final String LINE_SEPARATOR = System.lineSeparator();
 
     protected ServletContext servletContext;
     protected GrailsApplication grailsApplication;
@@ -283,7 +283,7 @@ public class GrailsExceptionResolver extends SimpleMappingExceptionResolver impl
 
             if (params.hasMoreElements()) {
                 String param;
-                String values[];
+                String[] values;
                 int i;
 
                 sb.append(" - parameters:");

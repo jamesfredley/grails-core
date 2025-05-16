@@ -1,33 +1,29 @@
 /*
- *  Licensed to the Apache Software Foundation (ASF) under one
- *  or more contributor license agreements.  See the NOTICE file
- *  distributed with this work for additional information
- *  regarding copyright ownership.  The ASF licenses this file
- *  to you under the Apache License, Version 2.0 (the
- *  "License"); you may not use this file except in compliance
- *  with the License.  You may obtain a copy of the License at
+ *  Licensed to the Apache Software Foundation (ASF) under one or more
+ *  contributor license agreements.  See the NOTICE file distributed with
+ *  this work for additional information regarding copyright ownership.
+ *  The ASF licenses this file to You under the Apache License, Version 2.0
+ *  (the "License"); you may not use this file except in compliance with
+ *  the License.  You may obtain a copy of the License at
  *
- *    https://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
- *  Unless required by applicable law or agreed to in writing,
- *  software distributed under the License is distributed on an
- *  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- *  KIND, either express or implied.  See the License for the
- *  specific language governing permissions and limitations
- *  under the License.
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
  */
 package org.grails.buffer;
 
 import groovy.lang.GroovyObject;
 import groovy.lang.MetaClass;
 import groovy.lang.Writable;
-
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.Writer;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.codehaus.groovy.runtime.GStringImpl;
+import org.codehaus.groovy.runtime.InvokerHelper;
+import org.codehaus.groovy.runtime.typehandling.DefaultTypeTransformation;
 import org.grails.charsequences.CharSequences;
 import org.grails.encoder.EncodedAppender;
 import org.grails.encoder.EncodedAppenderFactory;
@@ -37,9 +33,10 @@ import org.grails.encoder.Encoder;
 import org.grails.encoder.EncodingStateRegistry;
 import org.grails.encoder.StreamingEncoder;
 import org.grails.encoder.StreamingEncoderWriter;
-import org.codehaus.groovy.runtime.GStringImpl;
-import org.codehaus.groovy.runtime.InvokerHelper;
-import org.codehaus.groovy.runtime.typehandling.DefaultTypeTransformation;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.Writer;
 
 /**
  * PrintWriter implementation that doesn't have synchronization. null object
@@ -49,7 +46,7 @@ import org.codehaus.groovy.runtime.typehandling.DefaultTypeTransformation;
  */
 public class GrailsPrintWriter extends Writer implements GrailsWrappedWriter, EncodedAppenderWriterFactory, GroovyObject {
     protected static final Log LOG = LogFactory.getLog(GrailsPrintWriter.class);
-    protected static final char CRLF[] = { '\r', '\n' };
+    protected static final char[] CRLF = {'\r', '\n'};
     protected boolean trouble = false;
     protected Writer out;
     protected boolean allowUnwrappingOut = true;
@@ -101,7 +98,7 @@ public class GrailsPrintWriter extends Writer implements GrailsWrappedWriter, En
      *
      * @param obj The value
      * @return Returns this object
-     * @throws IOException
+     * @throws IOException If an I/O error occurs
      */
     public GrailsPrintWriter leftShift(Object obj) throws IOException {
         if (trouble || obj == null) {

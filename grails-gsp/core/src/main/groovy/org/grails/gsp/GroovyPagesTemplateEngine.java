@@ -1,20 +1,18 @@
 /*
- *  Licensed to the Apache Software Foundation (ASF) under one
- *  or more contributor license agreements.  See the NOTICE file
- *  distributed with this work for additional information
- *  regarding copyright ownership.  The ASF licenses this file
- *  to you under the Apache License, Version 2.0 (the
- *  "License"); you may not use this file except in compliance
- *  with the License.  You may obtain a copy of the License at
+ *  Licensed to the Apache Software Foundation (ASF) under one or more
+ *  contributor license agreements.  See the NOTICE file distributed with
+ *  this work for additional information regarding copyright ownership.
+ *  The ASF licenses this file to You under the Apache License, Version 2.0
+ *  (the "License"); you may not use this file except in compliance with
+ *  the License.  You may obtain a copy of the License at
  *
- *    https://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
- *  Unless required by applicable law or agreed to in writing,
- *  software distributed under the License is distributed on an
- *  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- *  KIND, either express or implied.  See the License for the
- *  specific language governing permissions and limitations
- *  under the License.
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
  */
 package org.grails.gsp;
 
@@ -37,7 +35,11 @@ import org.grails.core.artefact.DomainClassArtefactHandler;
 import org.grails.core.exceptions.DefaultErrorsPrinter;
 import org.grails.exceptions.ExceptionUtils;
 import org.grails.gsp.compiler.GroovyPageParser;
-import org.grails.gsp.io.*;
+import org.grails.gsp.io.DefaultGroovyPageLocator;
+import org.grails.gsp.io.GroovyPageCompiledScriptSource;
+import org.grails.gsp.io.GroovyPageLocator;
+import org.grails.gsp.io.GroovyPageResourceScriptSource;
+import org.grails.gsp.io.GroovyPageScriptSource;
 import org.grails.gsp.jsp.TagLibraryResolver;
 import org.grails.taglib.TagLibraryLookup;
 import org.springframework.beans.BeansException;
@@ -46,7 +48,11 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ResourceLoaderAware;
-import org.springframework.core.io.*;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
+import org.springframework.core.io.UrlResource;
 import org.springframework.scripting.ScriptSource;
 import org.springframework.scripting.support.ResourceScriptSource;
 import org.springframework.util.Assert;
@@ -55,8 +61,12 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.security.PrivilegedAction;
-import java.util.*;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -65,7 +75,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * Based on (but not extending) the existing TemplateEngine implementations
  * within Groovy. It allows GSP pages to be re-used in different context using code like the below:
- *
+ * <p>
  * <code>
  *      Template t = new GroovyPagesTemplateEngine()
  *                          .createTemplate(context,request,response);
@@ -88,9 +98,9 @@ public class GroovyPagesTemplateEngine extends ResourceAwareTemplateEngine imple
     private static final Log LOG = LogFactory.getLog(GroovyPagesTemplateEngine.class);
     private static File dumpLineNumbersTo;
 
-    private ConcurrentMap<String, CacheEntry<GroovyPageMetaInfo>> pageCache = new ConcurrentHashMap<String, CacheEntry<GroovyPageMetaInfo>>();
+    private final ConcurrentMap<String, CacheEntry<GroovyPageMetaInfo>> pageCache = new ConcurrentHashMap<>();
     private ClassLoader classLoader;
-    private AtomicInteger scriptNameCount=new AtomicInteger(0);
+    private final AtomicInteger scriptNameCount = new AtomicInteger(0);
 
     private GroovyPageLocator groovyPageLocator = new DefaultGroovyPageLocator();
 
@@ -103,7 +113,7 @@ public class GroovyPagesTemplateEngine extends ResourceAwareTemplateEngine imple
     private GrailsApplication grailsApplication;
     private Map<String, Class<?>> cachedDomainsWithoutPackage;
 
-    private List<GroovyPageSourceDecorator> groovyPageSourceDecorators = new ArrayList();
+    private List<GroovyPageSourceDecorator> groovyPageSourceDecorators = new ArrayList<>();
 
     static {
         String dirPath = System.getProperty("grails.dump.gsp.line.numbers.to.dir");
@@ -306,7 +316,7 @@ public class GroovyPagesTemplateEngine extends ResourceAwareTemplateEngine imple
      *
      * @param uri The URI of the page to create the template for
      * @return The Template instance
-     * @throws CompilationFailedException
+     * @throws CompilationFailedException if the gsp compilation fails
      */
     @Override
     public Template createTemplate(String uri) {
@@ -326,14 +336,12 @@ public class GroovyPagesTemplateEngine extends ResourceAwareTemplateEngine imple
     }
 
     private GroovyPageMetaInfo initializeCompiledMetaInfo(GroovyPageMetaInfo meta) {
-        meta.initializeOnDemand(new GroovyPageMetaInfo.GroovyPageMetaInfoInitializer() {
-            public void initialize(GroovyPageMetaInfo metaInfo) {
-                metaInfo.setGrailsApplication(grailsApplication);
-                metaInfo.setJspTagLibraryResolver(jspTagLibraryResolver);
-                metaInfo.setTagLibraryLookup(tagLibraryLookup);
-                metaInfo.initialize();
-                GroovyPagesMetaUtils.registerMethodMissingForGSP(metaInfo.getPageClass(), tagLibraryLookup);
-            }
+        meta.initializeOnDemand(metaInfo -> {
+            metaInfo.setGrailsApplication(grailsApplication);
+            metaInfo.setJspTagLibraryResolver(jspTagLibraryResolver);
+            metaInfo.setTagLibraryLookup(tagLibraryLookup);
+            metaInfo.initialize();
+            GroovyPagesMetaUtils.registerMethodMissingForGSP(metaInfo.getPageClass(), tagLibraryLookup);
         });
         return meta;
     }
@@ -371,8 +379,7 @@ public class GroovyPagesTemplateEngine extends ResourceAwareTemplateEngine imple
             return createTemplateFromPrecompiled((GroovyPageCompiledScriptSource) scriptSource);
         }
 
-        if (scriptSource instanceof ResourceScriptSource) {
-            ResourceScriptSource resourceSource = (ResourceScriptSource) scriptSource;
+        if (scriptSource instanceof ResourceScriptSource resourceSource) {
             Resource resource = resourceSource.getResource();
             return createTemplate(resource, true);
         }
@@ -392,14 +399,14 @@ public class GroovyPagesTemplateEngine extends ResourceAwareTemplateEngine imple
      * @param pageName The name of the page being parsed
      *
      * @return The Template instance
-     * @throws CompilationFailedException
+     * @throws CompilationFailedException if gsp template compilation fails
      * @throws IOException Thrown if an IO exception occurs creating the Template
      */
     public Template createTemplate(String txt, String pageName) throws IOException {
         Assert.hasLength(txt, "Argument [txt] cannot be null or blank");
         Assert.hasLength(pageName, "Argument [pageName] cannot be null or blank");
 
-        return createTemplate(new ByteArrayResource(txt.getBytes("UTF-8"), pageName), pageName, pageName != null);
+        return createTemplate(new ByteArrayResource(txt.getBytes(StandardCharsets.UTF_8), pageName), pageName, pageName != null);
     }
 
     /**
@@ -444,12 +451,8 @@ public class GroovyPagesTemplateEngine extends ResourceAwareTemplateEngine imple
     }
 
     protected GroovyPageMetaInfo buildPageMetaInfo(Resource resource, String pageName) throws IOException {
-        InputStream inputStream = resource.getInputStream();
-        try {
+        try (InputStream inputStream = resource.getInputStream()) {
             return buildPageMetaInfo(inputStream, resource, pageName);
-        }
-        finally {
-            inputStream.close();
         }
     }
 
@@ -468,11 +471,7 @@ public class GroovyPagesTemplateEngine extends ResourceAwareTemplateEngine imple
      * @return true if it is reloadable
      */
     private boolean isGroovyPageReloadable(final Resource resource, GroovyPageMetaInfo meta) {
-        return isReloadEnabled() && meta.shouldReload(new PrivilegedAction<Resource>() {
-            public Resource run() {
-                return resource;
-            }
-        });
+        return isReloadEnabled() && meta.shouldReload(() -> resource);
     }
 
     /**
@@ -501,7 +500,7 @@ public class GroovyPagesTemplateEngine extends ResourceAwareTemplateEngine imple
      */
     public Resource getResourceForUri(String uri) {
         GroovyPageScriptSource scriptSource = getResourceWithinContext(uri);
-        if (scriptSource != null && (scriptSource instanceof GroovyPageResourceScriptSource)) {
+        if ((scriptSource instanceof GroovyPageResourceScriptSource)) {
             return ((GroovyPageResourceScriptSource)scriptSource).getResource();
         }
         return null;
@@ -509,11 +508,7 @@ public class GroovyPagesTemplateEngine extends ResourceAwareTemplateEngine imple
 
     private GroovyPageScriptSource getResourceWithinContext(String uri) {
         Assert.state(groovyPageLocator != null, "TemplateEngine not initialised correctly, no [groovyPageLocator] specified!");
-        GroovyPageScriptSource scriptSource = groovyPageLocator.findPage(uri);
-        if (scriptSource != null) {
-            return scriptSource;
-        }
-        return null;
+        return groovyPageLocator.findPage(uri);
     }
 
     /**
@@ -687,11 +682,7 @@ public class GroovyPagesTemplateEngine extends ResourceAwareTemplateEngine imple
             // a word character or a digit with an underscore
             if (name.startsWith("/")) name = name.substring(1);
             return name.replaceAll("[^\\w\\d]", "_");
-        }
-        catch (IllegalStateException e) {
-            return generateTemplateName();
-        }
-        catch (IOException ioex) {
+        } catch (IllegalStateException | IOException e) {
             return generateTemplateName();
         }
     }
@@ -781,12 +772,12 @@ public class GroovyPagesTemplateEngine extends ResourceAwareTemplateEngine imple
     /**
      * The domainClassMap is used in GSP binding to "auto-import" domain classes in packages without package prefix.
      * real imports aren't used, instead each class is added to the binding
-     *
+     * <p>
      * This feature has existed earlier, the code has just been refactored and moved to GroovyPagesTemplateEngine
      * to prevent using the static cache that was used previously.
      */
     private Map<String, Class<?>> createDomainClassMap() {
-        Map<String, Class<?>> domainsWithoutPackage = new HashMap<String, Class<?>>();
+        Map<String, Class<?>> domainsWithoutPackage = new HashMap<>();
         if (grailsApplication != null) {
             GrailsClass[] domainClasses = grailsApplication.getArtefacts(DomainClassArtefactHandler.TYPE);
             for (GrailsClass domainClass : domainClasses) {
