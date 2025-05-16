@@ -1,18 +1,20 @@
 /*
- *  Licensed to the Apache Software Foundation (ASF) under one or more
- *  contributor license agreements.  See the NOTICE file distributed with
- *  this work for additional information regarding copyright ownership.
- *  The ASF licenses this file to You under the Apache License, Version 2.0
- *  (the "License"); you may not use this file except in compliance with
- *  the License.  You may obtain a copy of the License at
+ *  Licensed to the Apache Software Foundation (ASF) under one
+ *  or more contributor license agreements.  See the NOTICE file
+ *  distributed with this work for additional information
+ *  regarding copyright ownership.  The ASF licenses this file
+ *  to you under the Apache License, Version 2.0 (the
+ *  "License"); you may not use this file except in compliance
+ *  with the License.  You may obtain a copy of the License at
  *
- *      https://www.apache.org/licenses/LICENSE-2.0
+ *    https://www.apache.org/licenses/LICENSE-2.0
  *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ *  Unless required by applicable law or agreed to in writing,
+ *  software distributed under the License is distributed on an
+ *  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ *  KIND, either express or implied.  See the License for the
+ *  specific language governing permissions and limitations
+ *  under the License.
  */
 package org.grails.async.transform.internal;
 
@@ -20,6 +22,14 @@ import grails.async.Promise;
 import grails.async.Promises;
 import groovy.lang.Closure;
 import groovy.lang.GroovyObjectSupport;
+
+import java.beans.Introspector;
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
 import org.apache.grails.common.compiler.GroovyTransformOrder;
 import org.codehaus.groovy.GroovyBugError;
 import org.codehaus.groovy.ast.ASTNode;
@@ -49,13 +59,6 @@ import org.codehaus.groovy.transform.GroovyASTTransformation;
 import org.codehaus.groovy.transform.TransformWithPriority;
 import org.codehaus.groovy.transform.stc.StaticTypeCheckingSupport;
 
-import java.beans.Introspector;
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-
 /**
  * Implementation of {@link grails.async.DelegateAsync} transformation
  *
@@ -70,14 +73,18 @@ public class DelegateAsyncTransformation implements ASTTransformation, Transform
     public static final ClassNode OBJECT_CLASS_NODE = new ClassNode(Object.class);
 
     public void visit(ASTNode[] nodes, SourceUnit source) {
-        if (nodes.length != 2 || !(nodes[0] instanceof AnnotationNode annotationNode) || !(nodes[1] instanceof AnnotatedNode parent)) {
+        if (nodes.length != 2 || !(nodes[0] instanceof AnnotationNode) || !(nodes[1] instanceof AnnotatedNode)) {
             throw new GroovyBugError("Internal error: expecting [AnnotationNode, AnnotatedNode] but got: " + Arrays.asList(nodes));
         }
 
-        if (parent instanceof ClassNode classNode) {
+        AnnotatedNode parent = (AnnotatedNode) nodes[1];
+        AnnotationNode annotationNode = (AnnotationNode) nodes[0];
+
+        if (parent instanceof ClassNode) {
             Expression value = annotationNode.getMember("value");
             if (value instanceof ClassExpression) {
                 ClassNode targetApi = value.getType().getPlainNodeReference();
+                ClassNode classNode = (ClassNode)parent;
 
                 final String fieldName = '$' + Introspector.decapitalize(targetApi.getNameWithoutPackage());
                 FieldNode fieldNode = classNode.getField(fieldName);
@@ -88,7 +95,9 @@ public class DelegateAsyncTransformation implements ASTTransformation, Transform
 
                 applyDelegateAsyncTransform(classNode, targetApi, fieldName);
             }
-        } else if (parent instanceof FieldNode fieldNode) {
+        }
+        else if(parent instanceof FieldNode) {
+            FieldNode fieldNode = (FieldNode)parent;
             ClassNode targetApi = fieldNode.getType().getPlainNodeReference();
             ClassNode classNode = fieldNode.getOwner();
             applyDelegateAsyncTransform(classNode, targetApi, fieldNode.getName());

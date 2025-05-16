@@ -1,38 +1,30 @@
 /*
- *  Licensed to the Apache Software Foundation (ASF) under one or more
- *  contributor license agreements.  See the NOTICE file distributed with
- *  this work for additional information regarding copyright ownership.
- *  The ASF licenses this file to You under the Apache License, Version 2.0
- *  (the "License"); you may not use this file except in compliance with
- *  the License.  You may obtain a copy of the License at
+ *  Licensed to the Apache Software Foundation (ASF) under one
+ *  or more contributor license agreements.  See the NOTICE file
+ *  distributed with this work for additional information
+ *  regarding copyright ownership.  The ASF licenses this file
+ *  to you under the Apache License, Version 2.0 (the
+ *  "License"); you may not use this file except in compliance
+ *  with the License.  You may obtain a copy of the License at
  *
- *      https://www.apache.org/licenses/LICENSE-2.0
+ *    https://www.apache.org/licenses/LICENSE-2.0
  *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ *  Unless required by applicable law or agreed to in writing,
+ *  software distributed under the License is distributed on an
+ *  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ *  KIND, either express or implied.  See the License for the
+ *  specific language governing permissions and limitations
+ *  under the License.
  */
 package org.grails.gsp.jsp;
 
 import groovy.lang.Binding;
 import jakarta.el.ELContext;
-import jakarta.servlet.GenericServlet;
-import jakarta.servlet.Servlet;
-import jakarta.servlet.ServletConfig;
-import jakarta.servlet.ServletContext;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.ServletRequest;
-import jakarta.servlet.ServletResponse;
+import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
-import jakarta.servlet.jsp.JspApplicationContext;
-import jakarta.servlet.jsp.JspContext;
-import jakarta.servlet.jsp.JspFactory;
-import jakarta.servlet.jsp.JspWriter;
-import jakarta.servlet.jsp.PageContext;
+import jakarta.servlet.jsp.*;
 import jakarta.servlet.jsp.tagext.BodyContent;
 import org.grails.gsp.GroovyPage;
 import org.grails.web.servlet.mvc.GrailsWebRequest;
@@ -41,14 +33,7 @@ import org.springframework.web.context.request.RequestContextHolder;
 
 import java.io.IOException;
 import java.io.Writer;
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.Deque;
-import java.util.Enumeration;
-import java.util.List;
-import java.util.ListIterator;
-import java.util.Map;
-import java.util.NoSuchElementException;
+import java.util.*;
 
 /**
  * A JSP PageContext implementation for use with GSP.
@@ -107,7 +92,7 @@ public class GroovyPagesPageContext extends PageContext {
 
     void popWriter() {
         outStack.pop();
-        jspOut = outStack.peek();
+        jspOut = (JspWriter) outStack.peek();
         setCurrentOut();
     }
 
@@ -285,13 +270,13 @@ public class GroovyPagesPageContext extends PageContext {
     public Object getAttribute(String name, int scope) {
         Assert.notNull(name, "Attribute name cannot be null");
 
-        return switch (scope) {
-            case PAGE_SCOPE -> getAttribute(name);
-            case REQUEST_SCOPE -> request.getAttribute(name);
-            case SESSION_SCOPE -> request.getSession(true).getAttribute(name);
-            case APPLICATION_SCOPE -> servletContext.getAttribute(name);
-            default -> getAttribute(name);
-        };
+        switch (scope) {
+            case PAGE_SCOPE:        return getAttribute(name);
+            case REQUEST_SCOPE:     return request.getAttribute(name);
+            case SESSION_SCOPE:     return request.getSession(true).getAttribute(name);
+            case APPLICATION_SCOPE: return servletContext.getAttribute(name);
+            default:                return getAttribute(name);
+        }
     }
 
     @Override

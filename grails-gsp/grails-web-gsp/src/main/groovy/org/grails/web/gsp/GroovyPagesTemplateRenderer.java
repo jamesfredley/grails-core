@@ -1,18 +1,20 @@
 /*
- *  Licensed to the Apache Software Foundation (ASF) under one or more
- *  contributor license agreements.  See the NOTICE file distributed with
- *  this work for additional information regarding copyright ownership.
- *  The ASF licenses this file to You under the Apache License, Version 2.0
- *  (the "License"); you may not use this file except in compliance with
- *  the License.  You may obtain a copy of the License at
+ *  Licensed to the Apache Software Foundation (ASF) under one
+ *  or more contributor license agreements.  See the NOTICE file
+ *  distributed with this work for additional information
+ *  regarding copyright ownership.  The ASF licenses this file
+ *  to you under the Apache License, Version 2.0 (the
+ *  "License"); you may not use this file except in compliance
+ *  with the License.  You may obtain a copy of the License at
  *
- *      https://www.apache.org/licenses/LICENSE-2.0
+ *    https://www.apache.org/licenses/LICENSE-2.0
  *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ *  Unless required by applicable law or agreed to in writing,
+ *  software distributed under the License is distributed on an
+ *  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ *  KIND, either express or implied.  See the License for the
+ *  specific language governing permissions and limitations
+ *  under the License.
  */
 package org.grails.web.gsp;
 
@@ -50,7 +52,6 @@ import org.springframework.util.ReflectionUtils;
 import java.io.IOException;
 import java.io.Writer;
 import java.lang.reflect.Method;
-import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -61,7 +62,7 @@ import java.util.concurrent.ConcurrentMap;
 
 /**
  * Service that provides the actual implementation to RenderTagLib's render tag.
- * <p>
+ *
  * This is an internal Grails service and should not be used by plugins directly.
  * The implementation was moved from RenderTagLib, ported to Java and then refactored.
  *
@@ -73,7 +74,7 @@ import java.util.concurrent.ConcurrentMap;
 public class GroovyPagesTemplateRenderer implements InitializingBean {
     private GrailsConventionGroovyPageLocator groovyPageLocator;
     private GroovyPagesTemplateEngine groovyPagesTemplateEngine;
-    private final ConcurrentMap<String, CacheEntry<Template>> templateCache = new ConcurrentHashMap<>();
+    private ConcurrentMap<String,CacheEntry<Template>> templateCache = new ConcurrentHashMap<String,CacheEntry<Template>>();
     private Object scaffoldingTemplateGenerator;
     private Map<String, Collection<String>> scaffoldedActionMap;
     private Map<String, GrailsDomainClass> controllerToScaffoldedDomainClassMap;
@@ -157,23 +158,23 @@ public class GroovyPagesTemplateRenderer implements InitializingBean {
         return CacheEntry.getValue(templateCache, cacheKey, reloadEnabled ? GroovyPageMetaInfo.LASTMODIFIED_CHECK_INTERVAL : -1, null,
                 new Callable<CacheEntry<Template>>() {
                     public CacheEntry<Template> call() {
-                        return new CacheEntry<>() {
+                        return new CacheEntry<Template>() {
                             boolean allowCaching = cacheEnabled;
                             boolean neverExpire = false;
 
                             @Override
                             protected boolean hasExpired(long timeout, Object cacheRequestObject) {
-                                return !neverExpire && (!allowCaching || super.hasExpired(timeout, cacheRequestObject));
+                                return neverExpire ? false : (allowCaching ? super.hasExpired(timeout, cacheRequestObject) : true);
                             }
-
+                            
                             @Override
                             public boolean isInitialized() {
-                                return allowCaching && super.isInitialized();
+                                return allowCaching ? super.isInitialized() : false;
                             }
-
+                            
                             @Override
                             public void setValue(Template val) {
-                                if (allowCaching) {
+                                if(allowCaching) {
                                     super.setValue(val);
                                 }
                             }
@@ -229,7 +230,8 @@ public class GroovyPagesTemplateRenderer implements InitializingBean {
                 if (key == null && GrailsStringUtils.isBlank(var) && it != null) {
                     key = GrailsNameUtils.getPropertyName(it.getClass());
                 }
-                Map itmap = new LinkedHashMap<String, Object>(b);
+                Map itmap = new LinkedHashMap<String, Object>();
+                itmap.putAll(b);
                 if (GrailsStringUtils.isNotBlank(var)) {
                     itmap.put(var, it);
                 }
@@ -280,7 +282,7 @@ public class GroovyPagesTemplateRenderer implements InitializingBean {
                 }
                 FastStringWriter sw = new FastStringWriter();
                 ReflectionUtils.invokeMethod(generateViewMethod, scaffoldingTemplateGenerator, domainClass, scaffoldedtemplateName, sw);
-                t = groovyPagesTemplateEngine.createTemplate(new ByteArrayResource(sw.toString().getBytes(StandardCharsets.UTF_8), uri), false);
+                t = groovyPagesTemplateEngine.createTemplate(new ByteArrayResource(sw.toString().getBytes("UTF-8"), uri), false);
             }
         }
         return t;

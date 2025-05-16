@@ -1,18 +1,20 @@
 /*
- *  Licensed to the Apache Software Foundation (ASF) under one or more
- *  contributor license agreements.  See the NOTICE file distributed with
- *  this work for additional information regarding copyright ownership.
- *  The ASF licenses this file to You under the Apache License, Version 2.0
- *  (the "License"); you may not use this file except in compliance with
- *  the License.  You may obtain a copy of the License at
+ *  Licensed to the Apache Software Foundation (ASF) under one
+ *  or more contributor license agreements.  See the NOTICE file
+ *  distributed with this work for additional information
+ *  regarding copyright ownership.  The ASF licenses this file
+ *  to you under the Apache License, Version 2.0 (the
+ *  "License"); you may not use this file except in compliance
+ *  with the License.  You may obtain a copy of the License at
  *
- *      https://www.apache.org/licenses/LICENSE-2.0
+ *    https://www.apache.org/licenses/LICENSE-2.0
  *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ *  Unless required by applicable law or agreed to in writing,
+ *  software distributed under the License is distributed on an
+ *  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ *  KIND, either express or implied.  See the License for the
+ *  specific language governing permissions and limitations
+ *  under the License.
  */
 package org.grails.compiler.web;
 
@@ -98,18 +100,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
-import static org.codehaus.groovy.ast.tools.GeneralUtils.args;
-import static org.codehaus.groovy.ast.tools.GeneralUtils.assignX;
-import static org.codehaus.groovy.ast.tools.GeneralUtils.boolX;
-import static org.codehaus.groovy.ast.tools.GeneralUtils.callThisX;
-import static org.codehaus.groovy.ast.tools.GeneralUtils.callX;
-import static org.codehaus.groovy.ast.tools.GeneralUtils.classX;
-import static org.codehaus.groovy.ast.tools.GeneralUtils.constX;
-import static org.codehaus.groovy.ast.tools.GeneralUtils.declX;
-import static org.codehaus.groovy.ast.tools.GeneralUtils.ifS;
-import static org.codehaus.groovy.ast.tools.GeneralUtils.localVarX;
-import static org.codehaus.groovy.ast.tools.GeneralUtils.stmt;
-import static org.codehaus.groovy.ast.tools.GeneralUtils.varX;
+import static org.codehaus.groovy.ast.tools.GeneralUtils.*;
 import static org.grails.compiler.injection.GrailsASTUtils.applyDefaultMethodTarget;
 import static org.grails.compiler.injection.GrailsASTUtils.applyMethodTarget;
 import static org.grails.compiler.injection.GrailsASTUtils.buildGetMapExpression;
@@ -195,7 +186,7 @@ public class ControllerActionTransformer implements GrailsArtefactClassInjector,
             ClassHelper.Boolean_TYPE, "boolean",
             ClassHelper.Byte_TYPE, "byte",
             ClassHelper.Character_TYPE, "char");
-    private static final List<ClassNode> PRIMITIVE_CLASS_NODES = CollectionUtils.newList(
+    private static List<ClassNode> PRIMITIVE_CLASS_NODES = CollectionUtils.<ClassNode>newList(
             ClassHelper.boolean_TYPE,
             ClassHelper.char_TYPE,
             ClassHelper.int_TYPE,
@@ -208,7 +199,7 @@ public class ControllerActionTransformer implements GrailsArtefactClassInjector,
 
     public static final String CONVERT_CLOSURES_KEY = "grails.compile.artefacts.closures.convert";
 
-    private final Boolean converterEnabled;
+    private Boolean converterEnabled;
     private CompilationUnit compilationUnit;
 
     public ControllerActionTransformer() {
@@ -243,7 +234,7 @@ public class ControllerActionTransformer implements GrailsArtefactClassInjector,
 
     private boolean isExceptionHandlingMethod(MethodNode methodNode) {
         boolean isExceptionHandler = false;
-        if (!methodNode.isPrivate() && !methodNode.getName().contains("$")) {
+        if(!methodNode.isPrivate() && methodNode.getName().indexOf("$") == -1) {
             Parameter[] parameters = methodNode.getParameters();
             if(parameters.length == 1) {
                 ClassNode parameterTypeClassNode = parameters[0].getType();
@@ -258,7 +249,7 @@ public class ControllerActionTransformer implements GrailsArtefactClassInjector,
     private void processMethods(ClassNode classNode, SourceUnit source,
             GeneratorContext context) {
 
-        List<MethodNode> deferredNewMethods = new ArrayList<>();
+        List<MethodNode> deferredNewMethods = new ArrayList<MethodNode>();
         for (MethodNode method : classNode.getMethods()) {
             if (methodShouldBeConfiguredAsControllerAction(method)) {
                 final List<MethodNode> declaredMethodsWithThisName = classNode.getDeclaredMethods(method.getName());
@@ -334,7 +325,7 @@ public class ControllerActionTransformer implements GrailsArtefactClassInjector,
     }
 
     protected Collection<MethodNode> getExceptionHandlerMethods(final ClassNode classNode, SourceUnit sourceUnit) {
-        final Map<ClassNode, MethodNode> exceptionTypeToHandlerMethodMap = new HashMap<>();
+        final Map<ClassNode, MethodNode> exceptionTypeToHandlerMethodMap = new HashMap<ClassNode, MethodNode>();
         final List<MethodNode> methods = classNode.getMethods();
         for(MethodNode methodNode : methods) {
             if(isExceptionHandlingMethod(methodNode)) {
@@ -456,7 +447,7 @@ public class ControllerActionTransformer implements GrailsArtefactClassInjector,
 
     private void processClosures(ClassNode classNode, SourceUnit source, GeneratorContext context) {
 
-        List<PropertyNode> propertyNodes = new ArrayList<>(classNode.getProperties());
+        List<PropertyNode> propertyNodes = new ArrayList<PropertyNode>(classNode.getProperties());
 
         Expression initialExpression;
         ClosureExpression closureAction;
@@ -531,12 +522,14 @@ public class ControllerActionTransformer implements GrailsArtefactClassInjector,
         
         if(allowedMethodsField != null) {
             final Expression initialAllowedMethodsExpression = allowedMethodsField.getInitialExpression();
-            if (initialAllowedMethodsExpression instanceof MapExpression allowedMethodsMapExpression) {
+            if(initialAllowedMethodsExpression instanceof MapExpression) {
                 boolean actionIsRestricted = false;
+                final MapExpression allowedMethodsMapExpression = (MapExpression) initialAllowedMethodsExpression;
                 final List<MapEntryExpression> allowedMethodsMapEntryExpressions = allowedMethodsMapExpression.getMapEntryExpressions();
                 for(MapEntryExpression allowedMethodsMapEntryExpression : allowedMethodsMapEntryExpressions) {
                     final Expression allowedMethodsMapEntryKeyExpression = allowedMethodsMapEntryExpression.getKeyExpression();
-                    if (allowedMethodsMapEntryKeyExpression instanceof ConstantExpression allowedMethodsMapKeyConstantExpression) {
+                    if(allowedMethodsMapEntryKeyExpression instanceof ConstantExpression) {
+                        final ConstantExpression allowedMethodsMapKeyConstantExpression = (ConstantExpression) allowedMethodsMapEntryKeyExpression;
                         final Object allowedMethodsMapKeyValue = allowedMethodsMapKeyConstantExpression.getValue();
                         if(methodName.equals(allowedMethodsMapKeyValue)) {
                             actionIsRestricted = true;
@@ -732,7 +725,7 @@ public class ControllerActionTransformer implements GrailsArtefactClassInjector,
                         Parameter[] parameters = methods.get(0).getParameters();
                         //Look for a parameter of index (argX) in the method.
                         //The $self is the first parameter, so arg1 == index of 1
-                        int argNum = Integer.parseInt(paramName.replaceFirst("arg", ""));
+                        int argNum = Integer.valueOf(paramName.replaceFirst("arg", ""));
                         if (parameters.length >= argNum + 1) {
                             Parameter helperParam = parameters[argNum];
                             //Set the request parameter name based off of the parameter in the trait helper method

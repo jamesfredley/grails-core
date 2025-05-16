@@ -30,12 +30,7 @@ import org.springframework.util.ClassUtils;
 
 import java.io.IOException;
 import java.io.Writer;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * A JSONObject is an unordered collection of name/value pairs. Its
@@ -97,7 +92,7 @@ public class JSONObject implements JSONElement, Map {
     private static boolean useStreamingJavascriptEncoder=false;
     static {
         try {
-            javascriptEncoder = (StreamingEncoder) ClassUtils.forName("grails.encoders.JSONEncoder", JSONObject.class.getClassLoader()).getDeclaredConstructor().newInstance();
+            javascriptEncoder = (StreamingEncoder)ClassUtils.forName("grails.encoders.JSONEncoder", JSONObject.class.getClassLoader()).newInstance();
             javascriptEncoderStateless = (EncodesToWriter)javascriptEncoder;
             useStreamingJavascriptEncoder = true;
         }
@@ -109,7 +104,7 @@ public class JSONObject implements JSONElement, Map {
     /**
      * The hash map where the JSONObject's properties are kept.
      */
-    private final HashMap myHashMap;
+    private HashMap myHashMap;
 
     /**
      * Construct an empty JSONObject.
@@ -130,8 +125,8 @@ public class JSONObject implements JSONElement, Map {
      */
     public JSONObject(JSONObject jo, String[] sa) throws JSONException {
         this();
-        for (String s : sa) {
-            putOpt(s, jo.opt(s));
+        for (int i = 0; i < sa.length; i += 1) {
+            putOpt(sa[i], jo.opt(sa[i]));
         }
     }
 
@@ -446,7 +441,7 @@ public class JSONObject implements JSONElement, Map {
         while (keys.hasNext()) {
             ja.put(keys.next());
         }
-        return ja.isEmpty() ? null : ja;
+        return ja.length() == 0 ? null : ja;
     }
 
     /**
@@ -484,11 +479,12 @@ public class JSONObject implements JSONElement, Map {
     static public String collectionToString(Collection c) {
         StringBuilder sb = new StringBuilder("[");
         boolean first = true;
-        for (Object o : c) {
+        Iterator iterator = c.iterator();
+        while(iterator.hasNext()) {
             if (!first) {
                 sb.append(',');
             }
-            sb.append(valueToString(o));
+            sb.append(valueToString(iterator.next()));
             first = false;
         }
         sb.append("]");
@@ -566,7 +562,7 @@ public class JSONObject implements JSONElement, Map {
         try {
             Object o = opt(key);
             return o instanceof Number ? ((Number) o).doubleValue() :
-                    Double.parseDouble((String) o);
+                    Double.valueOf((String) o);
         } catch (Exception e) {
             return defaultValue;
         }
@@ -805,7 +801,7 @@ public class JSONObject implements JSONElement, Map {
      * @return A String correctly formatted for insertion in a JSON text.
      */
     public static String quote(String string) {
-        if (string == null || string.isEmpty()) {
+        if (string == null || string.length() == 0) {
             return "\"\"";
         }
 
@@ -850,7 +846,7 @@ public class JSONObject implements JSONElement, Map {
                 default:
                     if (c < ' ') {
                         t = "000" + Integer.toHexString(c);
-                        sb.append("\\u").append(t.substring(t.length() - 4));
+                        sb.append("\\u" + t.substring(t.length() - 4));
                     } else {
                         sb.append(c);
                     }
@@ -904,7 +900,7 @@ public class JSONObject implements JSONElement, Map {
      * @throws JSONException If any of the values are non-finite numbers.
      */
     public JSONArray toJSONArray(JSONArray names) throws JSONException {
-        if (names == null || names.isEmpty()) {
+        if (names == null || names.length() == 0) {
             return null;
         }
         JSONArray ja = new JSONArray();
@@ -1038,7 +1034,7 @@ public class JSONObject implements JSONElement, Map {
      * @throws JSONException If the value is or contains an invalid number.
      */
     static String valueToString(Object value) throws JSONException {
-        if (value == null) {
+        if (value == null || value.equals(null)) {
             return "null";
         }
         if (value instanceof Number) {
@@ -1057,7 +1053,7 @@ public class JSONObject implements JSONElement, Map {
     }
 
     static void writeValue(Writer writer, Object value) throws IOException {
-        if (value == null) {
+        if (value == null || value.equals(null)) {
             writer.write("null");
         } else if (value instanceof Number) {
             writeNumber(writer, (Number) value);
@@ -1124,7 +1120,7 @@ public class JSONObject implements JSONElement, Map {
      */
     static String valueToString(Object value, int indentFactor, int indent)
             throws JSONException {
-        if (value == null) {
+        if (value == null || value.equals(null)) {
             return "null";
         }
         if (value instanceof Number) {
@@ -1153,14 +1149,14 @@ public class JSONObject implements JSONElement, Map {
      * Warning: This method assumes that the data structure is acyclical.
      *
      * @return The writer.
-     * @throws JSONException if an I/O exception occurs using the writer
+     * @throws JSONException
      */
     public Writer write(Writer writer) throws JSONException {
         try {
             boolean notFirst = false;
             writer.write('{');
-            for (Object o : myHashMap.entrySet()) {
-                Entry entry = (Entry) o;
+            for(Iterator it = myHashMap.entrySet().iterator(); it.hasNext();) {
+                Map.Entry entry = (Entry)it.next();
                 if (notFirst) {
                     writer.write(',');
                 }
@@ -1231,7 +1227,9 @@ public class JSONObject implements JSONElement, Map {
 
         JSONObject that = (JSONObject) o;
 
-        return myHashMap != null ? myHashMap.equals(that.myHashMap) : that.myHashMap == null;
+        if (myHashMap != null ? !myHashMap.equals(that.myHashMap) : that.myHashMap != null) return false;
+
+        return true;
     }
 
     @Override
