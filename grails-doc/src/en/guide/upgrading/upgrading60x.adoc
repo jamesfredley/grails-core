@@ -214,6 +214,7 @@ Please consult the Spring upgrade guides for the impacts of this change.
 1. `grails.core.GrailsTagLibClass` -> `grails.core.gsp.GrailsTagLibClass`
 2. `org.grails.core.artefact.TagLibArtefactHandler` -> `org.grails.core.artefact.gsp.TagLibArtefactHandler`
 3. `org.grails.core.DefaultGrailsTagLibClass` -> `org.grails.core.gsp.DefaultGrailsTagLibClass`
+4. `org.grails.plugins.CodecsGrailsPlugin` -> `org.grails.plugins.codecs.CodecsGrailsPlugin`
 
 ===== 12.3 Micronaut in Grails is now supported via the Micronaut Spring Boot Starter
 - This change was made based on community input: https://github.com/orgs/grails/discussions/13517

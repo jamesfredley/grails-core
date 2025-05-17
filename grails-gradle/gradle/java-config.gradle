@@ -57,7 +57,6 @@ tasks.withType(Jar).configureEach {
             'Implementation-Version': projectVersion,
             'Implementation-Vendor': 'grails.org'
     )
-    duplicatesStrategy = DuplicatesStrategy.INCLUDE
 }
 
 // Any jar, zip, or archive should be reproducible
