@@ -28,6 +28,10 @@ env:
   # To prevent throttling of GitHub API usage, include the GitHub token as an environment variable
   # as the build will use it when fetching git tags in CreateReleaseDropDown.groovy
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+# queue jobs and only allow 1 run per branch due to the likelihood of hitting GitHub resource limits
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
 jobs:
   buildGradle:
     name: 'Build Gradle Plugins'
