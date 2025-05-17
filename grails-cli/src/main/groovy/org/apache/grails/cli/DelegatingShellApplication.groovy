@@ -16,12 +16,14 @@
  */
 package org.apache.grails.cli
 
-import org.grails.cli.GrailsCli
-import org.grails.forge.cli.Application
+import groovy.transform.CompileStatic
+
+import java.lang.reflect.Method
 
 /**
  * Class will delegate between grails-shell-cli & grails-forge-cli
  */
+@CompileStatic
 class DelegatingShellApplication {
     static void main(String[] args) {
         // Ideally, we'd use pico cli to delegate between them and get autocomplete, but we can't easily do that because
@@ -29,9 +31,15 @@ class DelegatingShellApplication {
 
         Tuple2<Boolean, String[]> info = determineForge(args)
 
-        // force the classloader to this jar file instead of the wrapper jar if it's being invoked indirectly
-        Thread.currentThread().contextClassLoader = DelegatingShellApplication.classLoader
-        info.v1 ? Application.main(info.v2) : GrailsCli.main(info.v2)
+        ClassLoader classLoader = DelegatingShellApplication.classLoader
+        Thread.currentThread().contextClassLoader = classLoader
+
+        // initialize reflectively so that the static initializes are called instead of being called at compile time
+        String entryName = info.v1 ? 'org.grails.forge.cli.Application' : 'org.grails.cli.GrailsCli'
+        Class<?> entry = Class.forName(entryName, true, classLoader)
+
+        Method mainMethod = entry.getMethod('main', String[].class)
+        mainMethod.invoke(null, (Object) info.v2)
     }
 
     private static void validateShellType(String shellType) {
