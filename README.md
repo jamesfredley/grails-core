@@ -20,7 +20,8 @@ limitations under the License.
 [![Develocity](https://img.shields.io/badge/Develocity-06A0CE?logo=Gradle&labelColor=06A0CE)](https://ge.grails.org/scans)
 [![CI](https://github.com/apache/grails-core/actions/workflows/gradle.yml/badge.svg?event=push)](https://github.com/apache/grails-core/actions/workflows/gradle.yml)
 [![Groovy Joint Validation Build](https://github.com/apache/grails-core/actions/workflows/groovy-joint-workflow.yml/badge.svg?event=push)](https://github.com/apache/grails-core/actions/workflows/groovy-joint-workflow.yml)
-[![Mailing List](https://img.shields.io/badge/Join_Mailing_List-feb571)](https://lists.apache.org/list.html?users@grails.apache.org)
+[![Users Mailing List](https://img.shields.io/badge/Users_Mailing_List-feb571)](https://lists.apache.org/list.html?users@grails.apache.org)
+[![Dev Mailing List](https://img.shields.io/badge/Dev_Mailing_List-feb571)](https://lists.apache.org/list.html?dev@grails.apache.org)
 [![Slack](https://img.shields.io/badge/Join_Slack-e01d5a)](https://slack.grails.org/)
 [![GitHub Discussions](https://img.shields.io/github/discussions/apache/grails-core)](https://github.com/apache/grails-core/discussions)
 
