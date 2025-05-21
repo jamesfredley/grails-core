@@ -236,7 +236,7 @@ jobs:
           MAVEN_PUBLISH_USERNAME: ${{ secrets.NEXUS_USER }}
           MAVEN_PUBLISH_PASSWORD: ${{ secrets.NEXUS_PW  }}
         with:
-          timeout_seconds: 300
+          timeout_seconds: 900 # normal range 360-720s
           max_attempts: 3
           retry_wait_seconds: 180
           command: ./gradlew publish
