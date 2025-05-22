@@ -772,7 +772,7 @@ class GrailsGradlePlugin extends GroovyPlugin {
     }
 
     /**
-     * Ensures that essential Grails project directories exist and configures a task to verify them.
+     * Configures a task to verify that essential Grails project directories exist and creates them if missing.
      *
      * This method registers a task named 'verifyGrailsProjectDirectories' that creates the following
      * directories if they do not already exist:
