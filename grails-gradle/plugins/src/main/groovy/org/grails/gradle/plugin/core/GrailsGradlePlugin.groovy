@@ -789,12 +789,14 @@ class GrailsGradlePlugin extends GroovyPlugin {
     private void verifyGrailsProjectDirectories(Project project) {
         TaskProvider<Task> verifyGrailsProjectDirectoriesTask = project.tasks.register('verifyGrailsProjectDirectories')
 
+        def grailsProjectDirectories = ['grails-app/services', 'grails-app/domain',
+                                 'grails-app/taglib', 'grails-app/migrations']
+
         verifyGrailsProjectDirectoriesTask.configure { Task task ->
             task.group = 'other'
             task.description = 'Ensures essential Grails project directories exist and creates them if missing.'
             task.doFirst {
-                ['grails-app/services', 'grails-app/domain',
-                 'grails-app/taglib', 'grails-app/migrations'].each { String dir ->
+                grailsProjectDirectories.each { String dir ->
                     Directory directory = project.layout.projectDirectory.dir(dir)
                     if (!directory.asFile.exists()) {
                         directory.asFile.mkdirs()
@@ -806,7 +808,9 @@ class GrailsGradlePlugin extends GroovyPlugin {
         project.afterEvaluate {
             // prepareKotlinBuildScriptModel runs when a project is created or synced in IntelliJ
             // cleanGroovyCompilerConfig is run by most other tasks
-            it.tasks.matching { it.name in ['prepareKotlinBuildScriptModel', 'cleanGroovyCompilerConfig'] }.configureEach { Task dependent ->
+            it.tasks.matching { Task task ->
+                task.name in ['prepareKotlinBuildScriptModel', 'cleanGroovyCompilerConfig'] }
+                    .configureEach { Task dependent ->
                 dependent.dependsOn verifyGrailsProjectDirectoriesTask
             }
         }
