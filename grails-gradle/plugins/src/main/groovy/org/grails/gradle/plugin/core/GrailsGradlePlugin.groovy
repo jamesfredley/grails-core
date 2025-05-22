@@ -317,12 +317,10 @@ class GrailsGradlePlugin extends GroovyPlugin {
         'web'
     }
 
-    protected String getDefaultMicronautVersion() {
-        '4.6.5'
-    }
-
     void addDefaultProfile(Project project, Configuration profileConfig) {
-        project.dependencies.add('profile', "org.apache.grails.profiles:${System.getProperty("grails.profile") ?: defaultProfile}:")
+        def bomProject = project.rootProject.subprojects.find { it.name == 'grails-bom' }
+        project.dependencies.add(PROFILE_CONFIGURATION, project.dependencies.platform(bomProject ?: "org.apache.grails:grails-bom:${project.properties.get('grailsVersion')}"))
+        project.dependencies.add(PROFILE_CONFIGURATION, "org.apache.grails.profiles:${System.getProperty("grails.profile") ?: defaultProfile}:")
     }
 
     @CompileDynamic
