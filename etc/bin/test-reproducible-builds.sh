@@ -33,7 +33,7 @@ killall -e java || true
 cd grails-gradle
 ./gradlew build --rerun-tasks -PskipTests --no-build-cache
 cd ..
-./gradlew :grails-bom:publishMavenPublicationToLocalBomRepository build --rerun-tasks -PskipTests --no-build-cache
+./gradlew build --rerun-tasks -PskipTests --no-build-cache
 "${SCRIPT_DIR}/generate-build-artifact-hashes.groovy" > "${SCRIPT_DIR}/results/first.txt"
 mkdir -p "${SCRIPT_DIR}/results/first"
 find . -path ./etc -prune -o -type f -path '*/build/libs/*.jar' -print0 | xargs -0 cp --parents -t "${SCRIPT_DIR}/results/first/"
@@ -43,7 +43,7 @@ killall -e java || true
 cd grails-gradle
 ./gradlew build --rerun-tasks -PskipTests --no-build-cache
 cd ..
-./gradlew :grails-bom:publishMavenPublicationToLocalBomRepository build --rerun-tasks -PskipTests --no-build-cache
+./gradlew build --rerun-tasks -PskipTests --no-build-cache
 "${SCRIPT_DIR}/generate-build-artifact-hashes.groovy" > "${SCRIPT_DIR}/results/second.txt"
 mkdir -p "${SCRIPT_DIR}/results/second"
 find . -path ./etc -prune -o -type f -path '*/build/libs/*.jar' -print0 | xargs -0 cp --parents -t "${SCRIPT_DIR}/results/second/"
