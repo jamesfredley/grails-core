@@ -33,6 +33,7 @@ ext {
 }
 
 dependencies {
+    implementation platform(project(':grails-bom'))
     api project(':grails-sitemesh3')
 }
 
