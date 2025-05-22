@@ -47,8 +47,12 @@ jobs:
           project_id: ${{ secrets.GCP_PROJECT_ID }}
           service_account_email: ${{ secrets.GCP_EMAIL }}
           service_account_key: ${{ secrets.GCP_CREDENTIALS }}
-      - name: "🐋 Configure Docker"
-        run: gcloud auth configure-docker --quiet
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+      - name: "🐋 Configure Docker for Artifact Registry"
+        run: gcloud auth configure-docker us-docker.pkg.dev --quiet
       - name: "📥 Checkout repository"
         uses: actions/checkout@v4
       - name: "☕️ Setup JDK"
@@ -72,10 +76,12 @@ jobs:
           ./gradlew
           grails-forge-web-netty:dockerBuildNative
           -PdockerImageName=${{ env.IMAGE_NAME }}
+      - name: "Push Container"
+        run: |
+          docker push ${{ env.IMAGE_NAME }}
       - name: "🚀 Deploy Docker image"
         run: >
           gcloud run deploy ${{ secrets.GCP_PROJECT_ID }}-next
-          --source grails-forge-web-netty/build/docker/native-main/DockerfileNative
           --image $IMAGE_NAME
           --region us-central1
           --update-env-vars=HOSTNAME="next.grails.org",CORS_ALLOWED_ORIGIN="https://start.grails.org",GITHUB_OAUTH_APP_CLIENT_ID=${{ secrets.GH_OAUTH_SNAPSHOT_CLIENT_ID }},GITHUB_OAUTH_APP_CLIENT_SECRET=${{ secrets.GH_OAUTH_SNAPSHOT_CLIENT_SECRET }},GITHUB_USER_AGENT=${{ secrets.GH_USER_AGENT }},GITHUB_REDIRECT_URL=${{ secrets.GH_REDIRECT_URL }}
