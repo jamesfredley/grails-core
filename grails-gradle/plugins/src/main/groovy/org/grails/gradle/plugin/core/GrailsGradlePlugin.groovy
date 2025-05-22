@@ -771,6 +771,21 @@ class GrailsGradlePlugin extends GroovyPlugin {
         fileCollection
     }
 
+    /**
+     * Ensures that essential Grails project directories exist and configures a task to verify them.
+     *
+     * This method registers a task named 'verifyGrailsProjectDirectories' that creates the following
+     * directories if they do not already exist:
+     * - grails-app/services
+     * - grails-app/domain
+     * - grails-app/taglib
+     * - grails-app/migrations
+     *
+     * Additionally, it sets up dependencies for tasks like 'prepareKotlinBuildScriptModel' and
+     * 'cleanGroovyCompilerConfig' to ensure that the directories are verified before these tasks run.
+     *
+     * @param project The Gradle project for which the directories are verified and tasks are configured.
+     */
     private void verifyGrailsProjectDirectories(Project project) {
         TaskProvider<Task> verifyGrailsProjectDirectoriesTask = project.tasks.register('verifyGrailsProjectDirectories')
 
