@@ -72,8 +72,6 @@ jobs:
           ./gradlew
           grails-forge-web-netty:dockerBuildNative
           -PdockerImageName=${{ env.IMAGE_NAME }}
-      - name: "🚀 Migrate to GCP Artifact Registry"
-        run: gcloud artifacts docker upgrade migrate --projects='${{ secrets.GCP_PROJECT_ID }}'
       - name: "📤 Push image to Google Cloud Container Registry"
         run: >
           ./gradlew
