@@ -39,16 +39,20 @@ jobs:
     runs-on: ubuntu-24.04
     needs: build
     env:
-      IMAGE_NAME: gcr.io/${{ secrets.GCP_PROJECT_ID }}/${{ secrets.GCP_APP_NAME }}:prev
+      IMAGE_NAME: us-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/${{ secrets.GCP_APP_NAME }}/${{ secrets.GCP_APP_NAME }}:prev
     steps:
-      - name: "🔑 Login"
+      - name: "🔑 Login to Google Cloud"
         uses: google-github-actions/setup-gcloud@20c93dacc1d70ddbce76c63ab32c35595345bdd1
         with:
           project_id: ${{ secrets.GCP_PROJECT_ID }}
           service_account_email: ${{ secrets.GCP_EMAIL }}
           service_account_key: ${{ secrets.GCP_CREDENTIALS }}
-      - name: "🐋 Configure Docker"
-        run: gcloud auth configure-docker --quiet
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+      - name: "🐋 Configure Docker for Artifact Registry"
+        run: gcloud auth configure-docker us-docker.pkg.dev --quiet
       - name: "📥 Checkout repository"
         uses: actions/checkout@v4
       - name: "☕️ Setup JDK"
@@ -72,11 +76,9 @@ jobs:
           ./gradlew
           grails-forge-web-netty:dockerBuildNative
           -PdockerImageName=${{ env.IMAGE_NAME }}
-      - name: "📤 Push image to Google Cloud Container Registry"
-        run: >
-          ./gradlew
-          grails-forge-web-netty:dockerPushNative
-          -PdockerImageName=${{ env.IMAGE_NAME }}
+      - name: "📤 Push Container to Google Cloud Artifact Registry"
+        run: |
+          docker push ${{ env.IMAGE_NAME }}
       - name: "🚀 Deploy Docker image"
         run: >
           gcloud run deploy ${{ secrets.GCP_PROJECT_ID }}-prev
@@ -91,16 +93,20 @@ jobs:
     runs-on: ubuntu-24.04
     needs: build
     env:
-      IMAGE_NAME: gcr.io/${{ secrets.GCP_PROJECT_ID }}/${{ secrets.GCP_APP_NAME }}-analytics:prev
+      IMAGE_NAME: us-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/${{ secrets.GCP_APP_NAME }}/${{ secrets.GCP_APP_NAME }}-analytics:prev
     steps:
-      - name: "🔑 Login"
+      - name: "🔑 Login to Google Cloud"
         uses: google-github-actions/setup-gcloud@20c93dacc1d70ddbce76c63ab32c35595345bdd1
         with:
           project_id: ${{ secrets.GCP_PROJECT_ID }}
           service_account_email: ${{ secrets.GCP_EMAIL }}
           service_account_key: ${{ secrets.GCP_CREDENTIALS }}
-      - name: "🐋 Configure Docker"
-        run: gcloud auth configure-docker --quiet
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+      - name: "🐋 Configure Docker for Artifact Registry"
+        run: gcloud auth configure-docker us-docker.pkg.dev --quiet
       - name: "📥 Checkout repository"
         uses: actions/checkout@v4
       - name: "☕️ Setup JDK"
@@ -121,11 +127,9 @@ jobs:
           ./gradlew
           grails-forge-analytics-postgres:dockerBuildNative
           -PdockerImageName=${{ env.IMAGE_NAME }}
-      - name: "📤 Push image to Google Cloud Container Registry"
-        run: >
-          ./gradlew
-          grails-forge-analytics-postgres:dockerPushNative
-          -PdockerImageName=${{ env.IMAGE_NAME }}
+      - name: "📤 Push Container to Google Cloud Artifact Registry"
+        run: |
+          docker push ${{ env.IMAGE_NAME }}
       - name: "🚀 Deploy Docker image"
         run: |
           gcloud components install beta --quiet
