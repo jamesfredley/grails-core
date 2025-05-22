@@ -19,15 +19,8 @@
 
 apply plugin: 'groovy'
 
-configurations.register('documentation')
-
-dependencies {
-    documentation platform(project(':grails-bom'))
-    documentation 'org.apache.groovy:groovy-groovydoc'
-    documentation 'org.apache.groovy:groovy-ant'
-}
-
 // grails-data-mapping api
+apply from: rootProject.layout.projectDirectory.file('gradle/docs-dependencies.gradle')
 tasks.register('aggregateDataMappingGroovydoc', Groovydoc).configure { Groovydoc task ->
     task.group = 'documentation'
     task.description = 'Copies Groovy API Documentation for all supporting projects'

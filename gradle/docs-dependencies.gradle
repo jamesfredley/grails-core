@@ -31,9 +31,18 @@ dependencies {
     add('documentation', 'org.fusesource.jansi:jansi')
     add('documentation', 'jline:jline')
     add('documentation', 'com.github.javaparser:javaparser-core')
+
+    /*
+    Temporarily use 4.0.27-SNAPSHOT for documentation generation until 4.0.27 is released.
     add('documentation', 'org.apache.groovy:groovy')
     add('documentation', 'org.apache.groovy:groovy-groovydoc')
     add('documentation', 'org.apache.groovy:groovy-ant')
     add('documentation', 'org.apache.groovy:groovy-docgenerator')
     add('documentation', 'org.apache.groovy:groovy-templates')
+*/
+    add('documentation', 'org.apache.groovy:groovy:4.0.27-SNAPSHOT')
+    add('documentation', 'org.apache.groovy:groovy-groovydoc:4.0.27-SNAPSHOT')
+    add('documentation', 'org.apache.groovy:groovy-ant:4.0.27-SNAPSHOT')
+    add('documentation', 'org.apache.groovy:groovy-docgenerator:4.0.27-SNAPSHOT')
+    add('documentation', 'org.apache.groovy:groovy-templates:4.0.27-SNAPSHOT')
 }
