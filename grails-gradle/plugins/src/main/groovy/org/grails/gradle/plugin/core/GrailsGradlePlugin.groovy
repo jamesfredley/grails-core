@@ -793,7 +793,7 @@ class GrailsGradlePlugin extends GroovyPlugin {
                                  'grails-app/taglib', 'grails-app/migrations']
 
         verifyGrailsProjectDirectoriesTask.configure { Task task ->
-            task.group = 'other'
+            task.group = 'build'
             task.description = 'Ensures essential Grails project directories exist and creates them if missing.'
             task.doFirst {
                 grailsProjectDirectories.each { String dir ->
