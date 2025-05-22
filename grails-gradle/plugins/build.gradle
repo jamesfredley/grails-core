@@ -32,10 +32,12 @@ dependencies {
     // compile grails-gradle-plugin with the Groovy version provided by Gradle
     // to ensure build compatibility with Gradle, currently Groovy 3.0.x
     // see: https://docs.gradle.org/current/userguide/compatibility.html#groovy
-    compileOnly 'org.codehaus.groovy:groovy'
+    compileOnly "org.codehaus.groovy:groovy"
 
+    implementation project(':grails-gradle-tasks')
+
+    // spock is leaking from the grails-gradle-bom through grails-gradle-model
     implementation project(':grails-gradle-model'), {
-        exclude group: 'org.apache.groovy'
         exclude group: 'org.spockframework'
     }
 
