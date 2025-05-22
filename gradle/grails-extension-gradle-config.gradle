@@ -1,0 +1,15 @@
+// do not cache SNAPSHOT dependencies
+//dependencyManagement {
+//    resolutionStrategy {
+//        cacheChangingModulesFor 0, 'seconds'
+//        cacheDynamicVersionsFor 0, 'seconds'
+//    }
+//}
+
+grails {
+    // WARNING: enabling spring dependency management in core can have unintended side effects.
+    // since it loads the bom via a pom file, it can't use a gradle project() reference
+    // this means you MUST publish locally via ./gradlew :grails-bom:publishMavenPublicationToLocalBomRepository
+    // this causes unexpected version mismatches in the various plugin projects
+    springDependencyManagement = false
+}

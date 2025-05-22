@@ -107,9 +107,9 @@ class GrailsGradlePlugin extends GroovyPlugin {
 
         configureProfile(project)
 
-        applyDefaultPlugins(project)
-
         registerGrailsExtension(project)
+
+        applyDefaultPlugins(project)
 
         configureGroovy(project)
 
@@ -283,14 +283,19 @@ class GrailsGradlePlugin extends GroovyPlugin {
     protected void applyDefaultPlugins(Project project) {
         applySpringBootPlugin(project)
 
-        Plugin dependencyManagementPlugin = project.plugins.findPlugin(DependencyManagementPlugin)
-        if (dependencyManagementPlugin == null) {
-            project.plugins.apply(DependencyManagementPlugin)
+        project.afterEvaluate {
+            GrailsExtension ge = project.extensions.getByType(GrailsExtension)
+            if(ge.springDependencyManagement) {
+                Plugin dependencyManagementPlugin = project.plugins.findPlugin(DependencyManagementPlugin)
+                if (dependencyManagementPlugin == null) {
+                    project.plugins.apply(DependencyManagementPlugin)
+                }
+
+                DependencyManagementExtension dme = project.extensions.findByType(DependencyManagementExtension)
+
+                applyBomImport(dme, project)
+            }
         }
-
-        DependencyManagementExtension dme = project.extensions.findByType(DependencyManagementExtension)
-
-        applyBomImport(dme, project)
     }
 
     protected void applySpringBootPlugin(Project project) {
