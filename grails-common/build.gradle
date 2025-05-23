@@ -17,6 +17,7 @@
 
 plugins {
     id 'groovy'
+    id 'grails.groovydoc'
     id 'java-library'
     id 'project-report'
 }

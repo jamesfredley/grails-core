@@ -229,9 +229,9 @@ Essentially, using the `toc.yml` file and the directory structure you can manipu
 
 To generate the documentation run the `publishGuide` in the `grails-doc` task:
 
-    ./gradlew :grails-doc:publishGuide -x aggregateGroovydoc
+    ./gradlew :grails-doc:publishGuide -x grailsGroovydoc
 
-NOTE: In the above example we skip the `aggregateGroovydoc` task to speed up building of the guide, otherwise all
+NOTE: In the above example we skip the `grailsGroovydoc` task to speed up building of the guide, otherwise all
 Groovydoc documentation will be built too!
 
 Once the guide is built simply open the `grails-doc/build/original-guide/index.html` file in a browser to review your

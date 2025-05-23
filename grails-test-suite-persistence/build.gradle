@@ -87,28 +87,58 @@ dependencies {
     testImplementation 'org.objenesis:objenesis'
 }
 
-test {
-    maxParallelForks = configuredTestParallel
-    forkEvery = isCiBuild ? 25 : 100
-    if(!isCiBuild) {
-        maxHeapSize = '2048m'
+def testGrailsDomainBinder = tasks.register('testGrailsDomainBinder', Test)
+testGrailsDomainBinder.configure { Test it ->
+    onlyIf {
+        ![
+                'onlyFunctionalTests',
+                'onlyHibernate5Tests',
+                'onlyMongodbTests',
+                'skipCoreTests',
+                'skipTests'
+        ].find {
+            project.hasProperty(it)
+        }
     }
-    excludes = ['**/GrailsDomainBinderTests.class',
+
+    it.includes = [
+            '**/GrailsDomainBinderTests.class'
+    ]
+}
+
+def testIsolatedPersistentOne = tasks.register('testIsolatedPersistentOne', Test)
+testIsolatedPersistentOne.configure {Test it ->
+    onlyIf {
+        ![
+                'onlyFunctionalTests',
+                'onlyHibernate5Tests',
+                'onlyMongodbTests',
+                'skipCoreTests',
+                'skipTests'
+        ].find {
+            project.hasProperty(it)
+        }
+    }
+
+    it.includes = [
+            '**/ComponentValidationTests.class',
+            '**/HibernateMappingUniqueConstraintTests.class'
+    ]
+}
+
+tasks.named('test', Test).configure {Test it ->
+    it.dependsOn testGrailsDomainBinder, testIsolatedPersistentOne
+
+    it.maxParallelForks = configuredTestParallel
+    it.forkEvery = isCiBuild ? 25 : 100
+    if(!isCiBuild) {
+        it.maxHeapSize = '2048m'
+    }
+    it.excludes = ['**/GrailsDomainBinderTests.class',
                 '**/ComponentValidationTests.class',
                 '**/HibernateMappingUniqueConstraintTests.class']
 }
 
-task testGrailsDomainBinder(type: Test) { includes = [
-        '**/GrailsDomainBinderTests.class'
-    ] }
-
-
-task testIsolatedPersistentOne(type: Test) {
-    includes = ['**/ComponentValidationTests.class']
-    includes = ['**/HibernateMappingUniqueConstraintTests.class']
-}
-
-test.dependsOn testGrailsDomainBinder, testIsolatedPersistentOne
 
 tasks.withType(Groovydoc).configureEach {
     // tests do not have groovydoc

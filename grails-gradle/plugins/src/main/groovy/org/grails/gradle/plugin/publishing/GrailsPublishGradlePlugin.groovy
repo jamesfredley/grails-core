@@ -509,7 +509,7 @@ Note: if project properties are used, the properties must be defined prior to ap
 
         final TaskContainer tasks = project.tasks
         tasks.named('javadoc').configure {
-            Task groovyDocTask = tasks.findByName('groovydoc')
+            Task groovyDocTask = tasks.findByName('grailsGroovydoc') ?: tasks.findByName('groovydoc')
             if (groovyDocTask) {
                 project.rootProject.logger.info('Configuring javadocJar task for project {} to include groovydoc', project.name)
                 it.enabled = false
@@ -522,7 +522,7 @@ Note: if project properties are used, the properties must be defined prior to ap
             jar.dirMode = 0755 // To avoid platform specific defaults
             jar.fileMode = 0644 // to avoid platform specific defaults
 
-            Groovydoc groovyDocTask = tasks.findByName('groovydoc')
+            Groovydoc groovyDocTask = tasks.findByName('grailsGroovydoc') ?: tasks.findByName('groovydoc')
             if (groovyDocTask) {
                 jar.dependsOn(groovyDocTask)
 
@@ -581,7 +581,7 @@ Note: if project properties are used, the properties must be defined prior to ap
 //        }
 
         registerValidationTask(project, 'grailsPublishValidation') {
-            Task groovyDocTask = project.tasks.findByName('groovydoc')
+            Task groovyDocTask = tasks.findByName('grailsGroovydoc') ?: project.tasks.findByName('groovydoc')
             if (groovyDocTask) {
                 if (!groovyDocTask.enabled) {
                     throw new RuntimeException('Groovydoc task is disabled. Please enable it to ensure javadoc can be published correctly with the Grails Publish Plugin.')

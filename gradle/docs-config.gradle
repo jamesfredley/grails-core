@@ -17,8 +17,6 @@
  *  under the License.
  */
 
-apply from: rootProject.layout.projectDirectory.file('gradle/docs-dependencies.gradle')
-
 ext {
     includeInApiDocs = true
 }

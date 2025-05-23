@@ -16,6 +16,7 @@
  */
 plugins {
 	id 'groovy'
+    id 'grails.groovydoc'
 	id 'org.apache.grails.gradle.grails-profile'
 }
 

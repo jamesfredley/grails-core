@@ -17,10 +17,13 @@
  *  under the License.
  */
 
+
+import org.apache.grails.internal.build.GrailsGroovydoc
 import org.asciidoctor.gradle.jvm.AsciidoctorTask
 
 plugins {
     id 'groovy'
+    id 'grails.groovydoc'
     id 'org.asciidoctor.jvm.convert'
 }
 
@@ -91,7 +94,7 @@ tasks.named('asciidoctor', AsciidoctorTask) { AsciidoctorTask it ->
     ]
 }
 
-tasks.withType(Groovydoc).configureEach {
+tasks.withType(GrailsGroovydoc).configureEach {
     it.dependsOn(rootProject.subprojects
             .findAll { it.findProperty('gormApiDocs') }
             .collect { ":${it.name}:groovydoc" })

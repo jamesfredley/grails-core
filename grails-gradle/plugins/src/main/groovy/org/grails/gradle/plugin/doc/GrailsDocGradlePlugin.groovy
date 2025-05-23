@@ -24,6 +24,7 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.artifacts.Configuration
+import org.gradle.api.tasks.TaskProvider
 import org.gradle.api.tasks.javadoc.Groovydoc
 import org.gradle.api.tasks.javadoc.Javadoc
 
@@ -43,26 +44,25 @@ class GrailsDocGradlePlugin implements Plugin<Project> {
         Configuration docConfiguration = project.configurations.create(DOC_CONFIGURATION)
         project.dependencies.add(DOC_CONFIGURATION, "org.grails:grails-docs:${BuildSettings.getPackage().getImplementationVersion()}")
 
-        Groovydoc groovydocTask = (Groovydoc)project.tasks.findByName('groovydoc')
+        Groovydoc groovydocTask = (Groovydoc)(project.tasks.findByName('grailsGroovydoc') ?: project.tasks.findByName('groovydoc'))
         Javadoc javadocTask = (Javadoc)project.tasks.findByName('javadoc')
 
         if(groovydocTask && javadocTask) {
+            TaskProvider<PublishGuideTask> docsTask = project.tasks.register('docs', PublishGuideTask)
+            docsTask.configure {
+                it.classpath = docConfiguration
 
-            Task docsTask = project.tasks.create('docs', PublishGuideTask)
-
-            docsTask.classpath = docConfiguration
-
-            File applicationYml = project.file("${project.projectDir}/grails-app/conf/application.yml")
-            if(applicationYml.exists()) {
-                docsTask.propertiesFile = applicationYml
+                File applicationYml = project.layout.projectDirectory.file('grails-app/conf/application.yml').getAsFile()
+                if(applicationYml.exists()) {
+                    it.propertiesFile = applicationYml
+                }
+                it.destinationDir = project.file("${project.buildDir}/docs/manual")
+                it.source = project.file("${project.projectDir}/src/docs")
+                it.resourcesDir = project.file("${project.projectDir}/src/docs")
+                it.groovydocDir = groovydocTask.destinationDir
+                it.javadocDir = javadocTask.destinationDir
+                it.dependsOn(groovydocTask, javadocTask)
             }
-            docsTask.destinationDir = project.file("${project.buildDir}/docs/manual")
-            docsTask.source = project.file("${project.projectDir}/src/docs")
-            docsTask.resourcesDir = project.file("${project.projectDir}/src/docs")
-            docsTask.groovydocDir = groovydocTask.destinationDir
-            docsTask.javadocDir = javadocTask.destinationDir
-            docsTask.dependsOn(groovydocTask)
-            docsTask.dependsOn(javadocTask)
         }
     }
 }

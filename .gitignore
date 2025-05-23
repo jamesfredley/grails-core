@@ -53,4 +53,5 @@ target
 tmp/
 !grails-fields/src/main/groovy/org/grails/scaffolding/registry/output
 !etc/bin
+!buildSrc/src/main/groovy/org/apache/grails/internal/build
 etc/bin/results

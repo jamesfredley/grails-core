@@ -19,11 +19,13 @@
 
 import grails.doc.AddReleaseDropDown
 import grails.doc.gradle.PublishGuide
+import org.apache.grails.internal.build.GrailsGroovydoc
 
 plugins {
     id 'base'
     id 'org.asciidoctor.jvm.convert'
     id 'groovy'
+    id 'grails.groovydoc'
 }
 
 compileJava.options.release = javaVersion.toInteger()
@@ -56,9 +58,8 @@ dependencies {
 }
 
 // this task needs to be here instead of the root since bom resolution only occurs when the java / groovy plugins are applied
-def combinedGroovydoc = tasks.register('aggregateGroovydoc', Groovydoc)
-apply from: rootProject.layout.projectDirectory.file('gradle/docs-dependencies.gradle')
-combinedGroovydoc.configure { Groovydoc gdoc ->
+def combinedGroovydoc = tasks.named('grailsGroovydoc', GrailsGroovydoc)
+combinedGroovydoc.configure { GrailsGroovydoc gdoc ->
     gdoc.windowTitle = "Grails $projectVersion"
     gdoc.docTitle = "Grails $projectVersion"
 
@@ -117,7 +118,7 @@ asciidoctor {
             'sourcedir': rootProject.projectDir.absolutePath
 }
 
-asciidoctor.dependsOn('aggregateGroovydoc')
+asciidoctor.dependsOn('grailsGroovydoc')
 
 tasks.register('dist', Zip).configure { Zip it ->
     it.dependsOn 'docs'
@@ -160,7 +161,7 @@ String getVersion(String artifact) {
 }
 
 tasks.register('publishGuide', PublishGuide).configure { PublishGuide publish ->
-    publish.dependsOn(['generateBomDocumentation', 'aggregateGroovydoc', 'jar', 'resolveGroovyVersion', 'processTestResources', 'compileTestJava', 'compileTestGroovy', 'test'])
+    publish.dependsOn(['generateBomDocumentation', 'grailsGroovydoc', 'jar', 'resolveGroovyVersion', 'processTestResources', 'compileTestJava', 'compileTestGroovy', 'test'])
 
     // No language setting because we want the English guide to be
     // generated with a 'en' in the path, but the source is in 'en'
@@ -250,7 +251,7 @@ tasks.register('generateGuide').configure { Task task ->
 }
 
 tasks.register('docs', Sync).configure { Sync it ->
-    it.dependsOn 'aggregateGroovydoc', 'generateGuide', ':grails-data-docs-stage:docs'
+    it.dependsOn 'grailsGroovydoc', 'generateGuide', ':grails-data-docs-stage:docs'
     it.group = 'documentation'
 
     def manualDocsDir = project.layout.buildDirectory.dir('modified-guide')

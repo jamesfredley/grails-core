@@ -19,6 +19,7 @@
 
 plugins {
     id 'groovy'
+    id 'grails.groovydoc'
     id 'java-library'
     id 'java-test-fixtures'
 }

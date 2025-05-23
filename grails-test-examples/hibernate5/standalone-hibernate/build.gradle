@@ -19,6 +19,7 @@
 
 plugins {
     id 'groovy'
+    id 'grails.groovydoc'
 }
 
 version = '0.0.1'

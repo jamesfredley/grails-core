@@ -202,7 +202,7 @@ class GrailsPluginGradlePlugin extends GrailsGradlePlugin {
                 project.rootProject.logger.info('Warning - a javadocTask was not found, so the ast source will not be included in the javadoc task')
             }
 
-            Task groovydocTask = taskContainer.findByName('groovydoc')
+            Task groovydocTask = taskContainer.findByName('grailsGroovydoc') ?: taskContainer.findByName('groovydoc')
             if (groovydocTask) {
                 if (taskContainer.findByName('javadocJar') == null) {
                     taskContainer.create("javadocJar", Jar) {

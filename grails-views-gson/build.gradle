@@ -20,6 +20,7 @@
 plugins {
     id 'java-library'
     id 'groovy'
+    id 'grails.groovydoc'
     id 'org.apache.grails.gradle.grails-plugin'
 }
 

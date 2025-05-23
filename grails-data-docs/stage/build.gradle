@@ -1,3 +1,5 @@
+import org.apache.grails.internal.build.GrailsGroovydoc
+
 /*
  *  Licensed to the Apache Software Foundation (ASF) under one
  *  or more contributor license agreements.  See the NOTICE file
@@ -17,12 +19,14 @@
  *  under the License.
  */
 
-apply plugin: 'groovy'
+plugins {
+    id 'groovy'
+    id 'grails.groovydoc'
+}
 
 // grails-data-mapping api
-def combinedGroovydoc = tasks.register('aggregateDataMappingGroovydoc', Groovydoc)
-apply from: rootProject.layout.projectDirectory.file('gradle/docs-dependencies.gradle')
-combinedGroovydoc.configure { Groovydoc task ->
+def combinedGroovydoc = tasks.named('grailsGroovydoc', GrailsGroovydoc)
+combinedGroovydoc.configure { GrailsGroovydoc task ->
     task.windowTitle = "Grails Data Mapping API - ${projectVersion}"
     task.docTitle = "Grails Data Mapping API - ${projectVersion}"
 
@@ -102,7 +106,7 @@ tasks.register('copyHibernate5Docs', Sync).configure { Sync it ->
 
 tasks.register('docs', Sync).configure { Sync it ->
     it.group = 'documentation'
-    it.dependsOn('aggregateDataMappingGroovydoc', 'copyGuides', 'copyMongodbDocs', 'copyHibernate5Docs')
+    it.dependsOn('grailsGroovydoc', 'copyGuides', 'copyMongodbDocs', 'copyHibernate5Docs')
 
     def websiteDir = rootProject.layout.projectDirectory.dir('grails-data-docs/data-mapping-website/src/main/resources')
     def guidesDir = project.layout.buildDirectory.dir('guides/grails-data')
