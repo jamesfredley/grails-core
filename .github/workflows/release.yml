@@ -142,27 +142,6 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
         with:
           develocity-access-key: ${{ secrets.GRAILS_DEVELOCITY_ACCESS_KEY  }}
-      - name: "🚪 Nexus Staging Close And Release for Gradle Plugins"
-        env:
-          SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
-          SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
-          SONATYPE_NEXUS_URL: ${{ secrets.SONATYPE_NEXUS_URL }}
-          SONATYPE_STAGING_PROFILE_ID: ${{ secrets.SONATYPE_STAGING_PROFILE_ID }}
-        working-directory: 'grails-gradle'
-        run: >
-          ./gradlew
-          findSonatypeStagingRepository 
-          releaseSonatypeStagingRepository
-      - name: "🚪 Nexus Staging Close And Release for Grails-Core"
-        env:
-          SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
-          SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
-          SONATYPE_NEXUS_URL: ${{ secrets.SONATYPE_NEXUS_URL }}
-          SONATYPE_STAGING_PROFILE_ID: ${{ secrets.SONATYPE_STAGING_PROFILE_ID }}
-        run: >
-          ./gradlew
-          findSonatypeStagingRepository 
-          releaseSonatypeStagingRepository
       - name: "⚙️ Run post-release"
         uses: apache/grails-github-actions/post-release@asf
         env:
