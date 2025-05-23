@@ -56,7 +56,7 @@ tasks.withType(Groovydoc).configureEach { Groovydoc gdoc ->
     gdoc.windowTitle = "${project.findProperty('pomArtifactId') ?: project.name} - $projectVersion"
     gdoc.docTitle = "${project.findProperty('pomArtifactId') ?: project.name} - $projectVersion"
     gdoc.access = GroovydocAccess.PROTECTED
-    gdoc.includeAuthor = true
+    gdoc.includeAuthor = false
     gdoc.includeMainForScripts = false
     gdoc.processScripts = false
     gdoc.noTimestamp = true
