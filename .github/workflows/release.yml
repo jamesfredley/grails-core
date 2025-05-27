@@ -18,7 +18,7 @@ on:
   release:
     types: [ published ]
 jobs:
-  build:
+  publish:
     name: "Release artifacts to GitHub release and SDKMAN plus publish source and documentation"
     runs-on: ubuntu-24.04
     permissions:
@@ -75,28 +75,47 @@ jobs:
         run: >
           ./gradlew
           -Psigning.secretKeyRingFile=${{ github.workspace }}/secring.gpg 
-          publishToSonatype 
-          closeSonatypeStagingRepository
-      - name: "🚀 Publish to Github Pages"
-        uses: grails/grails-github-actions/deploy-github-pages@asf
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GRADLE_PUBLISH_RELEASE: 'true'
-          SOURCE_FOLDER: build/docs
-          VERSION: ${{ steps.release_version.outputs.value }}
-      - name: '⚙️ Run post-release'
-        uses: grails/grails-github-actions/post-release@asf
-        env:
-          RELEASE_SCRIPT_PATH: '.github/scripts/setSnapshotGrailsVersion.sh'
-  sdkman:
-    name: "Release to SDKMAN!"
-    runs-on: ubuntu-24.04
-    needs: build
+          -x initializeSonatypeStagingRepository
+          findSonatypeStagingRepository 
+          publishToSonatype
+  release:
+    environment: release
+    needs: publish
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # required for gradle.properties revert
+      issues: write # required for milestone closing
     steps:
       - name: "📥 Checkout repository"
         uses: actions/checkout@v4
         with:
-          ref: v${{ needs.build.outputs.release_version }}
+          token: ${{ secrets.GH_TOKEN }}
+          ref: v${{ needs.publish.outputs.release_version }}
+      - name: 'Ensure Common Build Date' # to ensure a reproducible build
+        run: echo "SOURCE_DATE_EPOCH=$(git log -1 --pretty=%ct)" >> "$GITHUB_ENV"
+      - name: "☕️ Setup JDK"
+        uses: actions/setup-java@v4
+        with:
+          distribution: liberica
+          java-version: 17
+      - name: "🐘 Setup Gradle"
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          develocity-access-key: ${{ secrets.GRAILS_DEVELOCITY_ACCESS_KEY  }}
+      - name: "⚙️ Run post-release"
+        uses: apache/grails-github-actions/post-release@asf
+        env:
+          RELEASE_SCRIPT_PATH: '.github/scripts/setSnapshotGrailsVersion.sh'
+  sdkman:
+    environment: sdkman
+    name: "Release to SDKMAN!"
+    runs-on: ubuntu-24.04
+    needs: [publish, release]
+    steps:
+      - name: "📥 Checkout repository"
+        uses: actions/checkout@v4
+        with:
+          ref: v${{ needs.publish.outputs.release_version }}
       - name: "☕️ Setup JDK"
         uses: actions/setup-java@v4
         with:
