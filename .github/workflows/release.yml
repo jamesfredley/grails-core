@@ -124,7 +124,8 @@ jobs:
     needs: publish
     runs-on: ubuntu-latest
     permissions:
-      contents: read # limit to read access
+      contents: write # required for gradle.properties revert
+      issues: write # required for milestone closing
     steps:
       - name: "📥 Checkout repository"
         uses: actions/checkout@v4
