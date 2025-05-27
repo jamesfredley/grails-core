@@ -84,7 +84,21 @@ jobs:
         env:
           SECRING_FILE: ${{ secrets.SECRING_FILE }}
         run: echo $SECRING_FILE | base64 -d > ${{ github.workspace }}/secring.gpg
-      - name: "📤 Publish Gradle Plugins to Sonatype OSSRH"
+      - name: "Create Staging Repository"
+        env:
+          GRAILS_PUBLISH_RELEASE: 'true'
+          NEXUS_PUBLISH_USERNAME: ${{ secrets.NEXUS_STAGE_DEPLOYER_USER }}
+          NEXUS_PUBLISH_PASSWORD: ${{ secrets.NEXUS_STAGE_DEPLOYER_PW }}
+          NEXUS_PUBLISH_URL: ${{ secrets.GRAILS_NEXUS_PUBLISH_RELEASE_URL }}
+          NEXUS_PUBLISH_STAGING_PROFILE_ID: ${{ secrets.NEXUS_PUBLISH_STAGING_PROFILE_ID }} # TODO: unknown at this time
+          SIGNING_KEY: ${{ secrets.SIGNING_KEY }}
+          SIGNING_PASSPHRASE: ${{ secrets.SIGNING_PASSPHRASE }}
+        working-directory: 'grails-gradle'
+        run: >
+          ./gradlew 
+          -Psigning.secretKeyRingFile=${{ github.workspace }}/secring.gpg
+          initializeSonatypeStagingRepository
+      - name: "📤 Publish Gradle Plugins"
         env:
           GRAILS_PUBLISH_RELEASE: 'true'
           NEXUS_PUBLISH_USERNAME: ${{ secrets.NEXUS_STAGE_DEPLOYER_USER }}
@@ -96,11 +110,12 @@ jobs:
         working-directory: 'grails-gradle'
         run: >
           ./gradlew
-          -Psigning.secretKeyRingFile=${{ github.workspace }}/secring.gpg 
+          -Psigning.secretKeyRingFile=${{ github.workspace }}/secring.gpg
+          -x initializeSonatypeStagingRepository
+          findSonatypeStagingRepository 
           publishToSonatype 
           aggregateChecksums
-          closeSonatypeStagingRepository
-      - name: "📤 Publish Grails-Core to Sonatype OSSRH"
+      - name: "📤 Publish Grails-Core"
         id: publish
         env:
           GRAILS_PUBLISH_RELEASE: 'true'
@@ -113,6 +128,8 @@ jobs:
         run: >
           ./gradlew
           -Psigning.secretKeyRingFile=${{ github.workspace }}/secring.gpg 
+          -x initializeSonatypeStagingRepository
+          findSonatypeStagingRepository 
           publishToSonatype 
           aggregateChecksums
           closeSonatypeStagingRepository
