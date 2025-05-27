@@ -151,6 +151,8 @@ forgeCliStartScripts.configure { CreateStartScripts t ->
 }
 
 project.extensions.getByType(DistributionContainer).configureEach {
+    it.distributionBaseName.set("apache-grails")
+    it.distributionClassifier.set('incubating')
     it.contents {
         from(shadowJarTask) {
             into ".grails/$grailsVersion"
@@ -207,9 +209,9 @@ sdkman {
     version = project.version
     hashtag = '#grailsfw'
     platforms = [
-            'MAC_ARM64' : "https://github.com/apache/grails-forge/releases/download/v${project.version}/grails-cli-v${project.version}.zip",
-            'MAC_OSX'   : "https://github.com/apache/grails-forge/releases/download/v${project.version}/grails-cli-v${project.version}.zip",
-            'WINDOWS_64': "https://github.com/apache/grails-forge/releases/download/v${project.version}/grails-cli-v${project.version}.zip",
-            'LINUX_64'  : "https://github.com/apache/grails-forge/releases/download/v${project.version}/grails-cli-v${project.version}.zip"
+            'MAC_ARM64' : "https://github.com/apache/grails-forge/releases/download/v${project.version}/apache-grails-v${project.version}-incubating.zip",
+            'MAC_OSX'   : "https://github.com/apache/grails-forge/releases/download/v${project.version}/apache-grails-v${project.version}-incubating.zip",
+            'WINDOWS_64': "https://github.com/apache/grails-forge/releases/download/v${project.version}/apache-grails-v${project.version}-incubating.zip",
+            'LINUX_64'  : "https://github.com/apache/grails-forge/releases/download/v${project.version}/apache-grails-v${project.version}-incubating.zip"
     ] as Map<? extends String, ? extends String>
 }
