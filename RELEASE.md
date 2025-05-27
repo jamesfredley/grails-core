@@ -45,12 +45,17 @@ During the staging step, we must create a source distribution & stage any binary
 3. Create a matching release in `grails-forge`:
    * Follow the same steps to create a release in grails-forge. Update any release notes specific to the delegating cli & grails forge.
 4. (grails-forge)
-   * The Github workflow 'release.yml' will kick off, which will run the `publish` job steps. This job will perform the similar steps as above, but will perform these additional steps: 
+   * The Github workflow 'release.yml' will kick off, which will run the `publish` job steps. This job will perform the similar steps as above
+5. Kick off the `Distribution` workflow in `grails-core`, which will: 
      * download the tagged grails source
-     * generate a source distribution for apache
+     * download the tagged grails-forge source
+     * generate a source distribution meeting the ASF requirements
+     * upload the source distribution to the Github release `grails-core` release
      * upload the source distribution to https://dist.apache.org/repos/dist/dev/grails/VERSION/sources
-     * upload the binary CLIs that will be uploaded to sdkman to https://dist.apache.org/repos/dist/dev/grails/VERSION/distribution
-     * upload the binary CLIs to the GitHub forge-release
+6. Kick off the `Distribution` workflow in `grails-forge`, which will:
+     * create a binary distribution of the grails CLIs
+     * upload the binary distribution to the Github release `grails-forge` release
+     * upload the binary distribution that will be uploaded to sdkman to https://dist.apache.org/repos/dist/dev/grails/VERSION/distribution
 
 Once `grails-forge` & `grails-core` are published the end source & binary distributions should be staged. 
 
