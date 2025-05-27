@@ -120,7 +120,7 @@ tasks.register("aggregateChecksums") {
 }
 
 def sdkmanProps = new Properties()
-project.rootProject.layout.projectDirectory.file('.sdkmanrc').asFile.withInputStream {
+project.rootProject.layout.projectDirectory.file('../.sdkmanrc').asFile.withInputStream {
     sdkmanProps.load(it)
 }
 tasks.withType(Wrapper).configureEach {
