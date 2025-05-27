@@ -172,3 +172,7 @@ publishing {
         }
     }
 }
+
+apply {
+    from rootProject.layout.projectDirectory.file('gradle/checksum-config.gradle')
+}
