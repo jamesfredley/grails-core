@@ -57,6 +57,7 @@ jobs:
       - name: "📦 Create source distribution ZIP"
         run: |
           version="${{ github.event.inputs.release_tag }}"
+          version="${version#v}"  # Strip 'v' prefix
           zip -r "apache-grails-${version}-incubating-src.zip" grails-core -x '*.git*'
       - name: "🔏 Sign source distribution ZIP"
         env:
