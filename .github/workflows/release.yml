@@ -64,15 +64,11 @@ jobs:
         id: assemble
         run: ./gradlew assemble
       - name: "📤 Upload grails wrapper Zip"
-        id: upload-release-asset
-        uses: actions/upload-release-asset@v1
+        uses: softprops/action-gh-release@v2
+        with:
+          files: grails-wrapper/build/distributions/grails-wrapper-${{ steps.release_version.outputs.value }}.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ github.event.release.upload_url }}
-          asset_path: grails-wrapper/build/distributions/grails-wrapper-${{ steps.release_version.outputs.value }}.zip
-          asset_name: grails-wrapper-${{ steps.release_version.outputs.value }}.zip
-          asset_content_type: application/zip
       - name: "📤 Upload Distribution"
         uses: actions/upload-artifact@50769540e7f4bd5e21e526ee35c689e35e0d6874 # v4.4.0
         with:
@@ -92,10 +88,10 @@ jobs:
       - name: "📤 Publish Gradle Plugins to Sonatype OSSRH"
         env:
           GRAILS_PUBLISH_RELEASE: 'true'
-          NEXUS_PUBLISH_USERNAME: ${{ secrets.NEXUS_PUBLISH_USERNAME }}
-          NEXUS_PUBLISH_PASSWORD: ${{ secrets.NEXUS_PUBLISH_PASSWORD }}
-          NEXUS_PUBLISH_URL: ${{ secrets.NEXUS_PUBLISH_RELEASE_URL }}
-          NEXUS_PUBLISH_STAGING_PROFILE_ID: ${{ secrets.NEXUS_PUBLISH_STAGING_PROFILE_ID }}
+          NEXUS_PUBLISH_USERNAME: ${{ secrets.NEXUS_STAGE_DEPLOYER_USER }}
+          NEXUS_PUBLISH_PASSWORD: ${{ secrets.NEXUS_STAGE_DEPLOYER_PW }}
+          NEXUS_PUBLISH_URL: ${{ secrets.GRAILS_NEXUS_PUBLISH_RELEASE_URL }}
+          NEXUS_PUBLISH_STAGING_PROFILE_ID: ${{ secrets.NEXUS_PUBLISH_STAGING_PROFILE_ID }} # TODO: unknown at this time
           SIGNING_KEY: ${{ secrets.SIGNING_KEY }}
           SIGNING_PASSPHRASE: ${{ secrets.SIGNING_PASSPHRASE }}
         working-directory: 'grails-gradle'
@@ -103,22 +99,35 @@ jobs:
           ./gradlew
           -Psigning.secretKeyRingFile=${{ github.workspace }}/secring.gpg 
           publishToSonatype 
+          aggregateChecksums
           closeSonatypeStagingRepository
       - name: "📤 Publish Grails-Core to Sonatype OSSRH"
         id: publish
         env:
           GRAILS_PUBLISH_RELEASE: 'true'
-          NEXUS_PUBLISH_USERNAME: ${{ secrets.NEXUS_PUBLISH_USERNAME }}
-          NEXUS_PUBLISH_PASSWORD: ${{ secrets.NEXUS_PUBLISH_PASSWORD }}
-          NEXUS_PUBLISH_URL: ${{ secrets.NEXUS_PUBLISH_RELEASE_URL }}
-          NEXUS_PUBLISH_STAGING_PROFILE_ID: ${{ secrets.NEXUS_PUBLISH_STAGING_PROFILE_ID }}
+          NEXUS_PUBLISH_USERNAME: ${{ secrets.NEXUS_STAGE_DEPLOYER_USER }}
+          NEXUS_PUBLISH_PASSWORD: ${{ secrets.NEXUS_STAGE_DEPLOYER_PW }}
+          NEXUS_PUBLISH_URL: ${{ secrets.GRAILS_NEXUS_PUBLISH_RELEASE_URL }}
+          NEXUS_PUBLISH_STAGING_PROFILE_ID: ${{ secrets.NEXUS_PUBLISH_STAGING_PROFILE_ID }} # TODO: unknown at this time
           SIGNING_KEY: ${{ secrets.SIGNING_KEY }}
           SIGNING_PASSPHRASE: ${{ secrets.SIGNING_PASSPHRASE }}
         run: >
           ./gradlew
           -Psigning.secretKeyRingFile=${{ github.workspace }}/secring.gpg 
           publishToSonatype 
+          aggregateChecksums
           closeSonatypeStagingRepository
+      - name: "🩹Combine checksums"
+        run: |
+          combined_file="build/combined-checksums.txt"
+          cat build/checksums.txt > "$combined_file"
+          cat grails-gradle/build/checksums.txt >> "$combined_file"
+      - name: "Upload combined checksums"
+        uses: softprops/action-gh-release@v2
+        with:
+          files: build/combined-checksums.txt
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   release:
     environment: release
     needs: publish
