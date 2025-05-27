@@ -26,7 +26,6 @@ jobs:
     permissions:
       contents: write  #  to create release & upload wrapper
       issues: write  #  to modify milestones
-      packages: write # purge pre-release packages
     runs-on: ubuntu-latest
     outputs:
       release_version: ${{ steps.release_version.outputs.value }}
