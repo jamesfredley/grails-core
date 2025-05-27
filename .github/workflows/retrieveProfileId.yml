@@ -37,3 +37,8 @@ jobs:
         working-directory: 'grails-gradle'
         run: >
           ./gradlew retrieveSonatypeStagingProfile
+        env:
+          GRAILS_PUBLISH_RELEASE: 'true'
+          NEXUS_PUBLISH_USERNAME: ${{ secrets.NEXUS_STAGE_DEPLOYER_USER }}
+          NEXUS_PUBLISH_PASSWORD: ${{ secrets.NEXUS_STAGE_DEPLOYER_PW }}
+          NEXUS_PUBLISH_URL: ${{ secrets.GRAILS_NEXUS_PUBLISH_RELEASE_URL }}
