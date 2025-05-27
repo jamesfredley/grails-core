@@ -84,8 +84,7 @@ jobs:
           SIGNING_KEY: ${{ secrets.GPG_KEY_ID }}
         working-directory: 'grails-gradle'
         run: >
-          ./gradlew x
-          initializeSonatypeStagingRepository
+          ./gradlew initializeSonatypeStagingRepository
       - name: "📤 Publish Gradle Plugins"
         env:
           GRAILS_PUBLISH_RELEASE: 'true'
