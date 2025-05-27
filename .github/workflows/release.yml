@@ -32,6 +32,12 @@ jobs:
     steps:
       - name: "📥 Checkout repository"
         uses: actions/checkout@v4
+      - name: '🔐 Set up GPG'
+        run: |
+          echo "${{ secrets.GRAILS_GPG_KEY }}" | gpg --batch --import
+          gpg --list-keys
+        env:
+          GPG_KEY_ID: ${{ secrets.GPG_KEY_ID }}
       - name: "☕️ Setup JDK"
         uses: actions/setup-java@v4
         with:
@@ -53,25 +59,19 @@ jobs:
       - name: "📤 Upload CLI Zip"
         uses: softprops/action-gh-release@v2
         with:
-          files: grails-cli/build/distributions/apache-grails-${{ steps.release_version.outputs.value }}-incubating.zip
+          files: grails-cli/build/distributions/apache-grails-${{ steps.release_version.outputs.value }}-incubating-bin.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: "🔐 Generate secring file"
-        env:
-          SECRING_FILE: ${{ secrets.SECRING_FILE }}
-        run: echo $SECRING_FILE | base64 -d > ${{ github.workspace }}/secring.gpg
       - name: "📤 Publish to Sonatype OSSRH"
         env:
           GRAILS_PUBLISH_RELEASE: 'true'
           NEXUS_PUBLISH_USERNAME: ${{ secrets.NEXUS_PUBLISH_USERNAME }}
           NEXUS_PUBLISH_PASSWORD: ${{ secrets.NEXUS_PUBLISH_PASSWORD }}
-          NEXUS_PUBLISH_URL: ${{ secrets.NEXUS_PUBLISH_RELEASE_URL }}
-          NEXUS_PUBLISH_STAGING_PROFILE_ID: ${{ secrets.NEXUS_PUBLISH_STAGING_PROFILE_ID }}
-          SIGNING_KEY: ${{ secrets.SIGNING_KEY }}
-          SIGNING_PASSPHRASE: ${{ secrets.SIGNING_PASSPHRASE }}
+          NEXUS_PUBLISH_URL: 'https://repository.apache.org/service/local/'
+          NEXUS_PUBLISH_STAGING_PROFILE_ID: ${{ secrets.STAGING_PROFILE_ID }}
+          SIGNING_KEY: ${{ secrets.GPG_KEY_ID }}
         run: >
           ./gradlew
-          -Psigning.secretKeyRingFile=${{ github.workspace }}/secring.gpg 
           -x initializeSonatypeStagingRepository
           findSonatypeStagingRepository 
           publishToSonatype

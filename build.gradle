@@ -26,8 +26,8 @@ group = 'org.apache.grails.forge'
 
 // we must apply the publish configuration first or the aggregator plugin will not work
 apply from: layout.projectDirectory.file('gradle/publish-root-config.gradle')
-apply plugin: 'org.grails.forge.internal.aggregator'
 
+apply plugin: 'org.grails.forge.internal.aggregator'
 
 ext {
     buildInstant = java.util.Optional.ofNullable(System.getenv('SOURCE_DATE_EPOCH'))
@@ -39,8 +39,8 @@ ext {
 }
 
 // buildSrc tests fail occasionally without running clean first
-build {
-    dependsOn('clean')
+tasks.named('build').configure {
+    it.dependsOn(tasks.named('clean'))
 }
 
 apply {
