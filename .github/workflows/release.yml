@@ -118,7 +118,6 @@ jobs:
           findSonatypeStagingRepository 
           publishToSonatype 
           aggregateChecksums
-          closeSonatypeStagingRepository
       - name: "🩹Combine checksums"
         run: |
           combined_file="build/combined-checksums.txt"
