@@ -32,6 +32,7 @@ import org.gradle.api.plugins.ExtraPropertiesExtension
 import org.gradle.api.plugins.JavaPlatformExtension
 import org.gradle.api.plugins.JavaPluginExtension
 import org.gradle.api.plugins.PluginManager
+import org.gradle.api.publish.Publication
 import org.gradle.api.publish.maven.MavenPublication
 import org.gradle.api.publish.maven.plugins.MavenPublishPlugin
 import org.gradle.api.tasks.SourceSetContainer
@@ -430,8 +431,15 @@ Note: if project properties are used, the properties must be defined prior to ap
                     if(localSigning) {
                         it.useGpgCmd()
                     }
-                    it.sign project.publishing.publications.maven
+
+                    Publication[] publications = new Publication[project.publishing.publications.size()]
+                    project.publishing.publications.findAll().toArray(publications)
+                    it.sign(publications)
                 })
+
+                project.tasks.withType(Jar).configureEach {
+                    it.finalizedBy(project.tasks.named('signMavenPublication'))
+                }
             }
 
             addInstallTaskAliases(project)
