@@ -122,6 +122,7 @@ Note: if project properties are used, the properties must be defined prior to ap
         final String nexusPublishUsername = project.findProperty('nexusPublishUsername') ?: System.getenv('NEXUS_PUBLISH_USERNAME') ?: ''
         final String nexusPublishPassword = project.findProperty('nexusPublishPassword') ?: System.getenv('NEXUS_PUBLISH_PASSWORD') ?: ''
         final String nexusPublishStagingProfileId = project.findProperty('nexusPublishStagingProfileId') ?: System.getenv('NEXUS_PUBLISH_STAGING_PROFILE_ID') ?: ''
+        final String nexusPublishDescription = project.findProperty('nexusPublishDescription') ?: System.getenv('NEXUS_PUBLISH_DESCRIPTION') ?: ''
 
         final ExtraPropertiesExtension extraPropertiesExtension = project.extensions.findByType(ExtraPropertiesExtension)
 
@@ -225,6 +226,9 @@ Note: if project properties are used, the properties must be defined prior to ap
 
             if (!hasNexusPublishApplied) {
                 project.rootProject.nexusPublishing {
+                    if(nexusPublishDescription) {
+                        description = "${nexusPublishDescription}"
+                    }
                     repositories {
                         sonatype {
                             if (nexusPublishUrl) {

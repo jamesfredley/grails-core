@@ -28,6 +28,10 @@ if (isReleaseVersion) {
     apply plugin: 'io.github.gradle-nexus.publish-plugin'
 
     nexusPublishing {
+        String projectDescription = System.getenv('NEXUS_PUBLISH_DESCRIPTION')
+        if(projectDescription) {
+            description = "${projectDescription}"
+        }
         repositories {
             sonatype {
                 if(System.getenv('NEXUS_PUBLISH_URL')) {
