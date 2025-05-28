@@ -60,10 +60,8 @@ jobs:
         if: ${{ matrix.java == '17' }}
         uses: actions/upload-artifact@v4
         with:
-          include-hidden-files: true
-          name: grails-cli-snapshot
-          path: |
-            grails-cli/build/distributions/apache-grails-*.zip
+          path: grails-cli/build/distributions/apache-grails-*.zip
+          if-no-files-found: 'error'
   publish:
     if: github.repository_owner == 'apache' && github.event_name == 'push'
     needs: build
