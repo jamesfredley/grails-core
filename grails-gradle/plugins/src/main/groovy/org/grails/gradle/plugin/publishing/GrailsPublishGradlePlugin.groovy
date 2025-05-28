@@ -20,11 +20,20 @@ package org.grails.gradle.plugin.publishing
 
 import grails.util.GrailsNameUtils
 import groovy.namespace.QName
+import groovy.transform.CompileStatic
 import io.github.gradlenexus.publishplugin.InitializeNexusStagingRepository
+import io.github.gradlenexus.publishplugin.NexusPublishExtension
 import io.github.gradlenexus.publishplugin.NexusPublishPlugin
+import io.github.gradlenexus.publishplugin.NexusRepository
+import io.github.gradlenexus.publishplugin.NexusRepositoryContainer
+import org.gradle.api.NamedDomainObjectProvider
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.Task
+import org.gradle.api.XmlProvider
+import org.gradle.api.artifacts.dsl.RepositoryHandler
+import org.gradle.api.artifacts.repositories.MavenArtifactRepository
+import org.gradle.api.artifacts.repositories.PasswordCredentials
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.DuplicatesStrategy
 import org.gradle.api.plugins.ExtensionContainer
@@ -32,6 +41,10 @@ import org.gradle.api.plugins.ExtraPropertiesExtension
 import org.gradle.api.plugins.JavaPlatformExtension
 import org.gradle.api.plugins.JavaPluginExtension
 import org.gradle.api.plugins.PluginManager
+import org.gradle.api.publish.PublishingExtension
+import org.gradle.api.publish.maven.MavenPom
+import org.gradle.api.publish.maven.MavenPomDeveloperSpec
+import org.gradle.api.publish.maven.MavenPomLicenseSpec
 import org.gradle.api.publish.maven.MavenPublication
 import org.gradle.api.publish.maven.plugins.MavenPublishPlugin
 import org.gradle.api.tasks.SourceSetContainer
@@ -111,6 +124,7 @@ Note: if project properties are used, the properties must be defined prior to ap
 """
     }
 
+    @CompileStatic
     @Override
     void apply(Project project) {
         project.rootProject.logger.info("Applying Grails Publish Gradle Plugin for `${project.name}`...");
@@ -176,21 +190,20 @@ Note: if project properties are used, the properties must be defined prior to ap
         projectPluginManager.apply(MavenPublishPlugin)
 
         boolean localSigning = false
-        if(isRelease) {
+        if (isRelease) {
             String signingKeyId = project.findProperty('signing.keyId') ?: System.getenv('SIGNING_KEY')
-            extraPropertiesExtension.setProperty('signing.keyId', signingKeyId)
+            extraPropertiesExtension.set('signing.keyId', signingKeyId)
             String secringFile = project.findProperty('signing.secretKeyRingFile') ?: System.getenv('SIGNING_KEYRING')
-            if(!secringFile) {
+            if (!secringFile) {
                 project.logger.info("No keyring file has been specified. Assuming the use of local gpgCommand instead.")
                 localSigning = true
-                extraPropertiesExtension.setProperty('signing.gnupg.keyName', signingKeyId)
-            }
-            else {
-                extraPropertiesExtension.setProperty('signing.secretKeyRingFile', secringFile)
+                extraPropertiesExtension.set('signing.gnupg.keyName', signingKeyId)
+            } else {
+                extraPropertiesExtension.set('signing.secretKeyRingFile', secringFile)
 
                 String signingPassphrase = project.findProperty('signing.password') ?: System.getenv('SIGNING_PASSPHRASE')
-                if(signingPassphrase) {
-                    extraPropertiesExtension.setProperty('signing.password', signingPassphrase)
+                if (signingPassphrase) {
+                    extraPropertiesExtension.set('signing.password', signingPassphrase)
                 }
             }
         }
@@ -225,24 +238,25 @@ Note: if project properties are used, the properties must be defined prior to ap
             }
 
             if (!hasNexusPublishApplied) {
-                project.rootProject.nexusPublishing {
-                    if(nexusPublishDescription) {
-                        repositoryDescription = "${nexusPublishDescription}"
+                project.rootProject.extensions.configure(NexusPublishExtension, { NexusPublishExtension it ->
+                    if (nexusPublishDescription) {
+                        it.repositoryDescription.set(nexusPublishDescription)
                     }
-                    repositories {
-                        sonatype {
+                    it.repositories { NexusRepositoryContainer repoContainer ->
+                        repoContainer.sonatype { NexusRepository repo ->
                             if (nexusPublishUrl) {
-                                nexusUrl = project.uri(nexusPublishUrl)
+                                repo.nexusUrl.set(project.uri(nexusPublishUrl))
                             }
                             if (nexusPublishSnapshotUrl) {
-                                snapshotRepositoryUrl = project.uri(nexusPublishSnapshotUrl)
+                                repo.snapshotRepositoryUrl.set(project.uri(nexusPublishSnapshotUrl))
                             }
-                            username = nexusPublishUsername
-                            password = nexusPublishPassword
-                            stagingProfileId = nexusPublishStagingProfileId
+
+                            repo.username.set(nexusPublishUsername)
+                            repo.password.set(nexusPublishPassword)
+                            repo.stagingProfileId.set(nexusPublishStagingProfileId)
                         }
                     }
-                }
+                })
             }
         }
 
@@ -251,190 +265,194 @@ Note: if project properties are used, the properties must be defined prior to ap
 
             validateProjectPublishable(project as Project)
 
-            project.publishing {
+            project.extensions.configure(PublishingExtension, { PublishingExtension pe ->
                 final def mavenPublishUrl = project.findProperty('mavenPublishUrl') ?: System.getenv('MAVEN_PUBLISH_URL')
                 if (useMavenPublish) {
                     System.setProperty('org.gradle.internal.publish.checksums.insecure', true as String)
 
-                    repositories {
-                        maven {
+                    pe.repositories { RepositoryHandler repoHandler ->
+                        repoHandler.maven { MavenArtifactRepository repo ->
                             final String mavenPublishUsername = project.findProperty('mavenPublishUsername') ?: System.getenv('MAVEN_PUBLISH_USERNAME')
                             final String mavenPublishPassword = project.findProperty('mavenPublishPassword') ?: System.getenv('MAVEN_PUBLISH_PASSWORD')
                             if (mavenPublishUsername && mavenPublishPassword) {
-                                credentials {
-                                    username = mavenPublishUsername
-                                    password = mavenPublishPassword
+                                repo.credentials { PasswordCredentials credentials ->
+                                    credentials.username = mavenPublishUsername
+                                    credentials.password = mavenPublishPassword
                                 }
                             }
-                            url = mavenPublishUrl
+                            repo.url = mavenPublishUrl
                         }
                     }
                 }
 
-                final GrailsPublishExtension gpe = extensionContainer.findByType(GrailsPublishExtension)
-                publications {
-                    maven(MavenPublication) {
-                        delegate.artifactId = gpe.artifactId ?: project.name
-                        delegate.groupId = gpe.groupId ?: project.group
+                pe.publications {
+                    NamedDomainObjectProvider<MavenPublication> mavenPublication = it.register('maven', MavenPublication) { MavenPublication publication ->
+                        final GrailsPublishExtension gpe = extensionContainer.findByType(GrailsPublishExtension)
+                        publication.artifactId = gpe.artifactId ?: project.name
+                        publication.groupId = gpe.groupId ?: project.group
 
-                        doAddArtefact(project, delegate)
+                        doAddArtefact(project, publication)
+
                         def extraArtefact = getDefaultExtraArtifact(project)
                         if (extraArtefact) {
-                            artifact extraArtefact
+                            publication.artifact extraArtefact
                         }
 
-                        pom.withXml {
-                            Node pomNode = asNode()
-
-                            if (!project.extensions.findByType(JavaPlatformExtension)) {
-                                // Prevent multiple dependencyManagement nodes
-                                if (pomNode.dependencyManagement) {
-                                    pomNode.dependencyManagement[0].replaceNode {}
-                                }
-                            }
-
+                        publication.pom { MavenPom pom ->
                             if (gpe != null) {
-                                pomNode.children().last() + {
-                                    def title = gpe.title ?: project.name
-                                    delegate.name title
-                                    delegate.description gpe.desc ?: title
+                                String title = gpe.title ?: project.name
+                                pom.name.set(title)
+                                pom.description.set(gpe.desc ?: title)
 
-                                    def websiteUrl = gpe.websiteUrl ?: gpe.githubSlug ? "https://github.com/$gpe.githubSlug" : ''
-                                    if (!websiteUrl) {
-                                        throw new RuntimeException(getErrorMessage('websiteUrl'))
-                                    }
-                                    delegate.url websiteUrl
-
-                                    def license = gpe.license
-                                    if (license != null) {
-                                        def concreteLicense = GrailsPublishExtension.License.LICENSES.get(license.name)
-                                        if (concreteLicense != null) {
-                                            delegate.licenses {
-                                                delegate.license {
-                                                    delegate.name concreteLicense.name
-                                                    delegate.url concreteLicense.url
-                                                    delegate.distribution concreteLicense.distribution
-                                                }
-                                            }
-                                        } else if (license.name && license.url) {
-                                            delegate.licenses {
-                                                delegate.license {
-                                                    delegate.name license.name
-                                                    delegate.url license.url
-                                                    delegate.distribution license.distribution
-                                                }
+                                String websiteUrl = gpe.websiteUrl ?: gpe.githubSlug ? "https://github.com/$gpe.githubSlug" : ''
+                                if (!websiteUrl) {
+                                    throw new RuntimeException(getErrorMessage('websiteUrl'))
+                                }
+                                pom.url.set(websiteUrl)
+                                GrailsPublishExtension.License license = gpe.license
+                                if (license) {
+                                    GrailsPublishExtension.License concreteLicense = GrailsPublishExtension.License.LICENSES.get(license.name)
+                                    if (concreteLicense) {
+                                        pom.licenses { MavenPomLicenseSpec spec ->
+                                            spec.license {
+                                                it.name.set(concreteLicense.name)
+                                                it.url.set(concreteLicense.url)
+                                                it.distribution.set(concreteLicense.distribution)
                                             }
                                         }
-                                    } else {
-                                        throw new RuntimeException(getErrorMessage('license'))
-                                    }
-
-                                    if (gpe.githubSlug) {
-                                        delegate.scm {
-                                            delegate.url "https://github.com/$gpe.githubSlug"
-                                            delegate.connection "scm:git@github.com:${gpe.githubSlug}.git"
-                                            delegate.developerConnection "scm:git@github.com:${gpe.githubSlug}.git"
-                                        }
-                                        delegate.issueManagement {
-                                            delegate.system 'Github Issues'
-                                            delegate.url "https://github.com/$gpe.githubSlug/issues"
-                                        }
-                                    } else {
-                                        if (gpe.vcsUrl) {
-                                            delegate.scm {
-                                                delegate.url gpe.vcsUrl
-                                                delegate.connection "scm:$gpe.vcsUrl"
-                                                delegate.developerConnection "scm:$gpe.vcsUrl"
+                                    } else if (license.name && license.url) {
+                                        pom.licenses { MavenPomLicenseSpec spec ->
+                                            spec.license {
+                                                it.name.set(license.name)
+                                                it.url.set(license.url)
+                                                it.distribution.set(license.distribution)
                                             }
-                                        } else {
-                                            throw new RuntimeException(getErrorMessage('vcsUrl'))
-                                        }
-
-                                        if (gpe.issueTrackerUrl) {
-                                            delegate.issueManagement {
-                                                delegate.system 'Issue Tracker'
-                                                delegate.url gpe.issueTrackerUrl
-                                            }
-                                        } else {
-                                            throw new RuntimeException(getErrorMessage('issueTrackerUrl'))
                                         }
                                     }
+                                } else {
+                                    throw new RuntimeException(getErrorMessage('license'))
+                                }
 
-                                    if (gpe.developers) {
-                                        delegate.developers {
-                                            for (entry in gpe.developers.entrySet()) {
-                                                delegate.developer {
-                                                    delegate.id entry.key
-                                                    delegate.name entry.value
-                                                }
-                                            }
+                                if (gpe.githubSlug) {
+                                    pom.scm {
+                                        it.url.set("https://github.com/$gpe.githubSlug" as String)
+                                        it.connection.set("scm:git@github.com:${gpe.githubSlug}.git" as String)
+                                        it.developerConnection.set("scm:git@github.com:${gpe.githubSlug}.git" as String)
+                                    }
+                                    pom.issueManagement {
+                                        it.system.set('Github Issues')
+                                        it.url.set("https://github.com/$gpe.githubSlug/issues" as String)
+                                    }
+                                } else {
+                                    if (gpe.vcsUrl) {
+                                        pom.scm {
+                                            it.url.set(gpe.vcsUrl)
+                                            it.connection.set("scm:$gpe.vcsUrl" as String)
+                                            it.developerConnection.set("scm:$gpe.vcsUrl" as String)
                                         }
                                     } else {
-                                        throw new RuntimeException(getErrorMessage('developers'))
+                                        throw new RuntimeException(getErrorMessage('vcsUrl'))
+                                    }
+
+                                    if (gpe.issueTrackerUrl) {
+                                        pom.issueManagement {
+                                            it.system.set('Issue Tracker')
+                                            it.url.set(gpe.issueTrackerUrl)
+                                        }
+                                    } else {
+                                        throw new RuntimeException(getErrorMessage('issueTrackerUrl'))
                                     }
                                 }
 
+                                if (gpe.developers) {
+                                    pom.developers { MavenPomDeveloperSpec spec ->
+                                        for (entry in gpe.developers.entrySet()) {
+                                            spec.developer {
+                                                it.id.set(entry.key)
+                                                it.name.set(entry.value)
+                                            }
+                                        }
+                                    }
+                                } else {
+                                    throw new RuntimeException(getErrorMessage('developers'))
+                                }
                             }
 
-                            if (gpe.pomCustomization) {
-                                gpe.pomCustomization.delegate = delegate
-                                gpe.pomCustomization.resolveStrategy = Closure.DELEGATE_FIRST
-                                gpe.pomCustomization.call()
-                            }
+                            pom.withXml { XmlProvider xml ->
+                                Node pomNode = xml.asNode()
 
-                            // fix dependencies without a version
-                            def mavenPomNamespace = 'http://maven.apache.org/POM/4.0.0'
-                            def dependenciesQName = new QName(mavenPomNamespace, 'dependencies')
-                            def dependencyQName = new QName(mavenPomNamespace, 'dependency')
-                            def versionQName = new QName(mavenPomNamespace, 'version')
-                            def groupIdQName = new QName(mavenPomNamespace, 'groupId')
-                            def artifactIdQName = new QName(mavenPomNamespace, 'artifactId')
-                            def nodes = (pomNode.getAt(dependenciesQName) as NodeList)
-                            if (nodes) {
-                                def dependencyNodes = (nodes.first() as Node).getAt(dependencyQName)
-                                dependencyNodes.findAll { dependencyNode ->
-                                    def versionNodes = (dependencyNode as Node).getAt(versionQName)
-                                    return versionNodes.size() == 0 || (versionNodes.first() as Node).text().isEmpty()
-                                }.each { dependencyNode ->
-                                    def groupId = ((dependencyNode as Node).getAt(groupIdQName).first() as Node).text()
-                                    def artifactId = ((dependencyNode as Node).getAt(artifactIdQName).first() as Node).text()
-                                    def resolvedArtifacts = project.configurations.compileClasspath.resolvedConfiguration.resolvedArtifacts +
-                                            project.configurations.runtimeClasspath.resolvedConfiguration.resolvedArtifacts
-                                    if (project.configurations.hasProperty('testFixturesCompileClasspath')) {
-                                        resolvedArtifacts += project.configurations.testFixturesCompileClasspath.resolvedConfiguration.resolvedArtifacts +
-                                                project.configurations.testFixturesRuntimeClasspath.resolvedConfiguration.resolvedArtifacts
-                                    }
-                                    def managedVersion = resolvedArtifacts.find {
-                                        it.moduleVersion.id.group == groupId &&
-                                                it.moduleVersion.id.name == artifactId
-                                    }?.moduleVersion?.id?.version
-                                    if (!managedVersion) {
-                                        throw new RuntimeException("No version found for dependency $groupId:$artifactId.")
-                                    }
-                                    def versionNode = (dependencyNode as Node).getAt(versionQName)
-                                    if (versionNode) {
-                                        (versionNode.first() as Node).value = managedVersion
-                                    } else {
-                                        (dependencyNode as Node).appendNode('version', managedVersion)
+                                if (!project.extensions.findByType(JavaPlatformExtension)) {
+                                    // Prevent multiple dependencyManagement nodes
+                                    List<Node> dependencyManagementList = pomNode.get("dependencyManagement") as List<Node>
+                                    if (dependencyManagementList) {
+                                        Node dependencyManagementNode = dependencyManagementList[0]
+                                        dependencyManagementNode.replaceNode {}
                                     }
                                 }
+
+                                if (gpe.pomCustomization) {
+                                    gpe.pomCustomization.delegate = xml
+                                    gpe.pomCustomization.resolveStrategy = Closure.DELEGATE_FIRST
+                                    gpe.pomCustomization.call()
+                                }
+
+                                fixUnversionedDependencies(pomNode, project)
                             }
                         }
+                    }
+
+                    if (isRelease) {
+                        extensionContainer.configure(SigningExtension, { SigningExtension signing ->
+                            signing.required = isRelease
+                            if (localSigning) {
+                                signing.useGpgCmd()
+                            }
+                            signing.sign mavenPublication.get()
+                        })
                     }
                 }
-            }
-
-            if (isRelease) {
-                extensionContainer.configure(SigningExtension, {
-                    it.required = isRelease
-                    if(localSigning) {
-                        it.useGpgCmd()
-                    }
-                    it.sign project.publishing.publications.maven
-                })
-            }
+            })
 
             addInstallTaskAliases(project)
+        }
+    }
+
+    private void fixUnversionedDependencies(Node pomNode, project) {
+        def mavenPomNamespace = 'http://maven.apache.org/POM/4.0.0'
+        def dependenciesQName = new QName(mavenPomNamespace, 'dependencies')
+        def dependencyQName = new QName(mavenPomNamespace, 'dependency')
+        def versionQName = new QName(mavenPomNamespace, 'version')
+        def groupIdQName = new QName(mavenPomNamespace, 'groupId')
+        def artifactIdQName = new QName(mavenPomNamespace, 'artifactId')
+        def nodes = (pomNode.getAt(dependenciesQName) as NodeList)
+        if (nodes) {
+            def dependencyNodes = (nodes.first() as Node).getAt(dependencyQName)
+            dependencyNodes.findAll { dependencyNode ->
+                def versionNodes = (dependencyNode as Node).getAt(versionQName)
+                return versionNodes.size() == 0 || (versionNodes.first() as Node).text().isEmpty()
+            }.each { dependencyNode ->
+                def groupId = ((dependencyNode as Node).getAt(groupIdQName).first() as Node).text()
+                def artifactId = ((dependencyNode as Node).getAt(artifactIdQName).first() as Node).text()
+                def resolvedArtifacts = project.configurations.compileClasspath.resolvedConfiguration.resolvedArtifacts +
+                        project.configurations.runtimeClasspath.resolvedConfiguration.resolvedArtifacts
+                if (project.configurations.hasProperty('testFixturesCompileClasspath')) {
+                    resolvedArtifacts += project.configurations.testFixturesCompileClasspath.resolvedConfiguration.resolvedArtifacts +
+                            project.configurations.testFixturesRuntimeClasspath.resolvedConfiguration.resolvedArtifacts
+                }
+                def managedVersion = resolvedArtifacts.find {
+                    it.moduleVersion.id.group == groupId &&
+                            it.moduleVersion.id.name == artifactId
+                }?.moduleVersion?.id?.version
+                if (!managedVersion) {
+                    throw new RuntimeException("No version found for dependency $groupId:$artifactId.")
+                }
+                def versionNode = (dependencyNode as Node).getAt(versionQName)
+                if (versionNode) {
+                    (versionNode.first() as Node).value = managedVersion
+                } else {
+                    (dependencyNode as Node).appendNode('version', managedVersion)
+                }
+            }
         }
     }
 
