@@ -105,6 +105,7 @@ jobs:
           mkdir -p $VERSION/source          
           cd $VERSION/source
           curl -LO https://github.com/apache/grails-core/releases/download/$TAG/apache-grails-$VERSION-incubating-src.zip
+          curl -LO https://github.com/apache/grails-core/releases/download/$TAG/apache-grails-$VERSION-incubating-src.zip.sha512
           curl -LO https://github.com/apache/grails-core/releases/download/$TAG/apache-grails-$VERSION-incubating-src.zip.asc
           echo "Adding the following files:"
           ls -l
@@ -119,6 +120,7 @@ jobs:
           mkdir -p $VERSION/distribution
           cd $VERSION/distribution
           curl -LO https://github.com/apache/grails-forge/releases/download/$TAG/apache-grails-$VERSION-incubating-bin.zip
+          curl -LO https://github.com/apache/grails-forge/releases/download/$TAG/apache-grails-$VERSION-incubating-bin.zip.sha512
           curl -LO https://github.com/apache/grails-forge/releases/download/$TAG/apache-grails-$VERSION-incubating-bin.zip.asc
           echo "Adding the following files:"
           ls -l
@@ -131,6 +133,7 @@ jobs:
           VERSION=${{ steps.release_version.outputs.version }}
           cd dev-repo/$VERSION/distribution
           curl -LO https://github.com/apache/grails-core/releases/download/$TAG/apache-grails-wrapper-$VERSION-incubating-bin.zip
+          curl -LO https://github.com/apache/grails-core/releases/download/$TAG/apache-grails-wrapper-$VERSION-incubating-bin.zip.sha512
           curl -LO https://github.com/apache/grails-core/releases/download/$TAG/apache-grails-wrapper-$VERSION-incubating-bin.zip.asc
           echo "Adding the following files:"
           ls -l
