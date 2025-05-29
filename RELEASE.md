@@ -47,53 +47,104 @@ During the staging step, we must create a source distribution & stage any binary
 3. Create a matching release in `grails-forge`:
    * Follow the same steps to create a release in grails-forge. Update any release notes specific to the delegating cli & grails forge.
 4. (grails-forge) The Github workflow `release.yml`, titled `Release - Create grails-forge`, will kick off.  This workflow will run a `publish` job that will complete similar steps to the `grails-core` publish job.
-5. Kick off the `Release - Grails Distribution` workflow from `distribution.yml` in `grails-core`. This job will: 
+5. Kick off the `Release - Source Distribution` workflow from `release-source-distribution.yml` in `grails-core`. This job will: 
      * download the tagged grails source
      * download the tagged grails-forge source
      * generate a source distribution meeting the ASF requirements
-     * upload the source distribution to the Github release `grails-core` release
+     * upload the source distribution to the Github `grails-core` release
+6. Kick off the `Release - Upload to dist.apache.org` workflow from `release-upload.yml` in `grails-core`. This job will:
+     * update the KEYS file under https://dist.apache.org/repos/dist/release/grails/KEYS with the version in the tagged source code
      * upload the source distribution to https://dist.apache.org/repos/dist/dev/grails/VERSION/sources
-6. Kick off the `Distribution` workflow in `grails-forge`, which will:
-     * create a binary distribution of the grails CLIs
-     * upload the binary distribution to the Github release `grails-forge` release
-     * upload the binary distribution that will be uploaded to sdkman to https://dist.apache.org/repos/dist/dev/grails/VERSION/distribution
+     * upload the grails-wrapper binary distribution to https://dist.apache.org/repos/dist/dev/grails/VERSION/distribution
+     * upload the grails binary distribution to https://dist.apache.org/repos/dist/dev/grails/VERSION/distribution (note: this is the sdkman artifact)
 
 Once `grails-forge` & `grails-core` are published the end source & binary distributions should be staged. 
 
 ## 2. Verifying
 
-Prior to releasing a vote, we need to verify the staged artifacts. At a high level, the following must be completed to verify these artifacts:
-1. Download the zipped source distribution artifacts:
+Prior to releasing a vote, we need to verify the staged artifacts. Follow the below steps to verify each staged artifact.
+
+### Source Distribution Verification
+Download the zipped source distribution artifacts:
    * `apache-grails-<version>-incubating-src.zip` - the source distribution
    * `apache-grails-<version>-incubating-src.zip.asc` - the public key to verify the source distribution
    * `apache-grails-<version>-incubating-src.zip.sha512` - the checksum to verify the source distribution
-2. Verify the distribution checksum via the command:
+
+from [https://dist.apache.org/repos/dist/dev/grails/version](https://dist.apache.org/repos/dist/dev/grails)
+
+Verify the source distribution checksum via the command:
    ```bash
    shasum -a 512 -c apache-grails-<version>-incubating-src.zip.sha512
    ```
-3. Verify the distribution signature via the command:
+
+Verify the source distribution signature via the command:
    ```bash
     gpg --verify apache-grails-<version>-incubating-src.zip.asc apache-grails-<version>-incubating-src.zip
-    ```
-4. Extract the zip file and verify the contents:
+   ```
+
+Extract the zip file and verify the contents:
    * Ensure the `LICENSE` & `NOTICE` files are present to ensure license compliance.
    * Ensure `README.md` & `CONTRIBUTING.md` are present to ensure project build & usage instructions are present.
    * Ensure the `PUBLISHED` file is present so we know how to pull the various jar files.
-5. Verify the signed jar files by downloading all jars inside of the `PUBLISHED` file.
-   * For each jar, verify the jar file matches the published one:
-   ```bash
-    gpg --verify <jar>.asc <jar>
+
+### Jar file Signature Verification (Nexus Staging Repositories)
+As part of uploading to repository.apache.org the signatures are verified to match a KEY that has been distributed.  It does not verify that the jar files are built with a key trusted by the Grails project.
+
+Download the latest KEYS file and make sure it's imported into gpg:
+```bash
+    wget https://github.com/apache/grails-core/blob/7.0.x/KEYS
+    gpg --import KEYS
+```
+
+The jar files will need downloaded and verified they were signed by a valid Grails key.  Run the script (substitute the staging repo name):  
+```bash
+    wget --recursive --no-parent --accept jar,asc https://repository.apache.org/content/repositories/orgapachegrails-1020/org/apache/grails
+    for jar_file in *.jar; do
+      asc_file="${jar_file}.asc"
+    
+      if [[ -f "$asc_file" ]]; then
+        echo "🔍 Verifying $jar_file..."
+    
+        gpg --verify "$asc_file" "$jar_file"
+        verify_status=$?
+    
+        if [ $verify_status -eq 0 ]; then
+          echo "✅ $jar_file is correctly signed."
+        else
+          echo "❌ $jar_file FAILED signature verification!"
+        fi
+    
+        echo ""
+      else
+        echo "⚠️ No .asc file found for $jar_file. Skipping."
+      fi
+    done
+```
+
+### Reproducible Jar File
+After all jar files are verified to be signed by a valid Grails key, we need to build a local copy to ensure the file was built with the right code base.
+
+Bootstrap the source distribution so that it can be built: 
+    ```bash
+    gradle wrapper
     ```
-6. Run the `verify-distribution.sh` shell script to compare the published jar files to a locally built version of them.
-7. For any differences, extract the jar files, use IntelliJ to compare each differing file. Assuming differences are ordering related, we can continue with the verification.
-8. Download the binary distrubtion & expand it to test the various CLI's: `grailsw` (wrapper), `grails` (delegating), `grails-forge-cli`, and `grails-shell-cli`.  For each CLI, verify the published signature in the `PUBLISHED` file:
+
+Run the `verify-distribution.sh` shell script to compare the published jar files to a locally built version of them. For any differences, extract the jar files, use IntelliJ to compare each differing file. Assuming differences are ordering related, we can continue with the verification.
+
+### Binary Distribution Verification
+Download the binary distribution & expand it to test the various CLI's: `grailsw` (wrapper), `grails` (delegating), `grails-forge-cli`, and `grails-shell-cli`.  For each CLI, verify the published signature in the `PUBLISHED` file:
    ```bash
     gpg --verify <cli>.asc <cli>
    ```
-10. testing `grailsw`:
+
+### CLI Testing
+
+Each CLI needs tested to ensure it's functional prior to release:
+
+* testing `grailsw`:
     * set GRAILS_REPO_URL to the staging repository
     * run `grailsw` and ensure it downloads the correct jars to `.grails` (verify the checksums of the jars)
-11. testing `grails-shell-cli`:
+* testing `grails-shell-cli`:
     * create a basic app:
     ```bash
     grails-shell-cli create-app test
@@ -103,7 +154,7 @@ Prior to releasing a vote, we need to verify the staged artifacts. At a high lev
     ```bash
     grails-shell-cli run-app
     ```
-12. Perform the same tests, but use the delegating cli `grails` with type forge
+* Perform the same tests, but use the delegating cli `grails` with type forge
     * create a basic app:
     ```bash
     grails -t forge create-app test
@@ -119,6 +170,18 @@ Prior to releasing a vote, we need to verify the staged artifacts. At a high lev
 
 TODO
 
-## 3. Releasing
+## 4. Releasing
 
 TODO
+
+# Rollback
+
+In the event a staged artifact needs rolled back, follow the below steps:
+
+## Rollback Nexus Artifacts (Jars)
+
+To remove a Nexus staging repo, run the workflow `Release - Drop Nexus Staging` in `grails-core`.  The input of this task can be obtained by logging into [repository.apache.org](https://repository.apache.org/index.html#stagingRepositories) and finding the staging repository name. Please note that there will always be 2 staging repositories for a Grails release because we keep `grails-forge` separate from `grails-core`.
+
+## Rollback Distribution
+
+To remove the staged distribution, use your SVN credentials to remove the version directory at [https://dist.apache.org/repos/dist/dev/grails](https://dist.apache.org/repos/dist/dev/grails)
