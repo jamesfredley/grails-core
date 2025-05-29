@@ -38,23 +38,23 @@ jobs:
           path: grails-core
       - name: "Setup SVN and Tools"
         run: sudo apt-get install -y subversion subversion-tools
-      - name: "Ensure grails release folder exists"
-        run: |
-          set -e
-
-          if svn ls https://dist.apache.org/repos/dist/release/grails --username "$SVN_USERNAME" --password "$SVN_PASSWORD" --non-interactive; then
-            echo "Release Folder 'grails' already exists — skipping creation"
-          else
-            echo "Release Folder 'grails' does not exist, creating"
-            svnmucc --non-interactive \
-              --username "$SVN_USERNAME" \
-              --password "$SVN_PASSWORD" \
-              mkdir https://dist.apache.org/repos/dist/release/grails \
-              -m "Create 'grails' release folder"
-          fi
-        env:
-          SVN_USERNAME: ${{ secrets.SVC_DIST_GRAILS_USERNAME }}
-          SVN_PASSWORD: ${{ secrets.SVC_DIST_GRAILS_PASSWORD }}
+#      - name: "Ensure grails release folder exists"
+#        run: |
+#          set -e
+#
+#          if svn ls https://dist.apache.org/repos/dist/release/grails --username "$SVN_USERNAME" --password "$SVN_PASSWORD" --non-interactive; then
+#            echo "Release Folder 'grails' already exists — skipping creation"
+#          else
+#            echo "Release Folder 'grails' does not exist, creating"
+#            svnmucc --non-interactive \
+#              --username "$SVN_USERNAME" \
+#              --password "$SVN_PASSWORD" \
+#              mkdir https://dist.apache.org/repos/dist/release/grails \
+#              -m "Create 'grails' release folder"
+#          fi
+#        env:
+#          SVN_USERNAME: ${{ secrets.SVC_DIST_GRAILS_USERNAME }}
+#          SVN_PASSWORD: ${{ secrets.SVC_DIST_GRAILS_PASSWORD }}
       - name: "Ensure grails dev folder exists"
         run: |
           set -e
