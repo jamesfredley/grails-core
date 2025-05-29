@@ -3,6 +3,15 @@ This file contains the GPG keys used to sign Apache Grails releases.
 To import these keys:
     gpg --import KEYS
 
+To setup this key for trust:
+    gpg --edit-key <key id>
+    gpg> trust
+    gpg> 4
+    gpg> quit
+
+Sign the key for validity:
+    gpg --lsign-key 08E2CEC47E38FE415F080AB62ADECADC11775306
+
 To add a key to this file:
      (gpg --list-sigs <your email> && gpg --armor --export <your email>) >> KEYS
 
