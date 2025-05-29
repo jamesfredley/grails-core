@@ -31,6 +31,8 @@ jobs:
       release_version: ${{ steps.release_version.outputs.value }}
       target_branch: ${{ steps.extract_branch.outputs.value }}
     steps:
+      - name: "Output Agent IP" # in the event RAO blocks this agent, this can be used to debug it
+        run: curl -s https://api.ipify.org
       - name: "📥 Checkout repository"
         uses: actions/checkout@v4
       - name: 'Ensure Common Build Date' # to ensure a reproducible build
