@@ -66,11 +66,19 @@ jobs:
         env:
           GPG_KEY_ID: ${{ secrets.GPG_KEY_ID }}
         run: |
-          gpg --default-key "${GPG_KEY_ID}" --batch --yes --pinentry-mode loopback --armor --detach-sign apache-grails-*-incubating-src.zip
+          version="${{ github.ref_name }}"
+          version="${version#v}"  # Strip 'v' prefix
+          gpg --default-key "${GPG_KEY_ID}" --batch --yes --pinentry-mode loopback --armor --detach-sign apache-grails-${version}-incubating-src.zip
+      - name: "📦 Create source distribution checksum"
+        run: |
+          version="${{ github.ref_name }}"
+          version="${version#v}"  # Strip 'v' prefix
+          sha512sum apache-grails-${version}-incubating-src.zip | awk '{print $1}' > "grails-wrapper/build/distributions/apache-grails-${version}-incubating-src.zip.sha512"
       - name: "🚀 Upload ZIP and Signature to GitHub Release"
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ github.ref_name }}
           files: |
             apache-grails-*-incubating-src.zip
+            apache-grails-*-incubating-src.zip.sha512
             apache-grails-*-incubating-src.zip.asc
