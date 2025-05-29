@@ -16,6 +16,11 @@
 name: "Release - Upload to dist.apache.org"
 on:
   workflow_dispatch:
+    inputs:
+      release_tag:
+        description: 'Release tag (e.g., v7.0.0-M4)'
+        required: true
+        type: string
 jobs:
   asf_release:
     runs-on: ubuntu-latest
@@ -26,13 +31,13 @@ jobs:
       - name: "Extract release version"
         id: release_version
         run: |
-          version="${{ github.ref_name }}"
+          version="${{ github.event.inputs.release_tag }}"
           echo "version=${version#v}" >> $GITHUB_OUTPUT
       - name: "📥 Checkout repository"
         uses: actions/checkout@v4
         with:
           repository: apache/grails-core
-          ref: ${{ github.ref_name }}
+          ref: '7.0.x' # TODO: Temporary to minimize staging
           path: grails-core
       - name: "Setup SVN"
         run: sudo apt-get install -y subversion
