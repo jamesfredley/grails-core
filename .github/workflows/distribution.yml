@@ -59,14 +59,17 @@ jobs:
           version="${{ github.event.inputs.release_tag }}"
           version="${version#v}"  # Strip 'v' prefix
           zip -r "apache-grails-${version}-incubating-src.zip" grails-core -x '*.git*'
+      - name: '🔐 Set up GPG'
+        run: |
+          echo "${{ secrets.GRAILS_GPG_KEY }}" | gpg --batch --import
+          gpg --list-keys
+        env:
+          GPG_KEY_ID: ${{ secrets.GPG_KEY_ID }}
       - name: "🔏 Sign source distribution ZIP"
         env:
-          GPG_PRIVATE_KEY: ${{ secrets.GPG_KEY }}
-          GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+          GPG_KEY_ID: ${{ secrets.GPG_KEY_ID }}
         run: |
-          echo "$GPG_PRIVATE_KEY" | gpg --batch --import
-          gpg --batch --yes --pinentry-mode loopback --passphrase "$GPG_PASSPHRASE" \
-            --armor --detach-sign apache-grails-*-incubating-src.zip
+          gpg --default-key "${GPG_KEY_ID}" --batch --yes --pinentry-mode loopback --armor --detach-sign apache-grails-*-incubating-src.zip
       - name: "🚀 Upload ZIP and Signature to GitHub Release"
         uses: softprops/action-gh-release@v2
         with:
