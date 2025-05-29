@@ -105,6 +105,8 @@ jobs:
           cd dev-repo/$VERSION/source
           curl -LO https://github.com/apache/grails-core/releases/download/$TAG/apache-grails-$VERSION-incubating-src.zip
           curl -LO https://github.com/apache/grails-core/releases/download/$TAG/apache-grails-$VERSION-incubating-src.zip.asc
+          echo "Adding the following files:"
+          ls -l
           svn add . --force
           svn commit -m "Upload grails source files for $VERSION" --username "$SVN_USERNAME" --password "$SVN_PASSWORD"
       - name: "Upload grails binary distribution"
@@ -115,6 +117,8 @@ jobs:
           cd dev-repo/$VERSION/distribution
           curl -LO https://github.com/apache/grails-forge/releases/download/$TAG/apache-grails-$VERSION-incubating-bin.zip
           curl -LO https://github.com/apache/grails-forge/releases/download/$TAG/apache-grails-$VERSION-incubating-bin.zip.asc
+          echo "Adding the following files:"
+          ls -l
           svn add . --force
           svn commit -m "Upload grails binary distribution for $VERSION" --username "$SVN_USERNAME" --password "$SVN_PASSWORD"
       - name: "Upload grails wrapper binary distribution"
@@ -124,5 +128,7 @@ jobs:
           cd dev-repo/$VERSION/distribution
           curl -LO https://github.com/apache/grails-core/releases/download/$TAG/apache-grails-wrapper-$VERSION-incubating-bin.zip
           curl -LO https://github.com/apache/grails-core/releases/download/$TAG/apache-grails-wrapper-$VERSION-incubating-bin.zip.asc
+          echo "Adding the following files:"
+          ls -l
           svn add . --force
           svn commit -m "Upload grails wrapper binary distribution for $VERSION" --username "$SVN_USERNAME" --password "$SVN_PASSWORD"
