@@ -73,7 +73,7 @@ jobs:
         run: |
           version="${{ github.ref_name }}"
           version="${version#v}"  # Strip 'v' prefix
-          sha512sum apache-grails-${version}-incubating-src.zip | awk '{print $1}' > "apache-grails-${version}-incubating-src.zip.sha512"
+          sha512sum apache-grails-${version}-incubating-src.zip > "apache-grails-${version}-incubating-src.zip.sha512"
       - name: "🚀 Upload ZIP and Signature to GitHub Release"
         uses: softprops/action-gh-release@v2
         with:
