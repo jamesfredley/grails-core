@@ -51,7 +51,7 @@ gpg --homedir "${GRAILS_GPG_HOME}" --import "${SCRIPT_DIR}/../../KEYS"
 REPO_BASE_URL="https://repository.apache.org/content/repositories/${STAGING_REPO_ID}"
 
 # Create a temporary directory to work in
-WORK_DIR='build'
+WORK_DIR='etc/bin/results/published'
 mkdir -p $WORK_DIR
 echo "Using temp dir: $WORK_DIR"
 cd "$WORK_DIR"
