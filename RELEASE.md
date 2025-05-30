@@ -62,61 +62,44 @@ During the staging step, we must create a source distribution & stage any binary
 
 Prior to releasing a vote, we need to verify the staged artifacts. Follow the below steps to verify each staged artifact.
 
+### Download the Staged Artifacts
+
+Use `etc/bin/download-release-artifacts.sh` to download the staged artifacts. This script will download the source distribution, wrapper binary distribution, and sdkman binary distribution. The distribution should come from [https://dist.apache.org/repos/dist/dev/grails/version](https://dist.apache.org/repos/dist/dev/grails).
+
 ### Source Distribution Verification
-Download the zipped source distribution artifacts:
+
+The following are the source distribution artifacts:
    * `apache-grails-<version>-incubating-src.zip` - the source distribution
    * `apache-grails-<version>-incubating-src.zip.asc` - the public key to verify the source distribution
    * `apache-grails-<version>-incubating-src.zip.sha512` - the checksum to verify the source distribution
 
-from [https://dist.apache.org/repos/dist/dev/grails/version](https://dist.apache.org/repos/dist/dev/grails)
+Use `etc/bin/verify-source-distribution.sh` to verify the source distribution. This script performs the following:
 
-Verify the source distribution checksum via the command:
+Verifies the source distribution checksum via the command:
    ```bash
    shasum -a 512 -c apache-grails-<version>-incubating-src.zip.sha512
    ```
 
-Verify the source distribution signature via the command:
+Verifies the source distribution signature via the command:
    ```bash
     gpg --verify apache-grails-<version>-incubating-src.zip.asc apache-grails-<version>-incubating-src.zip
    ```
 
-Extract the zip file and verify the contents:
+Extracts the zip file and verifies the contents:
    * Ensure the `LICENSE` & `NOTICE` files are present to ensure license compliance.
    * Ensure `README.md` & `CONTRIBUTING.md` are present to ensure project build & usage instructions are present.
-   * Ensure the `PUBLISHED` file is present so we know how to pull the various jar files.
+   * Ensure the `PUBLISHED_ARTIFACTS` file is present so we know how to pull the various jar files.
+   * Ensure the `CHECKSUMS` file is present so we can ensure those checksums match the staged artifacts.
 
 ### Jar file Signature Verification (Nexus Staging Repositories)
-As part of uploading to repository.apache.org the signatures are verified to match a KEY that has been distributed.  It does not verify that the jar files are built with a key trusted by the Grails project.
 
-Download the latest KEYS file and make sure it's imported into gpg:
-```bash
-    wget https://github.com/apache/grails-core/blob/7.0.x/KEYS
-    gpg --import KEYS
-```
+As part of uploading to repository.apache.org the signatures are verified to match a KEY that has been distributed, but RAO does not verify that the jar files are built with a key trusted by the Grails project.
 
-The jar files will need downloaded and verified they were signed by a valid Grails key.  Run the script (substitute the staging repo name):  
+To ensure checksums match the server & signatures match, run the script `etc/bin/verify-jar-artifacts.sh` in the `grails-core` repository. This script will download the jar files from the staging repository, verify their signatures, and ensure they match the checksums provided in the source distribution.
+
+Example: 
 ```bash
-    wget --recursive --no-parent --accept jar,asc https://repository.apache.org/content/repositories/orgapachegrails-1020/org/apache/grails
-    for jar_file in *.jar; do
-      asc_file="${jar_file}.asc"
-    
-      if [[ -f "$asc_file" ]]; then
-        echo "🔍 Verifying $jar_file..."
-    
-        gpg --verify "$asc_file" "$jar_file"
-        verify_status=$?
-    
-        if [ $verify_status -eq 0 ]; then
-          echo "✅ $jar_file is correctly signed."
-        else
-          echo "❌ $jar_file FAILED signature verification!"
-        fi
-    
-        echo ""
-      else
-        echo "⚠️ No .asc file found for $jar_file. Skipping."
-      fi
-    done
+    ./etc/bin/verify-jar-artifacts.sh orgapachegrails-1026 v7.0.0-M4 <grailsdownloadlocation>
 ```
 
 ### Reproducible Jar File
@@ -127,7 +110,7 @@ Bootstrap the source distribution so that it can be built:
     gradle wrapper
     ```
 
-Run the `verify-distribution.sh` shell script to compare the published jar files to a locally built version of them. For any differences, extract the jar files, use IntelliJ to compare each differing file. Assuming differences are ordering related, we can continue with the verification.
+Run the `verify-reproducible.sh` shell script to compare the published jar files to a locally built version of them. For any differences, extract the jar files, use IntelliJ to compare each differing file. Assuming differences are ordering related, we can continue with the verification.
 
 ### Binary Distribution Verification
 Download the binary distribution & expand it to test the various CLI's: `grailsw` (wrapper), `grails` (delegating), `grails-forge-cli`, and `grails-shell-cli`.  For each CLI, verify the published signature in the `PUBLISHED` file:
@@ -183,3 +166,25 @@ To remove a Nexus staging repo, run the workflow `Release - Drop Nexus Staging` 
 ## Rollback Distribution
 
 To remove the staged distribution, use your SVN credentials to remove the version directory at [https://dist.apache.org/repos/dist/dev/grails](https://dist.apache.org/repos/dist/dev/grails)
+
+## Appendix: GPG Configuration
+If you wish to verify any artifact manually, you must trust the key used to build Grails. To do so:
+
+Download the latest KEYS file and make sure it's imported into gpg:
+```bash
+    wget https://github.com/apache/grails-core/blob/7.0.x/KEYS
+    gpg --import KEYS
+```
+
+Setup the key for trust:
+```bash
+   gpg --edit-key <key id>
+   gpg> trust
+   gpg> 4
+   gpg> quit
+```
+
+Setup the key for validity:
+```bash
+   gpg --lsign-key 08E2CEC47E38FE415F080AB62ADECADC11775306
+```
