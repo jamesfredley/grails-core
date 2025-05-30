@@ -50,8 +50,11 @@ gpg --homedir "${GRAILS_GPG_HOME}" --import "${SCRIPT_DIR}/../../KEYS"
 
 REPO_BASE_URL="https://repository.apache.org/content/repositories/${STAGING_REPO_ID}"
 
+# cp the artifacts file to the expected location for reproducible build check
+cp "${ARTIFACTS_FILE}" etc/bin/results/
+
 # Create a temporary directory to work in
-WORK_DIR='etc/bin/results/published'
+WORK_DIR='etc/bin/results/published_artifacts'
 mkdir -p $WORK_DIR
 echo "Using temp dir: $WORK_DIR"
 cd "$WORK_DIR"
