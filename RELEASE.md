@@ -108,6 +108,9 @@ After all jar files are verified to be signed by a valid Grails key, we need to 
 Bootstrap the source distribution so that it can be built: 
     ```bash
     gradle wrapper
+    cd grails-gradle
+    gradlew wrapper
+    cd -
     ```
 
 Run the `verify-reproducible.sh` shell script to compare the published jar files to a locally built version of them. For any differences, extract the jar files, use IntelliJ to compare each differing file. Assuming differences are ordering related, we can continue with the verification.
