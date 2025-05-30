@@ -26,3 +26,7 @@ This product includes Java Servlet and JSP specification files, which are licens
 - Jakarta Servlet 4.0, 5.0, 6.0 and JSP 3.0
   Copyright (c) 2009, 2021 Oracle and/or its affiliates. All rights reserved.
   See licenses/LICENSE-jakarta-ee.txt for license terms.
+
+This product includes software from Spring Framework 5.3, developed by Pivotal Software, Inc.
+Copyright 2002-2020 the original author or authors.
+See the LICENSE file for the Apache License 2.0 terms.

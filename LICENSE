@@ -253,3 +253,18 @@ The following files are licensed under the Eclipse Public License 2.0:
 See licenses/LICENSE-jakarta-ee.txt for the full license terms.
 
 --------------------------------------------------------------------------
+
+This product includes the following files from Spring Framework 5.3, developed by Pivotal Software, Inc., licensed under the Apache License 2.0:
+
+    grails-common/src/main/groovy/org/apache/grails/common/annotationAbstractRecursiveAnnotationVisitor.java
+    grails-common/src/main/groovy/org/apache/grails/common/AnnotationAttributesReadingVisitor.java
+    grails-common/src/main/groovy/org/apache/grails/common/AnnotationMetadataReadingVisitor.java
+    grails-common/src/main/groovy/org/apache/grails/common/AnnotationReadingVisitorUtils.java
+    grails-common/src/main/groovy/org/apache/grails/common/ClassMetadataReadingVisitor.java
+    grails-common/src/main/groovy/org/apache/grails/common/MethodMetadataReadingVisitor.java
+    grails-common/src/main/groovy/org/apache/grails/common/RecursiveAnnotationArrayVisitor.java
+    grails-common/src/main/groovy/org/apache/grails/common/RecursiveAnnotationAttributesVisitor.java
+
+See the above Apache License 2.0 for the terms governing these files.
+
+--------------------------------------------------------------------------
