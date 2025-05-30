@@ -53,7 +53,7 @@ afterEvaluate {
             List filesToChecksum = []
             publishing.publications.withType(MavenPublication).all { MavenPublication publication ->
                 publication.artifacts.each { MavenArtifact artifact ->
-                    if(artifact.file.name == 'grails-plugin.xml') {
+                    if(artifact.file.name == 'grails-plugin.xml' || artifact.file.name == 'profile.yml') {
                         return
                     }
                     filesToChecksum << artifact.file
@@ -71,7 +71,7 @@ afterEvaluate {
                     Map<String, String> artifacts = [:]
                     project.publishing.publications.withType(MavenPublication).all { MavenPublication publication ->
                         publication.artifacts.each { MavenArtifact artifact ->
-                            if(!artifact.file.exists() || artifact.file.name == 'grails-plugin.xml') {
+                            if(!artifact.file.exists() || artifact.file.name == 'grails-plugin.xml' || artifact.file.name == 'profile.yml') {
                                 return
                             }
 
