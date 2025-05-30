@@ -24,7 +24,7 @@ afterEvaluate {
     if (project.plugins.hasPlugin("maven-publish")) {
         def checksumTask = tasks.register("publishedChecksums", Checksum)
         checksumTask.configure { Checksum check ->
-            check.checksumAlgorithm = Checksum.Algorithm.SHA256
+            check.checksumAlgorithm = Checksum.Algorithm.SHA512
             check.outputDirectory.set(project.layout.buildDirectory.dir("checksums"))
             check.dependsOn(tasks.withType(Jar))
         }
