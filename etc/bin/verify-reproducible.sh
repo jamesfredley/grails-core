@@ -43,10 +43,10 @@ else
 fi
 export SOURCE_DATE_EPOCH=$(cat "${DOWNLOAD_LOCATION}/grails/BUILD_DATE")
 
-if [[ -d "${DOWNLOAD_LOCATION}/grails/etc/bin/results/published" ]]; then
-  echo "✅ Directory 'published' exists."
+if [[ -d "${DOWNLOAD_LOCATION}/grails/etc/bin/results/first" ]]; then
+  echo "✅ Directory 'first' exists."
 else
-  echo "❌ Directory 'published' not found. Please place the PUBLISHED jar files under ${DOWNLOAD_LOCATION}/grails/etc/bin/results/published..."
+  echo "❌ Directory 'first' not found. Please place the published jar files under ${DOWNLOAD_LOCATION}/grails/etc/bin/results/first..."
   exit 1
 fi
 
@@ -75,9 +75,9 @@ echo "$DIFF_RESULTS" > diff.txt
 cat diff.txt
 
 printf '%s\n' "$DIFF_RESULTS" | sed 's|^etc/bin/results/||' > toPurge.txt
-find published -type f -name '*.jar' -print | sed 's|^published/||' | grep -F -x -v -f toPurge.txt |
+find first -type f -name '*.jar' -print | sed 's|^first/||' | grep -F -x -v -f toPurge.txt |
   while IFS= read -r f; do
-    rm -f "./published/$f"
+    rm -f "./first/$f"
   done
 find second -type f -name '*.jar' -print | sed 's|^second/||' | grep -F -x -v -f toPurge.txt |
   while IFS= read -r f; do

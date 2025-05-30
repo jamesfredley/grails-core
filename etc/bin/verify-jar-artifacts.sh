@@ -59,7 +59,7 @@ REPO_BASE_URL="https://repository.apache.org/content/repositories/${STAGING_REPO
 cd grails
 
 # Create a temporary directory to work in
-WORK_DIR='etc/bin/results/published'
+WORK_DIR='etc/bin/results/first'
 mkdir -p $WORK_DIR
 echo "Using temp dir: $WORK_DIR"
 cd "$WORK_DIR"
