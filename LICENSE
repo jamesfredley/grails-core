@@ -220,8 +220,12 @@ Public Domain
 The following classes within this product:
 
     org.grails.web.json.JSONArray
+    org.grails.web.json.JSONElement
+    org.grails.web.json.JSONException
     org.grails.web.json.JSONObject
     org.grails.web.json.JSONTokener
     org.grails.web.json.JSONWriter
+
+Originally from https://github.com/stleary/JSON-java
 
 --------------------------------------------------------------------------
