@@ -182,6 +182,7 @@ project.extensions.getByType(DistributionContainer).configureEach {
         from(rootProject.layout.projectDirectory.file('LICENSE')) { it.into '' }
         from(rootProject.layout.projectDirectory.file('NOTICE')) { it.into '' }
         from(rootProject.layout.projectDirectory.file('INSTALL')) { it.into '' }
+        from(rootProject.layout.projectDirectory.file('DISCLAIMER')) { it.into '' }
     }
 }
 
