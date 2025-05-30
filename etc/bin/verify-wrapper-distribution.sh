@@ -31,10 +31,10 @@ fi
 VERSION=${RELEASE_TAG#v}
 
 cd $DOWNLOAD_LOCATION
-ZIP_FILE=$(ls "apache-grails-${VERSION}-incubating-src.zip" 2>/dev/null | head -n 1)
+ZIP_FILE=$(ls "apache-grails-wrapper-${VERSION}-incubating-bin.zip" 2>/dev/null | head -n 1)
 
 if [ -z "$ZIP_FILE" ]; then
-  echo "Error: Could not find apache-grails-${VERSION}-incubating-src.zip in $DOWNLOAD_LOCATION"
+  echo "Error: Could not find apache-grails-wrapper-${VERSION}-incubating-bin.zip in $DOWNLOAD_LOCATION"
   exit 1
 fi
 
@@ -45,18 +45,18 @@ cleanup() {
 trap cleanup EXIT
 
 echo "Verifying checksum..."
-shasum -a 512 -c "apache-grails-${VERSION}-incubating-src.zip.sha512"
+shasum -a 512 -c "apache-grails-wrapper-${VERSION}-incubating-bin.zip.sha512"
 echo "✅ Checksum Verified"
 
 echo "Verifying GPG signature..."
 gpg --homedir "${GRAILS_GPG_HOME}" --import "${SCRIPT_DIR}/../../KEYS"
-gpg --homedir "${GRAILS_GPG_HOME}" --verify "apache-grails-${VERSION}-incubating-src.zip.asc" "apache-grails-${VERSION}-incubating-src.zip"
+gpg --homedir "${GRAILS_GPG_HOME}" --verify "apache-grails-wrapper-${VERSION}-incubating-bin.zip.asc" "apache-grails-wrapper-${VERSION}-incubating-bin.zip"
 echo "✅ GPG Verified"
 
-SRC_DIR="grails"
+SRC_DIR="apache-grails-wrapper-${VERSION}-incubating-bin"
 rm -rf "${SRC_DIR}" || true
 echo "Extracting zip file..."
-unzip -q "apache-grails-${VERSION}-incubating-src.zip"
+unzip -q "apache-grails-wrapper-${VERSION}-incubating-bin.zip"
 
 if [ ! -d "${SRC_DIR}" ]; then
   echo "Error: Expected extracted folder '${SRC_DIR}' not found."
@@ -64,7 +64,7 @@ if [ ! -d "${SRC_DIR}" ]; then
 fi
 
 echo "Checking for required files existence..."
-REQUIRED_FILES=("LICENSE" "NOTICE" "README.md" "CONTRIBUTING.md" "PUBLISHED_ARTIFACTS" "CHECKSUMS")
+REQUIRED_FILES=("LICENSE" "NOTICE")
 
 for FILE in "${REQUIRED_FILES[@]}"; do
   if [ ! -f "${SRC_DIR}/$FILE" ]; then
@@ -75,4 +75,4 @@ for FILE in "${REQUIRED_FILES[@]}"; do
   echo "✅ Found required file: $FILE"
 done
 
-echo "✅ All source distribution checks passed successfully for Apache Grails ${VERSION}."
+echo "✅ All wrapper binary distribution checks passed successfully for Apache Grails ${VERSION}."

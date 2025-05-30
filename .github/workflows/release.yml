@@ -77,7 +77,8 @@ jobs:
           gpg --default-key "${GPG_KEY_ID}" --batch --yes --pinentry-mode loopback --armor --detach-sign grails-wrapper/build/distributions/apache-grails-wrapper-${{ steps.release_version.outputs.value }}-incubating-bin.zip
       - name: "📦 Create wrapper checksum"
         run: |
-          sha512sum grails-wrapper/build/distributions/apache-grails-wrapper-${{ steps.release_version.outputs.value }}-incubating-bin.zip > "grails-wrapper/build/distributions/apache-grails-wrapper-${{ steps.release_version.outputs.value }}-incubating-bin.zip.sha512"
+          cd grails-wrapper/build/distributions
+          sha512sum apache-grails-wrapper-${{ steps.release_version.outputs.value }}-incubating-bin.zip > "apache-grails-wrapper-${{ steps.release_version.outputs.value }}-incubating-bin.zip.sha512"
       - name: "📤 Upload grails wrapper ZIP"
         uses: softprops/action-gh-release@v2
         with:

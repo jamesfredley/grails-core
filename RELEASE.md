@@ -70,7 +70,7 @@ Use `etc/bin/download-release-artifacts.sh` to download the staged artifacts. Th
 
 The following are the source distribution artifacts:
    * `apache-grails-<version>-incubating-src.zip` - the source distribution
-   * `apache-grails-<version>-incubating-src.zip.asc` - the public key to verify the source distribution
+   * `apache-grails-<version>-incubating-src.zip.asc` - the generated signature of the source distribution
    * `apache-grails-<version>-incubating-src.zip.sha512` - the checksum to verify the source distribution
 
 Use `etc/bin/verify-source-distribution.sh` to verify the source distribution. This script performs the following:
@@ -113,6 +113,35 @@ Bootstrap the source distribution so that it can be built:
 Run the `verify-reproducible.sh` shell script to compare the published jar files to a locally built version of them. For any differences, extract the jar files, use IntelliJ to compare each differing file. Assuming differences are ordering related, we can continue with the verification.
 
 ### Binary Distribution Verification
+
+Grails has 2 binary distributions:
+   * `grailsw` - the Grails wrapper, which is a script that downloads the necessary jars to run Grails. This will exist inside of the generated applications, but can be optionally downloaded as a standalone binary distribution.
+   * `grails` - the delegating CLI, which is a script that delegates to the Grails Forge CLI. This is the `sdkman` distribution.
+
+#### Verify Grails Wrapper Binary Distribution
+
+The following are the Grails Wrapper distribution artifacts:
+* `apache-grails-wrapper-<version>-incubating-bin.zip` - the wrapper distribution
+* `apache-grails-wrapper-<version>-incubating-bin.zip.asc` - the generated signature of the source distribution
+* `apache-grails-wrapper-<version>-incubating-bin.zip.sha512` - the checksum to verify the source distribution
+
+Use `etc/bin/verify-wrapper-distribution.sh` to verify the wrapper distribution. This script performs the following:
+
+Verifies the wrapper distribution checksum via the command:
+   ```bash
+   shasum -a 512 -c apache-grails-wrapper-<version>-incubating-bin.zip.sha512
+   ```
+
+Verifies the wrapper distribution signature via the command:
+   ```bash
+    gpg --verify apache-grails-wrapper-<version>-incubating-bin.zip.asc apache-grails-<version>-incubating-bin.zip
+   ```
+
+Extracts the zip file and verifies the contents:
+* Ensure the `LICENSE` & `NOTICE` files are present to ensure license compliance.
+
+#### Verify Grails Delegating CLI Binary Distribution
+
 Download the binary distribution & expand it to test the various CLI's: `grailsw` (wrapper), `grails` (delegating), `grails-forge-cli`, and `grails-shell-cli`.  For each CLI, verify the published signature in the `PUBLISHED` file:
    ```bash
     gpg --verify <cli>.asc <cli>
