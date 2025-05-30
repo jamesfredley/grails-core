@@ -78,14 +78,24 @@ while IFS= read -r line; do
   ASC_URL="${JAR_URL}.asc"
 
   echo "🔎 Checking artifact: ${FILE_NAME}"
-  echo "... Downloading: ${JAR_URL}"
-  curl -sSfLO "${JAR_URL}"
+  if [ ! -f "${FILE_NAME}" ]; then
+    echo "... Downloading: ${JAR_URL}"
+    curl -sSfLO "${JAR_URL}"
+  else
+    echo "... Skipping download, already exists: ${FILE_NAME}"
+  fi
 
-  echo "... Downloading signature: ${ASC_URL}"
-  curl -sSfLO "${ASC_URL}"
+
+ if [ ! -f "${FILE_NAME}.asc" ]; then
+    echo "... Downloading signature: ${ASC_URL}"
+     curl -sSfLO "${ASC_URL}"
+  else
+    echo "... Skipping download, already exists: ${FILE_NAME}.asc"
+  fi
 
   echo "... Verifying GPG signature..."
   gpg --homedir "${GRAILS_GPG_HOME}" --verify "${FILE_NAME}.asc" "${FILE_NAME}"
+  echo "✅ Verified GPG signature for ${FILE_NAME}"
 
   EXPECTED_CHECKSUM=$(grep "^${FILE_NAME} " "${CHECKSUMS_FILE}" | awk '{print $2}')
   if [ -z "${EXPECTED_CHECKSUM}" ]; then
@@ -95,6 +105,7 @@ while IFS= read -r line; do
 
   echo "... Verifying checksum..."
   ACTUAL_CHECKSUM=$(shasum -a 512 "${FILE_NAME}" | awk '{print $1}')
+  echo "✅ Verified Checksum for ${FILE_NAME}: ${ACTUAL_CHECKSUM}"
 
   if [ "${ACTUAL_CHECKSUM}" != "${EXPECTED_CHECKSUM}" ]; then
     echo "❌ Checksum mismatch for ${FILE_NAME}"
