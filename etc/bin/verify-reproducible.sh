@@ -19,8 +19,6 @@
 # This file assumes the gnu version of coreutils is installed, which is not installed by default on a mac
 set -e
 
-export SOURCE_DATE_EPOCH=$(git log -1 --pretty=%ct)
-
 DOWNLOAD_LOCATION="${3:-downloads}"
 DOWNLOAD_LOCATION=$(realpath "${DOWNLOAD_LOCATION}")
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
@@ -36,6 +34,14 @@ else
   echo "❌ File 'PUBLISHED_ARTIFACTS' not found. Please place the PUBLISHED_ARTIFACTS distribution file under ${DOWNLOAD_LOCATION}/results/PUBLISHED_ARTIFACTS..."
   exit 1
 fi
+
+if [[ -f "${DOWNLOAD_LOCATION}/results/BUILD_DATE.txt" ]]; then
+  echo "✅ File 'BUILD_DATE.txt' exists."
+else
+  echo "❌ File 'BUILD_DATE.txt' not found. Please place the BUILD_DATE.txt distribution file under ${DOWNLOAD_LOCATION}/results/BUILD_DATE.txt..."
+  exit 1
+fi
+export SOURCE_DATE_EPOCH=$(cat "${DOWNLOAD_LOCATION}/results/BUILD_DATE.txt")
 
 if [[ -d "${DOWNLOAD_LOCATION}/results/published" ]]; then
   echo "✅ Directory 'published' exists."

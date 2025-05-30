@@ -52,3 +52,6 @@ curl -L -o "${DOWNLOAD_LOCATION}/CHECKSUMS.txt" "https://github.com/apache/grail
 
 # published artifacts
 curl -L -o "${DOWNLOAD_LOCATION}/PUBLISHED_ARTIFACTS.txt" "https://github.com/apache/grails-core/releases/download/$RELEASE_TAG/PUBLISHED_ARTIFACTS.txt"
+
+# build date for reproducible build testing
+curl -L -o "${DOWNLOAD_LOCATION}/BUILD_DATE.txt" "https://github.com/apache/grails-core/releases/download/$RELEASE_TAG/BUILD_DATE.txt"

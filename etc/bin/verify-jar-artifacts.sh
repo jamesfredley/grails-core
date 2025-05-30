@@ -34,10 +34,21 @@ VERSION=${RELEASE_TAG#v}
 
 ARTIFACTS_FILE="${DOWNLOAD_LOCATION}/PUBLISHED_ARTIFACTS"
 CHECKSUMS_FILE="${DOWNLOAD_LOCATION}/CHECKSUMS"
+BUILD_DATE_FILE="${DOWNLOAD_LOCATION}/BUILD_DATE.txt"
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
-if [ ! -f "${ARTIFACTS_FILE}" ] || [ ! -f "${CHECKSUMS_FILE}" ]; then
-  echo "Required files ${ARTIFACTS_FILE} and/or ${CHECKSUMS_FILE} not found."
+if [ ! -f "${ARTIFACTS_FILE}" ]; then
+  echo "Required file ${ARTIFACTS_FILE} not found."
+  exit 1
+fi
+
+if [ ! -f "${CHECKSUMS_FILE}" ]; then
+  echo "Required file ${CHECKSUMS_FILE} not found."
+  exit 1
+fi
+
+if [ ! -f "${BUILD_DATE_FILE}" ]; then
+  echo "Required file ${BUILD_DATE_FILE} not found."
   exit 1
 fi
 
@@ -52,6 +63,7 @@ REPO_BASE_URL="https://repository.apache.org/content/repositories/${STAGING_REPO
 
 # cp the artifacts file to the expected location for reproducible build check
 cp "${ARTIFACTS_FILE}" etc/bin/results/
+cp "${BUILD_DATE_FILE}" etc/bin/results/
 
 # Create a temporary directory to work in
 WORK_DIR='etc/bin/results/published_artifacts'
