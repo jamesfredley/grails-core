@@ -59,12 +59,12 @@ REPO_BASE_URL="https://repository.apache.org/content/repositories/${STAGING_REPO
 cd grails
 
 # Create a temporary directory to work in
-WORK_DIR='etc/bin/results/published_artifacts'
+WORK_DIR='etc/bin/results/published'
 mkdir -p $WORK_DIR
 echo "Using temp dir: $WORK_DIR"
 cd "$WORK_DIR"
 
-# Read each line from PUBLISHED_ARTIFACTS
+# Read each line from ARTIFACTS_FILE
 while IFS= read -r line; do
   JAR_FILE=$(echo "${line}" | awk '{print $1}')
   [[ "${JAR_FILE}" != *.jar ]] && continue

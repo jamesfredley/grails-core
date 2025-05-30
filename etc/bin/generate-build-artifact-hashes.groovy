@@ -21,8 +21,8 @@ import java.nio.file.*
 import java.security.MessageDigest
 
 // ---------------------------------------------------------------------------
-String sha256(Path file) {
-    MessageDigest md = MessageDigest.getInstance('SHA-256')
+String sha512(Path file) {
+    MessageDigest md = MessageDigest.getInstance('SHA-512')
     file.withInputStream { is ->
         byte[] buf = new byte[8192]
         for (int r = is.read(buf); r > 0; r = is.read(buf))
@@ -76,7 +76,7 @@ artifacts.findAll {
     !it.toString().contains("${File.separator}grails-test-examples${File.separator}" as String) // test examples aren't published
 }.sort { a, b -> a.toString() <=> b.toString()
 }.collect { Path jar ->
-    String hash = sha256(jar)
+    String hash = sha512(jar)
     String relative = root.relativize(jar).toString()
     "${relative} ${hash}"
 }.sort().each {

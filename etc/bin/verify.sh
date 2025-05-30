@@ -57,12 +57,19 @@ echo "Verifying JAR Artifacts ..."
 "${SCRIPT_DIR}/verify-jar-artifacts.sh" "${STAGING_REPO_ID}" "${RELEASE_TAG}" "${DOWNLOAD_LOCATION}"
 echo "✅ JAR Artifacts Verified"
 
-echo "Bootstrapping Gradle..."
-cd "${DOWNLOAD_LOCATION}/grails"
-gradle wrapper
-cd grails-gradle
-gradle wrapper
-cd "${CWD}"
+# I have no idea why this needs done manually, but if it's run from this script gradle happily ignores the settings.gradle and tries to build (so it fails)
+echo "Unable to bootstrap gradle manually. Please bootstrap by running 'gradle wrapper' in grails & grails/grails-gradle."
+echo "After bootstrapping, call verify-reproducible.sh '${DOWNLOAD_LOCATION}'"
 
-echo "Testing for Reproducible Build ..."
-echo " ... Manually"
+#echo "Using Java at ..."
+#which java
+#java -version
+#
+#echo "Using Gradle version to bootstrap ..."
+#which gradle
+#gradle --version
+
+#echo "Running Reproducible Build Verification ..."
+#"${SCRIPT_DIR}/verify-reproducible.sh" "${DOWNLOAD_LOCATION}"
+
+echo "✅ Verification finished, see above instructions for reproducible build testing"

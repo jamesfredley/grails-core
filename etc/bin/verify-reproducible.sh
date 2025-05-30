@@ -19,7 +19,7 @@
 # This file assumes the gnu version of coreutils is installed, which is not installed by default on a mac
 set -e
 
-DOWNLOAD_LOCATION="${3:-downloads}"
+DOWNLOAD_LOCATION="${1:-downloads}"
 DOWNLOAD_LOCATION=$(realpath "${DOWNLOAD_LOCATION}")
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
@@ -28,10 +28,10 @@ CWD=$(pwd)
 cd "${DOWNLOAD_LOCATION}/grails"
 
 mkdir -p "${DOWNLOAD_LOCATION}/grails/etc/bin/results"
-if [[ -f "${DOWNLOAD_LOCATION}/grails/PUBLISHED_ARTIFACTS" ]]; then
-  echo "✅ File 'PUBLISHED_ARTIFACTS' exists."
+if [[ -f "${DOWNLOAD_LOCATION}/grails/CHECKSUMS" ]]; then
+  echo "✅ File 'CHECKSUMS' exists."
 else
-  echo "❌ File 'PUBLISHED_ARTIFACTS' not found. Grails Source Distributions should have a PUBLISHED_ARTIFACTS file at the root..."
+  echo "❌ File 'CHECKSUMS' not found. Grails Source Distributions should have a CHECKSUMS file at the root..."
   exit 1
 fi
 
@@ -56,13 +56,20 @@ cd grails-gradle
 cd ..
 ./gradlew build --rerun-tasks -PskipTests --no-build-cache
 "${SCRIPT_DIR}/generate-build-artifact-hashes.groovy" > "${DOWNLOAD_LOCATION}/grails/etc/bin/results/second.txt"
+
+## Flatten the jar files since our published artifacts are flat
+tmpfile=$(mktemp)
+while read -r filepath checksum; do
+  echo "$(basename "$filepath") $checksum"
+done < "${DOWNLOAD_LOCATION}/grails/etc/bin/results/second.txt" > "$tmpfile" && mv "$tmpfile" "${DOWNLOAD_LOCATION}/grails/etc/bin/results/second.txt"
+
 mkdir -p "${DOWNLOAD_LOCATION}/grails/etc/bin/results/second"
-find . -path ./etc -prune -o -type f -path '*/build/libs/*.jar' -exec cp -t "${DOWNLOAD_LOCATION}/grails/etc/bin/results/second/" -- {} +
+find . -path ./etc -prune -o -type f -path '*/build/libs/*.jar' ! -name "buildSrc.jar" -exec cp -t "${DOWNLOAD_LOCATION}/grails/etc/bin/results/second/" -- {} +
 
 cd "${DOWNLOAD_LOCATION}/grails/etc/bin/results"
 
-# diff -u PUBLISHED_ARTIFACTS second.txt
-DIFF_RESULTS=$(comm -3 <(cut -d' ' -f1 ../../../PUBLISHED_ARTIFACTS | sort) <(sort second.txt) | cut -d' ' -f1 | sed 's/^[[:space:]]*//;s/[[:space:]]*$//' | uniq | sort)
+# diff -u CHECKSUMS second.txt
+DIFF_RESULTS=$(comm -3 <(sort ../../../CHECKSUMS) <(sort second.txt) | cut -d' ' -f1 | sed 's/^[[:space:]]*//;s/[[:space:]]*$//' | uniq | sort)
 echo "Differing artifacts:"
 echo "$DIFF_RESULTS" > diff.txt
 cat diff.txt
