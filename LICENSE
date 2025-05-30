@@ -213,6 +213,8 @@ The following classes within this product:
     org.apache.grails.common.compiler.asm.Context
     org.apache.grails.common.compiler.asm.TypePath
 
+See the LICENSE/licenses-asm.txt file for the ASM license terms.
+
 --------------------------------------------------------------------------
 
 Public Domain
