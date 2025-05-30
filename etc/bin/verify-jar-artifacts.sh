@@ -34,12 +34,19 @@ VERSION=${RELEASE_TAG#v}
 
 ARTIFACTS_FILE="${DOWNLOAD_LOCATION}/PUBLISHED_ARTIFACTS"
 CHECKSUMS_FILE="${DOWNLOAD_LOCATION}/CHECKSUMS"
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
 if [ ! -f "${ARTIFACTS_FILE}" ] || [ ! -f "${CHECKSUMS_FILE}" ]; then
   echo "Required files ${ARTIFACTS_FILE} and/or ${CHECKSUMS_FILE} not found."
   exit 1
 fi
 
+export GRAILS_GPG_HOME=$(mktemp -d)
+cleanup() {
+  rm -rf "${GRAILS_GPG_HOME}"
+}
+trap cleanup EXIT
+gpg --homedir "${GRAILS_GPG_HOME}" --import "${SCRIPT_DIR}/../../KEYS"
 
 REPO_BASE_URL="https://repository.apache.org/content/repositories/${STAGING_REPO_ID}"
 
@@ -78,7 +85,7 @@ while IFS= read -r line; do
   curl -sSfLO "${ASC_URL}"
 
   echo "... Verifying GPG signature..."
-  gpg --verify "${FILE_NAME}.asc" "${FILE_NAME}"
+  gpg --homedir "${GRAILS_GPG_HOME}" --verify "${FILE_NAME}.asc" "${FILE_NAME}"
 
   EXPECTED_CHECKSUM=$(grep "^${FILE_NAME} " "${CHECKSUMS_FILE}" | awk '{print $2}')
   if [ -z "${EXPECTED_CHECKSUM}" ]; then
