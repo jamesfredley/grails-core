@@ -63,6 +63,11 @@ while read -r filepath checksum; do
   echo "$(basename "$filepath") $checksum"
 done < "${DOWNLOAD_LOCATION}/grails/etc/bin/results/second.txt" > "$tmpfile" && mv "$tmpfile" "${DOWNLOAD_LOCATION}/grails/etc/bin/results/second.txt"
 
+# filter to only published jars to compare against
+grep -Ff "${DOWNLOAD_LOCATION}/grails/CHECKSUMS" "${DOWNLOAD_LOCATION}/grails/etc/bin/results/second.txt" > "${DOWNLOAD_LOCATION}/grails/etc/bin/results/filtered.txt"
+rm -f "${DOWNLOAD_LOCATION}/grails/etc/bin/results/second.txt"
+mv "${DOWNLOAD_LOCATION}/grails/etc/bin/results/filtered.txt" "${DOWNLOAD_LOCATION}/grails/etc/bin/results/second.txt"
+
 mkdir -p "${DOWNLOAD_LOCATION}/grails/etc/bin/results/second"
 find . -path ./etc -prune -o -type f -path '*/build/libs/*.jar' ! -name "buildSrc.jar" -exec cp -t "${DOWNLOAD_LOCATION}/grails/etc/bin/results/second/" -- {} +
 
