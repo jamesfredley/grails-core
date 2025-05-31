@@ -25,6 +25,11 @@ SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
 CWD=$(pwd)
 
+cleanup() {
+  echo "❌ Verification failed. ❌"
+}
+trap cleanup ERR
+
 cd "${DOWNLOAD_LOCATION}/grails"
 
 mkdir -p "${DOWNLOAD_LOCATION}/grails/etc/bin/results"
@@ -75,9 +80,16 @@ cd "${DOWNLOAD_LOCATION}/grails/etc/bin/results"
 
 # diff -u CHECKSUMS second.txt
 DIFF_RESULTS=$(comm -3 <(sort ../../../CHECKSUMS) <(sort second.txt) | cut -d' ' -f1 | sed 's/^[[:space:]]*//;s/[[:space:]]*$//' | uniq | sort)
-echo "Differing artifacts:"
 echo "$DIFF_RESULTS" > diff.txt
-cat diff.txt
+
+if [ -s diff.txt ]; then
+  echo "❌ Differences Found ❌"
+  cat diff.txt
+  echo "❌ Differences Found ❌"
+else
+  echo "✅ No Differences Found. ✅"
+  exit 0
+fi
 
 printf '%s\n' "$DIFF_RESULTS" | sed 's|^etc/bin/results/||' > toPurge.txt
 find first -type f -name '*.jar' -print | sed 's|^first/||' | grep -F -x -v -f toPurge.txt |
@@ -91,3 +103,4 @@ find second -type f -name '*.jar' -print | sed 's|^second/||' | grep -F -x -v -f
 rm toPurge.txt
 find . -type d -empty -delete
 cd "$CWD"
+exit 1
