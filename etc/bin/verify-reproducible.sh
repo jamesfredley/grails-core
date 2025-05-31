@@ -60,11 +60,11 @@ cd ..
 ## Flatten the jar files since our published artifacts are flat
 tmpfile=$(mktemp)
 while read -r filepath checksum; do
-  echo "$(basename "$filepath") $checksum"
+  printf '%s %s\n' "$(basename "$filepath")" "$checksum"
 done < "${DOWNLOAD_LOCATION}/grails/etc/bin/results/second.txt" > "$tmpfile" && mv "$tmpfile" "${DOWNLOAD_LOCATION}/grails/etc/bin/results/second.txt"
 
 # filter to only published jars to compare against
-grep -Ff "${DOWNLOAD_LOCATION}/grails/CHECKSUMS" "${DOWNLOAD_LOCATION}/grails/etc/bin/results/second.txt" > "${DOWNLOAD_LOCATION}/grails/etc/bin/results/filtered.txt"
+cut -d' ' -f1 "${DOWNLOAD_LOCATION}/grails/CHECKSUMS" | grep -Ff - "${DOWNLOAD_LOCATION}/grails/etc/bin/results/second.txt" > "${DOWNLOAD_LOCATION}/grails/etc/bin/results/filtered.txt"
 rm -f "${DOWNLOAD_LOCATION}/grails/etc/bin/results/second.txt"
 mv "${DOWNLOAD_LOCATION}/grails/etc/bin/results/filtered.txt" "${DOWNLOAD_LOCATION}/grails/etc/bin/results/second.txt"
 
