@@ -31,6 +31,7 @@ cleanup() {
 trap cleanup ERR
 
 cd "${DOWNLOAD_LOCATION}/grails"
+echo "Searching under ${DOWNLOAD_LOCATION}"
 
 mkdir -p "${DOWNLOAD_LOCATION}/grails/etc/bin/results"
 if [[ -f "${DOWNLOAD_LOCATION}/grails/CHECKSUMS" ]]; then
@@ -60,14 +61,21 @@ cd grails-gradle
 ./gradlew publishToMavenLocal --rerun-tasks -PskipTests --no-build-cache
 cd ..
 ./gradlew publishToMavenLocal --rerun-tasks -PskipTests --no-build-cache
-"${SCRIPT_DIR}/generate-build-artifact-hashes.groovy" > "${DOWNLOAD_LOCATION}/grails/etc/bin/results/second.txt"
+echo "Generating Checksums for Built Jars"
+"${SCRIPT_DIR}/generate-build-artifact-hashes.groovy" "${DOWNLOAD_LOCATION}/grails" > "${DOWNLOAD_LOCATION}/grails/etc/bin/results/second.txt"
+if [ -e "${DOWNLOAD_LOCATION}/grails/etc/bin/results/second.txt" ] && [ ! -s "${DOWNLOAD_LOCATION}/grails/etc/bin/results/second.txt" ]; then
+  echo "❌ Error: Could not find any checksums for built jar files!"
+  exit 1
+fi
 
+echo "Flattening Checksum file"
 ## Flatten the jar files since our published artifacts are flat
 tmpfile=$(mktemp)
 while read -r filepath checksum; do
   printf '%s %s\n' "$(basename "$filepath")" "$checksum"
 done < "${DOWNLOAD_LOCATION}/grails/etc/bin/results/second.txt" > "$tmpfile" && mv "$tmpfile" "${DOWNLOAD_LOCATION}/grails/etc/bin/results/second.txt"
 
+echo "Filtering non-published jars"
 # filter to only published jars to compare against
 cut -d' ' -f1 "${DOWNLOAD_LOCATION}/grails/CHECKSUMS" | grep -Ff - "${DOWNLOAD_LOCATION}/grails/etc/bin/results/second.txt" > "${DOWNLOAD_LOCATION}/grails/etc/bin/results/filtered.txt"
 rm -f "${DOWNLOAD_LOCATION}/grails/etc/bin/results/second.txt"
@@ -78,6 +86,7 @@ find . -path ./etc -prune -o -type f -path '*/build/libs/*.jar' ! -name "buildSr
 
 cd "${DOWNLOAD_LOCATION}/grails/etc/bin/results"
 
+echo "Checking for differences in checksums"
 # diff -u CHECKSUMS second.txt
 DIFF_RESULTS=$(comm -3 <(sort ../../../CHECKSUMS) <(sort second.txt) | cut -d' ' -f1 | sed 's/^[[:space:]]*//;s/[[:space:]]*$//' | uniq | sort)
 echo "$DIFF_RESULTS" > diff.txt
