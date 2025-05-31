@@ -88,7 +88,7 @@ while IFS= read -r line; do
   echo "🔎 Checking artifact: ${FILE_NAME} as ${JAR_FILE}"
   if [ ! -f "${JAR_FILE}" ]; then
     echo "... Downloading: ${JAR_URL} to ${JAR_FILE}"
-    curl -sSfL "${JAR_URL} -o ${JAR_FILE}"
+    curl -sSfL "${JAR_URL}" -o ${JAR_FILE}
   else
     echo "... Skipping download, already exists: ${JAR_FILE}"
   fi
