@@ -52,9 +52,9 @@ fi
 
 killall -e java || true
 cd grails-gradle
-./gradlew build --rerun-tasks -PskipTests --no-build-cache
+./gradlew publishToMavenLocal --rerun-tasks -PskipTests --no-build-cache
 cd ..
-./gradlew build --rerun-tasks -PskipTests --no-build-cache
+./gradlew publishToMavenLocal --rerun-tasks -PskipTests --no-build-cache
 "${SCRIPT_DIR}/generate-build-artifact-hashes.groovy" > "${DOWNLOAD_LOCATION}/grails/etc/bin/results/second.txt"
 
 ## Flatten the jar files since our published artifacts are flat
