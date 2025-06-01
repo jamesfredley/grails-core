@@ -96,3 +96,33 @@ jobs:
             apache-grails-*-incubating-src.zip
             apache-grails-*-incubating-src.zip.sha512
             apache-grails-*-incubating-src.zip.asc
+      - name: "Remove CHECKSUMS.txt asset from release"
+        id: checksums_asset_id
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cd grails
+          asset_id=$(gh release view ${{ github.ref_name }} --json assets --repo apache/grails-core --jq '.assets[] | select(.name == "CHECKSUMS.txt") | .id')
+          curl -X DELETE \
+            -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            https://api.github.com/repos/${{ github.repository }}/releases/assets/$asset_id
+      - name: "Remove BUILD_DATE.txt asset from release"
+        id: checksums_asset_id
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cd grails
+          asset_id=$(gh release view ${{ github.ref_name }} --json assets --repo apache/grails-core --jq '.assets[] | select(.name == "BUILD_DATE.txt") | .id')
+          curl -X DELETE \
+            -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            https://api.github.com/repos/${{ github.repository }}/releases/assets/$asset_id
+      - name: "Remove PUBLISHED_ARTIFACTS.txt asset from release"
+        id: checksums_asset_id
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cd grails
+          asset_id=$(gh release view ${{ github.ref_name }} --json assets --repo apache/grails-core --jq '.assets[] | select(.name == "PUBLISHED_ARTIFACTS.txt") | .id')
+          curl -X DELETE \
+            -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            https://api.github.com/repos/${{ github.repository }}/releases/assets/$asset_id
