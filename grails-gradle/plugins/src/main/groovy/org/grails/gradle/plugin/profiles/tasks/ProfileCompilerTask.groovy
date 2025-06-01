@@ -127,9 +127,9 @@ class ProfileCompilerTask extends AbstractCompile {
         boolean profileYmlExists = configFile?.exists()
 
         Yaml yaml = createYamlHandler()
-        Map<String, Object> profileData
+        LinkedHashMap<String, Object> profileData
         if (profileYmlExists) {
-            profileData = (Map<String, Object>) configFile.withReader { BufferedReader r ->
+            profileData = (LinkedHashMap<String, Object>) configFile.withReader { BufferedReader r ->
                 yaml.load(r)
             }
         } else {
@@ -176,9 +176,9 @@ class ProfileCompilerTask extends AbstractCompile {
             File parentDir = configFile.parentFile.canonicalFile
             File[] featureDirs = new File(parentDir, 'features').listFiles({ File f -> f.isDirectory() && !f.name.startsWith('.') } as FileFilter)
             if (featureDirs) {
-                Map map = (Map) profileData.get('features')
+                LinkedHashMap map = (LinkedHashMap) profileData.get('features')
                 if (map == null) {
-                    map = [:]
+                    map = [:] as LinkedHashMap
                     profileData.put('features', map)
                 }
                 List featureNames = []
@@ -186,7 +186,7 @@ class ProfileCompilerTask extends AbstractCompile {
                     featureNames.add f.name
                 }
                 if (featureNames) {
-                    map.put('provided', featureNames)
+                    map.put('provided', featureNames.sort())
                 }
                 profileData.put('features', map)
             }
@@ -203,7 +203,7 @@ class ProfileCompilerTask extends AbstractCompile {
         }
 
         if (templates) {
-            profileData.put('templates', templates)
+            profileData.put('templates', templates.sort())
         }
 
         profileRegularFile.asFile.withWriter { BufferedWriter w ->

@@ -58,86 +58,128 @@ During the staging step, we must create a source distribution & stage any binary
      * upload the grails-wrapper binary distribution to https://dist.apache.org/repos/dist/dev/grails/VERSION/distribution
      * upload the grails binary distribution to https://dist.apache.org/repos/dist/dev/grails/VERSION/distribution (note: this is the sdkman artifact)
 
-## 2. Verifying
+## 2. Verifying Artifacts are Authentic
 
-Prior to releasing a vote, we need to verify the staged artifacts. Follow the below steps to verify each staged artifact.
+Prior to releasing a vote, we need to verify the staged artifacts. The below sections detail all of the necessary steps to ensure the source & binary distributions are authentic and have not been changed. To verify all of these at once, use the script: 
+
+```bash
+    verify.sh <staging repo id> <release tag> <download location>
+```
+
+For Example:
+```bash
+    verify.sh orgapachegrails-1030 v7.0.0-M4 /tmp/grails-verify
+```
+
+### Download the Staged Artifacts
+
+Use `etc/bin/download-release-artifacts.sh` to download the staged artifacts. This script will download the source distribution, wrapper binary distribution, and sdkman binary distribution. The distribution should come from [https://dist.apache.org/repos/dist/dev/grails/version](https://dist.apache.org/repos/dist/dev/grails).
 
 ### Source Distribution Verification
-Download the zipped source distribution artifacts:
+
+The following are the source distribution artifacts:
    * `apache-grails-<version>-incubating-src.zip` - the source distribution
-   * `apache-grails-<version>-incubating-src.zip.asc` - the public key to verify the source distribution
+   * `apache-grails-<version>-incubating-src.zip.asc` - the generated signature of the source distribution
    * `apache-grails-<version>-incubating-src.zip.sha512` - the checksum to verify the source distribution
 
-from [https://dist.apache.org/repos/dist/dev/grails/version](https://dist.apache.org/repos/dist/dev/grails)
+Use `etc/bin/verify-source-distribution.sh` to verify the source distribution. This script performs the following:
 
-Verify the source distribution checksum via the command:
+Verifies the source distribution checksum via the command:
    ```bash
    shasum -a 512 -c apache-grails-<version>-incubating-src.zip.sha512
    ```
 
-Verify the source distribution signature via the command:
+Verifies the source distribution signature via the command:
    ```bash
     gpg --verify apache-grails-<version>-incubating-src.zip.asc apache-grails-<version>-incubating-src.zip
    ```
 
-Extract the zip file and verify the contents:
+Extracts the zip file and verifies the contents:
    * Ensure the `LICENSE` & `NOTICE` files are present to ensure license compliance.
    * Ensure `README.md` & `CONTRIBUTING.md` are present to ensure project build & usage instructions are present.
-   * Ensure the `PUBLISHED` file is present so we know how to pull the various jar files.
+   * Ensure the `PUBLISHED_ARTIFACTS` file is present so we know how to pull the various jar files.
+   * Ensure the `CHECKSUMS` file is present so we can ensure those checksums match the staged artifacts.
 
 ### Jar file Signature Verification (Nexus Staging Repositories)
-As part of uploading to repository.apache.org the signatures are verified to match a KEY that has been distributed.  It does not verify that the jar files are built with a key trusted by the Grails project.
 
-Download the latest KEYS file and make sure it's imported into gpg:
-```bash
-    wget https://github.com/apache/grails-core/blob/7.0.x/KEYS
-    gpg --import KEYS
-```
+As part of uploading to repository.apache.org the signatures are verified to match a KEY that has been distributed, but RAO does not verify that the jar files are built with a key trusted by the Grails project.
 
-The jar files will need downloaded and verified they were signed by a valid Grails key.  Run the script (substitute the staging repo name):  
+To ensure checksums match the server & signatures match, run the script `etc/bin/verify-jar-artifacts.sh` in the `grails-core` repository. This script will download the jar files from the staging repository, verify their signatures, and ensure they match the checksums provided in the source distribution.
+
+Example: 
 ```bash
-    wget --recursive --no-parent --accept jar,asc https://repository.apache.org/content/repositories/orgapachegrails-1020/org/apache/grails
-    for jar_file in *.jar; do
-      asc_file="${jar_file}.asc"
-    
-      if [[ -f "$asc_file" ]]; then
-        echo "🔍 Verifying $jar_file..."
-    
-        gpg --verify "$asc_file" "$jar_file"
-        verify_status=$?
-    
-        if [ $verify_status -eq 0 ]; then
-          echo "✅ $jar_file is correctly signed."
-        else
-          echo "❌ $jar_file FAILED signature verification!"
-        fi
-    
-        echo ""
-      else
-        echo "⚠️ No .asc file found for $jar_file. Skipping."
-      fi
-    done
+    ./etc/bin/verify-jar-artifacts.sh orgapachegrails-1026 v7.0.0-M4 <grailsdownloadlocation>
 ```
 
 ### Reproducible Jar File
 After all jar files are verified to be signed by a valid Grails key, we need to build a local copy to ensure the file was built with the right code base.
 
 Bootstrap the source distribution so that it can be built: 
-    ```bash
-    gradle wrapper
-    ```
 
-Run the `verify-distribution.sh` shell script to compare the published jar files to a locally built version of them. For any differences, extract the jar files, use IntelliJ to compare each differing file. Assuming differences are ordering related, we can continue with the verification.
+    gradle wrapper
+    cd grails-gradle
+    gradlew wrapper
+    cd -
+
+Run the `verify-reproducible.sh` shell script to compare the published jar files to a locally built version of them. 
+
+If there are any jar file differences, confirm they are relevant by following the following steps: 
+1. Extract the differing jar file using the `etc/bin/extract-build-artifact.sh <jarfilepath from diff.txt>`
+2. In IntelliJ, under `etc/bin/results` there will now be a `firstArtifact` & `secondArtifact` folder. Select them both, right click, and select `Compared Directories`  
 
 ### Binary Distribution Verification
-Download the binary distribution & expand it to test the various CLI's: `grailsw` (wrapper), `grails` (delegating), `grails-forge-cli`, and `grails-shell-cli`.  For each CLI, verify the published signature in the `PUBLISHED` file:
+
+Grails has 2 binary distributions:
+   * `grailsw` - the Grails wrapper, which is a script that downloads the necessary jars to run Grails. This will exist inside of the generated applications, but can be optionally downloaded as a standalone binary distribution.
+   * `grails` - the delegating CLI, which is a script that delegates to the Grails Forge CLI. This is the `sdkman` distribution.
+
+#### Verify Grails Wrapper Binary Distribution
+
+The following are the Grails Wrapper distribution artifacts:
+* `apache-grails-wrapper-<version>-incubating-bin.zip` - the wrapper distribution
+* `apache-grails-wrapper-<version>-incubating-bin.zip.asc` - the generated signature of the wrapper distribution
+* `apache-grails-wrapper-<version>-incubating-bin.zip.sha512` - the checksum to verify the wrapper distribution
+
+Use `etc/bin/verify-wrapper-distribution.sh` to verify the wrapper distribution. This script performs the following:
+
+Verifies the wrapper distribution checksum via the command:
    ```bash
-    gpg --verify <cli>.asc <cli>
+   shasum -a 512 -c apache-grails-wrapper-<version>-incubating-bin.zip.sha512
    ```
 
-### CLI Testing
+Verifies the wrapper distribution signature via the command:
+   ```bash
+    gpg --verify apache-grails-wrapper-<version>-incubating-bin.zip.asc apache-grails-wrapper-<version>-incubating-bin.zip
+   ```
 
-Each CLI needs tested to ensure it's functional prior to release:
+Extracts the zip file and verifies the contents:
+* Ensure the `LICENSE` & `NOTICE` files are present to ensure license compliance.
+
+#### Verify Grails Delegating CLI Binary Distribution
+
+The following are the Grails distribution artifacts:
+* `apache-grails-<version>-incubating-bin.zip` - the cli distribution that will be uploaded to sdkman
+* `apache-grails-<version>-incubating-bin.zip.asc` - the generated signature of the cli distribution
+* `apache-grails-<version>-incubating-bin.zip.sha512` - the checksum to verify the cli distribution
+
+Use `etc/bin/verify-cli-distribution.sh` to verify the cli distribution. This script performs the following:
+
+Verifies the cli distribution checksum via the command:
+   ```bash
+   shasum -a 512 -c apache-grails-<version>-incubating-bin.zip.sha512
+   ```
+
+Verifies the cli distribution signature via the command:
+   ```bash
+    gpg --verify apache-grails-<version>-incubating-bin.zip.asc apache-grails-<version>-incubating-bin.zip
+   ```
+
+Extracts the zip file and verifies the contents:
+* Ensure the `LICENSE` & `NOTICE` files are present to ensure license compliance.
+
+## 3. Verifying the CLIs are Functional
+
+The CLI distribution consists of various CLI's: `grailsw` (wrapper), `grails` (delegating), `grails-forge-cli`, and `grails-shell-cli`. Each CLI needs tested to ensure it's functional prior to release:
 
 * testing `grailsw`:
     * set GRAILS_REPO_URL to the staging repository
@@ -163,12 +205,11 @@ Each CLI needs tested to ensure it's functional prior to release:
     gradlew bootRun
     ```
 
-
-## 3. Voting
+## 4. Voting
 
 TODO
 
-## 4. Releasing
+## 5. Releasing
 
 TODO
 
@@ -183,3 +224,48 @@ To remove a Nexus staging repo, run the workflow `Release - Drop Nexus Staging` 
 ## Rollback Distribution
 
 To remove the staged distribution, use your SVN credentials to remove the version directory at [https://dist.apache.org/repos/dist/dev/grails](https://dist.apache.org/repos/dist/dev/grails)
+
+# Appendix: GPG Configuration
+If you wish to verify any artifact manually, you must trust the key used to build Grails. To do so:
+
+Download the latest KEYS file and make sure it's imported into gpg:
+```bash
+    wget https://github.com/apache/grails-core/blob/7.0.x/KEYS
+    gpg --import KEYS
+```
+
+Setup the key for trust:
+```bash
+   gpg --edit-key <key id>
+   gpg> trust
+   gpg> 4
+   gpg> quit
+```
+
+Setup the key for validity:
+```bash
+   gpg --lsign-key 08E2CEC47E38FE415F080AB62ADECADC11775306
+```
+
+# Appendix: Verification from a Container
+
+The Grails image is officially built on linux in a GitHub action using an Ubuntu container. To run a linux container locally, you can use the following command:
+
+```bash
+    docker build -t grails:testing -f etc/bin/Dockerfile . && docker run -it --rm -v $(pwd):/home/groovy/project grails:testing bash
+    cd grails-verify
+    verify.sh orgapachegrails-1038 v7.0.0-M4 .
+    cd grails 
+    gradlew wrapper
+    cd grails-gradle 
+    gradlew wrapper
+    cd ../..
+    verify-reproducible.sh .
+```
+
+In the event that artifacts differ, simply copy them to your project directory and work on your local machine instead of the docker image: 
+
+```bash
+    cd ~/project
+    rsync -av grails-verify/grails/etc/bin/results/ etc/bin/results/
+```

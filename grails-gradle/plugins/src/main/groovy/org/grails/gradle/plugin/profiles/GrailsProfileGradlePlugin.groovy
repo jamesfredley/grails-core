@@ -40,7 +40,6 @@ import org.gradle.api.tasks.bundling.Jar
 import org.grails.gradle.plugin.profiles.tasks.ProfileCompilerTask
 
 import javax.inject.Inject
-import java.nio.file.Files
 
 import static org.gradle.api.plugins.BasePlugin.BUILD_GROUP
 
@@ -55,7 +54,8 @@ class GrailsProfileGradlePlugin implements Plugin<Project> {
 
     static final String USAGE_PROFILE_NAME = 'profile-runtime'
     static final String COMPONENT_NAME = 'profile'
-    static final String RUNTIME_API_CONFIGURATION = 'profileRuntimeApi' // to add dependencies for that profile's scripts
+    static final String RUNTIME_API_CONFIGURATION = 'profileRuntimeApi'
+    // to add dependencies for that profile's scripts
     static final String RUNTIME_ONLY_CONFIGURATION = 'profileRuntimeOnly' // to be used to extend profiles
 
     private final SoftwareComponentFactory softwareComponentFactory
@@ -238,12 +238,26 @@ class GrailsProfileGradlePlugin implements Plugin<Project> {
             jar.group = BUILD_GROUP
         }
 
+        def profileReadme = project.layout.buildDirectory.file('profile.txt')
+        TaskProvider<Task> readmeGeneration = project.tasks.register('profileReadmeGeneration') { Task task ->
+            task.group = BUILD_GROUP
+            task.description = 'Generates a README file for profile javadoc.'
+            task.outputs.file(profileReadme)
+            task.doLast {
+                def readmeFile = profileReadme.get().asFile
+                if (!readmeFile.exists()) {
+                    readmeFile.text = "Profiles are templates and do not have javadoc."
+                }
+            }
+        }
+
         TaskProvider<Jar> javadocJarTask = project.tasks.register('javadocProfileJar', Jar)
         javadocJarTask.configure { Jar jar ->
-            final File tempReadmeForJavadoc = Files.createTempFile('README', 'txt').toFile()
+            jar.dependsOn(readmeGeneration)
             // https://central.sonatype.org/publish/requirements/#supply-javadoc-and-sources
-            tempReadmeForJavadoc << 'Profiles are templates and do not have javadoc.'
-            jar.from(tempReadmeForJavadoc)
+            jar.from(profileReadme) { CopySpec spec ->
+                spec.rename { fileName -> 'README.txt' }
+            }
             jar.archiveClassifier.set('javadoc')
             jar.destinationDirectory.set(new File(project.layout.buildDirectory.asFile.get(), 'libs'))
             jar.description = 'Assembles a jar archive containing the profile javadoc.'
