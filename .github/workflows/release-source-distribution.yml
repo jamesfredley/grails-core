@@ -110,8 +110,8 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -e
-          cd grails
-          asset_id=$(gh release view ${{ github.event.inputs.release_tag }} --json assets --repo apache/grails-core --jq '.assets[] | select(.name == "CHECKSUMS.txt") | .id')
+          asset_id=$(gh release view ${{ github.event.inputs.release_tag }} --json assets --repo ${{ github.repository }} --jq '.assets[] | select(.name == "CHECKSUMS.txt") | .id')
+          echo "Removing CHECKSUMS.txt asset with ID: $asset_id"
           gh api \
             --method DELETE \
             -H "Accept: application/vnd.github+json" \
@@ -122,8 +122,8 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -e
-          cd grails
-          asset_id=$(gh release view ${{ github.event.inputs.release_tag }} --json assets --repo apache/grails-core --jq '.assets[] | select(.name == "BUILD_DATE.txt") | .id')
+          asset_id=$(gh release view ${{ github.event.inputs.release_tag }} --json assets --repo ${{ github.repository }} --jq '.assets[] | select(.name == "BUILD_DATE.txt") | .id')
+          echo "Removing BUILD_DATE.txt asset with ID: $asset_id"
           gh api \
             --method DELETE \
             -H "Accept: application/vnd.github+json" \
@@ -134,8 +134,8 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -e
-          cd grails
-          asset_id=$(gh release view ${{ github.event.inputs.release_tag }} --json assets --repo apache/grails-core --jq '.assets[] | select(.name == "PUBLISHED_ARTIFACTS.txt") | .id')
+          asset_id=$(gh release view ${{ github.event.inputs.release_tag }} --json assets --repo ${{ github.repository }} --jq '.assets[] | select(.name == "PUBLISHED_ARTIFACTS.txt") | .id')
+          echo "Removing PUBLISHED_ARTIFACTS.txt asset with ID: $asset_id"
           gh api \
             --method DELETE \
             -H "Accept: application/vnd.github+json" \
