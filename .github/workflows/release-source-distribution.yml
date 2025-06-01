@@ -72,7 +72,7 @@ jobs:
           curl -L -H "Authorization: token $GH_TOKEN" -o BUILD_DATE "$release_url"
       - name: "Ensure source files use common date"
         run: |
-          SOURCE_DATE_EPOCH=$(cat BUILD_DATE)
+          SOURCE_DATE_EPOCH=$(cat grails/BUILD_DATE)
           find . -type f -exec touch -d "@${SOURCE_DATE_EPOCH}" {} +
       - name: "📦 Create source distribution ZIP"
         run: |
