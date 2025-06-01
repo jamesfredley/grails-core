@@ -115,12 +115,11 @@ Example:
 After all jar files are verified to be signed by a valid Grails key, we need to build a local copy to ensure the file was built with the right code base.
 
 Bootstrap the source distribution so that it can be built: 
-    ```bash
+
     gradle wrapper
     cd grails-gradle
     gradlew wrapper
     cd -
-    ```
 
 Run the `verify-reproducible.sh` shell script to compare the published jar files to a locally built version of them. For any differences, extract the jar files, use IntelliJ to compare each differing file. Assuming differences are ordering related, we can continue with the verification.
 
@@ -174,7 +173,7 @@ Verifies the cli distribution signature via the command:
 Extracts the zip file and verifies the contents:
 * Ensure the `LICENSE` & `NOTICE` files are present to ensure license compliance.
 
-## 3. Verifying CLI Functional
+## 3. Verifying the CLIs are Functional
 
 The CLI distribution consists of various CLI's: `grailsw` (wrapper), `grails` (delegating), `grails-forge-cli`, and `grails-shell-cli`. Each CLI needs tested to ensure it's functional prior to release:
 
