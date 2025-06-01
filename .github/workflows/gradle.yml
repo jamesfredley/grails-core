@@ -70,8 +70,6 @@ jobs:
     steps:
       - name: "📥 Checkout repository"
         uses: actions/checkout@v4
-      - name: 'Ensure common build date' # to ensure a reproducible build
-        run: echo "SOURCE_DATE_EPOCH=$(git log -1 --pretty=%ct)" >> "$GITHUB_ENV"
       - name: "☕️ Setup JDK"
         uses: actions/setup-java@v4
         with:
