@@ -127,8 +127,19 @@ jobs:
         with:
           token: ${{ secrets.GH_TOKEN }}
           ref: v${{ needs.publish.outputs.release_version }}
-      - name: 'Ensure Common Build Date' # to ensure a reproducible build
-        run: echo "SOURCE_DATE_EPOCH=$(git log -1 --pretty=%ct)" >> "$GITHUB_ENV"
+      - name: "Download grails-core BUILD_DATE.txt and rename to BUILD_DATE"
+        run: |
+          cd grails
+          release_url=$(gh release view ${{ github.ref_name }} --json assets --repo apache/grails-core --jq '.assets[] | select(.name == "BUILD_DATE.txt") | .url')
+          curl -L -H "Authorization: token $GH_TOKEN" -o BUILD_DATE "$release_url"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: 'Ensure Common Build Date'
+        run: |
+          echo "SOURCE_DATE_EPOCH=$(cat BUILD_DATE)" >> "$GITHUB_ENV"
+      - name: "Ensure source files use common date"
+        run: |
+          find . -type f -exec touch -d "@${SOURCE_DATE_EPOCH}" {} +
       - name: "☕️ Setup JDK"
         uses: actions/setup-java@v4
         with:
