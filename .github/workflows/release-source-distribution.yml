@@ -16,11 +16,6 @@
 name: "Release - Source Distribution"
 on:
   workflow_dispatch:
-    inputs:
-      release_tag:
-        description: 'Release tag (e.g., v7.0.0-M4)'
-        required: true
-        type: string
 jobs:
   source:
     permissions:
@@ -31,13 +26,13 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: apache/grails-core
-          ref: ${{ github.event.inputs.release_tag }}
+          ref: ${{ github.ref_name }}
           path: grails
       - name: "📥 Checkout grails-forge repository"
         uses: actions/checkout@v4
         with:
           repository: apache/grails-forge
-          ref: ${{ github.event.inputs.release_tag }}
+          ref: ${{ github.ref_name }}
           path: grails/grails-forge
       - name: "🗑️ Remove unnecessary files"
         run: |
@@ -56,21 +51,21 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           cd grails
-          release_url=$(gh release view ${{ github.event.inputs.release_tag }} --json assets --repo apache/grails-core --jq '.assets[] | select(.name == "CHECKSUMS.txt") | .url')
+          release_url=$(gh release view ${{ github.ref_name }} --json assets --repo apache/grails-core --jq '.assets[] | select(.name == "CHECKSUMS.txt") | .url')
           curl -L -H "Authorization: token $GH_TOKEN" -o CHECKSUMS "$release_url"
       - name: "Download PUBLISHED_ARTIFACTS.txt and rename to PUBLISHED_ARTIFACTS"
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           cd grails
-          release_url=$(gh release view ${{ github.event.inputs.release_tag }} --json assets --repo apache/grails-core --jq '.assets[] | select(.name == "PUBLISHED_ARTIFACTS.txt") | .url')
+          release_url=$(gh release view ${{ github.ref_name }} --json assets --repo apache/grails-core --jq '.assets[] | select(.name == "PUBLISHED_ARTIFACTS.txt") | .url')
           curl -L -H "Authorization: token $GH_TOKEN" -o PUBLISHED_ARTIFACTS "$release_url"
       - name: "Download BUILD_DATE.txt and rename to BUILD_DATE"
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           cd grails
-          release_url=$(gh release view ${{ github.event.inputs.release_tag }} --json assets --repo apache/grails-core --jq '.assets[] | select(.name == "BUILD_DATE.txt") | .url')
+          release_url=$(gh release view ${{ github.ref_name }} --json assets --repo apache/grails-core --jq '.assets[] | select(.name == "BUILD_DATE.txt") | .url')
           curl -L -H "Authorization: token $GH_TOKEN" -o BUILD_DATE "$release_url"
       - name: "Ensure source files use common date"
         run: |
@@ -78,7 +73,7 @@ jobs:
           find . -type f -exec touch -d "@${SOURCE_DATE_EPOCH}" {} +
       - name: "📦 Create source distribution ZIP"
         run: |
-          version="${{ github.event.inputs.release_tag }}"
+          version="${{ github.ref_name }}"
           version="${version#v}"  # Strip 'v' prefix
           zip -r "apache-grails-${version}-incubating-src.zip" grails -x 'grails/.git/*' -x 'grails/.github/*'
       - name: '🔐 Set up GPG'
@@ -91,18 +86,18 @@ jobs:
         env:
           GPG_KEY_ID: ${{ secrets.GPG_KEY_ID }}
         run: |
-          version="${{ github.event.inputs.release_tag }}"
+          version="${{ github.ref_name }}"
           version="${version#v}"  # Strip 'v' prefix
           gpg --default-key "${GPG_KEY_ID}" --batch --yes --pinentry-mode loopback --armor --detach-sign apache-grails-${version}-incubating-src.zip
       - name: "📦 Create source distribution checksum"
         run: |
-          version="${{ github.event.inputs.release_tag }}"
+          version="${{ github.ref_name }}"
           version="${version#v}"  # Strip 'v' prefix
           sha512sum apache-grails-${version}-incubating-src.zip > "apache-grails-${version}-incubating-src.zip.sha512"
       - name: "🚀 Upload ZIP and Signature to GitHub Release"
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ github.event.inputs.release_tag }}
+          tag_name: ${{ github.ref_name }}
           files: |
             apache-grails-*-incubating-src.zip
             apache-grails-*-incubating-src.zip.sha512
@@ -113,18 +108,18 @@ jobs:
         run: |
           set -e
           cd grails
-          gh release --repo ${{ github.repository }} delete-asset ${{ github.event.inputs.release_tag }} CHECKSUMS.txt --yes
+          gh release --repo ${{ github.repository }} delete-asset ${{ github.ref_name }} CHECKSUMS.txt --yes
       - name: "Remove BUILD_DATE.txt asset from release"
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -e
           cd grails
-          gh release --repo ${{ github.repository }} delete-asset ${{ github.event.inputs.release_tag }} BUILD_DATE.txt --yes
+          gh release --repo ${{ github.repository }} delete-asset ${{ github.ref_name }} BUILD_DATE.txt --yes
       - name: "Remove PUBLISHED_ARTIFACTS.txt asset from release"
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -e
           cd grails
-          gh release --repo ${{ github.repository }} delete-asset ${{ github.event.inputs.release_tag }} PUBLISHED_ARTIFACTS.txt --yes
+          gh release --repo ${{ github.repository }} delete-asset ${{ github.ref_name }} PUBLISHED_ARTIFACTS.txt --yes
