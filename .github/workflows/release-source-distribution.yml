@@ -23,6 +23,8 @@ on:
         type: string
 jobs:
   source:
+    permissions:
+      contents: write
     runs-on: ubuntu-latest
     steps:
       - name: "📥 Checkout grails-core repository"
