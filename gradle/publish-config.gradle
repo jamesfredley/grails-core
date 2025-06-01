@@ -35,6 +35,14 @@ extensions.configure(GrailsPublishExtension) {
 apply plugin: 'org.gradle.crypto.checksum'
 
 afterEvaluate {
+    if (project.plugins.hasPlugin('signing')) {
+        if(System.getenv('TEST_BUILD_REPRODUCIBLE')) {
+            project.logger.lifecycle("Signing is disabled for this build to test build reproducibility.")
+            project.tasks.withType(Sign).configureEach {
+                it.enabled = false
+            }
+        }
+    }
     if (project.plugins.hasPlugin("maven-publish")) {
         def checksumTask = tasks.register("publishedChecksums", Checksum)
         checksumTask.configure { Checksum check ->

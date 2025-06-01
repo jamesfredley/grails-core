@@ -48,6 +48,7 @@ else
   exit 1
 fi
 export SOURCE_DATE_EPOCH=$(cat "${DOWNLOAD_LOCATION}/grails/BUILD_DATE")
+export TEST_BUILD_REPRODUCIBLE='true'
 
 if [[ -d "${DOWNLOAD_LOCATION}/grails/etc/bin/results/first" ]]; then
   echo "✅ Directory 'first' exists."
