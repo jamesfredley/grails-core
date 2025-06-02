@@ -45,13 +45,13 @@ The default plugins are as follows:
 
 Many of these are built in plugins provided by Gradle or third party plugins. The Gradle plugins that Grails provides are as follows:
 
-* `org.apache.grails.gradle.grails-app` - The main Grails gradle plugin implementation
+* `org.apache.grails.gradle.grails-app` - Marks the project as a Grails application
 * `org.apache.grails.gradle.grails-docs` - Adds Grails doc publishing support
 * `org.apache.grails.gradle.grails-gsp` - Adds support for compiling Groovy Server Pages (GSP)
-* `org.apache.grails.gradle.grails-gson` - Adds support for compiling Groovy Json Views (GSON)
-* `org.apache.grails.gradle.grails-markup` - Adds support for compiling Markup Views
-* `org.apache.grails.gradle.grails-plugin` - Adds support Grails plugins
-* `org.apache.grails.gradle.grails-web` - Adds web specific extensions
-* `org.apache.grails.gradle.grails-publish` - Adds support for publishing Grails related artifacts
-* `org.apache.grails.gradle.grails-profile` - Adds support for compiling a Grails profile into a JAR file for distribution
-* `org.apache.grails.gradle.grails-publish-profile` - Adds support for publishing profiles
+* `org.apache.grails.gradle.grails-gson` - Adds support for compiling Json Views (GSON)
+* `org.apache.grails.gradle.grails-markup` - Adds support for compiling Markup Views (XML)
+* `org.apache.grails.gradle.grails-plugin` - Marks the project as a Grails plugin
+* `org.apache.grails.gradle.grails-web` - Adds the web url mappings report to the Gradle project
+* `org.apache.grails.gradle.grails-publish` - A plugin to assist in publishing to maven repositories or nexus staging repositories
+* `org.apache.grails.gradle.grails-profile` - Marks the project as a Grails profile
+* `org.apache.grails.gradle.grails-publish-profile` - Adds support for publishing Grails Profiles
