@@ -230,7 +230,7 @@ If you wish to verify any artifact manually, you must trust the key used to buil
 
 Download the latest KEYS file and make sure it's imported into gpg:
 ```bash
-    wget wget https://raw.githubusercontent.com/apache/grails-core/refs/heads/7.0.x/KEYS
+    wget https://dist.apache.org/repos/dist/release/grails/KEYS
     gpg --import KEYS
 ```
 
