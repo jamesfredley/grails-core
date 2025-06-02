@@ -40,6 +40,7 @@ fi
 
 export GRAILS_GPG_HOME=$(mktemp -d)
 cleanup() {
+  echo "❌ Wrapper Verification failed ❌"
   rm -rf "${GRAILS_GPG_HOME}"
 }
 trap cleanup EXIT
@@ -74,5 +75,14 @@ for FILE in "${REQUIRED_FILES[@]}"; do
 
   echo "✅ Found required file: $FILE"
 done
+
+export GRAILS_REPO_URL=https://repository.apache.org/content/groups/staging
+cd "${SRC_DIR}"
+echo "Checking wrapper shell command ..."
+./grailsw -t shell create-app ShellApp
+echo "✅ Generated Shell App"
+echo "Checking forge command"
+./grailsw -t forge create-app -x -g mongodb ForgeApp
+echo "✅ Generated Forge App"
 
 echo "✅ All wrapper binary distribution checks passed successfully for Apache Grails ${VERSION}."
