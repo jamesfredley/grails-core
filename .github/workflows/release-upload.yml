@@ -55,13 +55,27 @@ jobs:
               mkdir https://dist.apache.org/repos/dist/dev/grails \
               -m "Create 'grails' dev folder"
           fi
+      - name: "Ensure grails core folder exists"
+        run: |
+          set -e
+
+          if svn ls https://dist.apache.org/repos/dist/dev/grails/core --username "$SVN_USERNAME" --password "$SVN_PASSWORD" --non-interactive; then
+            echo "Dev Folder 'grails/core' already exists — skipping creation"
+          else
+            echo "Dev Folder 'grails/core' does not exist, creating"
+            svnmucc --non-interactive \
+              --username "$SVN_USERNAME" \
+              --password "$SVN_PASSWORD" \
+              mkdir https://dist.apache.org/repos/dist/dev/grails/core \
+              -m "Create 'grails' dev folder"
+          fi
       - name: "Checkout dev repo"
         run: |
-          svn checkout --non-interactive --username "$SVN_USERNAME" --password "$SVN_PASSWORD" https://dist.apache.org/repos/dist/dev/grails dev-repo
+          svn checkout --non-interactive --username "$SVN_USERNAME" --password "$SVN_PASSWORD" https://dist.apache.org/repos/dist/dev/grails/core dev-repo
       - name: "Remove existing dev version"
         run: |
           VERSION="${{ steps.release_version.outputs.version }}"
-          cd dev-repo
+          cd dev-repo/core
           if [ -d "$VERSION" ]; then
             svn delete "$VERSION"
             svn commit -m "Remove grails dev version $VERSION" --username "$SVN_USERNAME" --password "$SVN_PASSWORD"
@@ -72,7 +86,7 @@ jobs:
         run: |
           TAG=${{ github.event.inputs.release_tag }}
           VERSION=${{ steps.release_version.outputs.version }}
-          cd dev-repo
+          cd dev-repo/core
           mkdir -p $VERSION/sources          
           cd $VERSION/sources
           curl -LO https://github.com/apache/grails-core/releases/download/$TAG/apache-grails-$VERSION-incubating-src.zip
@@ -87,7 +101,7 @@ jobs:
         run: |
           TAG=${{ github.event.inputs.release_tag }}
           VERSION=${{ steps.release_version.outputs.version }}
-          cd dev-repo
+          cd dev-repo/core
           mkdir -p $VERSION/distribution
           cd $VERSION/distribution
           curl -LO https://github.com/apache/grails-forge/releases/download/$TAG/apache-grails-$VERSION-incubating-bin.zip
@@ -102,7 +116,7 @@ jobs:
         run: |
           TAG=${{ github.event.inputs.release_tag }}
           VERSION=${{ steps.release_version.outputs.version }}
-          cd dev-repo/$VERSION/distribution
+          cd dev-repo/core/$VERSION/distribution
           curl -LO https://github.com/apache/grails-core/releases/download/$TAG/apache-grails-wrapper-$VERSION-incubating-bin.zip
           curl -LO https://github.com/apache/grails-core/releases/download/$TAG/apache-grails-wrapper-$VERSION-incubating-bin.zip.sha512
           curl -LO https://github.com/apache/grails-core/releases/download/$TAG/apache-grails-wrapper-$VERSION-incubating-bin.zip.asc
