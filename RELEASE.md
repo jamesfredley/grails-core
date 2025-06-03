@@ -364,7 +364,7 @@ Setup the key for validity:
 The Grails image is officially built on linux in a GitHub action using an Ubuntu container. To run a linux container locally, you can use the following command:
 
 ```bash
-    docker build -t grails:testing -f etc/bin/Dockerfile . && docker run -it --rm -v $(pwd):/home/groovy/project grails:testing bash
+    docker build -t grails:testing -f etc/bin/Dockerfile . && docker run -it --rm -v $(pwd):/home/groovy/project -p 8080:8080 grails:testing bash
     cd grails-verify
     verify.sh orgapachegrails-1038 v7.0.0-M4 .
     cd grails 
@@ -374,6 +374,8 @@ The Grails image is officially built on linux in a GitHub action using an Ubuntu
     cd ../..
     verify-reproducible.sh .
 ```
+
+Please note that the argument `-p 8080:8080` is used to expose the port 8080 of the container to the host machine's port 8080 (fromContainerPort:toHostPort). This allows you to access any running Grails application in the container from your host. If you have another application on port 8080, you can change the port mapping to avoid conflicts, e.g., `-p 8080:8081`. 
 
 In the event that artifacts differ, simply copy them to your project directory and work on your local machine instead of the docker image: 
 
