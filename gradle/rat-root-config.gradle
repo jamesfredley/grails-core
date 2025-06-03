@@ -23,6 +23,9 @@ tasks.named('rat') {
             'CODE_OF_CONDUCT.md',
             'LICENSE',
             'NOTICE',
+            'BUILD_DATE', // build artifact for storing the build date / verifying
+            'CHECKSUMS', // build artifact for storing checksums for easy verification
+            'PUBLISHED_ARTIFACTS', // build artifact for storing published artifacts coordinates & paths
             'licenses/**', // licenses directory excluded
             'grails-web-common/src/main/groovy/org/grails/web/json/JSONObject.java',
             'grails-web-common/src/main/groovy/org/grails/web/json/JSONArray.java',
