@@ -54,9 +54,9 @@ During the staging step, we must create a source distribution & stage any binary
      * upload the source distribution to the Github `grails-core` release
 6. Kick off the `Release - Upload to dist.apache.org` workflow from `release-upload.yml` in `grails-core`. This job will:
      * update the KEYS file under https://dist.apache.org/repos/dist/release/grails/KEYS with the version in the tagged source code
-     * upload the source distribution to https://dist.apache.org/repos/dist/dev/grails/VERSION/sources
-     * upload the grails-wrapper binary distribution to https://dist.apache.org/repos/dist/dev/grails/VERSION/distribution
-     * upload the grails binary distribution to https://dist.apache.org/repos/dist/dev/grails/VERSION/distribution (note: this is the sdkman artifact)
+     * upload the source distribution to https://dist.apache.org/repos/dist/dev/grails/core/VERSION/sources
+     * upload the grails-wrapper binary distribution to https://dist.apache.org/repos/dist/dev/grails/core/VERSION/distribution
+     * upload the grails binary distribution to https://dist.apache.org/repos/dist/dev/grails/core/VERSION/distribution (note: this is the sdkman artifact)
 
 ## 2. Verifying Artifacts are Authentic
 
@@ -73,7 +73,7 @@ For Example:
 
 ### Download the Staged Artifacts
 
-Use `etc/bin/download-release-artifacts.sh` to download the staged artifacts. This script will download the source distribution, wrapper binary distribution, and sdkman binary distribution. The distribution should come from [https://dist.apache.org/repos/dist/dev/grails/version](https://dist.apache.org/repos/dist/dev/grails).
+Use `etc/bin/download-release-artifacts.sh` to download the staged artifacts. This script will download the source distribution, wrapper binary distribution, and sdkman binary distribution. The distribution should come from [https://dist.apache.org/repos/dist/dev/grails/core/version](https://dist.apache.org/repos/dist/dev/grails/core).
 
 ### Source Distribution Verification
 
@@ -234,8 +234,8 @@ https://github.com/apache/grails-forge/releases/tag/v7.0.0-M4
 Tag commit id: <commit hash>
 
 The artifacts to be voted on are located as follows (<svn version revision>):
-Source release: https://dist.apache.org/repos/dist/dev/grails/7.0.0-M4/sources
-Binary distributions: https://dist.apache.org/repos/dist/dev/grails/7.0.0-M4/distribution
+Source release: https://dist.apache.org/repos/dist/dev/grails/core/7.0.0-M4/sources
+Binary distributions: https://dist.apache.org/repos/dist/dev/grails/core/7.0.0-M4/distribution
 
 Release artifacts are signed with a key from the following file: 
 https://dist.apache.org/repos/dist/release/grails/KEYS
@@ -304,8 +304,8 @@ https://github.com/apache/grails-forge/releases/tag/v7.0.0-M4
 Tag commit id: <commit hash>
 
 The artifacts to be voted on are located as follows (<svn version revision>):
-Source release: https://dist.apache.org/repos/dist/dev/grails/7.0.0-M4/sources
-Binary distributions: https://dist.apache.org/repos/dist/dev/grails/7.0.0-M4/distribution
+Source release: https://dist.apache.org/repos/dist/dev/grails/core/7.0.0-M4/sources
+Binary distributions: https://dist.apache.org/repos/dist/dev/grails/core/7.0.0-M4/distribution
 
 Release artifacts are signed with a key from the following file: 
 https://dist.apache.org/repos/dist/release/grails/KEYS
@@ -335,7 +335,7 @@ To remove a Nexus staging repo, run the workflow `Release - Drop Nexus Staging` 
 
 ## Rollback Distribution
 
-To remove the staged distribution, use your SVN credentials to remove the version directory at [https://dist.apache.org/repos/dist/dev/grails](https://dist.apache.org/repos/dist/dev/grails)
+To remove the staged distribution, use your SVN credentials to remove the version directory at [https://dist.apache.org/repos/dist/dev/grails/core](https://dist.apache.org/repos/dist/dev/grails/core)
 
 # Appendix: GPG Configuration
 If you wish to verify any artifact manually, you must trust the key used to build Grails. To do so, it's best to download the KEYS file that was published to the official location:
