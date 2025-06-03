@@ -101,8 +101,8 @@ jobs:
           TAG=${{ github.event.inputs.release_tag }}
           VERSION=${{ steps.release_version.outputs.version }}
           cd dev-repo
-          mkdir -p $VERSION/source          
-          cd $VERSION/source
+          mkdir -p $VERSION/sources          
+          cd $VERSION/sources
           curl -LO https://github.com/apache/grails-core/releases/download/$TAG/apache-grails-$VERSION-incubating-src.zip
           curl -LO https://github.com/apache/grails-core/releases/download/$TAG/apache-grails-$VERSION-incubating-src.zip.sha512
           curl -LO https://github.com/apache/grails-core/releases/download/$TAG/apache-grails-$VERSION-incubating-src.zip.asc
