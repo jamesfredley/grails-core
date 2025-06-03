@@ -37,6 +37,9 @@ tasks.register('bootstrap') {
                 include(name: 'gradle-wrapper.properties')
             }
         }
+        ant.chmod(file: "${projectDir}/../grails-forge/gradlew", perm: '755')
+        ant.chmod(file: "${projectDir}/../grails-forge/gradlew.bat", perm: '755')
+
         ant.copy file: "${projectDir}/gradlew", todir: "${projectDir}/../grails-gradle"
         ant.copy file: "${projectDir}/gradlew.bat", todir: "${projectDir}/../grails-gradle"
         ant.copy(todir: "${projectDir}/../grails-gradle/gradle/wrapper") {
@@ -45,8 +48,13 @@ tasks.register('bootstrap') {
                 include(name: 'gradle-wrapper.properties')
             }
         }
+        ant.chmod(file: "${projectDir}/../grails-gradle/gradlew", perm: '755')
+        ant.chmod(file: "${projectDir}/../grails-gradle/gradlew.bat", perm: '755')
+
         ant.move file: "${projectDir}/gradlew", todir: "${projectDir}/../"
         ant.move file: "${projectDir}/gradlew.bat", todir: "${projectDir}/../"
         ant.move file: "${projectDir}/gradle/wrapper", todir: "${projectDir}/../gradle"
+        ant.chmod(file: "${projectDir}/../gradlew", perm: '755')
+        ant.chmod(file: "${projectDir}/../gradlew.bat", perm: '755')
     }
 }
