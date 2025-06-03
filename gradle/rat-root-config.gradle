@@ -24,7 +24,6 @@ tasks.named('rat') {
             'etc/bin/results/**', // exclude build directories
             '**/.gradle/**', '**/wrapper/**', 'gradlew*',  // gradle wrapper files excluded from src zip
             'out/**', '*.ipr', '**/*.iml', '*.iws', '.idea/**', // Intellij generated files
-            'src/*', // exclude build artifacts
             'LICENSE',
             'NOTICE',
             '**/.sdkmanrc', // tool selection files aren't code
