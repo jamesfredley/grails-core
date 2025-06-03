@@ -54,6 +54,5 @@ ext {
 }
 
 apply {
-    from layout.projectDirectory.file('gradle/gradle-wrapper-root-config.gradle')
     from layout.projectDirectory.file('gradle/publish-root-config.gradle')
 }
