@@ -64,6 +64,7 @@ jobs:
         run: >
           ./gradlew build
           --continue --stacktrace
+          --rerun-tasks
   build:
     if: ${{ !contains(github.event.head_commit.message, '[skip tests]') }}
     name: 'Build Grails-Core'
@@ -89,6 +90,7 @@ jobs:
         run: >
           ./gradlew build :grails-shell-cli:installDist groovydoc
           --continue --stacktrace -PonlyCoreTests
+          --rerun-tasks
   functional:
     name: "Functional Tests"
     if: ${{ !contains(github.event.head_commit.message, '[skip tests]') }}
@@ -116,6 +118,7 @@ jobs:
           -PonlyFunctionalTests
           -PskipHibernate5Tests
           -PskipMongodbTests
+          --rerun-tasks
   mongodbFunctional:
     if: ${{ !contains(github.event.head_commit.message, '[skip tests]') }}
     name: "Mongodb Functional Tests"
@@ -145,6 +148,7 @@ jobs:
           --continue --stacktrace
           -PonlyMongodbTests
           -PmongodbContainerVersion=${{ matrix.mongodb-version }}
+          --rerun-tasks
   hibernate5Functional:
     if: ${{ !contains(github.event.head_commit.message, '[skip tests]') }}
     name: "Hibernate5 Functional Tests"
@@ -172,6 +176,7 @@ jobs:
           ./gradlew bootJar cleanTest check
           --continue --stacktrace
           -PonlyHibernate5Tests
+          --rerun-tasks
   publishGradle:
     if: github.repository_owner == 'apache' && github.event_name == 'push'
     needs: [ buildGradle ]
