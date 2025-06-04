@@ -85,4 +85,4 @@ jobs:
           MAVEN_PUBLISH_URL: ${{ secrets.GRAILS_NEXUS_PUBLISH_SNAPSHOT_URL }}
           MAVEN_PUBLISH_USERNAME: ${{ secrets.NEXUS_USER }}
           MAVEN_PUBLISH_PASSWORD: ${{ secrets.NEXUS_PW  }}
-        run: ./gradlew publish
+        run: ./gradlew publish --no-build-cache --rerun-tasks
