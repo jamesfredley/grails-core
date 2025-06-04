@@ -187,8 +187,13 @@ class GrailsProfileGradlePlugin implements Plugin<Project> {
             jar.from(project.files(project.layout.buildDirectory.dir('resources/profile'), project.layout.buildDirectory.dir('classes/profile')))
             jar.reproducibleFileOrder = true
             jar.preserveFileTimestamps = false
-            jar.dirMode = 0755 // To avoid platform specific defaults
-            jar.fileMode = 0644 // to avoid platform specific defaults
+            // to avoid platform specific defaults, set the permissions consistently
+            jar.filePermissions { permissions ->
+                permissions.unix(0644)
+            }
+            jar.dirPermissions { permissions ->
+                permissions.unix(0755)
+            }
         }
 
         TaskProvider<Jar> sourcesJarTask = project.tasks.register('sourcesJar', Jar)
@@ -208,8 +213,13 @@ class GrailsProfileGradlePlugin implements Plugin<Project> {
             jar.description = 'Assembles a jar archive containing the profile sources.'
             jar.reproducibleFileOrder = true
             jar.preserveFileTimestamps = false
-            jar.dirMode = 0755 // To avoid platform specific defaults
-            jar.fileMode = 0644 // to avoid platform specific defaults
+            // to avoid platform specific defaults, set the permissions consistently
+            jar.filePermissions { permissions ->
+                permissions.unix(0644)
+            }
+            jar.dirPermissions { permissions ->
+                permissions.unix(0755)
+            }
         }
 
         def profileReadme = project.layout.buildDirectory.file('profile.txt')
@@ -233,8 +243,13 @@ class GrailsProfileGradlePlugin implements Plugin<Project> {
         javadocJarTask.configure { Jar jar ->
             jar.reproducibleFileOrder = true
             jar.preserveFileTimestamps = false
-            jar.dirMode = 0755 // To avoid platform specific defaults
-            jar.fileMode = 0644 // to avoid platform specific defaults
+            // to avoid platform specific defaults, set the permissions consistently
+            jar.filePermissions { permissions ->
+                permissions.unix(0644)
+            }
+            jar.dirPermissions { permissions ->
+                permissions.unix(0755)
+            }
 
             jar.dependsOn(readmeGeneration)
             // https://central.sonatype.org/publish/requirements/#supply-javadoc-and-sources
