@@ -202,7 +202,7 @@ jobs:
         working-directory: 'grails-gradle'
         run: >
           ./gradlew publish aggregateChecksums aggregatePublishedArtifacts
-          -Dorg.gradle.internal.publish.checksums.insecure=true
+          -Dorg.gradle.internal.publish.checksums.insecure=true --no-build-cache --rerun-tasks
       - name: "📤 Upload grails-gradle checksums"
         uses: actions/upload-artifact@v4
         with:
@@ -240,7 +240,7 @@ jobs:
           timeout_seconds: 900 # normal range 360-720s
           max_attempts: 3 # Attempts to address: Could not write to resource 'https://repository.apache.org/content/repositories/snapshots/...' Read timed out
           retry_wait_seconds: 180
-          command: ./gradlew publish aggregateChecksums aggregatePublishedArtifacts
+          command: ./gradlew publish aggregateChecksums aggregatePublishedArtifacts --no-build-cache --rerun-tasks
       - name: "📤 Upload grails-core checksums"
         uses: actions/upload-artifact@v4
         with:
