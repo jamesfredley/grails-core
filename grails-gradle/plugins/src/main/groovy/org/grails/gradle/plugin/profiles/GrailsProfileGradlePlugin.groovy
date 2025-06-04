@@ -176,6 +176,10 @@ class GrailsProfileGradlePlugin implements Plugin<Project> {
             it.classpath = project.files(runtimeOnlyConfiguration.get(), project.configurations.named('runtimeClasspath').get())
         }
 
+        project.tasks.named('classes').configure {
+            it.dependsOn(compileTask)
+        }
+
         TaskProvider<Jar> jarTask = project.tasks.named('jar', Jar)
         jarTask.configure { Jar jar ->
             jar.dependsOn(processProfileResourcesTask, compileTask)
