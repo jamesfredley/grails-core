@@ -139,7 +139,7 @@ class ProfileCompilerTask extends AbstractCompile {
 
         if (!profileData.containsKey('extends')) {
             List<String> dependencies = []
-            project.configurations.named(GrailsProfileGradlePlugin.RUNTIME_ONLY_CONFIGURATION).get().dependencies.all { Dependency d ->
+            project.configurations.named(GrailsProfileGradlePlugin.PROFILE_API_CONFIGURATION).get().dependencies.all { Dependency d ->
                 String profileName = d.name
                 if (d instanceof DefaultProjectDependency) {
                     DefaultProjectDependency projectDependency = (DefaultProjectDependency) d
