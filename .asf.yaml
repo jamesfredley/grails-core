@@ -43,9 +43,9 @@ notifications:
   # GitHub related
   commits: commits@grails.apache.org
   jobs: notifications@grails.apache.org
-  pullrequests_status: dev@grails.apache.org
-  pullrequests_comment: dev@grails.apache.org
-  pullrequests_bot_dependabot: dev@grails.apache.org
+  pullrequests_status: commits@grails.apache.org
+  pullrequests_comment: commits@grails.apache.org
+  pullrequests_bot_dependabot: commits@grails.apache.org
   issues: users@grails.apache.org
   issues_status: users@grails.apache.org
   issues_comment: users@grails.apache.org
