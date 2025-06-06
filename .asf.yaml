@@ -23,7 +23,7 @@ notifications:
   pullrequests_status: commits@grails.apache.org
   pullrequests_comment: commits@grails.apache.org
   pullrequests_bot_dependabot: commits@grails.apache.org
-  issues: users@grails.apache.org
-  issues_status: users@grails.apache.org
-  issues_comment: users@grails.apache.org
+  issues: notifications@grails.apache.org
+  issues_status: notifications@grails.apache.org
+  issues_comment: notifications@grails.apache.org
   discussions: users@grails.apache.org
