@@ -162,6 +162,7 @@ jobs:
           GVM_SDKVENDOR_KEY: ${{ secrets.GVM_SDKVENDOR_KEY }}
           GVM_SDKVENDOR_TOKEN: ${{ secrets.GVM_SDKVENDOR_TOKEN }}
   release:
+    name: "Close Release"
     environment: release
     needs: [publish, sdkman]
     runs-on: ubuntu-latest
