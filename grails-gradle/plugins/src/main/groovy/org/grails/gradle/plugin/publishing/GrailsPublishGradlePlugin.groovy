@@ -44,7 +44,6 @@ import org.gradle.api.tasks.javadoc.Groovydoc
 import org.gradle.plugins.signing.Sign
 import org.gradle.plugins.signing.SigningExtension
 import org.gradle.plugins.signing.SigningPlugin
-import org.grails.gradle.plugin.run.FindMainClassTask
 import org.grails.gradle.plugin.util.SourceSets
 
 import static org.gradle.api.plugins.BasePlugin.BUILD_GROUP
