@@ -327,23 +327,11 @@ Click the link in this email and mark the release published. For example, if the
 
 In `grails-forge`, kick off the step `Release to SDKMAN!` in the release create workflow.  This will cause SDKMAN to pull the new version from Maven Central.
 
-### Publish `start.grails.org` 
-
-TODO
-
-### Close out the `grails-forge` release
-
-The last step in the `grails-forge` release workflow is to run the `Close Release` step.  This will either open a PR or merge the tag into the matching branch.  If it opens a PR, you will need to merge it into the branch after correcting any merge conflict.
-
-### Close out the `grails-core` release
-
-The last step in the `grails-core` release workflow is to run the `Close Release` step.  This will either open a PR or merge the tag into the matching branch.  If it opens a PR, you will need to merge it into the branch after correcting any merge conflict.
-
 ### Deploy grails-forge-web-netty docker container to Google Cloud Run
 
 On the `grails-forge` repository, using the release tag, deploy the grails-forge-web-netty docker container to Google Cloud Run using one of the GCP Deploy actions.
 
-On https://start.grails.org, versions are listed in the following order:  RELEASE, NEXT, SNAPSHOT, PREV and PREV-SNAPSHOT.  Use the corresponding action to deploy to each location.  
+On https://start.grails.org, versions are listed in the following order:  RELEASE, NEXT, SNAPSHOT, PREV and PREV-SNAPSHOT.  Use the corresponding action to deploy to each location.
 
 RELEASE - GA releases only
 
@@ -354,6 +342,14 @@ SNAPSHOT - current or next version snapshot
 PREV - previous release version
 
 PREV-SNAPSHOT - previous version snapshot
+
+### Close out the `grails-forge` release
+
+The last step in the `grails-forge` release workflow is to run the `Close Release` step.  This will either open a PR or merge the tag into the matching branch.  If it opens a PR, you will need to merge it into the branch after correcting any merge conflict.
+
+### Close out the `grails-core` release
+
+The last step in the `grails-core` release workflow is to run the `Close Release` step.  This will either open a PR or merge the tag into the matching branch.  If it opens a PR, you will need to merge it into the branch after correcting any merge conflict.
 
 
 ### Update the `grails-static-website`
