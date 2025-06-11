@@ -25,10 +25,6 @@ plugins {
 version = projectVersion
 group = 'org.apache.grails.forge'
 
-repositories {
-    mavenCentral()
-}
-
 dependencies {
 
     annotationProcessor 'io.micronaut:micronaut-graal'

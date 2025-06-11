@@ -38,6 +38,25 @@ ext {
     buildDate = (buildInstant as Instant).atZone(ZoneOffset.UTC) // for reproducible builds
 }
 
+allprojects {
+    repositories {
+        mavenCentral()
+        maven { url = 'https://repo.grails.org/grails/restricted' }
+        maven {
+            url = 'https://repository.apache.org/content/groups/snapshots'
+            content {
+                includeVersionByRegex  'org[.]apache[.]grails.*', '.*','.*SNAPSHOT'
+            }
+        }
+        maven {
+            url = 'https://repository.apache.org/content/groups/staging'
+            content {
+                includeGroupByRegex 'org[.]apache[.]grails.*'
+            }
+        }
+    }
+}
+
 // buildSrc tests fail occasionally without running clean first
 tasks.named('build').configure {
     it.dependsOn(tasks.named('clean'))

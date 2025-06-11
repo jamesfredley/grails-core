@@ -27,10 +27,6 @@ plugins {
     id 'org.gradle.test-retry'
 }
 
-repositories {
-    mavenCentral()
-}
-
 version = project.projectVersion
 group = "org.apache.grails.forge"
 

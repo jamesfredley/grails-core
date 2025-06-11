@@ -80,14 +80,6 @@ nohttp {
     source.exclude('**/pom.rocker.raw')
 }
 
-repositories {
-    // mavenLocal()
-    maven { url = 'https://repo.grails.org/grails/restricted' }
-    maven { url = 'https://repository.apache.org/content/groups/staging' }
-    maven { url = 'https://repository.apache.org/content/groups/snapshots' }
-    mavenCentral()
-}
-
 TaskProvider<Sync> copyGrailsWrapper = tasks.register('copyGrailsWrapper', Sync)
 copyGrailsWrapper.configure { Sync it ->
     it.inputs.files(configurations.grailsWrapper)

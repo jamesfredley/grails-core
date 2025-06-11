@@ -36,15 +36,6 @@ ext {
 version = projectVersion
 group = 'org.apache.grails'
 
-repositories {
-//    mavenLocal()
-    mavenCentral()
-    gradlePluginPortal()
-    maven { url = 'https://repo.grails.org/grails/restricted' }
-    maven { url = 'https://repository.apache.org/content/groups/staging' }
-    maven { url = 'https://repository.apache.org/content/groups/snapshots' }
-}
-
 dependencies {
     implementation platform("org.apache.grails:grails-bom:$grailsVersion")
 
