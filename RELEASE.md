@@ -339,6 +339,23 @@ The last step in the `grails-forge` release workflow is to run the `Close Releas
 
 The last step in the `grails-core` release workflow is to run the `Close Release` step.  This will either open a PR or merge the tag into the matching branch.  If it opens a PR, you will need to merge it into the branch after correcting any merge conflict.
 
+### Deploy grails-forge-web-netty docker container to Google Cloud Run
+
+On the `grails-forge` repository, using the release tag, deploy the grails-forge-web-netty docker container to Google Cloud Run using one of the GCP Deploy actions.
+
+On https://start.grails.org, versions are listed in the following order:  RELEASE, NEXT, SNAPSHOT, PREV and PREV-SNAPSHOT.  Use the corresponding action to deploy to each location.  
+
+RELEASE - GA releases only
+
+NEXT - Milestones and Release Candidate
+
+SNAPSHOT - current or next version snapshot
+
+PREV - previous release version
+
+PREV-SNAPSHOT - previous version snapshot
+
+
 ### Update the `grails-static-website`
 
 Update the `grails-static-website` repository to point to announce the new version. Further instructions are a TODO
