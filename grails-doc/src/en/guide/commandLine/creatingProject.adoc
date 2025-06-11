@@ -17,7 +17,20 @@ specific language governing permissions and limitations
 under the License.
 ////
 
-Creating a project is the primary usage of the CLI. The primary command for creating a new project is create-app, which creates a standard Grails web application that communicates over HTTP. For other types of application, see the documentation below.
+// NEW: Clarify CLI usage starting with Grails 7
+Creating a project is the primary usage of the Forge CLI.
+
+The `create-app` and other project scaffolding commands are part of the **Forge CLI**, which must now be run using the following format:
+
+[source,console]
+----
+$ ./grails -t forge create-app myapp
+----
+
+Do *not* use `create-app` directly with just `./grails`, as that now runs the legacy shell CLI and will not recognize Forge commands.
+
+// NEW: Add reminder for post-generation workflow
+After generating a project with Forge, switch to the created directory and use the default Grails shell CLI (`./grails`) to manage, run, test, and deploy your application.
 
 [cols="1,3,4a,8a"]
 |===
@@ -26,7 +39,6 @@ Creating a project is the primary usage of the CLI. The primary command for crea
 | create-app / create-webapp
 | Creates a Grails web application
 |
-
 [none]
 * -jdk, --java-version
 * -s, --servlet
@@ -35,21 +47,21 @@ Creating a project is the primary usage of the CLI. The primary command for crea
 * -f, --features
 * -i, --inplace
 |
-[source,shell]
+[source,console]
 ----
-grails create-app \
+// NEW: Prefix with -t forge to indicate correct CLI usage
+./grails -t forge create-app \
     --servlet=tomcat \
     --jdk=11 \
     --gorm=hibernate \
     --test=spock \
     --features=github-workflow-java-ci \
-    com.example.demo`
+    com.example.demo
 ----
 
 | create-restapi
 | Creates a Grails REST API application
 |
-
 [none]
 * -jdk, --java-version
 * -s, --servlet
@@ -58,21 +70,21 @@ grails create-app \
 * -f, --features
 * -i, --inplace
 |
-[source,shell]
+[source,console]
 ----
-grails create-restapi \
+// NEW: Prefix with -t forge
+./grails -t forge create-restapi \
     --servlet=tomcat \
     --jdk=11 \
     --gorm=hibernate \
     --test=spock \
     --features=github-workflow-java-ci \
-    com.example.demo`
+    com.example.demo
 ----
 
 | create-plugin
 | Creates a Grails Plugin application
 |
-
 [none]
 * -jdk, --java-version
 * -s, --servlet
@@ -81,21 +93,21 @@ grails create-restapi \
 * -f, --features
 * -i, --inplace
 |
-[source,shell]
+[source,console]
 ----
-grails create-plugin \
+// NEW: Prefix with -t forge
+./grails -t forge create-plugin \
     --servlet=tomcat \
     --jdk=11 \
     --gorm=hibernate \
     --test=spock \
     --features=github-workflow-java-ci \
-    com.example.demo`
+    com.example.demo
 ----
 
 | create-web-plugin
 | Creates a Grails Web Plugin application
 |
-
 [none]
 * -jdk, --java-version
 * -s, --servlet
@@ -104,15 +116,16 @@ grails create-plugin \
 * -f, --features
 * -i, --inplace
 |
-[source,shell]
+[source,console]
 ----
-grails create-web-plugin \
+// NEW: Prefix with -t forge
+./grails -t forge create-web-plugin \
     --servlet=tomcat \
     --jdk=11 \
     --gorm=hibernate \
     --test=spock \
     --features=github-workflow-java-ci \
-    com.example.demo`
+    com.example.demo
 ----
 
 |===

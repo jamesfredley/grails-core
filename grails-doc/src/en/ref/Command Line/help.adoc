@@ -18,7 +18,7 @@ under the License.
 ////
 
 
-== help
+== Help
 
 
 
@@ -121,11 +121,15 @@ Commands:
   create-restapi     Creates an REST API
 ----
 
-By using the `--help` syntax with specific command names, Grails developers can access in-depth documentation, making it easier to work with Grails commands and ensuring they are used correctly in their projects. Here is an example of using `--help` with the `grails create-app` command:
+By using the `--help` syntax with specific command names, Grails developers can access in-depth documentation, making it easier
+to work with Grails commands and ensuring they are used correctly in their projects.
+
+// NEW: Clarify correct CLI usage for help with create-app
+Here is an example of using `--help` with the `create-app` command. Since `create-app` is part of the Forge CLI, it must be invoked via `grails -t forge`:
 
 [source,shell]
 ----
-grails> create-app --help
+$ grails -t forge create-app --help
 Usage: grails create-app [-hivVx] [--list-features] [-g=GORM Implementation] [--jdk=<javaVersion>]
                          [-s=Servlet Implementation] [-t=TEST] [-f=FEATURE[,FEATURE...]]... [NAME]
 Creates an application

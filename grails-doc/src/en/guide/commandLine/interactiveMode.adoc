@@ -55,6 +55,9 @@ grails>
 
 You can access general usage information for Grails commands using the help flag associated with a specific command.
 
+// NEW: Clarify that create-app help output comes from the Forge CLI
+The `create-app` command is part of the Forge CLI. To view its help information, you must use `./grails -t forge` from the terminal. You cannot access this output from the Grails shell (`grails>` prompt).
+
 [source,shell]
 ----
 grails> create-app -h
