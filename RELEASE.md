@@ -327,9 +327,21 @@ Click the link in this email and mark the release published. For example, if the
 
 In `grails-forge`, kick off the step `Release to SDKMAN!` in the release create workflow.  This will cause SDKMAN to pull the new version from Maven Central.
 
-### Publish `start.grails.org` 
+### Deploy grails-forge-web-netty docker container to Google Cloud Run
 
-TODO
+On the `grails-forge` repository, using the release tag, deploy the grails-forge-web-netty docker container to Google Cloud Run using one of the GCP Deploy actions.
+
+On https://start.grails.org, versions are listed in the following order:  RELEASE, NEXT, SNAPSHOT, PREV and PREV-SNAPSHOT.  Use the corresponding action to deploy to each location.
+
+RELEASE - GA releases only
+
+NEXT - Milestones and Release Candidate
+
+SNAPSHOT - current or next version snapshot
+
+PREV - previous release version
+
+PREV-SNAPSHOT - previous version snapshot
 
 ### Close out the `grails-forge` release
 
