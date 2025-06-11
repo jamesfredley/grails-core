@@ -356,6 +356,14 @@ The last step in the `grails-core` release workflow is to run the `Close Release
 
 Update the `grails-static-website` repository to point to announce the new version. Further instructions are a TODO
 
+### Flag release in `grails-core` as latest
+
+Update the release in `grails-core` to be flagged as 'latest'
+
+### Flag release in `grails-forge` as latest
+
+Update the release in `grails-forge` to be flagged as 'latest'
+
 ### Announce the release
 
 Announcements should come from your apache email address and have an expected format.  The announcement should be sent to `dev@grails.apache.org`, `dev@groovy.apache.org`, & `announce@apache.org`.  Here's an example email: 
