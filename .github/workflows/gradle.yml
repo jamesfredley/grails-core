@@ -266,7 +266,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: wrapper-artifacts
-          path: grails-wrapper/build/distributions/apache-grails-wrapper-*.zip
+          path: tmp/wrapper
   docs:
     if: github.repository_owner == 'apache' && github.event_name == 'push'
     needs: [ publish ]
