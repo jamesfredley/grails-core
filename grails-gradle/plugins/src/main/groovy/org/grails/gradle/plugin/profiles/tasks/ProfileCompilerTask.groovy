@@ -32,7 +32,9 @@ import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.internal.artifacts.dependencies.DefaultProjectDependency
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.plugins.BasePlugin
+import org.gradle.api.provider.MapProperty
 import org.gradle.api.tasks.CacheableTask
+import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputDirectory
 import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.Optional
@@ -78,6 +80,7 @@ class ProfileCompilerTask extends AbstractCompile {
         templatesDirectory = objectFactory.directoryProperty()
         skeletonDirectory = objectFactory.directoryProperty()
         commandsDirectory = objectFactory.directoryProperty()
+        projectArtifactIds = objectFactory.mapProperty(String, String)
     }
 
     @OutputDirectory
@@ -106,12 +109,23 @@ class ProfileCompilerTask extends AbstractCompile {
     @Optional
     final DirectoryProperty commandsDirectory
 
+    @Input
+    final MapProperty<String, String> projectArtifactIds
+
     // commands map to source property
 
     private Yaml createYamlHandler() {
         def options = new DumperOptions()
         options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK)
         new Yaml(new SafeConstructor(new LoaderOptions()), new Representer(options), options)
+    }
+
+    private getPublishedProjectId(String projectName, Map<String, String> projectArtifactIdMappings) {
+        if (projectArtifactIdMappings.containsKey(projectName)) {
+            return projectArtifactIdMappings[projectName]
+        }
+
+        projectName
     }
 
     @TaskAction
@@ -135,16 +149,16 @@ class ProfileCompilerTask extends AbstractCompile {
         } else {
             profileData = new LinkedHashMap<String, Object>()
         }
-        profileData.put(PROFILE_NAME, project.findProperty('pomArtifactId') ?: project.name)
+
+        Map<String, String> projectArtifactIdMappings = projectArtifactIds.get()
+        profileData.put(PROFILE_NAME, getPublishedProjectId(project.name, projectArtifactIdMappings))
 
         if (!profileData.containsKey('extends')) {
             List<String> dependencies = []
             project.configurations.named(GrailsProfileGradlePlugin.PROFILE_API_CONFIGURATION).get().dependencies.all { Dependency d ->
                 String profileName = d.name
                 if (d instanceof DefaultProjectDependency) {
-                    DefaultProjectDependency projectDependency = (DefaultProjectDependency) d
-                    Project dependentProject = project.project(projectDependency.path)
-                    profileName = dependentProject.findProperty('pomArtifactId') ?: profileName
+                    profileName = getPublishedProjectId(d.name, projectArtifactIdMappings)
                 }
 
                 dependencies.add("${d.group}:${profileName}:${d.version}".toString())

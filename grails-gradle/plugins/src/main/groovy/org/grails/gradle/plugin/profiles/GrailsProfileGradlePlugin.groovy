@@ -133,6 +133,16 @@ class GrailsProfileGradlePlugin implements Plugin<Project> {
         compileTask.configure { ProfileCompilerTask it ->
             it.destinationDirectory.set project.layout.buildDirectory.dir('classes/profile')
             it.config.set project.layout.projectDirectory.file('profile.yml')
+            Map<String, String> artifactIdMappings = [:]
+            project.rootProject.subprojects.each { p ->
+                project.evaluationDependsOn(p.path)
+                String artifactId = p.findProperty('pomArtifactId')
+                if(artifactId) {
+                    artifactIdMappings[p.name] = artifactId
+                }
+            }
+            it.projectArtifactIds.set(artifactIdMappings)
+
             // The profile task serves 2 purposes, it compiles the groovy files & it generates the profile.yml
             // for this reason the source must be set to include all possible files
             it.source project.provider {
