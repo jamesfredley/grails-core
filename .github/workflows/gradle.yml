@@ -265,7 +265,7 @@ jobs:
       - name: "📤 Upload Wrapper Zip to Workflow Summary Page"
         uses: actions/upload-artifact@v4
         with:
-          name: wrapper-artifacts
+          name: apache-grails-wrapper-SNAPSHOT-incubating-bin
           path: tmp/wrapper
   docs:
     if: github.repository_owner == 'apache' && github.event_name == 'push'
