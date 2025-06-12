@@ -18,7 +18,8 @@
  */
 
 plugins {
-    id 'org.grails.forge.internal.test-module'
+    id 'groovy'
+    id 'java-library'
     id 'org.grails.forge.rocker'
 }
 
@@ -42,7 +43,7 @@ configurations.configureEach {
 }
 
 dependencies {
-
+    implementation gradleTestKit()
     generateConfig "info.picocli:picocli-codegen:$picocliVersion"
 
     implementation "io.micronaut:micronaut-inject-groovy:$micronautVersion"
@@ -51,11 +52,24 @@ dependencies {
     testImplementation project(':grails-forge-core')
     testImplementation "ch.qos.logback:logback-classic:$logbackClassicVersion"
     testImplementation 'io.micronaut.picocli:micronaut-picocli'
+
+    if (project.hasProperty('micronautVersion')) {
+        testCompileOnly "io.micronaut:micronaut-inject-groovy:${micronautVersion}"
+    }
+
+    testImplementation "org.codehaus.groovy:groovy:$groovyVersion"
+    testImplementation "org.spockframework:spock-core:$spockVersion", {
+        exclude group: "org.codehaus.groovy", module: "groovy-all"
+    }
+
+    testImplementation "cglib:cglib-nodep:$cglibVersion"
+    testImplementation "org.objenesis:objenesis:$objenesisVersion"
+    testRuntimeOnly "ch.qos.logback:logback-classic:$logbackClassicVersion"
+    testImplementation "org.codehaus.groovy:groovy-test:$groovyVersion"
 }
 
-tasks.withType(Test).configureEach {
-    onlyIf {
-        !['skipTests'].find { project.hasProperty(it) }
-    }
-    forkEvery = 10
+apply {
+    from rootProject.layout.projectDirectory.file('gradle/java-config.gradle')
+    from rootProject.layout.projectDirectory.file('gradle/test-config.gradle')
+    from rootProject.layout.projectDirectory.file('gradle/style-enforcement-config.gradle')
 }

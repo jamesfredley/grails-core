@@ -20,7 +20,8 @@
 import org.grails.forge.internal.tasks.WriteGrailsVersionInfoTask
 
 plugins {
-    id 'org.grails.forge.internal.convention'
+    id 'groovy'
+    id 'java-library'
     id 'org.grails.forge.rocker'
 }
 
@@ -44,6 +45,11 @@ configurations {
 }
 
 dependencies {
+    annotationProcessor platform("io.micronaut:micronaut-bom:$micronautVersion")
+    implementation platform("io.micronaut:micronaut-bom:$micronautVersion")
+    annotationProcessor "io.micronaut:micronaut-inject-java"
+    testAnnotationProcessor platform("io.micronaut:micronaut-bom:$micronautVersion")
+    testAnnotationProcessor "io.micronaut:micronaut-inject-java"
 
     api platform("io.micronaut:micronaut-bom:$micronautVersion") // TODO: Should this be api?
     api "com.fizzed:rocker-runtime:$rockerVersion"
@@ -62,6 +68,20 @@ dependencies {
     testImplementation 'org.codehaus.groovy:groovy-yaml'
 
     grailsWrapper "org.apache.grails.profiles:base:$grailsVersion@jar"
+
+    if (project.hasProperty('micronautVersion')) {
+        testCompileOnly "io.micronaut:micronaut-inject-groovy:${micronautVersion}"
+    }
+
+    testImplementation "org.codehaus.groovy:groovy:$groovyVersion"
+    testImplementation "org.spockframework:spock-core:$spockVersion", {
+        exclude group: "org.codehaus.groovy", module: "groovy-all"
+    }
+
+    testImplementation "cglib:cglib-nodep:$cglibVersion"
+    testImplementation "org.objenesis:objenesis:$objenesisVersion"
+    testRuntimeOnly "ch.qos.logback:logback-classic:$logbackClassicVersion"
+    testImplementation "org.codehaus.groovy:groovy-test:$groovyVersion"
 }
 
 
@@ -76,8 +96,12 @@ rocker {
     postProcessing = ['org.grails.forge.rocker.plugin.WhitespaceProcessor']
 }
 
-nohttp {
-    source.exclude('**/pom.rocker.raw')
+repositories {
+    // mavenLocal()
+    maven { url = 'https://repo.grails.org/grails/restricted' }
+    maven { url = 'https://repository.apache.org/content/groups/staging' }
+    maven { url = 'https://repository.apache.org/content/groups/snapshots' }
+    mavenCentral()
 }
 
 TaskProvider<Sync> copyGrailsWrapper = tasks.register('copyGrailsWrapper', Sync)
@@ -99,10 +123,32 @@ copyGrailsWrapper.configure { Sync it ->
 apply {
     from rootProject.layout.projectDirectory.file('gradle/java-config.gradle')
     from rootProject.layout.projectDirectory.file('gradle/publish-config.gradle')
+    from rootProject.layout.projectDirectory.file('gradle/test-config.gradle')
+    from rootProject.layout.projectDirectory.file('gradle/style-enforcement-config.gradle')
+    from rootProject.layout.projectDirectory.file('gradle/doc-config.gradle')
+}
+
+nohttp {
+    source.exclude('**/pom.rocker.raw')
 }
 
 ['processResources', 'sourcesJar', 'spotlessJavaMisc', 'checkstyleNohttp'].each { name ->
     tasks.named(name).configure {
         it.dependsOn copyGrailsWrapper
+    }
+}
+
+configurations {
+    all {
+        resolutionStrategy {
+            eachDependency { DependencyResolveDetails details ->
+                if (details.requested.group == "org.codehaus.groovy") {
+                    details.useVersion(groovyVersion)
+                }
+                if (details.requested.name == "spock-core") {
+                    details.useVersion(spockVersion)
+                }
+            }
+        }
     }
 }

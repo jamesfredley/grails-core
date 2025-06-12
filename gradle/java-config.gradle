@@ -25,12 +25,15 @@ extensions.configure(JavaPluginExtension) {
     it.withSourcesJar()
 }
 
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = "UTF-8"
+    options.compilerArgs.add('-parameters')
+}
+
 tasks.withType(Javadoc).configureEach { Javadoc it ->
     it.options.noTimestamp true // prevent the file header with the date
     it.options.bottom "Generated ${formattedBuildDate} (UTC)"
 }
-
-// JavaCompile is not configured because we put java files inside of the groovy source sets
 
 tasks.withType(GroovyCompile).configureEach {
     groovyOptions.encoding = 'UTF-8' // encoding needs to be the same since it's different across platforms
@@ -45,9 +48,9 @@ tasks.withType(GroovyCompile).configureEach {
 // Note: we exclude attributes such as Built-By, Build-Jdk, Created-By to ensure the build is reproducible.
 tasks.withType(Jar).configureEach {
     manifest.attributes(
-            'Implementation-Title': 'Grails',
+            'Implementation-Title': 'Apache Grails',
             'Implementation-Version': grailsVersion,
-            'Implementation-Vendor': 'grails.org'
+            'Implementation-Vendor': 'grails.apache.org'
     )
     duplicatesStrategy = DuplicatesStrategy.INCLUDE
 }

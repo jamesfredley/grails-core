@@ -19,14 +19,27 @@
 
 package org.grails.forge.build.gradle
 
-import org.grails.forge.ApplicationContextSpec
+import io.micronaut.context.ApplicationContext
 import org.grails.forge.application.ApplicationType
 import org.grails.forge.fixture.CommandOutputFixture
-import org.grails.forge.options.JdkVersion
+import org.grails.forge.fixture.ContextFixture
+import org.grails.forge.fixture.ProjectFixture
 import org.grails.forge.options.Options
 import org.grails.forge.options.TestFramework
+import spock.lang.Specification
 
-class GradleSpec extends ApplicationContextSpec implements CommandOutputFixture {
+class GradleSpec extends Specification implements ProjectFixture, ContextFixture, CommandOutputFixture {
+
+    ApplicationContext beanContext
+
+    void setup() {
+        beanContext = ApplicationContext.run()
+    }
+
+    void cleanup() {
+        beanContext.close()
+        beanContext = null
+    }
 
     void "test build properties"() {
         given:

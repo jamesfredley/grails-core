@@ -16,20 +16,15 @@
  *  specific language governing permissions and limitations
  *  under the License.
  */
-
 import groovy.transform.CompileStatic
 
-plugins {
-    id "org.grails.forge.internal.convention"
-}
-
 def openApiOutputFile = layout.buildDirectory.file('generated/openapi/openapi.properties')
-
-def openApiProperties = tasks.register("openApiProperties", WriteProperties) {
-    outputFile(openApiOutputFile.get().asFile)
-    properties(
-            'swagger-ui.enabled':true,
-            'redoc.enabled':true,
+def openApiPropertiesTask = tasks.register("openApiProperties", WriteProperties)
+openApiPropertiesTask.configure { WriteProperties it ->
+    it.outputFile(openApiOutputFile.get().asFile)
+    it.properties(
+            'swagger-ui.enabled': true,
+            'redoc.enabled': true,
             'rapidoc.enabled': true,
             'rapidoc.bg-color': '#14191f',
             'rapidoc.text-color': '#aec2e0',
@@ -38,11 +33,11 @@ def openApiProperties = tasks.register("openApiProperties", WriteProperties) {
     )
 }
 
-tasks.named("compileJava", JavaCompile) {
+tasks.named("compileJava", JavaCompile).configure { JavaCompile it ->
     def override = objects.newInstance(OpenApiSystemPropertyOverride)
-    override.openApiPropertiesFile = openApiProperties.map { openApiOutputFile.get() }
-    options.fork = true
-    options.forkOptions.jvmArgumentProviders.add(override)
+    override.openApiPropertiesFile = openApiPropertiesTask.map { openApiOutputFile.get() }
+    it.options.fork = true
+    it.options.forkOptions.jvmArgumentProviders.add(override)
 }
 
 @CompileStatic

@@ -17,10 +17,33 @@
  *  under the License.
  */
 
-plugins {
-    id 'org.grails.forge.internal.base-module'
-}
+// apply plugin: 'org.gradle.test-retry'
 
-dependencies {
-    implementation gradleTestKit()
+tasks.withType(Test).configureEach {
+    onlyIf {
+        ![
+                'skipTests'
+        ].find {
+            project.hasProperty(it)
+        }
+    }
+    testLogging {
+        exceptionFormat = 'full'
+    }
+
+    jvmArgs '-Duser.country=US'
+    jvmArgs '-Duser.language=en'
+    forkEvery = 100
+    maxParallelForks = Runtime.runtime.availableProcessors().intdiv(2) ?: 1
+    maxHeapSize = "2G"
+
+    useJUnitPlatform()
+    //TODO: retry
+//    if (isCiBuild) {
+//        retry {
+//            maxRetries.set(2)
+//            maxFailures.set(20)
+//            failOnPassedAfterRetry.set(false)
+//        }
+//    }
 }
