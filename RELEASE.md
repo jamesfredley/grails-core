@@ -365,32 +365,32 @@ Update the release in `grails-forge` to be flagged as 'latest'
 
 ### Announce the release
 
-Announcements should come from your apache email address and have an expected format.  The announcement should be sent to `dev@grails.apache.org`, `dev@groovy.apache.org`, & `announce@apache.org`.  Here's an example email: 
+Announcements should come from your apache email address (see https://infra.apache.org/committer-email.html) and have an expected format.  The announcement should be sent to `dev@grails.apache.org`, `dev@groovy.apache.org`, & `announce@apache.org`.  Here's an example email: 
 
         Subject: [ANNOUNCE] Apache Grails (incubating) 7.0.0-M4
 
-        Hi Everyone,
-
-        The Apache Grails (incubating) community is pleased to announce that Apache Grails (incubating) 7.0.0-M4 has been released!
-
-        Grails is a powerful Groovy-based web application framework for the JVM built on top of Spring Boot that has many plugins to further extend it's functionality.
-
+        The Apache Grails (incubating) community is pleased to announce the release of Apache Grails (incubating) 7.0.0-M4.
+    
+        Grails is a powerful Groovy-based web application framework for the JVM built on top of Spring Boot that has many plugins to further extend its functionality.
+    
+        This release is a major milestone in our journey towards 7.0 and our first release under the ASF. Users are encouraged to try the milestone to provide early feedback. Detailed upgrade instructions are available here: https://docs.grails.org/7.0.0-M4/guide/upgrading.html.
+    
         The release notes are available here:
-        https://github.com/apache/grails-core/releases/tag/v7.0.0-M4
-
+        https://grails.apache.org/blog/2025-06-10-grails-7-m4.html
+    
         For the complete list of changes:
         https://github.com/apache/grails-core/compare/v7.0.0-M3...v7.0.0-M4
-
+    
         Apache Grails website: https://grails.apache.org/
-
+    
         Download Links: https://grails.apache.org/download.html
-
+    
         Grails Resources:
-        - Grails Github repo: https://github.com/apache/grails-core
-        - Issue: https://github.com/apache/grails-core/issues
-        - Mailing list: dev@grails.apache.org
-
-        Regards,
+        - Grails GitHub repo: https://github.com/apache/grails-core
+        - Issues: https://github.com/apache/grails-core/issues
+        - Mailing lists: https://grails.apache.org/community.html
+    
+        Happy Coding,
         The Apache Grails (incubating) Team
 
 # Rollback
