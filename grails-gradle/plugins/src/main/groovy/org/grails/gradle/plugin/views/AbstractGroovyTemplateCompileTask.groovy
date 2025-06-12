@@ -84,14 +84,14 @@ abstract class AbstractGroovyTemplateCompileTask extends AbstractCompile {
     private ExecOperations execOperations
 
     @Inject
-    AbstractGroovyTemplateCompileTask(ExecOperations execOperations, ObjectFactory objectFactory) {
+    AbstractGroovyTemplateCompileTask(ExecOperations execOperations, ObjectFactory objectFactory, String extensionDefault, String scriptBaseNameDefault, String compilerNameDefault) {
         this.execOperations = execOperations
         packageName = objectFactory.property(String).convention(project.name ?: project.projectDir.canonicalFile.name)
         srcDir = objectFactory.directoryProperty()
         compileOptions = new ViewCompileOptions(objectFactory)
-        fileExtension = objectFactory.property(String)
-        scriptBaseName = objectFactory.property(String)
-        compilerName = objectFactory.property(String)
+        fileExtension = objectFactory.property(String).convention(extensionDefault)
+        scriptBaseName = objectFactory.property(String).convention(scriptBaseNameDefault)
+        compilerName = objectFactory.property(String).convention(compilerNameDefault)
         grailsConfigurationPaths = objectFactory.fileCollection()
         grailsConfigurationPaths.from(
                 //TODO: historically this only used .yml, should it explore all configuration paths?
