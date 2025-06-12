@@ -19,6 +19,7 @@
 
 package org.grails.forge.build.gradle
 
+import groovy.util.logging.Slf4j
 import io.micronaut.context.ApplicationContext
 import org.grails.forge.application.ApplicationType
 import org.grails.forge.fixture.CommandOutputFixture
@@ -28,6 +29,7 @@ import org.grails.forge.options.Options
 import org.grails.forge.options.TestFramework
 import spock.lang.Specification
 
+@Slf4j
 class GradleSpec extends Specification implements ProjectFixture, ContextFixture, CommandOutputFixture {
 
     ApplicationContext beanContext
@@ -79,6 +81,11 @@ class GradleSpec extends Specification implements ProjectFixture, ContextFixture
         String buildSrcGradle = output["buildSrc/build.gradle"]
 
         expect:
+        if (!buildSrcGradle.contains('repositories')) {
+            // this test randomly fails.  adding logging for when it fails to debug further
+            log.error("Output: ${output}")
+            log.error("Build Src: ${buildSrcGradle}")
+        }
         buildSrcGradle.contains('repositories')
         buildSrcGradle.contains('dependencies')
     }
