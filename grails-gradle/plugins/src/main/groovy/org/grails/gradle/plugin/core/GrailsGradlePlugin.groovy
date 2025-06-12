@@ -639,6 +639,9 @@ class GrailsGradlePlugin extends GroovyPlugin {
             findMainClassTask.configure {
                 it.mustRunAfter(project.tasks.withType(GroovyCompile))
                 it.mainClassCacheFile.set(mainClassFileContainer)
+                it.outputs.upToDateWhen {
+                    mainClassFileContainer.orNull?.asFile?.exists()
+                }
             }
 
             // Set it on the extensions & spring boot extension "just" to be complete in case any other tasks use these values
@@ -649,7 +652,12 @@ class GrailsGradlePlugin extends GroovyPlugin {
                         return extraProperties.get('mainClassName')
                     }
 
-                    findMainClassTask.get().mainClassCacheFile.orNull?.asFile?.text
+                    File cacheFile = findMainClassTask.get().mainClassCacheFile.orNull?.asFile
+                    if (!cacheFile.exists()) {
+                        return null
+                    }
+
+                    cacheFile?.text
                 })
 
                 def springBootExtension = project.extensions.getByType(SpringBootExtension)
@@ -658,23 +666,36 @@ class GrailsGradlePlugin extends GroovyPlugin {
                         return springBootExtension.mainClass.get() as String
                     }
 
-                    findMainClassTask.get().mainClassCacheFile.orNull?.asFile?.text
+                    File cacheFile = findMainClassTask.get().mainClassCacheFile.orNull?.asFile
+                    if (!cacheFile.exists()) {
+                        return null
+                    }
+
+                    cacheFile?.text
                 })
             }
 
             project.tasks.withType(BootArchive).configureEach { BootArchive bootTask ->
                 bootTask.dependsOn(findMainClassTask)
-                bootTask.inputs.file(mainClassFileContainer)
                 bootTask.mainClass.convention(project.provider {
-                    findMainClassTask.get().mainClassCacheFile.orNull?.asFile?.text
+                    File cacheFile = findMainClassTask.get().mainClassCacheFile.orNull?.asFile
+                    if (!cacheFile.exists()) {
+                        return null
+                    }
+
+                    cacheFile?.text
                 })
             }
 
             project.tasks.withType(BootRun).configureEach { BootRun it ->
                 it.dependsOn(findMainClassTask)
-                it.inputs.file(mainClassFileContainer)
                 it.mainClass.convention(project.provider {
-                    findMainClassTask.get().mainClassCacheFile.orNull?.asFile?.text
+                    File cacheFile = findMainClassTask.get().mainClassCacheFile.orNull?.asFile
+                    if (!cacheFile.exists()) {
+                        return null
+                    }
+
+                    cacheFile?.text
                 })
             }
 
@@ -687,7 +708,12 @@ class GrailsGradlePlugin extends GroovyPlugin {
                         return springBootExtension.mainClass.get() as String
                     }
 
-                    findMainClassTask.get().mainClassCacheFile.orNull?.asFile?.text
+                    File cacheFile = findMainClassTask.get().mainClassCacheFile.orNull?.asFile
+                    if (!cacheFile.exists()) {
+                        return null
+                    }
+
+                    cacheFile?.text
                 })
             }
         } else if (!FindMainClassTask.class.isAssignableFrom(existingTask.class)) {
