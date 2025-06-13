@@ -68,10 +68,8 @@ Prior to releasing a vote, we need to verify the staged artifacts. The below sec
 
 For Example:
 ```bash
-    verify.sh orgapachegrails-1030 v7.0.0-M4 /tmp/grails-verify
+    verify.sh v7.0.0-M4 /tmp/grails-verify
 ```
-
-The `staging repo id` can be found under https://github.com/apache/grails-core/actions/workflows/release.yml, click `publish`, open the stage `Create Staging Repository` and look for the line starting with `Created staging repository` 
 
 ### Download the Staged Artifacts
 
@@ -251,7 +249,7 @@ Hints on validating checksums/signatures (but replace md5sum with
 sha512sum):
 https://www.apache.org/info/verification.html
 
-Details of our release process is documented at: https://github.com/apache/grails-core/blob/7.0.x/RELEASE.md
+Details of our release process is documented at: https://github.com/apache/grails-core/blob/HEAD/RELEASE.md
 
 The vote is open for the next 72 hours and passes if a majority of at least
 three +1 PPMC votes are cast.
@@ -295,7 +293,7 @@ Binary distributions: https://dist.apache.org/repos/dist/dev/grails/core/7.0.0-M
 Release artifacts are signed with a key from the following file:
 https://dist.apache.org/repos/dist/release/grails/KEYS
 
-Our release process, including verification steps, are documented here: https://github.com/apache/grails-core/blob/7.0.x/RELEASE.md The last section of this document `Appendix: Verification from a Container` is likely relevant.  For the differing artifacts, we have compared the decompiled classes to ensure they are as we expect to meet the ASF security team's requirements.
+Our release process, including verification steps, are documented here: https://github.com/apache/grails-core/blob/HEAD/RELEASE.md The last section of this document `Appendix: Verification from a Container` is likely relevant.  For the differing artifacts, we have compared the decompiled classes to ensure they are as we expect to meet the ASF security team's requirements.
 
 The vote for this release is open for the next 72 hours.
 [ ] +1 Release Apache Grails (incubating) 7.0.0-M4
@@ -327,9 +325,21 @@ Click the link in this email and mark the release published. For example, if the
 
 In `grails-forge`, kick off the step `Release to SDKMAN!` in the release create workflow.  This will cause SDKMAN to pull the new version from Maven Central.
 
-### Publish `start.grails.org` 
+### Deploy grails-forge-web-netty docker container to Google Cloud Run
 
-TODO
+On the `grails-forge` repository, using the release tag, deploy the grails-forge-web-netty docker container to Google Cloud Run using one of the GCP Deploy actions.
+
+On https://start.grails.org, versions are listed in the following order:  RELEASE, NEXT, SNAPSHOT, PREV and PREV-SNAPSHOT.  Use the corresponding action to deploy to each location.
+
+RELEASE - GA releases only
+
+NEXT - Milestones and Release Candidate
+
+SNAPSHOT - current or next version snapshot
+
+PREV - previous release version
+
+PREV-SNAPSHOT - previous version snapshot
 
 ### Close out the `grails-forge` release
 
@@ -341,36 +351,48 @@ The last step in the `grails-core` release workflow is to run the `Close Release
 
 ### Update the `grails-static-website`
 
-Update the `grails-static-website` repository to point to announce the new version. Further instructions are a TODO
+On the `grails-static-website` repository:
+
+Create a release (https://github.com/apache/grails-static-website/releases), which runs https://github.com/apache/grails-static-website/actions/workflows/release.yml and updates https://github.com/apache/grails-static-website/blob/HEAD/conf/releases.yml.  This will trigger publishing to the `asf-site-production` branch and https://grails.apache.org
+
+Create a new `.md` file in the `/posts` directory announcing the release.  The PR will stage this change on https://grails.staged.apache.org/ and when the PR is merged it will deploy to https://grails.apache.org
+
+### Flag release in `grails-core` as latest
+
+Update the release in `grails-core` to be flagged as 'latest'
+
+### Flag release in `grails-forge` as latest
+
+Update the release in `grails-forge` to be flagged as 'latest'
 
 ### Announce the release
 
-Announcements should come from your apache email address and have an expected format.  The announcement should be sent to `dev@grails.apache.org`, `dev@groovy.apache.org`, & `announce@apache.org`.  Here's an example email: 
+Announcements should come from your apache email address (see https://infra.apache.org/committer-email.html) and have an expected format.  The announcement should be sent to `dev@grails.apache.org`, `dev@groovy.apache.org`, & `announce@apache.org`.  Here's an example email: 
 
         Subject: [ANNOUNCE] Apache Grails (incubating) 7.0.0-M4
 
-        Hi Everyone,
-
-        The Apache Grails (incubating) community is pleased to announce that Apache Grails (incubating) 7.0.0-M4 has been released!
-
-        Grails is a powerful Groovy-based web application framework for the JVM built on top of Spring Boot that has many plugins to further extend it's functionality.
-
+        The Apache Grails (incubating) community is pleased to announce the release of Apache Grails (incubating) 7.0.0-M4.
+    
+        Grails is a powerful Groovy-based web application framework for the JVM built on top of Spring Boot that has many plugins to further extend its functionality.
+    
+        This release is a major milestone in our journey towards 7.0 and our first release under the ASF. Users are encouraged to try the milestone to provide early feedback. Detailed upgrade instructions are available here: https://docs.grails.org/7.0.0-M4/guide/upgrading.html.
+    
         The release notes are available here:
-        https://github.com/apache/grails-core/releases/tag/v7.0.0-M4
-
+        https://grails.apache.org/blog/2025-06-10-grails-7-m4.html
+    
         For the complete list of changes:
         https://github.com/apache/grails-core/compare/v7.0.0-M3...v7.0.0-M4
-
+    
         Apache Grails website: https://grails.apache.org/
-
+    
         Download Links: https://grails.apache.org/download.html
-
+    
         Grails Resources:
-        - Grails Github repo: https://github.com/apache/grails-core
-        - Issue: https://github.com/apache/grails-core/issues
-        - Mailing list: dev@grails.apache.org
-
-        Regards,
+        - Grails GitHub repo: https://github.com/apache/grails-core
+        - Issues: https://github.com/apache/grails-core/issues
+        - Mailing lists: https://grails.apache.org/community.html
+    
+        Happy Coding,
         The Apache Grails (incubating) Team
 
 # Rollback
@@ -414,7 +436,7 @@ The Grails image is officially built on linux in a GitHub action using an Ubuntu
 ```bash
     docker build -t grails:testing -f etc/bin/Dockerfile . && docker run -it --rm -v $(pwd):/home/groovy/project -p 8080:8080 grails:testing bash
     cd grails-verify
-    verify.sh orgapachegrails-1038 v7.0.0-M4 .
+    verify.sh v7.0.0-M4 .
     cd grails 
     gradlew wrapper
     cd grails-gradle 
