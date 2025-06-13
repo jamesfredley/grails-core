@@ -54,7 +54,7 @@ dependencies {
     runtimeOnly 'org.apache.grails:grails-scaffolding'
     runtimeOnly 'org.apache.grails:grails-fields'
 
-    runtimeOnly 'com.bertramlabs.plugins:asset-pipeline-grails'
+    runtimeOnly 'cloud.wondrify:asset-pipeline-grails'
     runtimeOnly 'org.apache.tomcat:tomcat-jdbc'
 
     testImplementation 'org.apache.grails:grails-testing-support-web'

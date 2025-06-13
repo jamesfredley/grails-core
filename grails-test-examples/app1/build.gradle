@@ -44,7 +44,7 @@ dependencies {
     implementation 'org.apache.grails:grails-scaffolding'
     implementation 'org.webjars.npm:jquery'
 
-    runtimeOnly 'com.bertramlabs.plugins:asset-pipeline-grails'
+    runtimeOnly 'cloud.wondrify:asset-pipeline-grails'
     runtimeOnly 'org.apache.grails:grails-fields'
     runtimeOnly 'org.apache.tomcat:tomcat-jdbc'
 

@@ -60,7 +60,7 @@ dependencies {
 
     runtimeOnly 'com.h2database:h2'
     runtimeOnly 'org.apache.tomcat:tomcat-jdbc'
-    runtimeOnly 'com.bertramlabs.plugins:asset-pipeline-grails'
+    runtimeOnly 'cloud.wondrify:asset-pipeline-grails'
 
     testImplementation 'org.apache.grails:grails-testing-support-views-gson'
     testImplementation 'org.apache.grails.testing:grails-testing-support-core'

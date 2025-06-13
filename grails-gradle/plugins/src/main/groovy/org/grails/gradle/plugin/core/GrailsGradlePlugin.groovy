@@ -505,8 +505,10 @@ class GrailsGradlePlugin extends GroovyPlugin {
     protected void configureAssetCompilation(Project project) {
         if (project.extensions.findByName('assets')) {
             project.assets {
-                assetsPath = 'grails-app/assets'
-                compileDir = 'build/assetCompile/assets'
+                assetsPath = project.layout.projectDirectory.dir('grails-app/assets')
+            }
+            project.tasks.named('assetCompile').configure {
+                it.destinationDirectory = project.layout.buildDirectory.dir('assetCompile/assets')
             }
         }
     }

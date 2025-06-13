@@ -22,7 +22,7 @@ group = 'examples'
 
 apply plugin: 'groovy'
 apply plugin: 'org.apache.grails.gradle.grails-web'
-apply plugin: 'com.bertramlabs.asset-pipeline'
+apply plugin: 'cloud.wondrify.asset-pipeline'
 
 dependencies {
 
@@ -36,7 +36,7 @@ dependencies {
 
     implementation 'org.webjars.npm:jquery'
 
-    runtimeOnly 'com.bertramlabs.plugins:asset-pipeline-grails'
+    runtimeOnly 'cloud.wondrify:asset-pipeline-grails'
     runtimeOnly 'org.fusesource.jansi:jansi'
     runtimeOnly 'org.apache.grails:grails-i18n'
     runtimeOnly 'org.apache.grails:grails-url-mappings'

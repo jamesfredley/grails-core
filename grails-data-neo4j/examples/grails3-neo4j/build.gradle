@@ -38,7 +38,7 @@ dependencies {
 
     implementation 'org.webjars.npm:jquery'
 
-    runtimeOnly "com.bertramlabs.plugins:asset-pipeline-grails:$assetPipelineVersion"
+    runtimeOnly "cloud.wondrify:asset-pipeline-grails:$assetPipelineVersion"
     runtimeOnly "org.apache.grails:grails-scaffolding:$scaffoldingVersion"
     runtimeOnly "org.apache.grails:grails-fields:$fieldsVersion"
 

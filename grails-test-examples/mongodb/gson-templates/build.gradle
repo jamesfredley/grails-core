@@ -44,7 +44,7 @@ dependencies {
     runtimeOnly 'org.springframework.boot:spring-boot-starter-tomcat'
 
     runtimeOnly 'org.apache.grails:grails-data-mongodb-gson-templates'
-    runtimeOnly 'com.bertramlabs.plugins:asset-pipeline-grails'
+    runtimeOnly 'cloud.wondrify:asset-pipeline-grails'
 
     integrationTestImplementation 'org.apache.grails.testing:grails-testing-support-core'
 }
