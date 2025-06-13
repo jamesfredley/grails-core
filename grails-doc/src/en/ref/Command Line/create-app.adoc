@@ -23,12 +23,10 @@ under the License.
 
 The `create-app` command serves as the initial step in Grails application development. When invoked, this command generates a Grails application with a user-specified name. Subsequently, it creates a subdirectory based on the provided application name within the directory where the command is executed.
 
-// NEW: Clarify CLI context
 NOTE: In Grails 7+, `create-app` is part of the Forge CLI. It must be executed using `grails -t forge`. Attempting to run `create-app` from the interactive shell (`grails>`) will result in an error.
 
 === Usage
 
-// NEW: Updated usage line with correct CLI invocation
 To create a Grails default web application, use the following command:
 
 [source,console]
@@ -63,7 +61,7 @@ Here are examples for the `create-app` command:
 $ grails create-app bookstore
 $ cd bookstore
 ----
-// NEW -- The basic create-app bookstore example (without Forge options) should not use -t forge unless it's doing something Forge-specific.
+
 NOTE: For basic project creation (e.g., just providing a project name), you can use `grails create-app` directly. Use `grails -t forge create-app` when passing Forge-specific options like `--jdk`, `--features`, `--gorm`, or `--profile`.
 
 2. Create an application directly in the current directory:
@@ -81,8 +79,3 @@ $ grails create-app --inplace
 ----
 $ grails -t forge create-app bookstore --features github-workflow-java-ci,asciidoctor
 ----
-
-
-// NEW: Removed redundant or legacy duplicate section below
-// The second "== Grails Forge create-app" block appears to be a duplicate and is no longer necessary
-// because we’ve already clarified that `create-app` is a Forge CLI command and included examples.

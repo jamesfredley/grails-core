@@ -26,7 +26,6 @@ Navigate to the directory where you want to create your Grails project:
 [source,console]
 $ cd your_project_directory
 
-//NEW
 Create a new Grails 7 project with the following command:
 
 [source,console]

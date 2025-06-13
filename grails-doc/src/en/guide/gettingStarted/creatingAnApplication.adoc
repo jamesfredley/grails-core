@@ -19,7 +19,6 @@ under the License.
 
 To create a Grails application you first need to familiarize yourself with the usage of the `grails` command which is used in the following manner:
 
-//NEW
 NOTE: You must use Forge-powered CLI with the `grails -t forge` syntax.
 
 [source,console]

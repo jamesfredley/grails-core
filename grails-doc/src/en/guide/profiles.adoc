@@ -19,7 +19,6 @@ under the License.
 
 When you create a Grails application with the link:../ref/Command%20Line/create-app.html[create-app] command by default the "web" profile is used:
 
-// NEW: Use the correct CLI invocation
 [source,console]
 ----
 $ grails -t forge create-app myapp
@@ -34,7 +33,6 @@ $ grails -t forge create-app myapp --profile=rest-api
 
 Profiles encapsulate the project commands, templates, and plugins that are designed to work for a given profile. The source for the profiles can be found https://github.com/grails-profiles[on GitHub], and the profiles themselves are published as JAR files to the Grails central repository.
 
-// NEW: Update list-profiles command to use Forge CLI
 To find out what profiles are available, use the link:../ref/Command%20Line/list-profiles.html[list-profiles] command:
 
 [source,console]
@@ -42,7 +40,6 @@ To find out what profiles are available, use the link:../ref/Command%20Line/list
 $ grails -t forge list-profiles
 ----
 
-// NEW: Update profile-info command to use Forge CLI
 For more information on a particular profile, use the link:../ref/Command%20Line/profile-info.html[profile-info] command:
 
 [source,console]
@@ -100,8 +97,7 @@ grails {
 
 
 To create an application that uses a custom profile, you must specify the full artifact.
-// NEW: The following commands use the Forge CLI to create applications with profiles.
-// Forge must be explicitly invoked using `-t forge` when using `--profile`, `--jdk`, `--features`, etc.
+
 [source,console]
 ----
 $ grails -t forge create-app myapp --profile=com.mycompany.grails.profiles:myprofile:1.0.0

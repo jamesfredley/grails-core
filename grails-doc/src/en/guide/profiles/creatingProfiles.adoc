@@ -82,8 +82,6 @@ $ gradle install
 
 Your profile is now usable with the `create-app` command:
 
-// NEW: The following commands use the Forge CLI, which supports profile-based application generation.
-// NEW: Updated to use Forge CLI
 [source,console]
 ----
 $ grails -t forge create-app myapp --profile mycompany
@@ -93,7 +91,6 @@ With the above command the application will be created with the "mycompany" prof
 
 Note that if you customize the dependency coordinates of the profile (group, version etc.) then you may need to use the fully qualified coordinates to create an application:
 
-// NEW: Updated to use Forge CLI
 [source,console]
 ----
 $ grails -t forge create-app myapp --profile com.mycompany:mycompany:1.0.1

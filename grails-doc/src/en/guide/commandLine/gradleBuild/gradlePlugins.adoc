@@ -17,11 +17,6 @@ specific language governing permissions and limitations
 under the License.
 ////
 
-//NEW - this document may need further updates.
-// The list of default plugins in build.gradle may have changed in Grails 7.
-// Descriptions should be reviewed against the actual defaults in Grails 7 Forge-generated projects.
-// {gradleVersion} should reflect Grails 7’s version (probably Gradle 8+).
-
 When you create a new project with the link:../ref/Command%20Line/create-app.html[create-app] command using Grails 7 and the Forge template (grails -t forge create-app), a default build.gradle is generated for you.
 
 [source,groovy]

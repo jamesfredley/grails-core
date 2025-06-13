@@ -43,7 +43,6 @@ To use `grails-forge-cli`, pass the `-t` or `--type` argument:
 [source,console]
 $ ./grails -t forge create-app myapp
 
-// NEW: Clarify behavior of new delegator
 
 === Install with SDKMAN
 
@@ -59,7 +58,6 @@ $ sdk install grails {version}
 
 You can find more information about SDKMAN usage on the https://sdkman.io/usage[SDKMAN Docs].
 After installing, all three CLI commands—`grails`, `grails-shell-cli`, and `grails-forge-cli`—should be available.
-// NEW: Clarify what CLI commands are installed
 
 === Manual installation
 
