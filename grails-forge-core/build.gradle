@@ -47,9 +47,9 @@ configurations {
 dependencies {
     annotationProcessor platform("io.micronaut:micronaut-bom:$micronautVersion")
     implementation platform("io.micronaut:micronaut-bom:$micronautVersion")
-    annotationProcessor "io.micronaut:micronaut-inject-java"
+    annotationProcessor 'io.micronaut:micronaut-inject-java'
     testAnnotationProcessor platform("io.micronaut:micronaut-bom:$micronautVersion")
-    testAnnotationProcessor "io.micronaut:micronaut-inject-java"
+    testAnnotationProcessor 'io.micronaut:micronaut-inject-java'
 
     api platform("io.micronaut:micronaut-bom:$micronautVersion") // TODO: Should this be api?
     api "com.fizzed:rocker-runtime:$rockerVersion"
@@ -75,7 +75,7 @@ dependencies {
 
     testImplementation "org.codehaus.groovy:groovy:$groovyVersion"
     testImplementation "org.spockframework:spock-core:$spockVersion", {
-        exclude group: "org.codehaus.groovy", module: "groovy-all"
+        exclude group: 'org.codehaus.groovy', module: 'groovy-all'
     }
 
     testImplementation "cglib:cglib-nodep:$cglibVersion"
@@ -142,10 +142,10 @@ configurations {
     all {
         resolutionStrategy {
             eachDependency { DependencyResolveDetails details ->
-                if (details.requested.group == "org.codehaus.groovy") {
+                if (details.requested.group == 'org.codehaus.groovy') {
                     details.useVersion(groovyVersion)
                 }
-                if (details.requested.name == "spock-core") {
+                if (details.requested.name == 'spock-core') {
                     details.useVersion(spockVersion)
                 }
             }

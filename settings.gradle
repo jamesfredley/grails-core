@@ -17,13 +17,13 @@
  *  under the License.
  */
 plugins {
-    id "com.gradle.develocity" version "$develocityVersion"
-    id "com.gradle.common-custom-user-data-gradle-plugin" version "$customUserDataVersion"
+    id 'com.gradle.develocity' version develocityVersion
+    id 'com.gradle.common-custom-user-data-gradle-plugin' version customUserDataVersion
 }
 
 def isCI = System.getenv().containsKey('CI')
 def isLocal = !isCI
-def isReproducibleBuild = System.getenv("SOURCE_DATE_EPOCH") != null
+def isReproducibleBuild = System.getenv('SOURCE_DATE_EPOCH') != null
 
 develocity {
     server = 'https://ge.grails.org'

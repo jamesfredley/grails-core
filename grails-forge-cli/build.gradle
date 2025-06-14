@@ -46,7 +46,7 @@ configurations.configureEach {
     }
 }
 
-def processManPages = tasks.register("processManPages", Sync)
+def processManPages = tasks.register('processManPages', Sync)
 configurations {
     generateConfig
 
@@ -54,7 +54,7 @@ configurations {
         canBeConsumed = true
         canBeResolved = false
         outgoing.artifact(processManPages.map {
-            project.layout.buildDirectory.dir("processed-manpages").get().asFile
+            project.layout.buildDirectory.dir('processed-manpages').get().asFile
         })
     }
 }
@@ -62,9 +62,9 @@ configurations {
 dependencies {
     annotationProcessor platform("io.micronaut:micronaut-bom:$micronautVersion")
     implementation platform("io.micronaut:micronaut-bom:$micronautVersion")
-    annotationProcessor "io.micronaut:micronaut-inject-java"
+    annotationProcessor 'io.micronaut:micronaut-inject-java'
     testAnnotationProcessor platform("io.micronaut:micronaut-bom:$micronautVersion")
-    testAnnotationProcessor "io.micronaut:micronaut-inject-java"
+    testAnnotationProcessor 'io.micronaut:micronaut-inject-java'
 
     generateConfig "info.picocli:picocli-codegen:$picocliVersion"
 
@@ -91,7 +91,7 @@ dependencies {
 
     testImplementation "org.codehaus.groovy:groovy:$groovyVersion"
     testImplementation "org.spockframework:spock-core:$spockVersion", {
-        exclude group: "org.codehaus.groovy", module: "groovy-all"
+        exclude group: 'org.codehaus.groovy', module: 'groovy-all'
     }
 
     testImplementation "cglib:cglib-nodep:$cglibVersion"
@@ -120,20 +120,20 @@ apply {
     from rootProject.layout.projectDirectory.file('gradle/doc-config.gradle')
 }
 
-def generateManpageAsciiDoc = tasks.register("generateManpageAsciiDoc", GenerateManpageAsciidoc) {
+def generateManpageAsciiDoc = tasks.register('generateManpageAsciiDoc', GenerateManpageAsciidoc) {
     mainClass = application.mainClass
     classpath.from(configurations.generateConfig, sourceSets.main.runtimeClasspath)
-    outputDirectory.set(layout.buildDirectory.dir("generated-picocli-docs"))
+    outputDirectory.set(layout.buildDirectory.dir('generated-picocli-docs'))
 }
 
 processManPages.configure { Sync it ->
-    it.group = "Documentation"
+    it.group = 'documentation'
     it.from generateManpageAsciiDoc
-    it.include "**/*.adoc"
-    it.into layout.buildDirectory.dir("processed-manpages")
+    it.include '**/*.adoc'
+    it.into layout.buildDirectory.dir('processed-manpages')
     it.filter { String line ->
         if (line == ':doctype: manpage' || line.startsWith('= ')) {
-            return ""
+            return ''
         } else if (line.startsWith('==')) {
             return '=' + line
         } else {
@@ -142,9 +142,9 @@ processManPages.configure { Sync it ->
     }
 }
 
-def buildCompletion = tasks.register("buildCompletion", PicocliBuildCompletionTask)
+def buildCompletion = tasks.register('buildCompletion', PicocliBuildCompletionTask)
 buildCompletion.configure { PicocliBuildCompletionTask it ->
-    it.outputDirectory.set(layout.buildDirectory.dir("bin"))
+    it.outputDirectory.set(layout.buildDirectory.dir('bin'))
     it.classpath.from(sourceSets.main.runtimeClasspath)
     it.mainClass.set(application.mainClass)
 }
@@ -166,23 +166,23 @@ tasks.named('shadowJar') {
     mergeServiceFiles()
 }
 
-tasks.named("shadowDistZip") {
+tasks.named('shadowDistZip') {
     enabled = false
 }
-tasks.named("shadowDistTar") {
+tasks.named('shadowDistTar') {
     enabled = false
 }
 
-tasks.register("copyShadowJar", Sync) {
+tasks.register('copyShadowJar', Sync) {
     from shadowJar.outputs
-    into "${project.rootProject.buildDir}/libs"
-    rename { String fileName -> "cli.jar" }
+    into project.rootProject.layout.buildDirectory.dir('libs')
+    rename { String fileName -> 'cli.jar' }
 }
 
-tasks.register("exploded", Sync) {
+tasks.register('exploded', Sync) {
     dependsOn 'distZip'
     from zipTree(distZip.outputs.files.singleFile)
-    into "${project.buildDir}/exploded"
+    into project.layout.buildDirectory.dir('exploded')
     eachFile { FileCopyDetails fcd ->
         fcd.relativePath = new RelativePath(true, fcd.relativePath.segments.drop(1))
     }
@@ -191,16 +191,16 @@ tasks.register("exploded", Sync) {
     }
 }
 
-tasks.register("cleanup", Delete) {
-    delete "${project.rootProject.buildDir}/libs/cli.jar"
-    delete "${project.buildDir}/dist"
+tasks.register('cleanup', Delete) {
+    delete project.rootProject.layout.buildDirectory.file('libs/cli.jar')
+    delete project.layout.buildDirectory.dir('dist')
 }
 
-tasks.named("clean") {
+tasks.named('clean') {
     dependsOn 'cleanup'
 }
 
-tasks.named("assemble") {
+tasks.named('assemble') {
     dependsOn('exploded')
 }
 
@@ -208,10 +208,10 @@ configurations {
     all {
         resolutionStrategy {
             eachDependency { DependencyResolveDetails details ->
-                if (details.requested.group == "org.codehaus.groovy") {
+                if (details.requested.group == 'org.codehaus.groovy') {
                     details.useVersion(groovyVersion)
                 }
-                if (details.requested.name == "spock-core") {
+                if (details.requested.name == 'spock-core') {
                     details.useVersion(spockVersion)
                 }
             }

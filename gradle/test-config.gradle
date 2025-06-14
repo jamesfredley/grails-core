@@ -35,7 +35,7 @@ tasks.withType(Test).configureEach {
     jvmArgs '-Duser.language=en'
     forkEvery = 100
     maxParallelForks = Runtime.runtime.availableProcessors().intdiv(2) ?: 1
-    maxHeapSize = "2G"
+    maxHeapSize = '2G'
 
     useJUnitPlatform()
     //TODO: retry

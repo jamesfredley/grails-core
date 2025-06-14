@@ -31,7 +31,7 @@ ext {
             .orElseGet(Instant::now) as Instant
     formattedBuildDate = DateTimeFormatter.ISO_INSTANT.format(buildInstant)
     buildDate = (buildInstant as Instant).atZone(ZoneOffset.UTC) // for reproducible builds
-    isCiBuild = System.getenv().get('CI') as Boolean
+    isCiBuild = System.getenv().containsKey('CI')
 }
 
 allprojects {

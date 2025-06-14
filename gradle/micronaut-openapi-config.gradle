@@ -19,7 +19,7 @@
 import groovy.transform.CompileStatic
 
 def openApiOutputFile = layout.buildDirectory.file('generated/openapi/openapi.properties')
-def openApiPropertiesTask = tasks.register("openApiProperties", WriteProperties)
+def openApiPropertiesTask = tasks.register('openApiProperties', WriteProperties)
 openApiPropertiesTask.configure { WriteProperties it ->
     it.outputFile(openApiOutputFile.get().asFile)
     it.properties(
@@ -33,7 +33,7 @@ openApiPropertiesTask.configure { WriteProperties it ->
     )
 }
 
-tasks.named("compileJava", JavaCompile).configure { JavaCompile it ->
+tasks.named('compileJava', JavaCompile).configure { JavaCompile it ->
     def override = objects.newInstance(OpenApiSystemPropertyOverride)
     override.openApiPropertiesFile = openApiPropertiesTask.map { openApiOutputFile.get() }
     it.options.fork = true
