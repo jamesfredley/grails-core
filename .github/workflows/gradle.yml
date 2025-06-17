@@ -43,7 +43,7 @@ jobs:
           develocity-access-key: ${{ secrets.GRAILS_DEVELOCITY_ACCESS_KEY  }}
       - name: "🔨 Build"
         id: build
-        run: ./gradlew build
+        run: ./gradlew build --rerun-tasks
       - name: "✅ Verify Forge CLI"
         run: |
           cp grails-forge-cli/build/distributions/grails-forge-cli-*.zip forge-cli.zip
