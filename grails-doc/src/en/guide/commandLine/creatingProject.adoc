@@ -32,7 +32,7 @@ The primary command for creating a new project is `create-app`, which creates a 
 
 Creating a project is the primary usage of the Grails Forge CLI.  You can also generate an application with grails-shell, which uses profiles for generation.
 
-The `create-app` and other advanced scaffolding commands support extended options in Forge, which must be run using the following format:
+The `create-app` and other commands support extended options in Forge, which must be run using the following format:
 
 [source,console]
 ----
