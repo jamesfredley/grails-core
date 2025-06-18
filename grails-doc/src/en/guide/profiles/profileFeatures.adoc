@@ -70,9 +70,9 @@ The contents of the skeleton get copied into the application tree, whilst the `a
 
 With the `feature.yml` you can define additional dependencies. This allows users to create applications with optional features. For example:
 
-[source,console]
+[source,bash]
 ----
-$ grails -t forge create-app myapp --profile myprofile --features myfeature,hibernate
+$ grails create-app myapp --profile myprofile --features myfeature,hibernate
 ----
 
 The above example will create a new application using your new feature and the "hibernate" feature.

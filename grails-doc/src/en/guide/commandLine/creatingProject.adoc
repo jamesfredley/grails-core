@@ -17,19 +17,20 @@ specific language governing permissions and limitations
 under the License.
 ////
 
-Creating a project is the primary usage of the Forge CLI.
-
 [NOTE]
 ====
-The `create-app` and related commands are available in both the Grails Shell CLI and the Forge CLI.
+The `create-app` and related commands are available in both the Grails Shell CLI and the Grails Forge CLI.
 
-- To create a basic project using the default Shell CLI:  
+- To create a project using the default Grails Shell CLI:
 `$ grails create-app myapp`
 - To use Forge-specific options (such as `--java-version`, `--features`, etc.):  
 `$ grails -t forge create-app myapp`
 
-Use the Forge CLI only when you need advanced scaffolding options. Otherwise, the traditional Shell CLI is preferred and supports typical project creation.
 ====
+
+The primary command for creating a new project is `create-app`, which creates a standard Grails web application that communicates over HTTP. For other types of applications, see the documentation below.
+
+Creating a project is the primary usage of the Grails Forge CLI.  You can also generate an application with grails-shell, which uses profiles for generation.
 
 The `create-app` and other advanced scaffolding commands support extended options in Forge, which must be run using the following format:
 
@@ -37,8 +38,6 @@ The `create-app` and other advanced scaffolding commands support extended option
 ----
 $ ./grails -t forge create-app myapp
 ----
-
-You can generate an application with grails-shell, which uses profiles. The primary command for creating a new project is create-app, which creates a standard Grails web application that communicates over HTTP. For other types of applications, see the documentation below.
 
 After generating a project with Forge, switch to the created directory and use the default Grails shell CLI (`./grails`) to manage, run, test, and deploy your application.
 
@@ -148,7 +147,7 @@ The "create-*" commands are used to produce a fundamental Grails project, allowi
 |
 [source,shell]
 ----
---java-version 11
+--java-version 21
 ----
 
 | -s, --servlet

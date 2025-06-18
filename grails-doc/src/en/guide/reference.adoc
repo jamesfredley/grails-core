@@ -50,6 +50,7 @@ include::ref/Command Line/console.adoc[]
 
 include::ref/Command Line/create-app.adoc[]
 
+[[ref-command-line-create-command]]
 ==== create-command
 [[ref-command-line-assemble]]
 ==== assemble

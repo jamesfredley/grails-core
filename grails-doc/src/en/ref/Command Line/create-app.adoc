@@ -83,7 +83,7 @@ Available flags:
 - `--features` _(limited support depending on profile)_
 - `--profile`
 
-Forge-only options such as `--jdk`, `--gorm`, or `--servlet` are **not supported** in the Shell CLI and will fail.
+Forge-only options such as `--jdk`, `--gorm`, or `--servlet` are **not supported** in the Shell CLI.
 
 === Examples
 

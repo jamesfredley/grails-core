@@ -98,7 +98,7 @@ From the terminal, run:
 
 [source,console]
 ----
-$grails --help
+grails> --help
 Usage: grails [-hvVx] [COMMAND]
 Grails CLI command line interface for generating projects and services.
 Application generation commands are:
@@ -133,7 +133,7 @@ NOTE: To access help for Forge-only options such as `--features`, `--jdk`, or `-
 
 [source,shell]
 ----
-$ grails -t forge create-app --help
+grails> create-app --help
 Usage: grails create-app [-hivVx] [--list-features] [-g=GORM Implementation] [--jdk=<javaVersion>]
                          [-s=Servlet Implementation] [-t=TEST] [-f=FEATURE[,FEATURE...]]... [NAME]
 Creates an application
