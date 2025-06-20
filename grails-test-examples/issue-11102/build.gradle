@@ -20,7 +20,7 @@
 version = '0.1'
 group = 'issue11102'
 
-apply plugin: 'asset-pipeline'
+apply plugin: 'cloud.wondrify.asset-pipeline'
 apply plugin: 'org.apache.grails.gradle.grails-web'
 
 // The grails-gsp Gradle plugin is not needed for running the functional tests.

@@ -20,7 +20,7 @@
 apply plugin: 'groovy'
 apply plugin: 'org.apache.grails.gradle.grails-web'
 apply plugin: 'org.apache.grails.gradle.grails-gsp'
-apply plugin: 'asset-pipeline'
+apply plugin: 'cloud.wondrify.asset-pipeline'
 
 group = 'org.demo.spock'
 version = projectVersion

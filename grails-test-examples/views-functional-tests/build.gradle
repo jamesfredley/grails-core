@@ -22,7 +22,7 @@ plugins {
     id 'groovy'
     id 'org.apache.grails.gradle.grails-gsp'
     id 'org.apache.grails.gradle.grails-web'
-    id 'asset-pipeline'
+    id 'cloud.wondrify.asset-pipeline'
 }
 
 version = "0.0.1"
