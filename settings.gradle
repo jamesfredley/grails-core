@@ -29,10 +29,10 @@ plugins {
 
 def isCI = System.getenv().containsKey('CI')
 def isLocal = !isCI
-def isReproducibleBuild = System.getenv("SOURCE_DATE_EPOCH") != null
+def isReproducibleBuild = System.getenv('SOURCE_DATE_EPOCH') != null
 if(isReproducibleBuild) {
     gradle.settingsEvaluated {
-        logger.warn("*************** Remote Build Cache Disabled due to Reproducible Build ********************")
+        logger.warn('*************** Remote Build Cache Disabled due to Reproducible Build ********************')
         logger.warn("Build date will be set to (SOURCE_DATE_EPOCH=${System.getenv("SOURCE_DATE_EPOCH")})")
     }
 }

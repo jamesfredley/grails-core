@@ -41,7 +41,7 @@ dependencies {
     developmentOnly platform(project(':grails-bom'))
     developmentOnly 'org.webjars.npm:jquery'
 
-    runtimeOnly "com.bertramlabs.plugins:asset-pipeline-grails:$assetPipelineVersion"
+    runtimeOnly "cloud.wondrify:asset-pipeline-grails:$assetPipelineVersion"
     runtimeOnly "org.apache.grails:grails-scaffolding:$scaffoldingVersion"
     runtimeOnly "org.apache.grails:grails-fields:$fieldsVersion"
     runtimeOnly "org.apache.tomcat:tomcat-jdbc:9.0.36"
