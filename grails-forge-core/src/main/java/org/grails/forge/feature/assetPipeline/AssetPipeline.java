@@ -74,17 +74,17 @@ public class AssetPipeline implements DefaultFeature {
         generatorContext.addDependency(Dependency.builder()
                 .groupId("org.webjars.npm")
                 .artifactId("bootstrap")
-                .developmentOnly());
+                .testAndDevelopmentOnly());
 
         generatorContext.addDependency(Dependency.builder()
                 .groupId("org.webjars.npm")
                 .artifactId("bootstrap-icons")
-                .developmentOnly());
+                .testAndDevelopmentOnly());
 
         generatorContext.addDependency(Dependency.builder()
                 .groupId("org.webjars.npm")
                 .artifactId("jquery")
-                .developmentOnly());
+                .testAndDevelopmentOnly());
 
         final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
         generatorContext.addTemplate("advancedgrails_svg", new URLTemplate("grails-app/assets/images/advancedgrails.svg", classLoader.getResource("assets/images/advancedgrails.svg")));
