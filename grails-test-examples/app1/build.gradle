@@ -43,7 +43,6 @@ dependencies {
     implementation 'org.apache.grails:grails-cache'
     implementation 'org.apache.grails:grails-scaffolding'
 
-    testAndDevelopmentOnly platform(project(':grails-bom'))
     testAndDevelopmentOnly 'org.webjars.npm:jquery'
 
     runtimeOnly 'cloud.wondrify:asset-pipeline-grails'
