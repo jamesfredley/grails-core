@@ -60,14 +60,14 @@ public class AssetPipeline implements DefaultFeature {
     public void apply(GeneratorContext generatorContext) {
 
         generatorContext.addBuildscriptDependency(Dependency.builder()
-                .groupId("com.bertramlabs.plugins")
+                .groupId("cloud.wondrify")
                 .artifactId("asset-pipeline-gradle")
                 .buildSrc());
 
-        generatorContext.addBuildPlugin(GradlePlugin.builder().id("asset-pipeline").useApplyPlugin(true).build());
+        generatorContext.addBuildPlugin(GradlePlugin.builder().id("cloud.wondrify.asset-pipeline").useApplyPlugin(true).build());
 
         generatorContext.addDependency(Dependency.builder()
-                .groupId("com.bertramlabs.plugins")
+                .groupId("cloud.wondrify")
                 .artifactId("asset-pipeline-grails")
                 .runtimeOnly());
 
