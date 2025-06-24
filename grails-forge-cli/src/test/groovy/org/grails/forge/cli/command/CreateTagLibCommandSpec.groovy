@@ -30,10 +30,16 @@ import spock.lang.Shared
 
 class CreateTagLibCommandSpec extends CommandSpec implements CommandFixture {
 
-    @Shared
-    @AutoCleanup
-    ApplicationContext beanContext = ApplicationContext.run()
+    ApplicationContext beanContext
 
+    void setup() {
+        beanContext = ApplicationContext.run()
+    }
+
+    void cleanup() {
+        beanContext.close()
+        beanContext = null
+    }
 
     void "test creating a taglib"() {
 

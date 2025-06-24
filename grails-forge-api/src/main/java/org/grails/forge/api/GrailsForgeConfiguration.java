@@ -33,7 +33,7 @@ import java.util.Optional;
 @ConfigurationProperties(GrailsForgeConfiguration.PREFIX)
 public class GrailsForgeConfiguration {
     public static final String PREFIX = "grails.forge";
-    private static final String DEFAULT_REDIRECT_URL = "https://grails.github.io/grails-forge-ui/";
+    private static final String DEFAULT_REDIRECT_URL = "https://apache.github.io/grails-forge-ui/";
 
     private URL url;
     private String path;

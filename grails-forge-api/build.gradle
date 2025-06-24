@@ -18,13 +18,19 @@
  */
 
 plugins {
-    id 'org.grails.forge.internal.build.openapi-module'
+    id 'groovy'
+    id 'java-library'
 }
 
 version = projectVersion
 group = 'org.apache.grails.forge'
 
 dependencies {
+    annotationProcessor platform("io.micronaut:micronaut-bom:$micronautVersion")
+    implementation platform("io.micronaut:micronaut-bom:$micronautVersion")
+    annotationProcessor 'io.micronaut:micronaut-inject-java'
+    testAnnotationProcessor platform("io.micronaut:micronaut-bom:$micronautVersion")
+    testAnnotationProcessor 'io.micronaut:micronaut-inject-java'
 
     annotationProcessor 'com.google.code.findbugs:jsr305'
     annotationProcessor "io.micronaut.docs:micronaut-docs-asciidoc-config-props:$micronautDocsVersion"
@@ -51,9 +57,40 @@ dependencies {
     testImplementation 'io.micronaut.test:micronaut-test-spock'
 
     testCompileOnly "io.micronaut:micronaut-inject-groovy:$micronautVersion"
+
+    if (project.hasProperty('micronautVersion')) {
+        testCompileOnly "io.micronaut:micronaut-inject-groovy:$micronautVersion"
+    }
+
+    testImplementation "org.codehaus.groovy:groovy:$groovyVersion"
+    testImplementation "org.spockframework:spock-core:$spockVersion", {
+        exclude group: 'org.codehaus.groovy', module: 'groovy-all'
+    }
+
+    testImplementation "cglib:cglib-nodep:$cglibVersion"
+    testImplementation "org.objenesis:objenesis:$objenesisVersion"
+    testRuntimeOnly "ch.qos.logback:logback-classic:$logbackClassicVersion"
+    testImplementation "org.codehaus.groovy:groovy-test:$groovyVersion"
 }
 
 apply {
     from rootProject.layout.projectDirectory.file('gradle/java-config.gradle')
     from rootProject.layout.projectDirectory.file('gradle/publish-config.gradle')
+    from rootProject.layout.projectDirectory.file('gradle/micronaut-openapi-config.gradle')
+    from rootProject.layout.projectDirectory.file('gradle/test-config.gradle')
+    from rootProject.layout.projectDirectory.file('gradle/style-enforcement-config.gradle')
+    from rootProject.layout.projectDirectory.file('gradle/doc-config.gradle')
+}
+
+configurations.configureEach {
+    resolutionStrategy {
+        eachDependency { DependencyResolveDetails details ->
+            if (details.requested.group == 'org.codehaus.groovy') {
+                details.useVersion(groovyVersion)
+            }
+            if (details.requested.name == 'spock-core') {
+                details.useVersion(spockVersion)
+            }
+        }
+    }
 }

@@ -49,11 +49,11 @@ tasks.named('run') {
 }
 graalvmNative.toolchainDetection = false
 micronaut {
-    runtime("netty")
-    testRuntime("junit5")
+    runtime('netty')
+    testRuntime('junit5')
     processing {
         incremental(true)
-        annotations("org.grails.forge.*")
+        annotations('org.grails.forge.*')
     }
 }
 tasks.named('dockerfileNative') {

@@ -49,10 +49,14 @@ abstract class CommandSpec extends Specification {
 
     abstract String getTempDirectoryPrefix()
 
+    @Shared
+    File testKit
     File dir
 
     void setupSpec() {
         applicationContext = ApplicationContext.run(getConfiguration())
+        testKit = Files.createTempDirectory("${tempDirectoryPrefix}TestKit").toFile()
+        gradleRunner.withTestKitDir(testKit)
     }
 
     void setup() {
@@ -61,16 +65,11 @@ abstract class CommandSpec extends Specification {
 
     void cleanup() {
         dir.deleteDir()
+        testKit.deleteDir()
     }
 
     Map<String, Object> getConfiguration() {
         return Collections.EMPTY_MAP
-    }
-
-    String executeBuild(String command) {
-        String output = null
-        output = executeGradle(command).getOutput()
-        return output
     }
 
     BuildResult executeGradle(String command) {
