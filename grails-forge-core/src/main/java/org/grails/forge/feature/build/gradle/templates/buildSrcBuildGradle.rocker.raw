@@ -32,7 +32,6 @@ GradleBuild gradleBuild,
 String grailsVersion
 )
 
-@if(!gradleBuild.getBuildSrcDependencies().isEmpty()) {
 repositories {
     mavenCentral()
     maven { url = 'https://repo.grails.org/grails/restricted' }
@@ -52,10 +51,10 @@ repositories {
         }
     }
 }
+
 dependencies {
     implementation platform("org.apache.grails:grails-gradle-bom:@VersionInfo.getGrailsVersion()")
 @for (GradleDependency dependency : gradleBuild.getBuildSrcDependencies()) {
     @dependency.toSnippet()
-}
 }
 }
