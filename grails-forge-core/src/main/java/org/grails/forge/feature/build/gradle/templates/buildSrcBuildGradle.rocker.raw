@@ -62,7 +62,7 @@ repositories {
 }
 
 dependencies {
-    implementation platform("org.apache.grails:grails-gradle-bom:$grailsVersion")
+    implementation platform("org.apache.grails:grails-bom:$grailsVersion")
 @for (GradleDependency dependency : gradleBuild.getBuildSrcDependencies()) {
     @dependency.toSnippet()
 }
