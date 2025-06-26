@@ -32,10 +32,13 @@ GradleBuild gradleBuild,
 String grailsVersion
 )
 
-file('../gradle.properties').withInputStream {
-    Properties props = new Properties()
-    props.load(it)
-    project.ext.gradleProperties = props
+// load the root gradle.properties only for properties not already set (e.g., by environment variables like ORG_GRADLE_PROJECT_grailsVersion=7.0.0)
+def props = new Properties()
+file('../gradle.properties').withInputStream { props.load(it) }
+props.each { key, val ->
+    if (!project.hasProperty(key)) {
+        project.ext."$key" = val
+    }
 }
 
 repositories {
@@ -59,7 +62,7 @@ repositories {
 }
 
 dependencies {
-    implementation platform("org.apache.grails:grails-gradle-bom:$gradleProperties.grailsVersion")
+    implementation platform("org.apache.grails:grails-gradle-bom:$grailsVersion")
 @for (GradleDependency dependency : gradleBuild.getBuildSrcDependencies()) {
     @dependency.toSnippet()
 }
