@@ -240,7 +240,9 @@ Note: if project properties are used, the properties must be defined prior to ap
                             }
                             username = nexusPublishUsername
                             password = nexusPublishPassword
-                            stagingProfileId = nexusPublishStagingProfileId
+                            if(nexusPublishStagingProfileId) {
+                                stagingProfileId = nexusPublishStagingProfileId
+                            }
                         }
                     }
                 }
