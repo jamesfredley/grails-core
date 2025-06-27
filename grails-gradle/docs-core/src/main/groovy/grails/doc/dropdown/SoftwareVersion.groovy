@@ -45,7 +45,10 @@ class SoftwareVersion implements Comparable<SoftwareVersion> {
                 softVersion.snapshot = new Snapshot(subparts[1..-1].join("-"))
                 return softVersion
             }
-            softVersion.patch = parts[2].toInteger()
+
+            if (parts[2].charAt(0).digit) {
+                softVersion.patch = parts[2].toInteger()
+            }
         }
         softVersion
     }
