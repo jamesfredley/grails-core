@@ -80,9 +80,10 @@ abstract class AddReleaseDropDown extends DefaultTask {
     @TaskAction
     void addReleaseDropDown() {
         String projectVersion = version.get()
+        SoftwareVersion minimumVersion = new SoftwareVersion(major: 5)
 
-        final Object result = listRepoTags("apache/grails-core")
-        List<SoftwareVersion> softwareVersions = parseSoftwareVersions(result)
+        final List<String> result = listRepoTags()
+        List<SoftwareVersion> softwareVersions = parseSoftwareVersions(result, minimumVersion)
         logger.lifecycle("Detected Project Version: ${projectVersion} and Software Versions: ${softwareVersions*.versionText.join(',')}")
 
         final String versionHtml = "<p><strong>Version:</strong> ${projectVersion}</p>"
@@ -103,9 +104,6 @@ abstract class AddReleaseDropDown extends DefaultTask {
             @Override
             FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
                 Path targetFile = targetOutputDirectory.resolve(guideDirectory.relativize(file))
-                if (Files.exists(targetFile)) {
-                    Files.deleteIfExists(targetFile)
-                }
 
                 String absolutePath = targetFile.toAbsolutePath().toString()
                 if (filesToChange.containsKey(absolutePath)) {
@@ -118,7 +116,6 @@ abstract class AddReleaseDropDown extends DefaultTask {
 
                     filesToChange.remove(absolutePath)
                 }
-                Files.copy(file, targetFile, StandardCopyOption.REPLACE_EXISTING)
                 FileVisitResult.CONTINUE
             }
 
@@ -144,7 +141,7 @@ abstract class AddReleaseDropDown extends DefaultTask {
 
         softwareVersions
                 .forEach { softwareVersion ->
-                    final String versionName = softwareVersion.versionText
+                    final String versionName = softwareVersion?.versionText
                     final String href = GRAILS_DOC_BASE_URL + "/" + versionName  + page
                     options << option(href, versionName, version == versionName)
                 }
@@ -152,26 +149,26 @@ abstract class AddReleaseDropDown extends DefaultTask {
     }
 
     /**
-     * List all tags in the repository using the GitHub API.
+     * List all tags in the local Git repository.
      *
      * @param repoSlug The slug of the repository. e.g. apache/grails-core
      * @return The list of tags in the repository
      */
-    private Object listRepoTags(String repoSlug) {
-        URL url = new URL(GITHUB_API_BASE_URL + "/repos/" + repoSlug + "/tags")
-        URLConnection connection = url.openConnection()
-        connection.setRequestProperty("User-Agent", "apache/grails-core")
+    private List<String> listRepoTags() {
+        File repoRoot = project.rootProject.projectDir
+        def command = ["git", "-C", repoRoot.absolutePath, "tag", "-l", "--sort=-creatordate"]
 
-        // See https://github.com/orgs/community/discussions/42748#discussioncomment-4709316
-        String token = System.getenv('GITHUB_TOKEN')
-        if(token) {
-            connection.setRequestProperty("Authorization", "Bearer ${token}")
+        def process = new ProcessBuilder(command)
+                .redirectErrorStream(true)
+                .start()
+
+        process.waitFor()
+
+        if (process.exitValue() != 0) {
+            throw new GradleException("Failed executing Git command to fetch version tags: ${process.text}")
         }
 
-        final String json = connection.inputStream.text
-
-        def result = new JsonSlurper().parseText(json)
-        result
+        process.text.readLines()*.trim()
     }
 
 
@@ -211,17 +208,18 @@ abstract class AddReleaseDropDown extends DefaultTask {
      * Parse the software versions from the resultant JSON
      *
      * @param result List of all tags in the repository.
+     * @param minimumVersion Minimum SoftwareVersion to include in the list. Default version is 0.0.0
      * @return The list of software versions
      */
     @CompileDynamic
-    private List<SoftwareVersion> parseSoftwareVersions(def result) {
-        result.stream()
-            .filter(v -> v.name.startsWith('v'))
-            .map(v -> v.name.replace('v', ''))
-            .map(SoftwareVersion::build)
-            .sorted()
-            .distinct()
-            .collect(Collectors.toList())
+    private List<SoftwareVersion> parseSoftwareVersions(List<String> tags, SoftwareVersion minimumVersion = SoftwareVersion.build('0.0.0')) {
+
+        tags.findAll { it?.startsWith('v') }
+            .collect { it.replace('v', '') }
+            .collect { SoftwareVersion.build(it) }
+            .findAll {it >= minimumVersion}
+            .toSorted()
+            .unique()
             .reverse()
     }
 }
