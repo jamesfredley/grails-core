@@ -37,7 +37,7 @@ version = projectVersion
 group = 'org.apache.grails'
 
 dependencies {
-    implementation platform("org.apache.grails:grails-bom:$grailsVersion")
+    implementation platform("org.apache.grails:grails-bom:$projectVersion")
 
     // shell-cli dependencies
     implementation 'org.apache.grails:grails-shell-cli'
@@ -93,11 +93,11 @@ cliStartScripts.configure { CreateStartScripts t ->
     // See gradle tickets such as for lib https://github.com/gradle/gradle/issues/7033
     doLast {
         t.unixScript.text = t.unixScript.text
-                .replace('$APP_HOME/lib/', "\$APP_HOME/.grails/$grailsVersion/")
+                .replace('$APP_HOME/lib/', "\$APP_HOME/.grails/$projectVersion/")
                 .replace('"${APP_HOME:-./}.."', '"${APP_HOME:-./}"')
 
         t.windowsScript.text = t.windowsScript.text
-                .replace('%APP_HOME%\\lib\\', "%APP_HOME%\\.grails\\$grailsVersion\\")
+                .replace('%APP_HOME%\\lib\\', "%APP_HOME%\\.grails\\$projectVersion\\")
                 .replace('%DIRNAME%..', '%DIRNAME%')
     }
 }
@@ -113,11 +113,11 @@ shellCliStartScripts.configure { CreateStartScripts t ->
     // See gradle tickets such as for lib https://github.com/gradle/gradle/issues/7033
     doLast {
         t.unixScript.text = t.unixScript.text
-                .replace('$APP_HOME/lib/', "\$APP_HOME/.grails/${grailsVersion}/")
+                .replace('$APP_HOME/lib/', "\$APP_HOME/.grails/${projectVersion}/")
                 .replace('"${APP_HOME:-./}.."', '"${APP_HOME:-./}"')
 
         t.windowsScript.text = t.windowsScript.text
-                .replace('%APP_HOME%\\lib\\', "%APP_HOME%\\.grails\\${grailsVersion}\\")
+                .replace('%APP_HOME%\\lib\\', "%APP_HOME%\\.grails\\${projectVersion}\\")
                 .replace('%DIRNAME%..', '%DIRNAME%')
     }
 }
@@ -133,10 +133,10 @@ forgeCliStartScripts.configure { CreateStartScripts t ->
     // See gradle tickets such as for lib https://github.com/gradle/gradle/issues/7033
     doLast {
         t.unixScript.text = t.unixScript.text
-                .replace('$APP_HOME/lib/', "\$APP_HOME/.grails/$grailsVersion/")
+                .replace('$APP_HOME/lib/', "\$APP_HOME/.grails/$projectVersion/")
 
         t.windowsScript.text = t.windowsScript.text
-                .replace('%APP_HOME%\\lib\\', "%APP_HOME%\\.grails\\$grailsVersion\\")
+                .replace('%APP_HOME%\\lib\\', "%APP_HOME%\\.grails\\$projectVersion\\")
     }
 }
 
@@ -145,7 +145,7 @@ project.extensions.getByType(DistributionContainer).configureEach {
     it.distributionClassifier.set('incubating-bin')
     it.contents {
         from(shadowJarTask) {
-            into "bin/.grails/$grailsVersion"
+            into "bin/.grails/$projectVersion"
         }
 
         from(cliStartScripts) {

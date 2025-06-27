@@ -19,19 +19,10 @@ apply plugin: 'org.nosphere.apache.rat'
 
 tasks.named('rat') {
     excludes = [
+            '**/.gitattributes', // git configuration isn't code
             '.asf.yaml', // ASF metadata for github integration excluded from src zip
             '**/build/**', // Gradle generated build directories
-            'etc/bin/results/**', // exclude build directories
-            '**/.gradle/**', '**/wrapper/**', 'gradlew*',  // gradle wrapper files excluded from src zip
-            'out/**', '*.ipr', '**/*.iml', '*.iws', '.idea/**', // Intellij generated files
-            'LICENSE',
-            'NOTICE',
-            '**/.sdkmanrc', // tool selection files aren't code
-            '**/.gitignore', // git configuration isn't code
-            '**/*.png', '**/*.svg', '**/*.ico', '**/*.eps', '**/*.icns', '**/*.jpg', '**/*.jpeg', '**/*.gif', // Image files
-            '**/*.gitkeep', // Empty Gitkeep file
-            '**/src/main/resources/**', // src/main/resources are included in generated application and should not include a license
-            '**/src/test/resources/**', // src/test/resources are used in tests against files included in generated application and should not include a license
+
     ]
     // never cache license audits
     it.outputs.upToDateWhen { false }

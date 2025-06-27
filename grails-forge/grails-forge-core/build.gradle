@@ -36,14 +36,6 @@ sourceSets {
     }
 }
 
-configurations {
-    grailsWrapper {
-        canBeResolved = true
-        canBeConsumed = false
-        transitive = false
-    }
-}
-
 dependencies {
     annotationProcessor platform("io.micronaut:micronaut-bom:$micronautVersion")
     implementation platform("io.micronaut:micronaut-bom:$micronautVersion")
@@ -67,8 +59,6 @@ dependencies {
 
     testImplementation 'org.codehaus.groovy:groovy-yaml'
 
-    grailsWrapper "org.apache.grails.profiles:base:$grailsVersion@jar"
-
     if (project.hasProperty('micronautVersion')) {
         testCompileOnly "io.micronaut:micronaut-inject-groovy:$micronautVersion"
     }
@@ -86,7 +76,7 @@ dependencies {
 
 
 def grailsVersionInfo = tasks.register('grailsVersionInfo', WriteGrailsVersionInfoTask) {
-    version = grailsVersion
+    version = projectVersion
     outputDirectory = layout.buildDirectory.dir('version-info')
 }
 
@@ -96,16 +86,20 @@ rocker {
     postProcessing = ['org.grails.forge.rocker.plugin.WhitespaceProcessor']
 }
 
+// profile base
 TaskProvider<Sync> copyGrailsWrapper = tasks.register('copyGrailsWrapper', Sync)
 copyGrailsWrapper.configure { Sync it ->
-    it.inputs.files(configurations.grailsWrapper)
+    it.dependsOn(gradle.includedBuild('grails-core').task(':grails-wrapper:installDist'))
+
+    def wrapperFiles = rootProject.layout.projectDirectory.dir('../grails-wrapper/build/install/apache-grails-wrapper-incubating-bin')
+    it.inputs.files(wrapperFiles)
     it.includeEmptyDirs = false
 
-    it.from(zipTree(configurations.grailsWrapper.singleFile)) {
+    it.from(wrapperFiles) {
         include(
-                'META-INF/grails-profile/skeleton/grailsw',
-                'META-INF/grails-profile/skeleton/grailsw.bat',
-                'META-INF/grails-profile/skeleton/grails-wrapper.jar'
+                'grailsw',
+                'grailsw.bat',
+                'grails-wrapper.jar'
         )
         eachFile { details -> details.path = details.name } // flatten
     }

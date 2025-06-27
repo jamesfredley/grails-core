@@ -16,9 +16,12 @@
  *  specific language governing permissions and limitations
  *  under the License.
  */
+pluginManagement {
+    includeBuild('../grails-gradle')
+}
 plugins {
-    id 'com.gradle.develocity' version "$develocityVersion"
-    id 'com.gradle.common-custom-user-data-gradle-plugin' version "$customUserDataVersion"
+    id 'com.gradle.develocity' version '4.0.1'
+    id 'com.gradle.common-custom-user-data-gradle-plugin' version '2.2.1'
 }
 
 def isCI = System.getenv().containsKey('CI')
@@ -45,10 +48,15 @@ buildCache {
 
 rootProject.name = 'grails-forge'
 
-include 'grails-cli'
-include 'grails-forge-core'
-include 'grails-forge-cli'
-include 'test-core'
-include 'grails-forge-api'
-include 'grails-forge-web-netty'
-include 'grails-forge-analytics-postgres'
+include(
+        'grails-cli',
+        'grails-forge-core',
+        'grails-forge-cli',
+        'test-core',
+        'grails-forge-api',
+        'grails-forge-web-netty',
+        'grails-forge-analytics-postgres'
+)
+
+includeBuild('..')
+includeBuild('../grails-gradle')

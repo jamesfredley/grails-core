@@ -22,13 +22,24 @@ plugins {
     id 'groovy-gradle-plugin'
 }
 
-Properties properties = new Properties()
+Properties forgeProperties = new Properties()
 file('../gradle.properties').withInputStream { input ->
-    properties.load(input)
+    forgeProperties.load(input)
 }
 
-for (String key : properties.stringPropertyNames()) {
-    ext.set(key, properties.getProperty(key))
+Properties rootProperties = new Properties()
+file('../../gradle.properties').withInputStream { input ->
+    rootProperties.load(input)
+}
+
+for (String key : forgeProperties.stringPropertyNames()) {
+    ext.set(key, forgeProperties.getProperty(key))
+}
+
+for (String key : rootProperties.stringPropertyNames()) {
+    if(!ext.has(key)) {
+        ext.set(key, rootProperties.getProperty(key))
+    }
 }
 
 repositories {
@@ -37,13 +48,7 @@ repositories {
     maven {
         url = 'https://repository.apache.org/content/groups/snapshots'
         content {
-            includeVersionByRegex  'org[.]apache[.]((grails)|(groovy)).*', '.*','.*SNAPSHOT'
-        }
-    }
-    maven {
-        url = 'https://repository.apache.org/content/groups/staging'
-        content {
-            includeGroupByRegex 'org[.]apache[.]grails.*'
+            includeVersionByRegex  'org[.]apache[.]groovy.*', '.*','.*SNAPSHOT'
         }
     }
 }
@@ -61,10 +66,9 @@ dependencies {
     implementation "com.diffplug.spotless:spotless-plugin-gradle:$spotlessVersion"
     implementation "io.spring.nohttp:nohttp-gradle:$nohttpGradleVersion"
     implementation "com.gradleup.shadow:shadow-gradle-plugin:$shadowVersion"
-    implementation "io.github.gradle-nexus:publish-plugin:$nexusPublishVersion"
     implementation "org.gradle.test-retry:org.gradle.test-retry.gradle.plugin:$testRetryVersion"
     implementation "org.nosphere.apache.rat:org.nosphere.apache.rat.gradle.plugin:$apacheRatVersion"
-    implementation "org.apache.grails:grails-gradle-plugins:$grailsVersion", {
+    implementation "org.apache.grails:grails-gradle-plugins:$projectVersion", {
         exclude group: 'org.yaml'
         exclude group: 'org.asciidoctor'
     }
