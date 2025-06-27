@@ -128,7 +128,7 @@ tasks.register('createReleaseDropdown', AddReleaseDropDown).configure { AddRelea
     it.group = 'documentation'
     it.dependsOn 'publishGuide'
 
-    it.inputFiles = project.layout.buildDirectory.files('original-guide/guide/single.html')
+    it.inputFiles = project.layout.buildDirectory.files('modified-guide/guide/single.html', 'modified-guide/index.html')
     it.docsDirectory = project.layout.buildDirectory.dir('original-guide')
     it.outputDir = project.layout.buildDirectory.dir('modified-guide')
 }
