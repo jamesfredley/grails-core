@@ -79,6 +79,21 @@ abstract class FindMainClassTask extends DefaultTask {
     @Input
     final Property<Boolean> enabledBootRunTask
 
+    @Input
+    final Property<Boolean> enabledShellTask
+
+    @Input
+    final Property<Boolean> enabledConsoleTask
+
+    @Input
+    final Property<Boolean> enabledRunCommandTask
+
+    @Input
+    final Property<Boolean> enabledRunScriptTask
+
+    @Input
+    final Property<Boolean> dependentTaskEnabled
+
     @Inject
     FindMainClassTask(Project project, ObjectFactory objects) {
         classesDirectory = objects.fileCollection().convention(project.provider {
@@ -108,6 +123,11 @@ abstract class FindMainClassTask extends DefaultTask {
             Task bootWarTask = project.tasks.findByName(SpringBootPlugin.BOOT_WAR_TASK_NAME)
             (bootWarTask && bootWarTask.enabled && project.gradle.taskGraph.hasTask(bootWarTask)) as boolean
         })
+        enabledConsoleTask = objects.property(Boolean).convention(false)
+        enabledShellTask = objects.property(Boolean).convention(false)
+        enabledRunScriptTask = objects.property(Boolean).convention(false)
+        enabledRunCommandTask = objects.property(Boolean).convention(false)
+        dependentTaskEnabled = objects.property(Boolean).convention(false)
         mainClassName = objects.property(String)
     }
 
@@ -118,6 +138,19 @@ abstract class FindMainClassTask extends DefaultTask {
             // the only time this task should invoke is when gradle has deemed it necessary to run, always remove the
             // the cache file to prevent invalid states when running tasks other than bootRun, bootJar, or bootWar
             cacheFile.delete()
+        }
+
+        if (!enabledConsoleTask.get() &&
+                !enabledShellTask.get() &&
+                !enabledRunScriptTask.get() &&
+                !enabledRunCommandTask.get() &&
+                !dependentTaskEnabled.get() &&
+                !enabledBootRunTask.get() &&
+                !enabledBootJarTask.get() &&
+                !enabledBootWarTask.get()) {
+            // If none of the boot tasks are configured, allow for silent errors because downstream tasks will error out
+            logger.info('A GrailsApplication class was not found, but no tasks requiring a main class are configured to run. Suppressing error.')
+            return
         }
 
         if (mainClassName.isPresent()) {
@@ -158,12 +191,6 @@ abstract class FindMainClassTask extends DefaultTask {
         }
 
         if (!mainClassHolder) {
-            if (!enabledBootRunTask.get() && !enabledBootJarTask.get() && !enabledBootWarTask.get()) {
-                // If none of the boot tasks are configured, allow for silent errors because downstream tasks will error out
-                logger.info('A GrailsApplication class was not found, but no tasks requiring a main class are configured to run. Suppressing error.')
-                return
-            }
-
             if (isGrailsPlugin.get()) {
                 // this is ok if the project is a plugin because it's likely not going to be a runnable grails app
                 logger.lifecycle('WARNING: this plugin project does not have an Application.class and thus the bootJar / bootWar / bootRun will be invalid.')
