@@ -41,6 +41,8 @@ jobs:
         java: [ 17, 21 ]
     runs-on: ubuntu-24.04
     steps:
+      - name: "Output Agent IP" # in the event RAO blocks this agent, this can be used to debug it
+        run: curl -s https://api.ipify.org
       - name: "📥 Checkout repository"
         uses: actions/checkout@v4
       - name: "☕️ Setup JDK"
@@ -75,6 +77,8 @@ jobs:
         os: [ ubuntu-latest, windows-latest, macos-latest ]
     runs-on: ${{ matrix.os }}
     steps:
+      - name: "Output Agent IP" # in the event RAO blocks this agent, this can be used to debug it
+        run: curl -s https://api.ipify.org
       - name: "📥 Checkout repository"
         uses: actions/checkout@v4
       - name: "☕️ Setup JDK"
@@ -100,6 +104,8 @@ jobs:
         java: [ 17, 21 ]
     runs-on: ubuntu-24.04
     steps:
+      - name: "Output Agent IP" # in the event RAO blocks this agent, this can be used to debug it
+        run: curl -s https://api.ipify.org
       - name: "📥 Checkout repository"
         uses: actions/checkout@v4
       - name: "☕️ Setup JDK"
@@ -155,6 +161,8 @@ jobs:
         java: [ 17, 21, 24 ]
     runs-on: ubuntu-24.04
     steps:
+      - name: "Output Agent IP" # in the event RAO blocks this agent, this can be used to debug it
+        run: curl -s https://api.ipify.org
       - name: "📥 Checkout repository"
         uses: actions/checkout@v4
       - name: "☕️ Setup JDK"
@@ -184,6 +192,8 @@ jobs:
         java: [ 17, 21 ]
         mongodb-version: [ '7.0', '8.0' ] # test with supported versions https://www.mongodb.com/legal/support-policy/lifecycles
     steps:
+      - name: "Output Agent IP" # in the event RAO blocks this agent, this can be used to debug it
+        run: curl -s https://api.ipify.org
       - name: "📥 Checkout the repository"
         uses: actions/checkout@v4
       - name: "☕️ Setup JDK"
@@ -213,6 +223,8 @@ jobs:
       matrix:
         java: [ 17, 21 ]
     steps:
+      - name: "Output Agent IP" # in the event RAO blocks this agent, this can be used to debug it
+        run: curl -s https://api.ipify.org
       - name: "📥 Checkout the repository"
         uses: actions/checkout@v4
       - name: "☕️ Setup JDK"
@@ -237,6 +249,8 @@ jobs:
     needs: [ buildGradle ]
     runs-on: ubuntu-24.04
     steps:
+      - name: "Output Agent IP" # in the event RAO blocks this agent, this can be used to debug it
+        run: curl -s https://api.ipify.org
       - name: "📥 Checkout repository"
         uses: actions/checkout@v4
       - name: "☕️ Setup JDK"
@@ -273,6 +287,8 @@ jobs:
     if: ${{ always() && github.repository_owner == 'apache' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && needs.publishGradle.result == 'success' && (needs.build.result == 'success' || needs.build.result == 'skipped') && (needs.functional.result == 'success' || needs.functional.result == 'skipped') && (needs.hibernate5Functional.result == 'success' || needs.hibernate5Functional.result == 'skipped') && (needs.mongodbFunctional.result == 'success' || needs.mongodbFunctional.result == 'skipped') }}
     runs-on: ubuntu-24.04
     steps:
+      - name: "Output Agent IP" # in the event RAO blocks this agent, this can be used to debug it
+        run: curl -s https://api.ipify.org
       - name: "📥 Checkout repository"
         uses: actions/checkout@v4
       - name: "☕️ Setup JDK"
@@ -327,6 +343,8 @@ jobs:
     needs: [ buildForge, publishGradle, publish ]
     runs-on: ubuntu-24.04
     steps:
+      - name: "Output Agent IP" # in the event RAO blocks this agent, this can be used to debug it
+        run: curl -s https://api.ipify.org
       - name: "📥 Checkout repository"
         uses: actions/checkout@v4
       - name: "☕️ Setup JDK"
@@ -363,6 +381,8 @@ jobs:
     needs: [ publish ]
     runs-on: ubuntu-24.04
     steps:
+      - name: "Output Agent IP" # in the event RAO blocks this agent, this can be used to debug it
+        run: curl -s https://api.ipify.org
       - name: "📥 Checkout the repository"
         uses: actions/checkout@v4
       - name: "🔀 Store current branch name"
