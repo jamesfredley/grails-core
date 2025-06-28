@@ -134,7 +134,7 @@ abstract class FindMainClassTask extends DefaultTask {
             cacheFile.text = mainClassHolder.className
             logger.info('Found main class: {}', mainClassHolder.className)
         } else if (!isGrailsPlugin.get()) {
-            logger.warn('No main class found. Please set \'springBoot.mainClass\'.')
+            logger.warn('No main class found. Considering adding one or setting \'springBoot.mainClass\' if one already exists to use tasks such as runCommand, runScript, console, shell, or boot* tasks.')
         }
     }
 
