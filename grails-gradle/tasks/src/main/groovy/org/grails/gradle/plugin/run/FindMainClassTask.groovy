@@ -22,6 +22,7 @@ import groovy.transform.CompileStatic
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
 import org.gradle.api.Task
+import org.gradle.api.execution.TaskExecutionGraph
 import org.gradle.api.file.FileCollection
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.model.ObjectFactory
@@ -70,30 +71,6 @@ abstract class FindMainClassTask extends DefaultTask {
     @Input
     final Property<Boolean> isGrailsPlugin
 
-    @Input
-    final Property<Boolean> enabledBootJarTask
-
-    @Input
-    final Property<Boolean> enabledBootWarTask
-
-    @Input
-    final Property<Boolean> enabledBootRunTask
-
-    @Input
-    final Property<Boolean> enabledShellTask
-
-    @Input
-    final Property<Boolean> enabledConsoleTask
-
-    @Input
-    final Property<Boolean> enabledRunCommandTask
-
-    @Input
-    final Property<Boolean> enabledRunScriptTask
-
-    @Input
-    final Property<Boolean> dependentTaskEnabled
-
     @Inject
     FindMainClassTask(Project project, ObjectFactory objects) {
         classesDirectory = objects.fileCollection().convention(project.provider {
@@ -111,23 +88,6 @@ abstract class FindMainClassTask extends DefaultTask {
         isGrailsPlugin = objects.property(Boolean).convention(project.provider {
             project.plugins.hasPlugin('org.grails.gradle.plugin.core.GrailsPluginGradlePlugin')
         })
-        enabledBootRunTask = objects.property(Boolean).convention(project.provider {
-            Task bootRunTask = project.tasks.findByName('bootRun')
-            (bootRunTask && bootRunTask.enabled && project.gradle.taskGraph.hasTask(bootRunTask)) as boolean
-        })
-        enabledBootJarTask = objects.property(Boolean).convention(project.provider {
-            Task bootJarTask = project.tasks.findByName(SpringBootPlugin.BOOT_JAR_TASK_NAME)
-            (bootJarTask && bootJarTask.enabled && project.gradle.taskGraph.hasTask(bootJarTask)) as boolean
-        })
-        enabledBootWarTask = objects.property(Boolean).convention(project.provider {
-            Task bootWarTask = project.tasks.findByName(SpringBootPlugin.BOOT_WAR_TASK_NAME)
-            (bootWarTask && bootWarTask.enabled && project.gradle.taskGraph.hasTask(bootWarTask)) as boolean
-        })
-        enabledConsoleTask = objects.property(Boolean).convention(false)
-        enabledShellTask = objects.property(Boolean).convention(false)
-        enabledRunScriptTask = objects.property(Boolean).convention(false)
-        enabledRunCommandTask = objects.property(Boolean).convention(false)
-        dependentTaskEnabled = objects.property(Boolean).convention(false)
         mainClassName = objects.property(String)
     }
 
@@ -138,19 +98,6 @@ abstract class FindMainClassTask extends DefaultTask {
             // the only time this task should invoke is when gradle has deemed it necessary to run, always remove the
             // the cache file to prevent invalid states when running tasks other than bootRun, bootJar, or bootWar
             cacheFile.delete()
-        }
-
-        if (!enabledConsoleTask.get() &&
-                !enabledShellTask.get() &&
-                !enabledRunScriptTask.get() &&
-                !enabledRunCommandTask.get() &&
-                !dependentTaskEnabled.get() &&
-                !enabledBootRunTask.get() &&
-                !enabledBootJarTask.get() &&
-                !enabledBootWarTask.get()) {
-            // If none of the boot tasks are configured, allow for silent errors because downstream tasks will error out
-            logger.info('A GrailsApplication class was not found, but no tasks requiring a main class are configured to run. Suppressing error.')
-            return
         }
 
         if (mainClassName.isPresent()) {
@@ -167,7 +114,9 @@ abstract class FindMainClassTask extends DefaultTask {
             cacheFile.text = mainClassHolder.className
             logger.info('Found main class: {}', mainClassHolder.className)
         } else if (!isGrailsPlugin.get()) {
-            logger.warn('No main class found. Considering adding one or setting \'springBoot.mainClass\' if one already exists to use tasks such as runCommand, runScript, console, shell, or boot* tasks.')
+            // caching based on the task graph isn't practical here, so we just log a warning in case troubleshooting is needed
+            // for a task that will depend on the main class
+            logger.info('No main class found. Considering adding one or setting \'springBoot.mainClass\' if one already exists to use tasks such as runCommand, runScript, console, shell, or boot* tasks.')
         }
     }
 
