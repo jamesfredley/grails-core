@@ -35,6 +35,8 @@ public class GradleBuild {
     private static final Logger LOG = LoggerFactory.getLogger(GradleBuild.class);
 
     private final GradleDsl dsl;
+    private final List<GradleRepository> repositories;
+    private final List<GradleRepository> buildRepositories;
     private final List<GradleDependency> dependencies;
     private final List<GradleDependency> buildscriptDependencies;
     private final List<GradlePlugin> plugins;
@@ -46,17 +48,21 @@ public class GradleBuild {
     public GradleBuild(@NonNull GradleDsl gradleDsl,
                        @NonNull List<GradleDependency> dependencies,
                        @NonNull List<GradleDependency> buildscriptDependencies) {
-        this(gradleDsl, dependencies, buildscriptDependencies, Collections.emptyList());
+        this(gradleDsl, dependencies, buildscriptDependencies, Collections.emptyList(), Collections.emptyList(), Collections.emptyList());
     }
 
     public GradleBuild(@NonNull GradleDsl gradleDsl,
                        @NonNull List<GradleDependency> dependencies,
                        @NonNull List<GradleDependency> buildscriptDependencies,
-                       @NonNull List<GradlePlugin> plugins) {
+                       @NonNull List<GradlePlugin> plugins,
+                       @NonNull List<GradleRepository> buildRepositories,
+                       @NonNull List<GradleRepository> repositories) {
         this.dsl = gradleDsl;
         this.dependencies = dependencies;
         this.buildscriptDependencies = buildscriptDependencies;
         this.plugins = plugins;
+        this.buildRepositories = buildRepositories;
+        this.repositories = repositories;
     }
 
     @NonNull
@@ -67,6 +73,16 @@ public class GradleBuild {
     @NonNull
     public List<GradleDependency> getDependencies() {
         return dependencies;
+    }
+
+    @NonNull
+    public List<GradleRepository> getBuildRepositories() {
+        return buildRepositories;
+    }
+
+    @NonNull
+    public List<GradleRepository> getRepositories() {
+        return repositories;
     }
 
     @NonNull

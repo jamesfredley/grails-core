@@ -24,6 +24,7 @@ import org.grails.forge.application.Project;
 import org.grails.forge.build.BuildPlugin;
 import org.grails.forge.build.BuildProperties;
 import org.grails.forge.build.dependencies.*;
+import org.grails.forge.build.gradle.GradleRepository;
 import org.grails.forge.feature.Feature;
 import org.grails.forge.feature.Features;
 import org.grails.forge.feature.build.gradle.GradleBuildSrc;
@@ -65,6 +66,8 @@ public class GeneratorContext implements DependencyContext {
     private final Options options;
     private final Set<Dependency> dependencies = new HashSet<>();
     private final Set<Dependency> buildscriptDependencies = new HashSet<>();
+    private final Set<GradleRepository> buildRepositories;
+    private final Set<GradleRepository> repositories;
 
     private final Set<BuildPlugin> buildPlugins = new HashSet<>();
 
@@ -82,6 +85,8 @@ public class GeneratorContext implements DependencyContext {
         this.options = options;
         String grailsVersion = VersionInfo.getGrailsVersion();
         buildProperties.put("grailsVersion", grailsVersion);
+        this.buildRepositories = GradleRepository.getDefaultRepositories(grailsVersion);
+        this.repositories = this.buildRepositories;
     }
 
     /**
@@ -345,6 +350,18 @@ public class GeneratorContext implements DependencyContext {
     @NonNull
     public Set<Dependency> getBuildscriptDependencies() {
         return buildscriptDependencies;
+    }
+
+    @Override
+    @NonNull
+    public Set<GradleRepository> getRepositories() {
+        return repositories;
+    }
+
+    @Override
+    @NonNull
+    public Set<GradleRepository> getBuildRepositories() {
+        return buildRepositories;
     }
 
     public void addBuildPlugin(BuildPlugin buildPlugin) {

@@ -17,6 +17,7 @@ package org.grails.forge.build.dependencies;
 
 
 import io.micronaut.core.annotation.NonNull;
+import org.grails.forge.build.gradle.GradleRepository;
 
 import java.util.Collection;
 
@@ -27,6 +28,12 @@ public interface DependencyContext {
 
     @NonNull
     Collection<Dependency> getBuildscriptDependencies();
+
+    @NonNull
+    Collection<GradleRepository> getRepositories();
+
+    @NonNull
+    Collection<GradleRepository> getBuildRepositories();
 
     void addDependency(@NonNull Dependency dependency);
 

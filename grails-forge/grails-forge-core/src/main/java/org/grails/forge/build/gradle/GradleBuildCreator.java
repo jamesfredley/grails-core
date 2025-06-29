@@ -38,7 +38,18 @@ public class GradleBuildCreator {
                 .map(GradlePlugin.class::cast)
                 .sorted(OrderUtil.COMPARATOR)
                 .collect(Collectors.toList());
-        return new GradleBuild(gradleDsl, resolveDependencies(generatorContext), resolveBuildscriptDependencies(generatorContext), gradlePlugins);
+
+        List<GradleRepository> buildRepositories = generatorContext.getBuildRepositories()
+                .stream()
+                .sorted(OrderUtil.COMPARATOR).
+                toList();
+
+        List<GradleRepository> repositories = generatorContext.getRepositories()
+                .stream()
+                .sorted(OrderUtil.COMPARATOR)
+                .toList();
+
+        return new GradleBuild(gradleDsl, resolveDependencies(generatorContext), resolveBuildscriptDependencies(generatorContext), gradlePlugins, buildRepositories, repositories);
     }
 
     @NonNull

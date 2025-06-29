@@ -22,6 +22,7 @@ under the License.
 @import org.grails.forge.feature.Features
 @import org.grails.forge.build.gradle.GradleBuild
 @import org.grails.forge.build.gradle.GradleDependency
+@import org.grails.forge.build.gradle.GradleRepository
 @import org.grails.forge.util.VersionInfo
 
 @args (
@@ -44,23 +45,9 @@ props.each { key, val ->
 }
 
 repositories {
-    mavenCentral()
-    maven { url = 'https://repo.grails.org/grails/restricted' }
-@if (grailsVersion.endsWith("SNAPSHOT")) {
-    maven {
-        url = 'https://repository.apache.org/content/groups/snapshots'
-        content {
-            includeVersionByRegex  'org[.]apache[.]((grails)|(groovy)).*', '.*','.*SNAPSHOT'
-        }
-    }
+@for (GradleRepository repo : gradleBuild.getBuildRepositories()) {
+    @repo.toSnippet("    ")
 }
-    maven {
-        // This is needed until we have a stable release of cloud.wondrify:asset-pipeline-gradle
-        url = 'https://central.sonatype.com/repository/maven-snapshots'
-        content {
-            includeVersionByRegex('cloud[.]wondrify', '.*', '.*-SNAPSHOT')
-        }
-    }
 }
 
 dependencies {
