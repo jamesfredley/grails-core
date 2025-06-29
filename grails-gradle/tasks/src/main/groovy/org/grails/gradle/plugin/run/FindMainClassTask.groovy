@@ -142,7 +142,7 @@ abstract class FindMainClassTask extends DefaultTask {
         if (!mainClassHolder) {
             if (isGrailsPlugin.get()) {
                 // this is ok if the project is a plugin because it's likely not going to be a runnable grails app
-                logger.lifecycle('WARNING: this plugin project does not have an Application.class and thus tasks requiring a main class such as runScript / runCommand / bootJar / bootWar / bootRun / etc will be invalid.')
+                logger.info('WARNING: this plugin project does not have an Application.class and thus tasks requiring a main class such as runScript / runCommand / bootJar / bootWar / bootRun / etc will be invalid.')
                 return null
             }
 
