@@ -61,12 +61,14 @@ afterEvaluate {
 
         gradle.taskGraph.whenReady {
             List filesToChecksum = []
-            publishing.publications.withType(MavenPublication).all { MavenPublication publication ->
-                publication.artifacts.each { MavenArtifact artifact ->
-                    if(artifact.file.name == 'grails-plugin.xml' || artifact.file.name == 'profile.yml') {
-                        return
+            extensions.configure(PublishingExtension) {
+                it.publications.withType(MavenPublication).configureEach {
+                    artifacts.each {
+                        if (it.file.name in ['grails-plugin.xml', 'profile.yml']) {
+                            return
+                        }
+                        filesToChecksum << it.file
                     }
-                    filesToChecksum << artifact.file
                 }
             }
 
