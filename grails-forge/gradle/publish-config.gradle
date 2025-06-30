@@ -39,7 +39,7 @@ afterEvaluate {
     if (plugins.hasPlugin('signing')) {
         if (System.getenv('TEST_BUILD_REPRODUCIBLE')) {
             logger.lifecycle('Signing is disabled for this build to test build reproducibility.')
-            project.tasks.withType(Sign).configureEach {
+            tasks.withType(Sign).configureEach {
                 enabled = false
             }
         }
@@ -48,7 +48,7 @@ afterEvaluate {
         def checksumTask = tasks.register('publishedChecksums', Checksum)
         checksumTask.configure { Checksum check ->
             check.checksumAlgorithm = Checksum.Algorithm.SHA512
-            check.outputDirectory.set(layout.buildDirectory.dir('checksums'))
+            check.outputDirectory = layout.buildDirectory.dir('checksums')
             check.dependsOn(tasks.withType(Jar))
         }
 
