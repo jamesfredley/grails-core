@@ -84,10 +84,10 @@ public class GeneratorContext implements DependencyContext {
         this.features = new Features(this, features, options);
         this.options = options;
 
-        Set<GradleRepository> repositories = GradleRepository.getDefaultRepositories(VersionInfo.getGrailsVersion());
+        String grailsVersion = VersionInfo.getGrailsVersion();
+        Set<GradleRepository> repositories = GradleRepository.getDefaultRepositories(grailsVersion);
         this.buildRepositories = repositories;
         this.repositories = repositories;
-        String grailsVersion = VersionInfo.getGrailsVersion();
         buildProperties.put("grailsVersion", grailsVersion);
     }
 
