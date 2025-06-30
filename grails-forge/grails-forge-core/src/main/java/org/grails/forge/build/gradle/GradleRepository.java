@@ -42,7 +42,7 @@ public interface GradleRepository extends Ordered {
                     null,
                     List.of(
                             new VersionRegexRepoFilter(
-                                    "org[.]apache[.]((grails)|(groovy)).*", ".*", ".*-SNAPSHOT"
+                                    "org[.]apache[.](grails|groovy).*", ".*", ".*-SNAPSHOT"
                             )
                     )
             ));

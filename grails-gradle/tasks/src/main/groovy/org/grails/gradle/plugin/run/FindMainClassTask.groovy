@@ -134,7 +134,7 @@ abstract class FindMainClassTask extends DefaultTask {
             mainClassHolder = mainClassFinder.findMainClass(classesDir, false)
             // do not cache inside of the finder since gradle is responsible for caching
             if (mainClassHolder) {
-                logger.debug("Found main class: {} at {}", mainClassHolder.className, mainClassHolder.classFile.absolutePath)
+                logger.debug('Found main class: {} at {}', mainClassHolder.className, mainClassHolder.classFile.absolutePath)
                 break
             }
         }

@@ -49,7 +49,7 @@ tasks.register("aggregateChecksums").configure {
         def outputFile = outputFileProvider.get().asFile
         outputFile.withPrintWriter { writer ->
             subprojects.each { sub ->
-                def checksumDir = sub.layout.buildDirectory.dir("checksums").get().asFile
+                def checksumDir = sub.layout.buildDirectory.dir('checksums').get().asFile
                 if (checksumDir.exists()) {
                     checksumDir.listFiles(new FilenameFilter() {
                         boolean accept(File dir, String name) {
@@ -85,7 +85,7 @@ aggregatePublishedArtifacts.configure {
         outputFile.text = "" // clear previous
         outputFile.withPrintWriter { writer ->
             subprojects.each { sub ->
-                def artifactsDir = sub.layout.buildDirectory.dir("artifacts").get().asFile
+                def artifactsDir = sub.layout.buildDirectory.dir('artifacts').get().asFile
                 if (artifactsDir.exists()) {
                     artifactsDir.listFiles(new FilenameFilter() {
                         boolean accept(File dir, String name) {

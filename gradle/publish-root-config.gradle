@@ -140,9 +140,11 @@ subprojects {
 }
 
 tasks.register('publishAllPublicationsToTestCaseMavenRepoRepository').configure {
-    dependsOn(subprojects.findAll { it.name in publishedProjects }
-            .collect { p -> p.tasks.named('publishAllPublicationsToTestCaseMavenRepoRepository') }
-            .flatten())
+    dependsOn(
+            subprojects
+                    .findAll { it.name in publishedProjects }
+                    .collect { it.tasks.named('publishAllPublicationsToTestCaseMavenRepoRepository') }
+    )
 }
 
 def aggregatePublishedArtifacts = tasks.register('aggregatePublishedArtifacts')
@@ -163,7 +165,7 @@ tasks.register("aggregateChecksums").configure {
         def outputFile = outputFileProvider.get().asFile
         outputFile.withPrintWriter { writer ->
             subprojects.each { sub ->
-                def checksumDir = sub.layout.buildDirectory.dir("checksums").get().asFile
+                def checksumDir = sub.layout.buildDirectory.dir('checksums').get().asFile
                 if (checksumDir.exists()) {
                     checksumDir.listFiles(new FilenameFilter() {
                         boolean accept(File dir, String name) {
@@ -199,7 +201,7 @@ aggregatePublishedArtifacts.configure {
         outputFile.text = "" // clear previous
         outputFile.withPrintWriter { writer ->
             subprojects.each { sub ->
-                def artifactsDir = sub.layout.buildDirectory.dir("artifacts").get().asFile
+                def artifactsDir = sub.layout.buildDirectory.dir('artifacts').get().asFile
                 if (artifactsDir.exists()) {
                     artifactsDir.listFiles(new FilenameFilter() {
                         boolean accept(File dir, String name) {
