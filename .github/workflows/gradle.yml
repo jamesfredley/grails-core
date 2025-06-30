@@ -96,7 +96,7 @@ jobs:
           --continue --stacktrace -PonlyCoreTests
           --rerun-tasks
   buildForge:
-    name: "🔨Grails Forge"
+    name: "Build Grails Forge"
     strategy:
       fail-fast: false
       matrix:
