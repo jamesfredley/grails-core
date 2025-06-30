@@ -19,71 +19,212 @@
 
 package grails.doc.dropdown
 
-import groovy.json.JsonSlurper
 import groovy.transform.CompileDynamic
 import groovy.transform.CompileStatic
 import org.gradle.api.DefaultTask
-import org.gradle.api.tasks.Input
-import org.gradle.api.tasks.OutputFile
-import org.gradle.api.tasks.TaskAction
+import org.gradle.api.GradleException
+import org.gradle.api.Project
+import org.gradle.api.file.ConfigurableFileCollection
+import org.gradle.api.file.DirectoryProperty
+import org.gradle.api.model.ObjectFactory
+import org.gradle.api.provider.Property
+import org.gradle.api.tasks.*
 
+import javax.inject.Inject
+import java.nio.file.*
+import java.nio.file.attribute.BasicFileAttributes
+
+/**
+ * Duplicates the documentation and modifies source files to add a release dropdown to the documentation
+ * @since 6.2.1
+ */
 @CompileStatic
-class CreateReleasesDropdownTask extends DefaultTask {
+@CacheableTask
+abstract class CreateReleaseDropDownTask extends DefaultTask {
+
+    private static final String GRAILS_DOC_BASE_URL = "https://docs.grails.org"
+    private static final String GITHUB_API_BASE_URL = "https://api.github.com"
 
     @Input
-    String slug
+    final Property<String> slug
+
+    @InputDirectory
+    @PathSensitive(PathSensitivity.RELATIVE)
+    final DirectoryProperty docsDirectory
 
     @Input
-    String version
+    final Property<String> version
 
-    @OutputFile
-    File guide
+    @InputFiles
+    @PathSensitive(PathSensitivity.RELATIVE)
+    final ConfigurableFileCollection inputFiles
 
-    @OutputFile
-    File index
+    @OutputDirectory
+    final DirectoryProperty outputDir
 
-    @TaskAction
-    void modifyHtmlAndAddReleasesDropdown() {
-
-        String selectHtml = composeSelectHtml()
-
-        String versionHtml = "<p><strong>Version:</strong> ${version}</p>"
-        String versionWithSelectHtml = "<p><strong>Version:</strong>&nbsp;<span style='width:100px;display:inline-block;'>${selectHtml}</span></p>"
-        guide.text = guide.text.replace(versionHtml, versionWithSelectHtml)
-        index.text = index.text.replace(versionHtml, versionWithSelectHtml)
+    @Inject
+    CreateReleaseDropDownTask(ObjectFactory objects, Project project) {
+        slug = objects.property(String).convention('apache/grails-doc')
+        docsDirectory = objects.directoryProperty().convention(project.layout.buildDirectory.dir('manual'))
+        version = objects.property(String).convention(project.provider { project.version.toString() })
+        inputFiles = objects.fileCollection()
+        outputDir = objects.directoryProperty().convention(project.layout.buildDirectory.dir("modified-pages"))
+        group = 'documentation'
     }
 
-    String composeSelectHtml() {
-        String repo = slug.split('/')[1]
-        String org = slug.split('/')[0]
-        JsonSlurper slurper = new JsonSlurper()
-        String json = new URL("https://api.github.com/repos/${slug}/tags").text
-        def result = slurper.parseText(json)
-        String selectHtml = "<select onChange='window.document.location.href=this.options[this.selectedIndex].value;'>"
-        String snapshotHref = "https://${org}.github.io/${repo}/snapshot/guide/single.html"
-        if (version.endsWith("-SNAPSHOT")) {
-            selectHtml += "<option selected='selected' value='${snapshotHref}'>SNAPSHOT</option>"
-        } else {
-            selectHtml += "<option value='${snapshotHref}'>SNAPSHOT</option>"
+    /**
+     * Add the release dropdown to the documentation
+     */
+    @TaskAction
+    void addReleaseDropDown() {
+        String projectVersion = version.get()
+        SoftwareVersion minimumVersion = new SoftwareVersion(major: 5)
+
+        final List<String> result = listRepoTags()
+        List<SoftwareVersion> softwareVersions = parseSoftwareVersions(result, minimumVersion)
+        logger.lifecycle("Detected Project Version: ${projectVersion} and Software Versions: ${softwareVersions*.versionText.join(',')}")
+
+        final String versionHtml = "<p><strong>Version:</strong> ${projectVersion}</p>"
+        Path guideDirectory = docsDirectory.get().asFile.toPath()
+        Path targetOutputDirectory = outputDir.get().asFile.toPath()
+
+        Map<String, Path> filesToChange = inputFiles.collectEntries { [it.absolutePath, it.toPath()] }
+        Files.walkFileTree(guideDirectory, new SimpleFileVisitor<Path>() {
+            @Override
+            FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
+                Path targetDir = targetOutputDirectory.resolve(guideDirectory.relativize(dir))
+                if (!Files.exists(targetDir)) {
+                    Files.createDirectories(targetDir)
+                }
+                FileVisitResult.CONTINUE
+            }
+
+            @Override
+            FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                Path targetFile = targetOutputDirectory.resolve(guideDirectory.relativize(file))
+                if (Files.exists(targetFile)) {
+                    Files.deleteIfExists(targetFile)
+                }
+
+
+                String absolutePath = targetFile.toAbsolutePath().toString()
+                if (filesToChange.containsKey(absolutePath)) {
+                    //Need to add the version dropdown
+                    String page = guideDirectory.toFile().relativePath(file.toFile())
+                    String selectHtml = select(options(projectVersion, page, softwareVersions))
+
+                    final String versionWithSelectHtml = "<p><strong>Version:</strong>&nbsp;<span style='width:100px;display:inline-block;'>${selectHtml}</span></p>"
+                    targetFile.toFile().text = file.text.replace(versionHtml, versionWithSelectHtml)
+
+                    filesToChange.remove(absolutePath)
+                }
+                else {
+                    Files.copy(file, targetFile, StandardCopyOption.REPLACE_EXISTING)
+                }
+                FileVisitResult.CONTINUE
+            }
+
+            @Override
+            FileVisitResult visitFileFailed(Path file, IOException e) throws IOException {
+                throw new GradleException("Unable to copy file: ${file}", e)
+            }
+        })
+    }
+
+    /**
+     * Generate the options for the select tag.
+     *
+     * @param version The current version of the documentation
+     * @param page The page to add the dropdown to
+     * @param softwareVersions The list of software versions to include in the dropdown
+     * @return The list of options for the select tag
+     */
+    private List<String> options(String version, String page, List<SoftwareVersion> softwareVersions) {
+        List<String> options = []
+        final String snapshotHref = GRAILS_DOC_BASE_URL + "/snapshot" + page
+        options << option(snapshotHref, "SNAPSHOT", version.endsWith("-SNAPSHOT"))
+
+        softwareVersions
+                .forEach { softwareVersion ->
+                    final String versionName = softwareVersion?.versionText
+                    final String href = GRAILS_DOC_BASE_URL + "/" + versionName + "/" + page
+                    options << option(href, versionName, version == versionName)
+                }
+        options
+    }
+
+    /**
+     * List all tags in the local Git repository.
+     *
+     * @param repoSlug The slug of the repository. e.g. apache/grails-core
+     * @return The list of tags in the repository
+     */
+    private List<String> listRepoTags() {
+        File repoRoot = project.rootProject.projectDir
+        def command = ["git", "-C", repoRoot.absolutePath, "tag", "-l", "--sort=-creatordate"]
+
+        def process = new ProcessBuilder(command)
+                .redirectErrorStream(true)
+                .start()
+
+        process.waitFor()
+
+        if (process.exitValue() != 0) {
+            throw new GradleException("Failed executing Git command to fetch version tags: ${process.text}")
         }
-        parseSoftwareVersions(result).each { softwareVersion ->
-            String versionName = softwareVersion.versionText
-            String href = "https://${org}.github.io/${repo}/${versionName}/guide/single.html"
-            if (slug == 'apache/grails-core') {
-                href = "https://docs.grails.org/${versionName}/guide/single.html"
-            }
-            if (version == versionName) {
-                selectHtml += "<option selected='selected' value='${href}'>${versionName}</option>"
-            } else {
-                selectHtml += "<option value='${href}'>${versionName}</option>"
-            }
+
+        process.text.readLines()*.trim()
+    }
+
+
+    /**
+     * Generate the select tag
+     *
+     * @param options The List of options tags for the select tag
+     * @return The select tag with the options
+     */
+    private String select(List<String> options) {
+        String selectHtml = "<select onChange='window.document.location.href=this.options[this.selectedIndex].value;'>"
+        options.each { option ->
+            selectHtml += option
         }
         selectHtml += '</select>'
         selectHtml
     }
 
+    /**
+     * Generate the option tag
+     *
+     * @param value The URL to navigate to
+     * @param text The version to display
+     * @param selected Whether the option is selected
+     *
+     * @return The option tag
+     */
+    private String option(String value, String text, boolean selected = false) {
+        if (selected) {
+            return "<option selected='selected' value='${value}'>${text}</option>"
+        } else {
+            return "<option value='${value}'>${text}</option>"
+        }
+    }
+
+    /**
+     * Parse the software versions from the resultant JSON
+     *
+     * @param result List of all tags in the repository.
+     * @param minimumVersion Minimum SoftwareVersion to include in the list. Default version is 0.0.0
+     * @return The list of software versions
+     */
     @CompileDynamic
-    List<SoftwareVersion> parseSoftwareVersions(Object result) {
-        result.findAll { it.name.startsWith('v') }.collect { SoftwareVersion.build(it.name.replace('v', '')) }.sort().unique().reverse()
+    private List<SoftwareVersion> parseSoftwareVersions(List<String> tags, SoftwareVersion minimumVersion = SoftwareVersion.build('0.0.0')) {
+
+        tags.findAll { it?.startsWith('v') }
+                .collect { it.replace('v', '') }
+                .collect { SoftwareVersion.build(it) }
+                .findAll {it >= minimumVersion}
+                .toSorted()
+                .unique()
+                .reverse()
     }
 }

@@ -17,7 +17,7 @@
  *  under the License.
  */
 
-import grails.doc.AddReleaseDropDown
+import grails.doc.dropdown.CreateReleaseDropDownTask
 import grails.doc.gradle.PublishGuide
 
 plugins {
@@ -124,7 +124,7 @@ tasks.register('dist', Zip).configure { Zip it ->
     it.from outputDir
 }
 
-tasks.register('createReleaseDropdown', AddReleaseDropDown).configure { AddReleaseDropDown it ->
+tasks.register('createReleaseDropdown', CreateReleaseDropDownTask).configure { CreateReleaseDropDownTask it ->
     it.group = 'documentation'
     it.dependsOn 'publishGuide'
 
