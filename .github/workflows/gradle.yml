@@ -270,6 +270,8 @@ jobs:
     steps:
       - name: "📥 Checkout the repository"
         uses: actions/checkout@v4
+        with:
+          fetch-tags: true
       - name: "🔀 Store current branch name"
         run: |
           TARGET_BRANCH="${GITHUB_BASE_REF:-${GITHUB_REF#refs/heads/}}"
