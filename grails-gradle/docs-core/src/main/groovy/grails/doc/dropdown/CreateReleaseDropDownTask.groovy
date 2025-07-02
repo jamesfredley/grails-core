@@ -43,7 +43,6 @@ import java.nio.file.attribute.BasicFileAttributes
 abstract class CreateReleaseDropDownTask extends DefaultTask {
 
     private static final String GRAILS_DOC_BASE_URL = "https://docs.grails.org"
-    private static final String GITHUB_API_BASE_URL = "https://api.github.com"
 
     @Input
     final Property<String> slug
@@ -76,7 +75,7 @@ abstract class CreateReleaseDropDownTask extends DefaultTask {
      * Add the release dropdown to the documentation
      */
     @TaskAction
-    void addReleaseDropDown() {
+    void createReleaseDropDown() {
         String projectVersion = version.get()
         SoftwareVersion minimumVersion = new SoftwareVersion(major: 5)
 
@@ -151,29 +150,6 @@ abstract class CreateReleaseDropDownTask extends DefaultTask {
                     options << option(href, versionName, version == versionName)
                 }
         options
-    }
-
-    /**
-     * List all tags in the local Git repository.
-     *
-     * @param repoSlug The slug of the repository. e.g. apache/grails-core
-     * @return The list of tags in the repository
-     */
-    private List<String> listRepoTags() {
-        File repoRoot = project.rootProject.projectDir
-        def command = ["git", "-C", repoRoot.absolutePath, "tag", "-l", "--sort=-creatordate"]
-
-        def process = new ProcessBuilder(command)
-                .redirectErrorStream(true)
-                .start()
-
-        process.waitFor()
-
-        if (process.exitValue() != 0) {
-            throw new GradleException("Failed executing Git command to fetch version tags: ${process.text}")
-        }
-
-        process.text.readLines()*.trim()
     }
 
 
