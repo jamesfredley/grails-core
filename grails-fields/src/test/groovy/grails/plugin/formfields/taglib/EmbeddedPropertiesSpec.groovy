@@ -41,7 +41,7 @@ class EmbeddedPropertiesSpec extends AbstractFormFieldsTagLibSpec implements Tag
         mockFormFieldsTemplateService.getWidgetPrefix() >> 'input-'
         tagLib.formFieldsTemplateService = mockFormFieldsTemplateService
 
-        mockEmbeddedSitemeshLayout tagLib
+        mockEmbeddedGrailsLayout(tagLib)
     }
 
     void "field tag renders individual fields for embedded properties"() {
