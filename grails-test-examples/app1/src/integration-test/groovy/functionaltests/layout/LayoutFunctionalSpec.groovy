@@ -17,21 +17,46 @@
  *  under the License.
  */
 
-package functionaltests.sitemesh
+package functionaltests.layout
 
 import functionaltests.Application
-import grails.gorm.transactions.Rollback
 import grails.plugin.geb.ContainerGebSpec
 import grails.testing.mixin.integration.Integration
+import spock.lang.Issue
+import spock.lang.PendingFeature
 
 @Integration(applicationClass = Application)
-@Rollback
-class LayoutWithTemplateSpec extends ContainerGebSpec {
+class LayoutFunctionalSpec extends ContainerGebSpec {
 
-    void "Test that a layout is not applied to a template rendered by a controller by default"() {
-        when:"The home page is visited"
-            go '/layoutTemplate/index'
-        then:"The title is correct"
-            title == "Welcome to My Partial"
+    @Issue('GRAILS-12045')
+    @PendingFeature(reason = 'title is empty')
+    void 'test layout by convention'() {
+        when:
+        go '/layoutByConvention'
+
+        then:
+        title == 'Convention Layout'
+    }
+
+    @Issue('GRAILS-12045')
+    @PendingFeature(reason='title is empty')
+    void 'test layout specified in controller property'() {
+        when:
+        go '/layoutSpecifiedByProperty'
+
+        then:
+        title == 'Foo Layout'
+
+    }
+
+    @Issue('GRAILS-12045')
+    @PendingFeature(reason='text does not contain the value')
+    void 'test layout specified in controller property applied to a GSP that does not contain a root html tag'() {
+        when:
+        go '/layoutSpecifiedByProperty/snippetView'
+
+        then:
+        title  == 'Foo Layout'
+        $().text().contains 'this is some content'
     }
 }

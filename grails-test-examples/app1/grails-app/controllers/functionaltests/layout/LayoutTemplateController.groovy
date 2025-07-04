@@ -17,9 +17,12 @@
  *  under the License.
  */
 
-package functionaltests.sitemesh
+package functionaltests.layout
 
-class LayoutByConventionController {
 
-    def index() {}
+class LayoutTemplateController {
+
+    def index() { 
+        render template: 'partial'
+    }
 }

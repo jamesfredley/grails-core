@@ -17,7 +17,7 @@
  *  under the License.
  */
 
-package functionaltests.sitemesh
+package functionaltests.layout
 
 class LayoutSpecifiedByPropertyController {
 
