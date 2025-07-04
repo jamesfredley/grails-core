@@ -59,7 +59,7 @@ class RestfulReverseUrlRenderingTests extends Specification implements UrlMappin
     }
 }
 
-@Artefact("UrlMappings")
+@Artefact('UrlMappings')
 class RestfulReverseUrlMappings {
     static mappings = {
         "/car" (controller: "restfulCar", action: [GET: "create", POST: "save"])

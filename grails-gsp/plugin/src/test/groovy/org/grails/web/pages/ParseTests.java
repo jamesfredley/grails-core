@@ -46,7 +46,7 @@ import java.io.InputStream;
  * Tests the GSP parser.  This can detect issues caused by improper
  * GSP->Groovy conversion.  Normally, to compare the code, you can
  * run the page with a showSource parameter specified.
- *
+ * <p>
  * The methods parseCode() and trimAndRemoveCR() have been added
  * to simplify test case code.
  *
@@ -60,7 +60,9 @@ public class ParseTests {
         String[] htmlParts;
 
         @Override
-        public String toString() { return generatedGsp; }
+        public String toString() {
+            return generatedGsp;
+        }
     }
 
     protected static final String GSP_FOOTER = "public static final Map JSP_TAGS = new HashMap()\n"
@@ -87,14 +89,14 @@ public class ParseTests {
     public void testParse() throws Exception {
         ParsedResult result = parseCode("myTest1", "<div>hi</div>");
         String expected = makeImports() +
-            "\n" +
-            "class myTest1 extends org.grails.gsp.GroovyPage {\n" +
-            "public String getGroovyPageFileName() { \"myTest1\" }\n" +
-            "public Object run() {\n" +
-            "Writer out = getOut()\n" +
-            "Writer expressionOut = getExpressionOut()\n"+
-            "printHtmlPart(0)\n" +
-            "}\n" + GSP_FOOTER;
+                "\n" +
+                "class myTest1 extends org.grails.gsp.GroovyPage {\n" +
+                "public String getGroovyPageFileName() { \"myTest1\" }\n" +
+                "public Object run() {\n" +
+                "Writer out = getOut()\n" +
+                "Writer expressionOut = getExpressionOut()\n" +
+                "printHtmlPart(0)\n" +
+                "}\n" + GSP_FOOTER;
         Assertions.assertEquals(trimAndRemoveCR(expected), trimAndRemoveCR(result.generatedGsp));
         Assertions.assertEquals("<div>hi</div>", result.htmlParts[0]);
     }
@@ -103,15 +105,15 @@ public class ParseTests {
     public void testParseWithUnclosedSquareBracket() throws Exception {
         String output = parseCode("myTest2", "<g:message code=\"testing [\"/>").generatedGsp;
         String expected = makeImports() +
-            "\n" +
-            "class myTest2 extends org.grails.gsp.GroovyPage {\n" +
-            "public String getGroovyPageFileName() { \"myTest2\" }\n" +
-            "public Object run() {\n" +
-            "Writer out = getOut()\n" +
-            "Writer expressionOut = getExpressionOut()\n"+
+                "\n" +
+                "class myTest2 extends org.grails.gsp.GroovyPage {\n" +
+                "public String getGroovyPageFileName() { \"myTest2\" }\n" +
+                "public Object run() {\n" +
+                "Writer out = getOut()\n" +
+                "Writer expressionOut = getExpressionOut()\n" +
 
-            "invokeTag('message','g',1,['code':evaluate('\"testing [\"', 1, it) { return \"testing [\" }],-1)\n" +
-            "}\n" + GSP_FOOTER;
+                "invokeTag('message','g',1,['code':evaluate('\"testing [\"', 1, it) { return \"testing [\" }],-1)\n" +
+                "}\n" + GSP_FOOTER;
 
         Assertions.assertEquals(trimAndRemoveCR(expected), trimAndRemoveCR(output));
     }
@@ -135,19 +137,18 @@ public class ParseTests {
         ParsedResult output = null;
         try {
             output = parseCode("myTest4", src);
-        }
-        finally {
+        } finally {
             RequestContextHolder.resetRequestAttributes();
         }
         String expected = makeImports() +
-            "\n" +
-            "class myTest4 extends org.grails.gsp.GroovyPage {\n" +
-            "public String getGroovyPageFileName() { \"myTest4\" }\n" +
-            "public Object run() {\n" +
-            "Writer out = getOut()\n" +
-            "Writer expressionOut = getExpressionOut()\n"+
-            "printHtmlPart(0)\n" +
-            "}\n" + GSP_FOOTER;
+                "\n" +
+                "class myTest4 extends org.grails.gsp.GroovyPage {\n" +
+                "public String getGroovyPageFileName() { \"myTest4\" }\n" +
+                "public Object run() {\n" +
+                "Writer out = getOut()\n" +
+                "Writer expressionOut = getExpressionOut()\n" +
+                "printHtmlPart(0)\n" +
+                "}\n" + GSP_FOOTER;
         Assertions.assertEquals(trimAndRemoveCR(expected), trimAndRemoveCR(output.generatedGsp));
         Assertions.assertEquals(src, output.htmlParts[0]);
     }
@@ -175,14 +176,14 @@ public class ParseTests {
         ParsedResult output = null;
         output = parseCode("myTest5", src);
         String expected = makeImports() +
-            "\n" +
-            "class myTest5 extends org.grails.gsp.GroovyPage {\n" +
-            "public String getGroovyPageFileName() { \"myTest5\" }\n" +
-            "public Object run() {\n" +
-            "Writer out = getOut()\n" +
-            "Writer expressionOut = getExpressionOut()\n"+
-            "printHtmlPart(0)\n" +
-            "}\n" + GSP_FOOTER;
+                "\n" +
+                "class myTest5 extends org.grails.gsp.GroovyPage {\n" +
+                "public String getGroovyPageFileName() { \"myTest5\" }\n" +
+                "public Object run() {\n" +
+                "Writer out = getOut()\n" +
+                "Writer expressionOut = getExpressionOut()\n" +
+                "printHtmlPart(0)\n" +
+                "}\n" + GSP_FOOTER;
         Assertions.assertEquals(trimAndRemoveCR(expected), trimAndRemoveCR(output.generatedGsp));
         Assertions.assertEquals(src, output.htmlParts[0]);
     }
@@ -190,7 +191,7 @@ public class ParseTests {
     /**
      * Eliminate potential issues caused by operating system differences
      * and minor output differences that we don't care about.
-     *
+     * <p>
      * Note: this code is inefficient and could stand to be optimized.
      */
     public String trimAndRemoveCR(String s) {
@@ -221,40 +222,40 @@ public class ParseTests {
     }
 
     @Test
-     public void testParseGTagsWithNamespaces() throws Exception {
-         String output = parseCode("myTest6",
-                 "<tbody>\n" +
-                 "  <tt:form />\n" +
-                 "</tbody>").generatedGsp;
-         System.out.println("output = " + output);
-         Assertions.assertTrue(output.indexOf("invokeTag('form','tt',2,[:],-1)") > -1, "should have call to tag with 'tt' namespace");
-     }
+    public void testParseGTagsWithNamespaces() throws Exception {
+        String output = parseCode("myTest6",
+                "<tbody>\n" +
+                        "  <tt:form />\n" +
+                        "</tbody>").generatedGsp;
+        System.out.println("output = " + output);
+        Assertions.assertTrue(output.indexOf("invokeTag('form','tt',2,[:],-1)") > -1, "should have call to tag with 'tt' namespace");
+    }
 
-     @Test
-     public void testParseWithWhitespaceNotEaten() throws Exception {
-         String expected = makeImports() +
-            "\n" +
-            "class myTest7 extends org.grails.gsp.GroovyPage {\n" +
-            "public String getGroovyPageFileName() { \"myTest7\" }\n" +
-            "public Object run() {\n" +
-            "Writer out = getOut()\n" +
-            "Writer expressionOut = getExpressionOut()\n"+
-            "printHtmlPart(0)\n" +
-            GroovyPage.EXPRESSION_OUT_STATEMENT + ".print(evaluate('uri', 3, it) { return uri })\n" +
-            "printHtmlPart(1)\n" +
-            "}\n" + GSP_FOOTER;
+    @Test
+    public void testParseWithWhitespaceNotEaten() throws Exception {
+        String expected = makeImports() +
+                "\n" +
+                "class myTest7 extends org.grails.gsp.GroovyPage {\n" +
+                "public String getGroovyPageFileName() { \"myTest7\" }\n" +
+                "public Object run() {\n" +
+                "Writer out = getOut()\n" +
+                "Writer expressionOut = getExpressionOut()\n" +
+                "printHtmlPart(0)\n" +
+                GroovyPage.EXPRESSION_OUT_STATEMENT + ".print(evaluate('uri', 3, it) { return uri })\n" +
+                "printHtmlPart(1)\n" +
+                "}\n" + GSP_FOOTER;
 
-         ParsedResult output = parseCode("myTest7",
-                 "Please click the link below to confirm your email address:\n" +
-                 "\n" +
-                 "${uri}\n" +
-                 "\n" +
-                 "\n" +
-                 "Thanks");
+        ParsedResult output = parseCode("myTest7",
+                "Please click the link below to confirm your email address:\n" +
+                        "\n" +
+                        "${uri}\n" +
+                        "\n" +
+                        "\n" +
+                        "Thanks");
 
-         Assertions.assertEquals(expected.replaceAll("[\r\n]", ""), output.generatedGsp.replaceAll("[\r\n]", ""));
-         Assertions.assertEquals("Please click the link below to confirm your email address:\n\n", output.htmlParts[0]);
-         Assertions.assertEquals("\n\n\nThanks", output.htmlParts[1]);
-     }
+        Assertions.assertEquals(expected.replaceAll("[\r\n]", ""), output.generatedGsp.replaceAll("[\r\n]", ""));
+        Assertions.assertEquals("Please click the link below to confirm your email address:\n\n", output.htmlParts[0]);
+        Assertions.assertEquals("\n\n\nThanks", output.htmlParts[1]);
+    }
 
 }

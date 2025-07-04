@@ -32,7 +32,7 @@ class GroovyEachParseTests extends ParseTests {
 </g:each>
 """)
 
-        assertEquals(trimAndRemoveCR(makeImports()+"""\n
+        assertEquals(trimAndRemoveCR(makeImports() + """\n
 class myTest extends org.grails.gsp.GroovyPage {
 public String getGroovyPageFileName() { "myTest" }
 public Object run() {
@@ -45,7 +45,7 @@ printHtmlPart(0)
 }
 printHtmlPart(0)
 }""" + GSP_FOOTER
-),trimAndRemoveCR(output.toString()))
+        ), trimAndRemoveCR(output.toString()))
         assertEquals("\n", output.htmlParts[0])
     }
 
@@ -54,7 +54,7 @@ printHtmlPart(0)
         def output = parseCode("myTest", """
 <g:each var="t" in="${'blah'}"></g:each>""")
 
-        assertEquals(trimAndRemoveCR(makeImports()+"""\n
+        assertEquals(trimAndRemoveCR(makeImports() + """\n
 class myTest extends org.grails.gsp.GroovyPage {
 public String getGroovyPageFileName() { "myTest" }
 public Object run() {
@@ -65,7 +65,7 @@ printHtmlPart(0)
 for( t in evaluate('"blah"', 1, it) { return "blah" } ) {
 }
 }""" + GSP_FOOTER
-),trimAndRemoveCR(output.toString()))
+        ), trimAndRemoveCR(output.toString()))
         assertEquals("\n", output.htmlParts[0])
     }
 
@@ -76,7 +76,7 @@ for( t in evaluate('"blah"', 1, it) { return "blah" } ) {
 </g:each>
 """)
 
-        assertEquals(trimAndRemoveCR(makeImports()+"""\n
+        assertEquals(trimAndRemoveCR(makeImports() + """\n
 class myTest2 extends org.grails.gsp.GroovyPage {
 public String getGroovyPageFileName() { "myTest2" }
 public Object run() {
@@ -93,7 +93,7 @@ i++
 }
 printHtmlPart(0)
 }""" + GSP_FOOTER
-),trimAndRemoveCR(output.toString()))
+        ), trimAndRemoveCR(output.toString()))
         assertEquals("\n", output.htmlParts[0])
     }
 

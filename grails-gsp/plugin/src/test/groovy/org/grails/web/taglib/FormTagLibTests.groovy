@@ -56,7 +56,7 @@ class FormTagLibTests extends Specification implements TagLibUnitTest<FormTagLib
 
         defineBeans {
             grailsUrlMappingsHolder(UrlMappingsHolderFactoryBean) {
-                getDelegate().grailsApplication = grailsApplication
+                delegate.grailsApplication = grailsApplication
             }
         }
     }
@@ -564,7 +564,7 @@ class FormTagLibTests extends Specification implements TagLibUnitTest<FormTagLib
     }
 }
 
-@Artefact("UrlMappings")
+@Artefact('UrlMappings')
 class FormTagLibUrlMappings {
     static mappings = {
         '/admin/books'(controller: 'books', namespace: 'admin')

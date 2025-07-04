@@ -140,10 +140,10 @@ trait DataTest extends GrailsUnitTest {
                 GrailsClass grailsDomain = grailsApplication.getArtefact(DomainClassArtefactHandler.TYPE, domain.javaClass.name)
 
                 "$validationBeanName"(MockCascadingDomainClassValidator) { bean ->
-                    getDelegate().messageSource = ref("messageSource")
                     bean.lazyInit = true
-                    getDelegate().domainClass = grailsDomain
-                    getDelegate().grailsApplication = grailsApplication
+                    delegate.messageSource = ref("messageSource")
+                    delegate.domainClass = grailsDomain
+                    delegate.grailsApplication = grailsApplication
                 }
             } else {
                 "$validationBeanName"(PersistentEntityValidator, domain, ref("messageSource"), ref(DataTestSetupSpecInterceptor.BEAN_NAME))
