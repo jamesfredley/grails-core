@@ -27,6 +27,7 @@ import grails.web.api.WebAttributes
 import grails.web.http.HttpHeaders
 import grails.web.mime.MimeType
 import grails.web.mime.MimeUtility
+import grails.web.pages.GrailsLayoutSelector
 import grails.web.pages.GrailsRenderViewMutator
 import groovy.json.StreamingJsonBuilder
 import groovy.transform.CompileStatic
@@ -72,12 +73,19 @@ trait ResponseRenderer extends WebAttributes {
 
     private MimeUtility mimeUtility
     private GrailsRenderViewMutator grailsRenderViewMutator
+    private GrailsLayoutSelector grailsLayoutSelector
     private GrailsPluginManager pluginManager
 
     @Generated
     @Autowired(required = false)
     void setGrailsRenderViewMutator(GrailsRenderViewMutator grailsRenderViewMutator) {
         this.grailsRenderViewMutator = grailsRenderViewMutator
+    }
+
+    @Generated
+    @Autowired(required = false)
+    void setGrailsLayoutSelector(GrailsLayoutSelector grailsLayoutSelector) {
+        this.grailsLayoutSelector = grailsLayoutSelector
     }
 
     @Generated
@@ -150,7 +158,7 @@ trait ResponseRenderer extends WebAttributes {
         else {
             renderMarkupInternal webRequest, closure, response
         }
-        setLayout webRequest.currentRequest, layoutArg
+        setLayout webRequest.currentRequest, false, layoutArg
     }
 
     private void renderJsonInternal(HttpServletResponse response, @DelegatesTo(value = StreamingJsonBuilder.StreamingJsonDelegate.class, strategy = Closure.DELEGATE_FIRST) Closure callable) {
@@ -174,7 +182,7 @@ trait ResponseRenderer extends WebAttributes {
         applyContentType response, argMap, body
         handleStatusArgument argMap, webRequest, response
         render body
-        setLayout webRequest.currentRequest, layoutArg
+        setLayout webRequest.currentRequest, false, layoutArg
     }
 
     /**
@@ -218,7 +226,7 @@ trait ResponseRenderer extends WebAttributes {
         handleStatusArgument argMap, webRequest, response
         applyContentType response, argMap, writable
         renderWritable writable, response
-        setLayout webRequest.currentRequest, layoutArg
+        setLayout webRequest.currentRequest, false, layoutArg
         webRequest.renderView = false
     }
 
@@ -246,7 +254,7 @@ trait ResponseRenderer extends WebAttributes {
                 CharSequence text = (textArg instanceof CharSequence) ? ((CharSequence)textArg) : textArg.toString()
                 render text
             }
-            setLayout webRequest.currentRequest, layoutArg
+            setLayout webRequest.currentRequest, false, layoutArg
         }
         else if (argMap.containsKey(ARGUMENT_VIEW)) {
             String viewName = argMap[ARGUMENT_VIEW].toString()
@@ -274,7 +282,7 @@ trait ResponseRenderer extends WebAttributes {
             }
 
             ((GroovyObject)this).setProperty "modelAndView", new ModelAndView(viewUri, model)
-            setLayout webRequest.currentRequest, layoutArg
+            setLayout webRequest.currentRequest, true, layoutArg
         }
         else if (argMap.containsKey(ARGUMENT_TEMPLATE)) {
             applyContentType response, argMap, null, false
@@ -309,7 +317,7 @@ trait ResponseRenderer extends WebAttributes {
                 boolean renderWithLayout = (layoutArg || webRequest.getCurrentRequest().getAttribute(WebUtils.LAYOUT_ATTRIBUTE))
                 // if automatic decoration occurred unwrap, since this is a partial
                 if (renderWithLayout) {
-                    setLayout webRequest.currentRequest, layoutArg
+                    setLayout webRequest.currentRequest, false, layoutArg
                 }
 
                 if(grailsRenderViewMutator) {
@@ -544,9 +552,15 @@ trait ResponseRenderer extends WebAttributes {
         renderArgument instanceof GPathResult ? APPLICATION_XML : defaultEncoding
     }
 
-    private void setLayout(HttpServletRequest request, String layout) {
-        if (layout != null && request.getAttribute(WebUtils.LAYOUT_ATTRIBUTE) == null) {
-            request.setAttribute WebUtils.LAYOUT_ATTRIBUTE, layout
+    private void setLayout(HttpServletRequest request, boolean renderingView, String explicitLayoutArg) {
+        if (explicitLayoutArg == null && request.getAttribute(WebUtils.LAYOUT_ATTRIBUTE) != null) {
+            // layout has been set already
+            return
+        }
+
+        String selectedLayout = grailsLayoutSelector == null ? explicitLayoutArg : grailsLayoutSelector.selectLayout(explicitLayoutArg, renderingView)
+        if (selectedLayout != null) {
+            request.setAttribute WebUtils.LAYOUT_ATTRIBUTE, selectedLayout
         }
     }
 
