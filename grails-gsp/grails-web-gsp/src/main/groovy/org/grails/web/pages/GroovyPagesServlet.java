@@ -22,6 +22,7 @@ import grails.plugins.GrailsPlugin;
 import grails.plugins.GrailsPluginManager;
 import grails.plugins.PluginManagerAware;
 import grails.util.GrailsStringUtils;
+import grails.web.pages.GroovyPagesUriService;
 import org.grails.web.util.GrailsApplicationAttributes;
 import groovy.text.Template;
 import org.grails.core.io.support.GrailsFactoriesLoader;
@@ -76,8 +77,6 @@ import java.util.concurrent.ConcurrentHashMap;
 public class GroovyPagesServlet extends FrameworkServlet implements PluginManagerAware {
 
     private static final long serialVersionUID = -1918149859392123495L;
-
-    public static final String RENDERING_VIEW_ATTRIBUTE = "org.grails.rendering.view";
 
     private static final String WEB_INF = "/WEB-INF";
     private static final String GRAILS_APP = "/grails-app";
@@ -215,7 +214,7 @@ public class GroovyPagesServlet extends FrameworkServlet implements PluginManage
      */
     protected void renderPageWithEngine(GroovyPagesTemplateEngine engine, HttpServletRequest request,
                                         HttpServletResponse response, GroovyPageScriptSource scriptSource) throws Exception {
-        request.setAttribute(RENDERING_VIEW_ATTRIBUTE, Boolean.TRUE);
+        request.setAttribute(GroovyPagesUriService.RENDERING_VIEW_ATTRIBUTE, Boolean.TRUE);
         GSPResponseWriter out = createResponseWriter(response);
         try {
             Template template = engine.createTemplate(scriptSource);
