@@ -36,6 +36,7 @@ import org.springframework.mock.web.MockServletContext
 import org.springframework.web.context.WebApplicationContext
 import org.springframework.web.context.request.RequestContextHolder
 import org.springframework.web.context.support.GenericWebApplicationContext
+import spock.lang.PendingFeature
 import spock.lang.Specification
 
 /**
@@ -207,6 +208,73 @@ public static final String TAGLIB_CODEC = 'none'
         expected.replaceAll("[\r\n]", "") == output.generatedGsp.replaceAll("[\r\n]", "")
         "Please click the link below to confirm your email address:\n\n" == output.htmlParts[0]
         "\n\n\nThanks" == output.htmlParts[1]
+    }
+
+    @PendingFeature
+    void 'body with gstring attribute'()  {
+        given:
+        String expected = makeImports() +
+                "\n" +
+                "class GRAILS5598 extends org.grails.gsp.GroovyPage {\n" +
+                "public String getGroovyPageFileName() { \"GRAILS5598\" }\n" +
+                "public Object run() {\n" +
+                "Writer out = getOut()\n" +
+                "Writer expressionOut = getExpressionOut()\n" +
+                "createClosureForHtmlPart(0, 1)\n" +
+                "invokeTag('captureBody','grailsLayout',1,['class':evaluate('\"\${page.name} \${page.group.name.toLowerCase()}\"', 1, it) { return \"\${page.name} \${page.group.name.toLowerCase()}\" }],1)\n" +
+                "}\n" + GSP_FOOTER
+
+        when:
+        ParsedResult result = parseCode("GRAILS5598", '<body class=\"${page.name} ${page.group.name.toLowerCase()}\">text</body>')
+
+        then:
+        trimAndRemoveCR(expected) == trimAndRemoveCR(result.generatedGsp)
+        "text" == result.htmlParts[0]
+    }
+
+    void "bypass grails layout preprocess"() {
+        given:
+        String expected = makeImports() +
+                "\n" +
+                "class GRAILS_LAYOUT_PREPROCESS_TEST extends org.grails.gsp.GroovyPage {\n" +
+                "public String getGroovyPageFileName() { \"GRAILS_LAYOUT_PREPROCESS_TEST\" }\n" +
+                "public Object run() {\n" +
+                "Writer out = getOut()\n" +
+                "Writer expressionOut = getExpressionOut()\n" +
+                "printHtmlPart(0)\n" +
+                "}\n" + GSP_FOOTER
+
+        when:
+        ParsedResult result = parseCode("GRAILS_LAYOUT_PREPROCESS_TEST", "<%@page grailsLayoutPreprocess=\"false\"%>\n<body>text</body>")
+
+        then:
+        trimAndRemoveCR(expected) == trimAndRemoveCR(result.generatedGsp)
+        "\n<body>text</body>" == result.htmlParts[0]
+    }
+
+    @PendingFeature
+    void "meta with gstring attribute"() {
+        given:
+        String expected = makeImports() +
+                "\n" +
+                "class GRAILS5605 extends org.grails.gsp.GroovyPage {\n" +
+                "public String getGroovyPageFileName() { \"GRAILS5605\" }\n" +
+                "public Object run() {\n" +
+                "Writer out = getOut()\n" +
+                "Writer expressionOut = getExpressionOut()\n" +
+                "printHtmlPart(0)\n" +
+                "createTagBody(1, {->\n" +
+                "invokeTag('captureMeta','grailsLayout',1,['gsp_sm_xmlClosingForEmptyTag':evaluate('\"/\"', 1, it) { return \"/\" },'name':evaluate('\"SomeName\"', 1, it) { return \"SomeName\" },'content':evaluate('\"\${grailsApplication.config.myFirstConfig}/something/\${someVar}\"', 1, it) { return \"\${grailsApplication.config.myFirstConfig}/something/\${someVar}\" }],-1)\n" +
+                "})\n" +
+                "invokeTag('captureHead','grailsLayout',1,[:],1)\n" +
+                "printHtmlPart(1)\n" +
+                "}\n" + GSP_FOOTER
+
+        when:
+        ParsedResult result = parseCode("GRAILS5605", "<html><head><meta name=\"SomeName\" content='\${grailsApplication.config.myFirstConfig}/something/\${someVar}' /></head></html>");
+
+        then:
+        trimAndRemoveCR(expected) == trimAndRemoveCR(result.generatedGsp)
     }
 
     static ParsedResult parseCode(String uri, String gsp) throws IOException {
