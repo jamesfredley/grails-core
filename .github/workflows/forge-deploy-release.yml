@@ -39,6 +39,7 @@ jobs:
         with:
           develocity-access-key: ${{ secrets.GRAILS_DEVELOCITY_ACCESS_KEY  }}
       - name: "🧩 Assemble"
+        working-directory: grails-forge
         run: ./gradlew grails-forge-cli:assemble
   deploy:
     name: "Deploy to Google Cloud Run"
@@ -71,11 +72,13 @@ jobs:
         with:
           develocity-access-key: ${{ secrets.GRAILS_DEVELOCITY_ACCESS_KEY  }}
       - name: "🏃 Run tests"
+        working-directory: grails-forge
         run: >
           ./gradlew
           grails-forge-api:test
           grails-forge-web-netty:test
       - name: "🔨 Build Docker native image"
+        working-directory: grails-forge
         env:
           IMAGE_NAME: us-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/${{ secrets.GCP_APP_NAME }}/${{ secrets.GCP_APP_NAME }}:${{ needs.build.outputs.release_version }}
         run: >
@@ -126,10 +129,12 @@ jobs:
         with:
           develocity-access-key: ${{ secrets.GRAILS_DEVELOCITY_ACCESS_KEY  }}
       - name: "🏃 Run tests"
+        working-directory: grails-forge
         run: >
           ./gradlew
           grails-forge-analytics-postgres:test
       - name: "🔨 Build Docker native image"
+        working-directory: grails-forge
         env:
           IMAGE_NAME: us-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/${{ secrets.GCP_APP_NAME }}/${{ secrets.GCP_APP_NAME }}-analytics:${{ needs.build.outputs.release_version }}
         run: >

@@ -33,6 +33,7 @@ jobs:
         with:
           develocity-access-key: ${{ secrets.GRAILS_DEVELOCITY_ACCESS_KEY  }}
       - name: "🔨 Build"
+        working-directory: grails-forge
         run: ./gradlew build
   deploy:
     name: "Deploy to Google Cloud Run"
@@ -65,11 +66,13 @@ jobs:
         with:
           develocity-access-key: ${{ secrets.GRAILS_DEVELOCITY_ACCESS_KEY  }}
       - name: "🏃 Run tests"
+        working-directory: grails-forge
         run: >
           ./gradlew
           grails-forge-api:test
           grails-forge-web-netty:test
       - name: "🔨 Build Docker image"
+        working-directory: grails-forge
         # To deploy native executables built with GraalVM, replace dockerBuild with dockerBuildNative and dockerPush
         # with dockerPushNative. First, try that it works locally.
         run: >
@@ -119,8 +122,10 @@ jobs:
         with:
           develocity-access-key: ${{ secrets.GRAILS_DEVELOCITY_ACCESS_KEY  }}
       - name: "🏃 Run tests"
+        working-directory: grails-forge
         run: ./gradlew grails-forge-analytics-postgres:test
       - name: "🔨 Build Docker image"
+        working-directory: grails-forge
         # To deploy native executables built with GraalVM, replace dockerBuild with dockerBuildNative and dockerPush
         # with dockerPushNative. First, try that it works locally.
         run: >
