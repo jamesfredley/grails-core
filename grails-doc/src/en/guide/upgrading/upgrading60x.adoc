@@ -201,10 +201,6 @@ Grails 7.0.0 introduces several breaking changes that may require updates to you
 Due to the significant changes in Grails 7, all prior Grails Plugin will need updated to work with Grails 7. For plugins in the https://github.com/grails-plugins/[Grails Plugins] GitHub organization, the Grails Core team is updating them as time permits and when requested.
 If there is a plugin that you require updating, please reach out via https://github.com/apache/grails-core/issues[ticket] to see if we can help.
 
-===== 12.0 Asset Pipeline
-
-The asset pipeline has a new https://github.com/wondrify/asset-pipeline[home]. Version 5.0.12 and forward is compatible with Grails 7.x.
-
 ===== 12.2 javax -> Jakarta
 
 Spring has switched from javax to https://jakarta.ee/[jakarta] packages.
