@@ -23,8 +23,6 @@ import grails.gorm.transactions.Rollback
 import grails.plugin.geb.ContainerGebSpec
 import grails.testing.mixin.integration.Integration
 
-/**
- */
 @Integration(applicationClass = Application)
 @Rollback
 class ErrorsControllerSpec extends ContainerGebSpec {
@@ -34,7 +32,7 @@ class ErrorsControllerSpec extends ContainerGebSpec {
         go('/test/throwGeneralError')
 
         then: "The correct action is executed"
-        pageSource.contains 'my error occurred'
+        pageSource.contains('my error occurred')
     }
 
 }

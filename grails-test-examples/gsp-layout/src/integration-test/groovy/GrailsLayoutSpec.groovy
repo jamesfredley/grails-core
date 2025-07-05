@@ -25,7 +25,7 @@ class GrailsLayoutSpec extends ContainerGebSpec {
 
     void "forced layout"() {
         when:
-        browser.go('demo/index')
+        go('demo/index')
 
         then:
         pageSource.contains('Do you like BootStrap?')
@@ -33,7 +33,7 @@ class GrailsLayoutSpec extends ContainerGebSpec {
 
     void "decorator chaining"() {
         when:
-        browser.go('demo/chaining')
+        go('demo/chaining')
 
         then:
         pageSource.contains('This is so cool.')
@@ -41,7 +41,7 @@ class GrailsLayoutSpec extends ContainerGebSpec {
 
     void "jsp demo"() {
         when:
-        browser.go('demo/jsp')
+        go('demo/jsp')
 
         then:
         def container = browser.$('div.container')
@@ -52,7 +52,7 @@ class GrailsLayoutSpec extends ContainerGebSpec {
 
     void "text"() {
         when:
-        browser.go('demo/renderText')
+        go('demo/renderText')
 
         then:
         downloadText() == '''<p>Hello World</p>'''
@@ -60,7 +60,7 @@ class GrailsLayoutSpec extends ContainerGebSpec {
 
     void "Controller 500 Example"() {
         when:
-        browser.go('demo/exception')
+        go('demo/exception')
 
         then:
         pageSource.contains('Whoops, why would you ever want to see an exception??')
@@ -68,7 +68,7 @@ class GrailsLayoutSpec extends ContainerGebSpec {
 
     void "View 500 Example"() {
         when:
-        browser.go('demo/viewException')
+        go('demo/viewException')
 
         then:
         pageSource.contains('Oh Man, this view sucks!')
@@ -76,7 +76,7 @@ class GrailsLayoutSpec extends ContainerGebSpec {
 
     void "404 Error"() {
         when:
-        browser.go('demo/404')
+        go('demo/404')
 
         then:
         pageSource.contains('Error: Page Not Found (404)')

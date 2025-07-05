@@ -33,6 +33,6 @@ class RedirectInterceptorSpec extends ContainerGebSpec {
         go('/misc/interceptedByInterceptor')
 
         then:
-        pageSource.contains 'Test' // the redirect worked
+        pageSource.contains('Test') // the redirect worked
     }
 }

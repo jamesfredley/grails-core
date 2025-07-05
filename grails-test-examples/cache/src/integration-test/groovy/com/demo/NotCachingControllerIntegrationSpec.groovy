@@ -30,12 +30,12 @@ class NotCachingControllerIntegrationSpec extends ContainerGebSpec {
         go('/demo/show/1')
 
         then:
-        $().text().contains 'Hello World!1'
+        $().text().contains('Hello World!1')
 
         when:
         go('/demo/show/2')
 
         then:
-        $().text().contains 'Hello World!2'
+        $().text().contains('Hello World!2')
     }
 }

@@ -32,8 +32,7 @@ class MiscFunctionalSpec extends ContainerGebSpec {
         go('/misc/beanPropertyOverrideTest')
 
         then:
-        pageSource.contains 'Brian'
-
+        pageSource.contains('Brian')
     }
 
     @Issue('GRAILS-12028')
@@ -42,14 +41,14 @@ class MiscFunctionalSpec extends ContainerGebSpec {
         go('/misc/actionWhichReturnsNull')
 
         then:
-        	title == 'Action Which Returns Null GSP'
+        title == ('Action Which Returns Null GSP')
     }
 
     void "Test that placeholder configuration works for the config object"() {
-    	when:
+        when:
         go('/misc/placeHolderConfig')
 
-    	then:
-        pageSource.contains '[test test test]'
+        then:
+        pageSource.contains('[test test test]')
     }
 }

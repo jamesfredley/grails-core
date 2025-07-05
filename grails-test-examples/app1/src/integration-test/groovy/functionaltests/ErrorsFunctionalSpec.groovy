@@ -25,8 +25,6 @@ import grails.testing.mixin.integration.Integration
 import spock.lang.Issue
 import spock.lang.PendingFeature
 
-/**
- */
 @Integration(applicationClass = Application)
 @Rollback
 class ErrorsFunctionalSpec extends ContainerGebSpec {
@@ -36,7 +34,7 @@ class ErrorsFunctionalSpec extends ContainerGebSpec {
         go('/errors/throwCustomError')
 
         then: "The correct action is executed"
-        pageSource.contains 'Message = Something bad'
+        pageSource.contains('Message = Something bad')
     }
 
     void "Test 500 mappings for custom exceptions"() {
@@ -44,14 +42,14 @@ class ErrorsFunctionalSpec extends ContainerGebSpec {
         go('/demo/throwCustomError')
 
         then: "The correct action is executed"
-        pageSource.contains 'Message = Something bad'
+        pageSource.contains('Message = Something bad')
     }
 
     void "Test default 500 mapping"() {
         when: "An excetion that throws a general error handled by the default 500 mapping in UrlMapings.groovy"
         go('/errors/throwGeneralError')
 
-        println pageSource
+        println(pageSource)
 
         then: "The title is correct"
         $('ul', class: 'errors').text() == 'An error has occurred'

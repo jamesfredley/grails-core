@@ -33,7 +33,7 @@ class ControllerIncludesSpec extends ContainerGebSpec {
         go('/includes/includeFromControllerActionRenderingView')
 
         then: "Then the include worked"
-        pageSource.contains 'Model is bar'
+        pageSource.contains('Model is bar')
     }
 
     void "Test includes that render text work when called from a controller action"() {
@@ -41,7 +41,7 @@ class ControllerIncludesSpec extends ContainerGebSpec {
         go('/includes/includeFromControllerActionRenderingText')
 
         then: "Then the include worked"
-        pageSource.contains 'Test'
+        pageSource.contains('Test')
     }
 
     void "Test includes that render a view work when called from another view"() {
@@ -49,7 +49,7 @@ class ControllerIncludesSpec extends ContainerGebSpec {
         go('/includes/includeFromViewRenderingView')
 
         then: "Then the include worked"
-        pageSource.trim().contains 'Include: \nModel is bar'
+        pageSource.trim().contains('Include: \nModel is bar')
     }
 
     void "Test includes that render text work when called from another view"() {
@@ -57,7 +57,7 @@ class ControllerIncludesSpec extends ContainerGebSpec {
         go('/includes/includeFromViewRenderingText')
 
         then: "Then the include worked"
-        pageSource.contains 'Include: Test'
+        pageSource.contains('Include: Test')
     }
 
     void "Test includes that render a view work when called from a template"() {
@@ -65,7 +65,7 @@ class ControllerIncludesSpec extends ContainerGebSpec {
         go('/includes/includeFromTemplateRenderingView')
 
         then: "Then the include worked"
-        pageSource.trim().contains 'Include: \nModel is bar'
+        pageSource.trim().contains('Include: \nModel is bar')
     }
 
     void "Test includes that render text work when called from a template"() {
@@ -73,7 +73,7 @@ class ControllerIncludesSpec extends ContainerGebSpec {
         go('/includes/includeFromTemplateRenderingText')
 
         then: "Then the include worked"
-        pageSource.contains 'Include: Test'
+        pageSource.contains('Include: Test')
     }
 
 }
