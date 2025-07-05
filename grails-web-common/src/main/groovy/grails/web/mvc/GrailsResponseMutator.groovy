@@ -17,7 +17,7 @@
  *  under the License.
  */
 
-package org.grails.buffer
+package grails.web.mvc
 
 /**
  * Interface to assign to a HttpServletResponse wrapper so on an error, it can be deactivated to not further

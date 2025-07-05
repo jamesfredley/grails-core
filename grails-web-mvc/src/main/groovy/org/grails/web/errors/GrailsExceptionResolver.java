@@ -35,7 +35,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.codehaus.groovy.control.CompilationFailedException;
 import grails.core.GrailsApplication;
-import org.grails.buffer.GrailsResponseMutator;
+import grails.web.mvc.GrailsResponseMutator;
 import org.grails.exceptions.reporting.DefaultStackTraceFilterer;
 import org.grails.core.exceptions.GrailsRuntimeException;
 import org.grails.exceptions.reporting.StackTraceFilterer;
