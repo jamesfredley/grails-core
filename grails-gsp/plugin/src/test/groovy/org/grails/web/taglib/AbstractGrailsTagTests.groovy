@@ -143,7 +143,7 @@ abstract class AbstractGrailsTagTests {
         for (i in 0..100) {
             callable.call()
         }
-        println "$name took ${System.currentTimeMillis() - now}ms"
+        println("$name took ${System.currentTimeMillis() - now}ms")
     }
 
     def withTag(String tagName, Writer out, String tagNamespace = 'g', Closure callable) {
@@ -428,14 +428,14 @@ abstract class AbstractGrailsTagTests {
 
     void assertOutputContains(expected, template, params = [:]) {
         def result = applyTemplate(template, params)
-        assertTrue result.indexOf(expected) > -1,
-                "Output does not contain expected string [$expected]. Output was: [${result}]"
+        assertTrue(result.indexOf(expected) > -1,
+                "Output does not contain expected string [$expected]. Output was: [${result}]")
     }
 
     void assertOutputNotContains(expected, template, params = [:]) {
         def result = applyTemplate(template, params)
-        assertFalse result.indexOf(expected) > -1,
-                "Output should not contain the expected string [$expected]. Output was: [${result}]"
+        assertFalse(result.indexOf(expected) > -1,
+                "Output should not contain the expected string [$expected]. Output was: [${result}]")
     }
 
     /**
@@ -534,6 +534,7 @@ abstract class AbstractGrailsTagTests {
 }
 
 class MockThemeSource implements ThemeSource {
+
     private messageSource
 
     MockThemeSource(MessageSource messageSource) {

@@ -69,13 +69,13 @@ import org.springframework.web.servlet.view.InternalResourceViewResolver
 @Slf4j
 class GroovyPagesGrailsPlugin extends Plugin {
 
-    public static final String GSP_RELOAD_INTERVAL = "grails.gsp.reload.interval"
+    public static final String GSP_RELOAD_INTERVAL = 'grails.gsp.reload.interval'
     public static final String GSP_VIEWS_DIR = 'grails.gsp.view.dir'
 
-    def watchedResources = ["file:./plugins/*/grails-app/taglib/**/*TagLib.groovy",
-                            "file:./grails-app/taglib/**/*TagLib.groovy"]
+    def watchedResources = ['file:./plugins/*/grails-app/taglib/**/*TagLib.groovy',
+                            'file:./grails-app/taglib/**/*TagLib.groovy']
 
-    def grailsVersion = "7.0.0-SNAPSHOT > *"
+    def grailsVersion = '7.0.0-SNAPSHOT > *'
     def dependsOn = [core: GrailsUtil.getGrailsVersion(), i18n: GrailsUtil.getGrailsVersion()]
     def observe = ['controllers']
     def loadAfter = ['filters']
@@ -99,7 +99,7 @@ class GroovyPagesGrailsPlugin extends Plugin {
     @CompileStatic
     @Override
     void doWithApplicationContext() {
-        applicationContext.getBean("groovyPagesTemplateEngine", GroovyPagesTemplateEngine).clearPageCache()
+        applicationContext.getBean('groovyPagesTemplateEngine', GroovyPagesTemplateEngine).clearPageCache()
     }
 
     /**
@@ -235,7 +235,7 @@ class GroovyPagesGrailsPlugin extends Plugin {
             }
 
             boolean jstlPresent = ClassUtils.isPresent(
-                    "jakarta.servlet.jsp.jstl.core.Config", InternalResourceViewResolver.class.getClassLoader())
+                    'jakarta.servlet.jsp.jstl.core.Config', InternalResourceViewResolver.class.getClassLoader())
 
             abstractViewResolver {
                 prefix = GrailsApplicationAttributes.PATH_TO_VIEWS
