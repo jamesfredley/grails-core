@@ -114,11 +114,18 @@ This script will scan any gradle file and attempt to update both exclusions & de
 
 ==== 6. Gradle Changes:
 
-One of the major changes in Grails 7.0.0 is the modernization of it's build system.
-As a side effect of this modernization, the Grails build is fully parallel & https://docs.gradle.org/current/userguide/task_configuration_avoidance.html[lazy].
-When updating to Grails 7.0.0, there may be required updates to various tasks we distribute since the inputs of those tasks have changed to support lazy configuration.
+One of the major changes in Grails 7.0.0 is the modernization of it's build system. As a side effect of this modernization, the Grails build is fully parallel & https://docs.gradle.org/current/userguide/task_configuration_avoidance.html[lazy]. Moreover, most tasks have been enhanced to be cacheable. When updating to Grails 7.0.0, there may be required updates to various tasks we distribute since the inputs of those tasks have changed to support lazy configuration.
 
-===== 6.1. Upgrading Gradle:
+===== 6.1. Gradle Plugin Changes
+As part of the cacheable task changes, some tasks have slightly new behaviors:
+
+- FindMainTask can now fail for non-plugins: If an Application class is not found & the project has a Grails gradle plugin applied, the FindMainTask will now fail.
+- FindMainTask is now cacheable - restarting with bootRun should not force a recompile of the application if no changes have been made.
+- Configuration tasks have been added to customize compileGroovy tasks. These tasks allow for proper metadata being passed to the Groovy compiler to ensure the AST transformations know if code is a Grails Plugin or a Grails Application. In the event these tasks do not run or are caching incorrectly, you may observe incorrect UrlMapping resolution. Please report any instances of this happening so it can be addressed.
+- `groovyVersion` is now `groovy.version` to match upstream Spring BOM property names. If you still define groovyVersion to override the groovy version & use the Spring Dependency Management plugin, you will need to change this property to `groovy.version` in your `gradle.properties` file.
+- While the Spring Dependency Management plugin is still used by default, it can now be disabled by setting the property `springDependencyManagement` on the `grails` extension.
+
+===== 6.2. Upgrading Gradle:
 
 It is recommended to set your gradle version to a version of 8.14 or higher:
 
@@ -129,7 +136,7 @@ It is recommended to set your gradle version to a version of 8.14 or higher:
 
 This command will download the specified Gradle version and update the Gradle wrapper settings in your project.
 
-===== 6.2. Check Gradle Version:
+===== 6.3. Check Gradle Version:
 
 After the command finishes, you can verify that the Gradle version has been updated by checking the `gradle-wrapper.properties` file located in the `gradle/wrapper` directory.
 The `distributionUrl` in the file should now point to the specified Gradle version's distribution:
