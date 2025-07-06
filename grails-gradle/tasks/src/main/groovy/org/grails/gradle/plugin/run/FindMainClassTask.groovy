@@ -146,7 +146,7 @@ abstract class FindMainClassTask extends DefaultTask {
                 return null
             }
 
-            throw new RuntimeException('Could not find Application main class. Please set \'springBoot.mainClass\' or disable bootRun & bootArchive (bootJar / bootWar) tasks.')
+            throw new RuntimeException('Could not find Application main class. Please set \'springBoot.mainClass\'.')
         }
 
         return mainClassHolder
