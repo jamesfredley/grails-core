@@ -198,7 +198,7 @@ Grails 7.0.0 introduces several breaking changes that may require updates to you
 
 ===== 12.1
 
-Due to the significant changes in Grails 7, all prior Grails Plugin will need updated to work with Grails 7. For plugins in the https://github.com/grails-plugins/[Grails Plugins] GitHub organization, the Grails Core team is updating them as time permits and when requested.
+Due to the significant changes in Grails 7, all prior Grails Plugins will need updated to work with Grails 7. For plugins in the https://github.com/grails-plugins/[Grails Plugins] GitHub organization, the Grails Core team is updating them as time permits and when requested.
 If there is a plugin that you require updating, please reach out via https://github.com/apache/grails-core/issues[ticket] to see if we can help.
 
 ===== 12.2 javax -> Jakarta
@@ -293,6 +293,12 @@ The previous method using WebDriver binaries remains supported for backward comp
 ===== 12.11 Asset Pipeline
 
 The asset pipeline has a new https://github.com/wondrify/asset-pipeline[home]. Version 5.0.12 and forward is compatible with Grails 7.x.
+
+===== 12.12 API Changes
+
+As part of any major release, APIs can change.  For Grails 7.0, the list of renamed APIs follows:
+
+* GrailsClassUtils#isMatchBetweenPrimativeAndWrapperTypes -> GrailsClassUtils#isMatchBetweenPrimitiveAndWrapperTypes
 
 ====== Key Features
 
