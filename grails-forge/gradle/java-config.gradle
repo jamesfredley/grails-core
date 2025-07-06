@@ -81,7 +81,12 @@ tasks.withType(Jar).configureEach {
 tasks.withType(AbstractArchiveTask).configureEach {
     preserveFileTimestamps = false // to prevent timestamp mismatches
     reproducibleFileOrder = true // to keep the same ordering
-    dirMode = 0755 // To avoid platform specific defaults
-    fileMode = 0644 // to avoid platform specific defaults
+    // to avoid platform specific defaults, set the permissions consistently
+    filePermissions { permissions ->
+        permissions.unix(0644)
+    }
+    dirPermissions { permissions ->
+        permissions.unix(0755)
+    }
 }
 
