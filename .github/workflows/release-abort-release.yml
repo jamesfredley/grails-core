@@ -104,7 +104,6 @@ jobs:
           done < run-ids.txt
           rm -f run-ids.txt || true
       - name: "Remove GitHub Release & Tag"
-        continue-on-error: true
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TAG: ${{ github.event.inputs.release_tag }}
@@ -115,8 +114,14 @@ jobs:
           
           release_json="$(gh api -H 'Accept: application/vnd.github+json' "/repos/$OWNER/$REPO/releases/tags/$TAG" || true)"
           if [ -n "$release_json" ]; then
-              release_id=$(jq -r '.id' <<<"$release_json")
-              echo "Deleting release $release_id linked to tag $TAG"
+              # only pre-releases can be removed
+              if [ "$(jq -r '.prerelease' <<<"$release_json")" != "true" ]; then
+                  echo "❌ Release $TAG exists but is *not* marked as a pre-release. Aborting."
+                  exit 1
+              fi
+
+              release_id="$(jq -r '.id' <<<"$release_json")"
+              echo "Deleting pre-release $release_id linked to tag $TAG"
               gh api -X DELETE "/repos/$OWNER/$REPO/releases/$release_id"
           else
               echo "No GitHub release found for tag $TAG – skipping release deletion"
