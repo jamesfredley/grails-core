@@ -30,6 +30,7 @@ jobs:
     runs-on: ubuntu-24.04
     outputs:
       release_version: ${{ steps.release_version.outputs.value }}
+      commit_hash: ${{ steps.commit_hash.outputs.value }}
       target_branch: ${{ steps.extract_branch.outputs.value }}
       extract_repository_name: ${{ steps.extract_repository_name.outputs.repository_name }}
     steps:
@@ -76,6 +77,25 @@ jobs:
         env:
           RELEASE_VERSION: ${{ steps.release_version.outputs.value }}
           RELEASE_SCRIPT_PATH: '.github/scripts/setReleasedGrailsVersion.sh'
+      - name: 'Fetch release Commit Hash'
+        id: commit_hash
+        env:
+          OWNER: ${{ github.repository_owner }}
+          REPO: ${{ steps.extract_repository_name.outputs.repository_name }}
+          TAG: 'v${{ steps.release_version.outputs.value }}'
+        run: |
+          ref_json=$(gh api "repos/$OWNER/$REPO/git/ref/tags/$TAG")
+
+          type=$(jq -r '.object.type' <<<"$ref_json")
+          sha=$(jq -r '.object.sha'  <<<"$ref_json")
+
+          if [ "$type" = "tag" ]; then
+            sha=$(gh api "repos/$OWNER/$REPO/git/tags/$sha" --jq '.object.sha')
+          fi
+          
+          echo "Found Commit Sha: $sha"
+
+          echo "value=$sha" >>"$GITHUB_OUTPUT"
       - name: "🧩 Run grails-core Assemble"
         run: ./gradlew assemble
         env:
@@ -350,7 +370,7 @@ jobs:
       - name: "Output Agent IP" # in the event RAO blocks this agent, this can be used to debug it
         run: curl -s https://api.ipify.org
       - name: "Setup SVN and Tools"
-        run: sudo apt-get install -y subversion subversion-tools tree
+        run: sudo apt-get install -y subversion subversion-tools tree gettext-base
       - name: "Ensure grails dev folder exists"
         run: |
           set -e
@@ -436,6 +456,26 @@ jobs:
           files: DIST_SVN_REVISION.txt
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: "📥 Checkout repository"
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          ref: v${{ needs.publish.outputs.release_version }}
+          path: "grails-core"
+      - name: 'Vote Email'
+        env:
+          VERSION: ${{ needs.publish.outputs.release_version }}
+          VERSION_COMMIT_ID: ${{ needs.publish.outputs.commit_hash }}
+        run: |
+          export DIST_SVN_REVISION = $(cat DIST_SVN_REVISION.txt | grep 'Last Changed Rev:' | awk '{print $4}')
+          
+          echo "*************************************************"
+          echo "Subject: [VOTE] Release Apache Grails (incubating) ${VERSION}"
+          echo "*************************************************"
+          echo "Body:"
+          echo "*************************************************"
+          cat grails-core/.github/vote_templates/staged.txt | envsubst
+          echo "*************************************************"
   docs:
     environment: docs
     name: "Publish Documentation"
