@@ -469,7 +469,7 @@ jobs:
           VERSION: ${{ needs.publish.outputs.release_version }}
           VERSION_COMMIT_ID: ${{ needs.publish.outputs.commit_hash }}
         run: |
-          export DIST_SVN_REVISION = $(cat dev-repo/DIST_SVN_REVISION.txt | grep 'Last Changed Rev:' | awk '{print $4}')
+          export DIST_SVN_REVISION=$(awk '/Last Changed Rev:/ {print $4}' dev-repo/DIST_SVN_REVISION.txt)
           
           echo "*************************************************"
           echo "Subject: [VOTE] Release Apache Grails (incubating) ${VERSION}"
