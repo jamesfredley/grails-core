@@ -343,6 +343,9 @@ jobs:
   upload:
     needs: [ publish, source ]
     runs-on: ubuntu-24.04
+    env:
+      SVN_USERNAME: ${{ secrets.SVC_DIST_GRAILS_USERNAME }}
+      SVN_PASSWORD: ${{ secrets.SVC_DIST_GRAILS_PASSWORD }}
     steps:
       - name: "Output Agent IP" # in the event RAO blocks this agent, this can be used to debug it
         run: curl -s https://api.ipify.org
