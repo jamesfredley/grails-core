@@ -26,6 +26,9 @@ on:
         required: true
         default: 'grails-core'
         type: string
+permissions:
+  contents: write
+  actions: write
 jobs:
   abort:
     name: "Abort Release"
@@ -78,6 +81,28 @@ jobs:
           svnmucc --username "$SVN_USERNAME" --password "$SVN_PASSWORD" --non-interactive \
                       -m "Remove grails dev version $VERSION" \
                       rm "https://dist.apache.org/repos/dist/dev/incubator/grails/core/$VERSION"
+      - name: "Cancel GitHub Actions"
+        continue-on-error: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          OWNER: ${{ github.repository_owner }}
+          REPO: ${{ github.event.inputs.repository_name }}
+        run: |
+          for status in queued in_progress; do
+            curl -s -H "Authorization: Bearer $GITHUB_TOKEN" \
+                 -H "Accept: application/vnd.github+json" \
+                 "https://api.github.com/repos/$OWNER/$REPO/actions/runs?event=release&status=$status&per_page=100" |
+            jq -r '.workflow_runs[].id'
+          done > run-ids.txt
+          
+          while read run_id; do
+            echo "cancelling $run_id"
+            curl -s -X POST \
+            -H "Authorization: Bearer $GITHUB_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/$OWNER/$REPO/actions/runs/$run_id/cancel"
+          done < run-ids.txt
+          rm -f run-ids.txt || true
       - name: "Remove GitHub Release & Tag"
         continue-on-error: true
         env:
