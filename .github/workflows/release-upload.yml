@@ -42,7 +42,7 @@ jobs:
           ref: '7.0.x' # TODO: Temporary to minimize having to restage to test this workflow, remove once the input tag is removed
           path: grails-core
       - name: "Setup SVN and Tools"
-        run: sudo apt-get install -y subversion subversion-tools
+        run: sudo apt-get install -y subversion subversion-tools tree
       - name: "Ensure grails dev folder exists"
         run: |
           set -e
@@ -80,7 +80,7 @@ jobs:
           else
             echo "No existing dev version $VERSION to remove"
           fi
-      - name: "Upload distributions"
+      - name: "Fetch source distributions"
         run: |
           TAG=${{ github.event.inputs.release_tag }}
           VERSION=${{ steps.release_version.outputs.version }}
@@ -96,8 +96,33 @@ jobs:
           curl -LO https://github.com/apache/grails-core/releases/download/$TAG/apache-grails-wrapper-$VERSION-incubating-bin.zip
           curl -LO https://github.com/apache/grails-core/releases/download/$TAG/apache-grails-wrapper-$VERSION-incubating-bin.zip.sha512
           curl -LO https://github.com/apache/grails-core/releases/download/$TAG/apache-grails-wrapper-$VERSION-incubating-bin.zip.asc
-          echo "Adding the following files:"
+          echo "Downloaded the following files:"
           ls -l
-          cd ../..
+      - name: "Fetch binary distributions"
+        run: |
+          TAG=${{ github.event.inputs.release_tag }}
+          VERSION=${{ steps.release_version.outputs.version }}
+          cd dev-repo
+          mkdir -p $VERSION/distribution          
+          cd $VERSION/distribution
+          curl -LO https://github.com/apache/grails-core/releases/download/$TAG/apache-grails-$VERSION-incubating-src.zip
+          curl -LO https://github.com/apache/grails-core/releases/download/$TAG/apache-grails-$VERSION-incubating-src.zip.sha512
+          curl -LO https://github.com/apache/grails-core/releases/download/$TAG/apache-grails-$VERSION-incubating-src.zip.asc
+          curl -LO https://github.com/apache/grails-core/releases/download/$TAG/apache-grails-$VERSION-incubating-bin.zip
+          curl -LO https://github.com/apache/grails-core/releases/download/$TAG/apache-grails-$VERSION-incubating-bin.zip.sha512
+          curl -LO https://github.com/apache/grails-core/releases/download/$TAG/apache-grails-$VERSION-incubating-bin.zip.asc
+          curl -LO https://github.com/apache/grails-core/releases/download/$TAG/apache-grails-wrapper-$VERSION-incubating-bin.zip
+          curl -LO https://github.com/apache/grails-core/releases/download/$TAG/apache-grails-wrapper-$VERSION-incubating-bin.zip.sha512
+          curl -LO https://github.com/apache/grails-core/releases/download/$TAG/apache-grails-wrapper-$VERSION-incubating-bin.zip.asc
+          echo "Downloaded the following files:"
+          ls -l
+      - name: "Upload distributions"
+        run: |
+          TAG=${{ github.event.inputs.release_tag }}
+          VERSION=${{ steps.release_version.outputs.version }}
+          cd dev-repo
+          echo "Adding the following files to SVN:"
+          tree
           svn add $VERSION --force
-          svn commit -m "Upload grails source files for $VERSION" --username "$SVN_USERNAME" --password "$SVN_PASSWORD" --non-interactive
+          svn commit -m "Upload grails distribution files for $VERSION" --username "$SVN_USERNAME" --password "$SVN_PASSWORD" --non-interactive
+          pwd
