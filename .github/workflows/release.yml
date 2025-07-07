@@ -16,8 +16,8 @@
 name: "Release"
 on:
   release:
-    types: [published]
-permissions: {}
+    types: [ published ]
+permissions: { }
 env:
   # to prevent throttling of the github api, include the github token in an environment variable since the build will check for it
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -27,7 +27,7 @@ jobs:
     permissions:
       contents: write  #  to create release & upload wrapper
       issues: write  #  to modify milestones
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     outputs:
       release_version: ${{ steps.release_version.outputs.value }}
       target_branch: ${{ steps.extract_branch.outputs.value }}
@@ -243,11 +243,12 @@ jobs:
     needs: publish
     permissions:
       contents: write
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: "📥 Checkout grails-core repository"
         uses: actions/checkout@v4
         with:
+          token: ${{ secrets.GITHUB_TOKEN }}
           ref: v${{ needs.publish.outputs.release_version }}
           path: "grails"
       - name: "🗑️ Remove unnecessary files"
@@ -333,15 +334,98 @@ jobs:
         run: |
           set -e
           gh release --repo ${{ github.repository }} delete-asset v${{ needs.publish.outputs.release_version }} PUBLISHED_ARTIFACTS.txt --yes
+  upload:
+    needs: [ publish, source ]
+    runs-on: ubuntu-24.04
+    steps:
+      - name: "Output Agent IP" # in the event RAO blocks this agent, this can be used to debug it
+        run: curl -s https://api.ipify.org
+      - name: "Setup SVN and Tools"
+        run: sudo apt-get install -y subversion subversion-tools tree
+      - name: "Ensure grails dev folder exists"
+        run: |
+          set -e
+
+          if svn ls https://dist.apache.org/repos/dist/dev/incubator/grails --username "$SVN_USERNAME" --password "$SVN_PASSWORD" --non-interactive; then
+            echo "Dev Folder 'grails' already exists — skipping creation"
+          else
+            echo "Dev Folder 'grails' does not exist, creating"
+            svnmucc --username "$SVN_USERNAME" --password "$SVN_PASSWORD" --non-interactive \
+              mkdir https://dist.apache.org/repos/dist/dev/incubator/grails \
+              -m "Create 'grails' dev folder"
+          fi
+      - name: "Ensure grails core folder exists"
+        run: |
+          set -e
+
+          if svn ls https://dist.apache.org/repos/dist/dev/incubator/grails/core --username "$SVN_USERNAME" --password "$SVN_PASSWORD" --non-interactive; then
+            echo "Dev Folder 'grails/core' already exists — skipping creation"
+          else
+            echo "Dev Folder 'grails/core' does not exist, creating"
+            svnmucc --username "$SVN_USERNAME" --password "$SVN_PASSWORD" --non-interactive \
+              mkdir https://dist.apache.org/repos/dist/dev/incubator/grails/core \
+              -m "Create 'grails' dev folder"
+          fi
+      - name: "Checkout dev repo"
+        run: |
+          svn checkout --username "$SVN_USERNAME" --password "$SVN_PASSWORD" --non-interactive https://dist.apache.org/repos/dist/dev/incubator/grails/core dev-repo
+      - name: "Remove existing dev version"
+        run: |
+          VERSION="${{ needs.publish.outputs.release_version }}"
+          cd dev-repo
+          if [ -d "$VERSION" ]; then
+            svn delete "$VERSION"
+            svn commit -m "Remove grails dev version $VERSION" --username "$SVN_USERNAME" --password "$SVN_PASSWORD" --non-interactive
+          else
+            echo "No existing dev version $VERSION to remove"
+          fi
+      - name: "Fetch source distributions"
+        run: |
+          TAG="v${{ needs.publish.outputs.release_version }}"
+          VERSION="${{ needs.publish.outputs.release_version }}"
+          cd dev-repo
+          mkdir -p $VERSION/sources          
+          cd $VERSION/sources
+          curl -LO https://github.com/apache/grails-core/releases/download/$TAG/apache-grails-$VERSION-incubating-src.zip
+          curl -LO https://github.com/apache/grails-core/releases/download/$TAG/apache-grails-$VERSION-incubating-src.zip.sha512
+          curl -LO https://github.com/apache/grails-core/releases/download/$TAG/apache-grails-$VERSION-incubating-src.zip.asc
+          echo "Downloaded the following files:"
+          ls -l
+      - name: "Fetch binary distributions"
+        run: |
+          TAG="v${{ needs.publish.outputs.release_version }}"
+          VERSION="${{ needs.publish.outputs.release_version }}"
+          cd dev-repo
+          mkdir -p $VERSION/distribution          
+          cd $VERSION/distribution
+          curl -LO https://github.com/apache/grails-core/releases/download/$TAG/apache-grails-$VERSION-incubating-bin.zip
+          curl -LO https://github.com/apache/grails-core/releases/download/$TAG/apache-grails-$VERSION-incubating-bin.zip.sha512
+          curl -LO https://github.com/apache/grails-core/releases/download/$TAG/apache-grails-$VERSION-incubating-bin.zip.asc
+          curl -LO https://github.com/apache/grails-core/releases/download/$TAG/apache-grails-wrapper-$VERSION-incubating-bin.zip
+          curl -LO https://github.com/apache/grails-core/releases/download/$TAG/apache-grails-wrapper-$VERSION-incubating-bin.zip.sha512
+          curl -LO https://github.com/apache/grails-core/releases/download/$TAG/apache-grails-wrapper-$VERSION-incubating-bin.zip.asc
+          echo "Downloaded the following files:"
+          ls -l
+      - name: "Upload distributions"
+        run: |
+          TAG="v${{ needs.publish.outputs.release_version }}"
+          VERSION="${{ needs.publish.outputs.release_version }}"
+          cd dev-repo
+          echo "Adding the following files to SVN:"
+          tree
+          svn add $VERSION --force
+          svn commit -m "Upload grails distribution files for $VERSION" --username "$SVN_USERNAME" --password "$SVN_PASSWORD" --non-interactive
+          pwd
   docs:
     environment: docs
     name: "Publish Documentation"
-    needs: [publish, source]
+    needs: [ publish, source, upload ]
     runs-on: ubuntu-24.04
     steps:
       - name: "📥 Checkout repository"
         uses: actions/checkout@v4
         with:
+          token: ${{ secrets.GITHUB_TOKEN }}
           ref: v${{ needs.publish.outputs.release_version }}
       - name: 'Ensure Common Build Date' # to ensure a reproducible build
         run: echo "SOURCE_DATE_EPOCH=$(git log -1 --pretty=%ct)" >> "$GITHUB_ENV"
@@ -370,7 +454,7 @@ jobs:
     environment: sdkman
     name: "Release to SDKMAN!"
     runs-on: ubuntu-24.04
-    needs: [ publish, source ]
+    needs: [ publish, source, upload ]
     steps:
       - name: "📥 Checkout repository"
         uses: actions/checkout@v4
@@ -401,8 +485,8 @@ jobs:
   release:
     name: "Close Release"
     environment: release
-    needs: [publish, source, docs, sdkman]
-    runs-on: ubuntu-latest
+    needs: [ publish, source, upload, docs, sdkman ]
+    runs-on: ubuntu-24.04
     permissions:
       contents: write # required for gradle.properties revert
       issues: write # required for milestone closing
