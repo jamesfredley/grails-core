@@ -17,6 +17,7 @@
  *  under the License.
  */
 
+import grails.doc.git.FetchTagsTask
 import grails.doc.dropdown.CreateReleaseDropDownTask
 import grails.doc.gradle.PublishGuide
 
@@ -122,6 +123,12 @@ asciidoctor.dependsOn('aggregateGroovydoc')
 tasks.register('dist', Zip).configure { Zip it ->
     it.dependsOn 'docs'
     it.from outputDir
+}
+
+tasks.register('fetchTags', FetchTagsTask).configure {FetchTagsTask it ->
+    it.group = 'documentation'
+
+    task.outputs.file()
 }
 
 tasks.register('createReleaseDropdown', CreateReleaseDropDownTask).configure { CreateReleaseDropDownTask it ->

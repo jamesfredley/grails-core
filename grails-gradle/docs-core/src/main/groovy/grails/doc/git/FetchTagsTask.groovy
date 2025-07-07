@@ -21,14 +21,16 @@ package grails.doc.git
 
 
 import groovy.transform.CompileStatic
-import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
+import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.tasks.*
 
 @CompileStatic
 @CacheableTask
-abstract class FetchTagsTask extends DefaultTask {
+abstract class FetchTagsTask extends JavaExec {
 
+    @OutputFile
+    abstract RegularFileProperty getOutputFile() // Declares output
     /**
      * List all tags in the local Git repository.
      *
@@ -50,6 +52,7 @@ abstract class FetchTagsTask extends DefaultTask {
             throw new GradleException("Failed executing Git command to fetch version tags: ${process.text}")
         }
 
-        process.text.readLines()*.trim()
+        def tags = process.text.readLines()*.trim()
+
     }
 }
