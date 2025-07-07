@@ -125,11 +125,7 @@ tasks.register('dist', Zip).configure { Zip it ->
     it.from outputDir
 }
 
-tasks.register('fetchTags', FetchTagsTask).configure {FetchTagsTask it ->
-    it.group = 'documentation'
-
-    task.outputs.file()
-}
+tasks.register('fetchTags', FetchTagsTask)
 
 tasks.register('createReleaseDropdown', CreateReleaseDropDownTask).configure { CreateReleaseDropDownTask it ->
     it.group = 'documentation'

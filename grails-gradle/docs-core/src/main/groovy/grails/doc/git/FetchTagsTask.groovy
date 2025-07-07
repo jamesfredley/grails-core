@@ -19,40 +19,47 @@
 
 package grails.doc.git
 
-
 import groovy.transform.CompileStatic
-import org.gradle.api.GradleException
+import org.gradle.api.Project
 import org.gradle.api.file.RegularFileProperty
+import org.gradle.api.model.ObjectFactory
+import org.gradle.api.provider.Property
 import org.gradle.api.tasks.*
+
+import javax.inject.Inject
+import java.nio.charset.StandardCharsets
+import java.time.LocalDate
+import java.time.LocalDateTime
 
 @CompileStatic
 @CacheableTask
-abstract class FetchTagsTask extends JavaExec {
+abstract class FetchTagsTask extends Exec {
+
+    @Input
+    final Property<LocalDateTime> cacheDate // allows for forcing refreshing the tags, defaults to once a day
 
     @OutputFile
-    abstract RegularFileProperty getOutputFile() // Declares output
-    /**
-     * List all tags in the local Git repository.
-     *
-     * @param repoSlug The slug of the repository. e.g. apache/grails-core
-     * @return The list of tags in the repository
-     */
-    @TaskAction
-    private List<String> listRepoTags() {
-        File repoRoot = project.rootProject.projectDir
-        def command = ["git", "-C", repoRoot.absolutePath, "tag", "-l", "--sort=-creatordate"]
+    final RegularFileProperty tagsFile
 
-        def process = new ProcessBuilder(command)
-                .redirectErrorStream(true)
-                .start()
+    @Inject
+    FetchTagsTask(ObjectFactory objectFactory, Project project) {
+        group = 'documentation'
+        cacheDate = objectFactory.property(LocalDateTime).convention(LocalDate.now().atStartOfDay())
+        tagsFile = objectFactory.fileProperty().convention(project.layout.buildDirectory.file('git-tags.txt'))
 
-        process.waitFor()
+        commandLine("git", "tag", "-l", "--sort=-creatordate")
+        ignoreExitValue = false
 
-        if (process.exitValue() != 0) {
-            throw new GradleException("Failed executing Git command to fetch version tags: ${process.text}")
+        def output = new ByteArrayOutputStream()
+        standardOutput = output
+
+        doLast {
+            File file = tagsFile.get().asFile
+            if (!file.parentFile.exists()) {
+                file.mkdirs()
+            }
+
+            file.text = new String(output.toByteArray(), StandardCharsets.UTF_8).trim()
         }
-
-        def tags = process.text.readLines()*.trim()
-
     }
 }
