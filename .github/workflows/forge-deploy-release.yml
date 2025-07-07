@@ -48,18 +48,6 @@ jobs:
     steps:
       - name: "📥 Checkout repository"
         uses: actions/checkout@v4
-        with:
-          ref: v${{ needs.build.outputs.release_version }}
-      - name: "🔑 Login to Google Cloud"
-        uses: google-github-actions/auth@ba79af03959ebeac9769e648f473a284504d9193
-        with:
-          credentials_json: ${{ secrets.GCP_CREDENTIALS }}
-      - name: Set up Cloud SDK
-        uses: google-github-actions/setup-gcloud@77e7a554d41e2ee56fc945c52dfd3f33d12def9a
-        with:
-          project_id: ${{ secrets.GCP_PROJECT_ID }}
-      - name: "🐋 Configure Docker for Artifact Registry"
-        run: gcloud auth configure-docker us-docker.pkg.dev --quiet
       - name: "☕️ Setup JDK"
         uses: actions/setup-java@v4
         with:
@@ -69,6 +57,17 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
         with:
           develocity-access-key: ${{ secrets.GRAILS_DEVELOCITY_ACCESS_KEY  }}
+      - name: "🔑 Login to Google Cloud"
+        uses: google-github-actions/auth@ba79af03959ebeac9769e648f473a284504d9193
+        with:
+          credentials_json: ${{ secrets.GCP_CREDENTIALS }}
+          create_credentials_file: 'true'
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@77e7a554d41e2ee56fc945c52dfd3f33d12def9a
+        with:
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+      - name: "🐋 Configure Docker for Artifact Registry"
+        run: gcloud auth configure-docker us-docker.pkg.dev --quiet
       - name: "🏃 Run tests"
         working-directory: grails-forge
         run: >
@@ -103,18 +102,6 @@ jobs:
     steps:
       - name: "📥 Checkout repository"
         uses: actions/checkout@v4
-        with:
-          ref: v${{ needs.build.outputs.release_version }}
-      - name: "🔑 Login to Google Cloud"
-        uses: google-github-actions/auth@ba79af03959ebeac9769e648f473a284504d9193
-        with:
-          credentials_json: ${{ secrets.GCP_CREDENTIALS }}
-      - name: Set up Cloud SDK
-        uses: google-github-actions/setup-gcloud@77e7a554d41e2ee56fc945c52dfd3f33d12def9a
-        with:
-          project_id: ${{ secrets.GCP_PROJECT_ID }}
-      - name: "🐋 Configure Docker for Artifact Registry"
-        run: gcloud auth configure-docker us-docker.pkg.dev --quiet
       - name: "☕️ Setup JDK"
         uses: actions/setup-java@v4
         with:
@@ -124,6 +111,17 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
         with:
           develocity-access-key: ${{ secrets.GRAILS_DEVELOCITY_ACCESS_KEY  }}
+      - name: "🔑 Login to Google Cloud"
+        uses: google-github-actions/auth@ba79af03959ebeac9769e648f473a284504d9193
+        with:
+          credentials_json: ${{ secrets.GCP_CREDENTIALS }}
+          create_credentials_file: 'true'
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@77e7a554d41e2ee56fc945c52dfd3f33d12def9a
+        with:
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+      - name: "🐋 Configure Docker for Artifact Registry"
+        run: gcloud auth configure-docker us-docker.pkg.dev --quiet
       - name: "🏃 Run tests"
         working-directory: grails-forge
         run: >
