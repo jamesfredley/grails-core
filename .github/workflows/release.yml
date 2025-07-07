@@ -102,7 +102,10 @@ jobs:
       - name: "📦 Create wrapper checksum"
         run: |
           cd grails-wrapper/build/distributions
+          ls
           sha512sum apache-grails-wrapper-${{ steps.release_version.outputs.value }}-incubating-bin.zip > "apache-grails-wrapper-${{ steps.release_version.outputs.value }}-incubating-bin.zip.sha512"
+          echo: "Generated checksum for grails wrapper ZIP:"
+          cat apache-grails-wrapper-${{ steps.release_version.outputs.value }}-incubating-bin.zip.sha512
       - name: "📤 Upload grails wrapper ZIP"
         uses: softprops/action-gh-release@v2
         with:
@@ -120,7 +123,10 @@ jobs:
       - name: "📦 Create CLI checksum"
         run: |
           cd grails-forge/grails-cli/build/distributions
+          ls
           sha512sum apache-grails-${{ steps.release_version.outputs.value }}-incubating-bin.zip > "apache-grails-${{ steps.release_version.outputs.value }}-incubating-bin.zip.sha512"
+          echo: "Generated checksum for grails cli ZIP:"
+          cat apache-grails-${{ steps.release_version.outputs.value }}-incubating-bin.zip.sha512
       - name: "📤 Upload CLI ZIP"
         uses: softprops/action-gh-release@v2
         with:
