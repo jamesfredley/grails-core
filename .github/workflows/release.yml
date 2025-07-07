@@ -453,7 +453,7 @@ jobs:
       - name: "Upload Distribution SVN revision"
         uses: softprops/action-gh-release@v2
         with:
-          files: DIST_SVN_REVISION.txt
+          files: dev-repo/DIST_SVN_REVISION.txt
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: "📥 Checkout repository"
