@@ -129,20 +129,39 @@ while IFS= read -r line; do
     exit 1
   fi
 
-  echo "... Verifying required files exist in jar..."
-  required_jar_contents=(META-INF/LICENSE META-INF/DISCLAIMER META-INF/NOTICE)
-  missing_jar_contents=()
-  for entry in "${required_jar_contents[@]}"; do
-      if ! jar tf "${JAR_FILE}" | grep -qF -- "${entry}"; then
-          missing_jar_contents+=("${entry}")
-      fi
-  done
+  if [[ $JAR_FILE != *-javadoc.jar ]]; then
+      echo "... Verifying required files exist in non-javadoc jar..."
+        required_jar_contents=(META-INF/LICENSE META-INF/DISCLAIMER META-INF/NOTICE)
+        missing_jar_contents=()
+        for entry in "${required_jar_contents[@]}"; do
+            if ! jar tf "${JAR_FILE}" | grep -qF -- "${entry}"; then
+                missing_jar_contents+=("${entry}")
+            fi
+        done
 
-  if ((${#missing_jar_contents[@]})); then
-    printf '❌ %s missing from %s\n' "${missing_jar_contents[*]}" "${JAR_FILE}"
+        if ((${#missing_jar_contents[@]})); then
+          printf '❌ %s missing from %s\n' "${missing_jar_contents[*]}" "${JAR_FILE}"
+          exit 1
+        else
+          printf '✅ Required files %s are present in %s\n' "${required_jar_contents[*]}" "${JAR_FILE}"
+        fi
+  fi
+
+  POM_FILE="${ARTIFACT_ID}-${VERSION}.pom"
+  POM_URL="${REPO_BASE_URL}/${GROUP_ID}/${ARTIFACT_ID}/${VERSION}/${POM_FILE}"
+  echo "🔎 Checking pom for artifact: ${ARTIFACT_ID}-${VERSION}.pom"
+  if [ ! -f "${POM_FILE}" ]; then
+    echo "... Downloading: ${POM_URL} to ${POM_FILE}"
+    curl -sSfL "${POM_URL}" -o ${POM_FILE}
+  else
+    echo "... Skipping download, already exists: ${POM_FILE}"
+  fi
+
+  if grep -q 'SNAPSHOT' "${POM_FILE}"; then
+    echo "❌ ${POM_FILE} must not reference SNAPSHOT artifacts"
     exit 1
   else
-    printf '✅ Required files %s are present in %s\n' "${required_jar_contents[*]}" "${JAR_FILE}"
+    echo "✅ Verified: ${POM_FILE} does not reference SNAPSHOT artifacts"
   fi
 
   echo "✅ Verified: ${JAR_FILE}"
