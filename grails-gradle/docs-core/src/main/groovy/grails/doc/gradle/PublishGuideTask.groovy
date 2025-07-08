@@ -32,12 +32,13 @@ import org.gradle.api.AntBuilder
 import org.gradle.api.tasks.*
 
 import javax.inject.Inject
+import java.nio.file.Files
 
 /**
  * Gradle task for generating a gdoc-based HTML user guide.
  */
 @CacheableTask
-class PublishGuide extends DefaultTask {
+class PublishGuideTask extends DefaultTask {
 
     @Optional
     @Input
@@ -67,11 +68,6 @@ class PublishGuide extends DefaultTask {
     @Optional
     @InputDirectory
     @PathSensitive(PathSensitivity.RELATIVE)
-    final DirectoryProperty workDir
-
-    @Optional
-    @InputDirectory
-    @PathSensitive(PathSensitivity.RELATIVE)
     final DirectoryProperty resourcesDir
 
     @Optional
@@ -84,7 +80,7 @@ class PublishGuide extends DefaultTask {
     private final AntBuilder ant
 
     @Inject
-    PublishGuide(ObjectFactory objects, Project project) {
+    PublishGuideTask(ObjectFactory objects, Project project) {
         this.ant = project.ant
         language = objects.property(String).convention(null as String)
         sourceRepo = objects.property(String)
@@ -92,7 +88,6 @@ class PublishGuide extends DefaultTask {
         asciidoc = objects.property(Boolean).convention(true)
         propertiesFiles = objects.fileCollection()
         sourceDir = objects.directoryProperty().convention(project.layout.projectDirectory.dir("src"))
-        workDir = objects.directoryProperty().convention(project.layout.buildDirectory)
         resourcesDir = objects.directoryProperty().convention(project.layout.projectDirectory.dir("resources"))
         macros = objects.listProperty(Object).convention([])
         targetDir = objects.directoryProperty().convention(project.layout.buildDirectory.dir("docs"))
@@ -102,6 +97,8 @@ class PublishGuide extends DefaultTask {
     @TaskAction
     def publishGuide() {
         Properties combinedProperties = new Properties()
+
+        File workingDir = Files.createTempDirectory('grails-doc-publish-guide').toFile()
 
         File resources = resourcesDir.get().asFile
         File docProperties = new File(resources, 'doc.properties')
@@ -126,7 +123,7 @@ class PublishGuide extends DefaultTask {
         def publisher = new DocPublisher(sourceDir.get().asFile, apiDir)
         publisher.ant = ant
         publisher.asciidoc = asciidoc
-        publisher.workDir = workDir.get().asFile
+        publisher.workDir = workingDir
         publisher.apiDir = apiDir
         publisher.language = language.getOrElse('')
         publisher.sourceRepo = sourceRepo.getOrElse('')
@@ -170,6 +167,8 @@ class PublishGuide extends DefaultTask {
 
         // Restore the old context class loader.
         Thread.currentThread().contextClassLoader = oldClassLoader
+
+        workingDir.deleteDir()
     }
 }
 
