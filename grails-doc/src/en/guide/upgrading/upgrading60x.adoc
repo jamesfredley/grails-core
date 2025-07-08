@@ -146,6 +146,10 @@ The `distributionUrl` in the file should now point to the specified Gradle versi
 distributionUrl=https\://services.gradle.org/distributions/gradle-8.14-bin.zip
 ----
 
+===== 6.4. Removed Gradle Plugins
+
+The `grails-doc` plugin has been removed. If you wish to continue to generate the guide documentation, you can use the PublishGuideTask offered by `grails-docs-core`.
+
 ==== 7. Reproducible Builds:
 
 The ASF strongly encourages https://reproducible-builds.org/[reproducible builds] as part of it's security requirements.
