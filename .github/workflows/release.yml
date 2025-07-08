@@ -107,7 +107,7 @@ jobs:
           GRAILS_PUBLISH_RELEASE: "true"
       - name: "🧩 Run grails-forge Assemble"
         working-directory: grails-forge
-        run: ./gradlew assemble
+        run: ./gradlew assemble build -PskipTests --info
         env:
           GRAILS_PUBLISH_RELEASE: "true"
       - name: "📦 Generate grails-core docs"
