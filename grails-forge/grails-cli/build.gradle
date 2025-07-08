@@ -89,17 +89,6 @@ cliStartScripts.configure { CreateStartScripts t ->
     t.applicationName = 'grails'
     t.mainClass = project.findProperty('startMainClass') as String
     t.classpath = files(shadowJarTask)
-
-    // See gradle tickets such as for lib https://github.com/gradle/gradle/issues/7033
-    doLast {
-        t.unixScript.text = t.unixScript.text
-                .replace('$APP_HOME/lib/', "\$APP_HOME/.grails/$projectVersion/")
-                .replace('"${APP_HOME:-./}.."', '"${APP_HOME:-./}"')
-
-        t.windowsScript.text = t.windowsScript.text
-                .replace('%APP_HOME%\\lib\\', "%APP_HOME%\\.grails\\$projectVersion\\")
-                .replace('%DIRNAME%..', '%DIRNAME%')
-    }
 }
 
 TaskProvider<CreateStartScripts> shellCliStartScripts = tasks.register('createShellCliStartScripts', CreateStartScripts)
@@ -109,17 +98,6 @@ shellCliStartScripts.configure { CreateStartScripts t ->
     t.applicationName = 'grails-shell-cli'
     t.mainClass = 'org.grails.cli.GrailsCli'
     t.classpath = files(shadowJarTask)
-
-    // See gradle tickets such as for lib https://github.com/gradle/gradle/issues/7033
-    doLast {
-        t.unixScript.text = t.unixScript.text
-                .replace('$APP_HOME/lib/', "\$APP_HOME/.grails/${projectVersion}/")
-                .replace('"${APP_HOME:-./}.."', '"${APP_HOME:-./}"')
-
-        t.windowsScript.text = t.windowsScript.text
-                .replace('%APP_HOME%\\lib\\', "%APP_HOME%\\.grails\\${projectVersion}\\")
-                .replace('%DIRNAME%..', '%DIRNAME%')
-    }
 }
 
 TaskProvider<CreateStartScripts> forgeCliStartScripts = tasks.register('createForgeCliStartScripts', CreateStartScripts)
@@ -129,15 +107,6 @@ forgeCliStartScripts.configure { CreateStartScripts t ->
     t.applicationName = 'grails-forge-cli'
     t.mainClass = 'org.grails.forge.cli.Application'
     t.classpath = files(shadowJarTask)
-
-    // See gradle tickets such as for lib https://github.com/gradle/gradle/issues/7033
-    doLast {
-        t.unixScript.text = t.unixScript.text
-                .replace('$APP_HOME/lib/', "\$APP_HOME/.grails/$projectVersion/")
-
-        t.windowsScript.text = t.windowsScript.text
-                .replace('%APP_HOME%\\lib\\', "%APP_HOME%\\.grails\\$projectVersion\\")
-    }
 }
 
 project.extensions.getByType(DistributionContainer).configureEach {
@@ -145,7 +114,7 @@ project.extensions.getByType(DistributionContainer).configureEach {
     it.distributionClassifier.set('incubating-bin')
     it.contents {
         from(shadowJarTask) {
-            into "bin/.grails/$projectVersion"
+            into "lib"
         }
 
         from(cliStartScripts) {
