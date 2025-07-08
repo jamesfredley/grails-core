@@ -57,5 +57,8 @@ project(':grails-gradle-model').projectDir = file('model')
 include 'grails-docs-core'
 project(':grails-docs-core').projectDir = file('docs-core')
 
+include 'grails-docs-plugin'
+project(':grails-docs-plugin').projectDir = file('docs-plugin')
+
 include 'grails-gradle-tasks'
 project(':grails-gradle-tasks').projectDir = file('tasks')
