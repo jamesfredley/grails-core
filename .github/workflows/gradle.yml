@@ -24,10 +24,6 @@ on:
       - '[4-9]+.[0-9]+.x'
       - '[3-9]+.[3-9]+.x'
   workflow_dispatch:
-env:
-  # To prevent throttling of GitHub API usage, include the GitHub token as an environment variable
-  # as the build will use it when fetching git tags in CreateReleaseDropDown.groovy
-  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 # queue jobs and only allow 1 run per branch due to the likelihood of hitting GitHub resource limits
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -393,6 +389,8 @@ jobs:
         run: curl -s https://api.ipify.org
       - name: "📥 Checkout the repository"
         uses: actions/checkout@v4
+        with:
+          fetch-tags: true
       - name: "🔀 Store current branch name"
         run: |
           TARGET_BRANCH="${GITHUB_BASE_REF:-${GITHUB_REF#refs/heads/}}"
