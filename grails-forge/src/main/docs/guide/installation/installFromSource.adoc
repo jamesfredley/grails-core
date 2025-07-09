@@ -20,11 +20,11 @@ Clone the repository as follows:
 
 [source,bash]
 ----
-$ git clone https://github.com/apache/grails-forge.git
+$ git clone https://github.com/apache/grails-core.git
 ----
 
 
-`cd` into the `grails-forge` directory and run the following command:
+`cd` into the `grails-core/grails-forge` directory and run the following command:
 
 [source,bash]
 ----
