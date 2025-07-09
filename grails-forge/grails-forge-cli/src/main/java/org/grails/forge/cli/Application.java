@@ -40,7 +40,7 @@ import java.util.function.BiFunction;
         "*  @|bold create-webapp|@ @|yellow NAME|@",
         "*  @|bold create-restapi|@ @|yellow NAME|@",
         "*  @|bold create-plugin|@ @|yellow NAME|@",
-        "*  @|bold create-webplugin|@ @|yellow NAME|@"
+        "*  @|bold create-web-plugin|@ @|yellow NAME|@"
 },
         synopsisHeading = "@|bold,underline Usage:|@ ",
         optionListHeading = "%n@|bold,underline Options:|@%n",
