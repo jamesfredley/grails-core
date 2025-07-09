@@ -130,7 +130,7 @@ jobs:
           cd grails-forge
           cp grails-forge-cli/build/distributions/apache-grails-forge-cli-*.zip forge-cli.zip
           unzip forge-cli -d tmp
-          mv tmp/grails-forge-cli-* tmp/forge-cli
+          mv tmp/apache-grails-forge-cli-* tmp/forge-cli
           ./tmp/forge-cli/bin/grails-forge-cli --version
       - name: "✅ Verify combined CLI"
         run: |
