@@ -1,3 +1,5 @@
+import org.apache.grails.buildsrc.WriteGrailsVersionInfoTask
+
 /*
  *  Licensed to the Apache Software Foundation (ASF) under one
  *  or more contributor license agreements.  See the NOTICE file
@@ -16,8 +18,6 @@
  *  specific language governing permissions and limitations
  *  under the License.
  */
-
-import org.grails.forge.internal.tasks.WriteGrailsVersionInfoTask
 
 plugins {
     id 'groovy'
@@ -75,15 +75,19 @@ dependencies {
 }
 
 
-def grailsVersionInfo = tasks.register('grailsVersionInfo', WriteGrailsVersionInfoTask) {
-    version = projectVersion
-    outputDirectory = layout.buildDirectory.dir('version-info')
+def grailsVersionsPath = layout.buildDirectory.dir('version-info')
+def grailsVersionInfoTask = tasks.register('grailsVersionInfo', WriteGrailsVersionInfoTask)
+grailsVersionInfoTask.configure { WriteGrailsVersionInfoTask it ->
+    def grailsIncludedBuildName = rootProject.layout.projectDirectory.dir('..').asFile.name
+    def bomPublicationTask = gradle.includedBuild(grailsIncludedBuildName).task(':grails-bom:generatePomFileForMavenPublication')
+    it.dependsOn(bomPublicationTask)
+    it.bomPublicationFile = rootProject.layout.projectDirectory.file('../grails-bom/build/publications/maven/pom-default.xml')
+    it.versionsDirectory = grailsVersionsPath
 }
-
-sourceSets.main.resources.srcDir(grailsVersionInfo)
+sourceSets.main.resources.srcDir(grailsVersionsPath)
 
 tasks.named('build').configure {
-    it.dependsOn(grailsVersionInfo)
+    it.dependsOn(grailsVersionInfoTask)
 }
 
 rocker {
@@ -125,7 +129,7 @@ nohttp {
 
 ['processResources', 'sourcesJar', 'spotlessJavaMisc', 'checkstyleNohttp'].each { name ->
     tasks.named(name).configure {
-        it.dependsOn copyGrailsWrapper
+        it.dependsOn(copyGrailsWrapper, grailsVersionInfoTask)
     }
 }
 

@@ -72,6 +72,7 @@ afterEvaluate {
     if (plugins.hasPlugin('maven-publish')) {
         def checksumTask = tasks.register('publishedChecksums', Checksum)
         checksumTask.configure { Checksum check ->
+            check.group = 'publishing'
             check.checksumAlgorithm = Checksum.Algorithm.SHA512
             check.outputDirectory = layout.buildDirectory.dir('checksums')
             check.dependsOn(tasks.withType(Jar))
@@ -80,6 +81,7 @@ afterEvaluate {
         def artifactsDir = layout.buildDirectory.dir('artifacts')
         def artifactsTask = tasks.register('savePublishedArtifacts')
         artifactsTask.configure {
+            it.group = 'publishing'
             it.outputs.dir(artifactsDir)
             it.dependsOn(tasks.withType(Jar))
         }
