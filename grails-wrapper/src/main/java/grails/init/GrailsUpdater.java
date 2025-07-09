@@ -149,8 +149,9 @@ public class GrailsUpdater {
     private boolean updateJar(GrailsWrapperRepo repo, GrailsVersion version, String snapshotVersion) {
         boolean success = false;
 
-        final String localJarFilename = GrailsWrapperHome.CLI_COMBINED_PROJECT_NAME + "-" + version.version;
-        final String remoteJarFilename = snapshotVersion != null ? GrailsWrapperHome.CLI_COMBINED_PROJECT_NAME + "-" + snapshotVersion : GrailsWrapperHome.CLI_COMBINED_PROJECT_NAME + "-" + version.version;
+        final String localJarFilename = GrailsWrapperHome.CLI_COMBINED_PROJECT_NAME + "-" + version.version + "-all";
+        // shadowjars will always have the 'all' classifier
+        final String remoteJarFilename = snapshotVersion != null ? GrailsWrapperHome.CLI_COMBINED_PROJECT_NAME + "-" + snapshotVersion : GrailsWrapperHome.CLI_COMBINED_PROJECT_NAME + "-" + version.version + "-all";
         final String jarFileExtension = ".jar";
 
         try {
@@ -256,7 +257,7 @@ public class GrailsUpdater {
         if (!directory.exists()) {
             directory.mkdirs();
         }
-        Path jarFile = new File(directory, GrailsWrapperHome.CLI_COMBINED_PROJECT_NAME + "-" + version.version + ".jar").toPath();
+        Path jarFile = new File(directory, GrailsWrapperHome.CLI_COMBINED_PROJECT_NAME + "-" + version.version + "-all.jar").toPath();
         System.out.println("...Moving " + (isLocal ? "local" : "remotely") + " downloaded jar to: " + jarFile.toAbsolutePath());
         Files.move(downloadJarLocation.getAbsoluteFile().toPath(), jarFile, REPLACE_EXISTING);
 

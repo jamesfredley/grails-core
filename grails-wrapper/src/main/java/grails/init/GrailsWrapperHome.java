@@ -74,7 +74,7 @@ public class GrailsWrapperHome {
             return null;
         }
 
-        return new File(implDirectory, CLI_COMBINED_PROJECT_NAME + "-" + version.version + ".jar");
+        return new File(implDirectory, CLI_COMBINED_PROJECT_NAME + "-" + version.version + "-all.jar");
     }
 
     void cleanupOtherVersions(GrailsVersion toKeep) {
