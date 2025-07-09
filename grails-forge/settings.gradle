@@ -17,7 +17,9 @@
  *  under the License.
  */
 pluginManagement {
-    includeBuild('../grails-gradle')
+    includeBuild('../grails-gradle') {
+        name = 'grails-gradle'
+    }
 }
 plugins {
     id 'com.gradle.develocity' version '4.0.1'
@@ -58,5 +60,9 @@ include(
         'grails-forge-analytics-postgres'
 )
 
-includeBuild('..')
-includeBuild('../grails-gradle')
+includeBuild('..') {
+    name = 'grails-core'
+}
+includeBuild('../grails-gradle') {
+    name = 'grails-gradle'
+}
