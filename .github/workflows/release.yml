@@ -506,7 +506,7 @@ jobs:
           export DIST_SVN_REVISION=$(awk '/Last Changed Rev:/ {print $4}' dev-repo/DIST_SVN_REVISION.txt)
           
           echo "*************************************************"
-          echo "Subject: [ANNOUNCE] Apache Grails (incubating) ${VERSION}
+          echo "Subject: [ANNOUNCE] Apache Grails (incubating) ${VERSION}"
           echo "*************************************************"
           echo "Body:"
           echo "*************************************************"
