@@ -26,7 +26,7 @@ import org.grails.forge.internal.tasks.PicocliBuildCompletionTask
 plugins {
     id 'groovy'
     id 'java-library'
-    id 'application'
+    id 'distribution'
     id 'com.gradleup.shadow'
     id 'org.grails.forge.rocker'
 }
@@ -60,6 +60,11 @@ configurations {
             it.project.layout.buildDirectory.dir('processed-manpages').get().asFile
         })
     }
+}
+
+ext {
+    cliProject = true
+    startMainClass = 'org.grails.forge.cli.Application'
 }
 
 dependencies {
@@ -103,16 +108,8 @@ dependencies {
     testImplementation "org.codehaus.groovy:groovy-test:$groovyVersion"
 }
 
-application {
-    mainClass = 'org.grails.forge.cli.Application'
-}
-
 rocker {
     postProcessing = ['org.grails.forge.rocker.plugin.WhitespaceProcessor']
-}
-
-startScripts {
-    applicationName = 'grails-forge-cli'
 }
 
 apply {
@@ -124,7 +121,7 @@ apply {
 }
 
 def generateManpageAsciiDoc = tasks.register('generateManpageAsciiDoc', GenerateManpageAsciidoc) {
-    mainClass = application.mainClass
+    mainClass = findProperty('startMainClass') as String
     classpath.from(configurations.generateConfig, sourceSets.main.runtimeClasspath)
     outputDirectory = layout.buildDirectory.dir('generated-picocli-docs')
 }
@@ -147,74 +144,83 @@ processManPages.configure { Sync it ->
 
 def buildCompletion = tasks.register('buildCompletion', PicocliBuildCompletionTask)
 buildCompletion.configure { PicocliBuildCompletionTask it ->
-    it.outputDirectory.set(layout.buildDirectory.dir('bin'))
+    it.outputDirectory.set(layout.buildDirectory.dir('build-completion'))
     it.classpath.from(sourceSets.main.runtimeClasspath)
-    it.mainClass.set(application.mainClass)
+    it.mainClass.set(findProperty('startMainClass'))
 }
 
-distributions {
-    main {
-        contents {
-            from(buildCompletion) {
-                into 'bin'
-            }
-            from(rootProject.layout.projectDirectory.file('LICENSE')) {
-                into ''
-            }
-        }
+TaskProvider<Jar> jarTask = tasks.named('jar', Jar)
+jarTask.configure { Jar it ->
+    it.manifest {
+        attributes 'Main-Class': project.property('startMainClass')
     }
 }
 
-tasks.named('shadowJar', ShadowJar) {
+TaskProvider<Jar> shadowJarTask = tasks.named('shadowJar', ShadowJar)
+shadowJarTask.configure { ShadowJar it ->
+    it.archiveClassifier.set('')
 
     // TODO: This needs reworked so we have one consistent license view, for now the disclaimer is shipped so this should suffice until this is fixed.
     it.transform(ApacheLicenseResourceTransformer)
     it.transform(ApacheNoticeResourceTransformer)
     it.exclude('DISCLAIMER', 'license.header', 'licenses/**', 'META-INF/NOTICE.md', 'META-INF/NOTICE', 'META-INF/NOTICE.md', 'META-INF/licenses/**', 'META-INF/LICENSE.md')
 
-    mergeServiceFiles()
+    it.mergeServiceFiles()
 }
 
-tasks.named('shadowDistZip') {
-    enabled = false
-}
-tasks.named('shadowDistTar') {
-    enabled = false
-}
-
-tasks.named('distTar') {
-    enabled = false
+TaskProvider<CreateStartScripts> forgeCliStartScripts = tasks.register('createForgeCliStartScripts', CreateStartScripts)
+forgeCliStartScripts.configure { CreateStartScripts t ->
+    t.dependsOn jarTask, shadowJarTask
+    t.outputDir = layout.buildDirectory.dir('generated-forge-cli-scripts').get().asFile
+    t.applicationName = 'grails-forge-cli'
+    t.mainClass = findProperty('startMainClass') as String
+    t.classpath = files(shadowJarTask)
 }
 
-tasks.register('copyShadowJar', Sync) {
-    from shadowJar.outputs
-    into project.rootProject.layout.buildDirectory.dir('libs')
-    rename { String fileName -> 'cli.jar' }
-}
+project.extensions.getByType(DistributionContainer).configureEach {
+    it.distributionBaseName.set('apache-grails')
+    it.distributionClassifier.set('incubating-bin')
+    it.contents {
+        from(shadowJarTask) {
+            into "lib"
+        }
 
-tasks.register('exploded', Sync) {
-    dependsOn('distZip')
-    from(zipTree(distZip.outputs.files.singleFile))
-    into(project.layout.buildDirectory.dir('exploded'))
-    eachFile { FileCopyDetails fcd ->
-        fcd.relativePath = new RelativePath(true, fcd.relativePath.segments.drop(1))
+        from(layout.buildDirectory.dir('build-completion')) {
+            into 'bin'
+            it.filePermissions { permissions ->
+                permissions.unix(0755)
+            }
+        }
+
+        from(forgeCliStartScripts) {
+            into 'bin'
+            it.filePermissions { permissions ->
+                permissions.unix(0755)
+            }
+        }
+
+        from(rootProject.layout.projectDirectory.file('../LICENSE')) { it.into '' }
+        from(rootProject.layout.projectDirectory.file('../NOTICE')) { it.into '' }
+        from(rootProject.layout.projectDirectory.file('../INSTALL')) { it.into '' }
+        from(rootProject.layout.projectDirectory.file('../DISCLAIMER')) { it.into '' }
     }
-    onlyIf {
-        distZip.outputs.files.singleFile.exists()
-    }
 }
 
-tasks.register('cleanup', Delete) {
-    delete(project.rootProject.layout.buildDirectory.file('libs/cli.jar'))
-    delete(project.layout.buildDirectory.dir('dist'))
+def distZipTask = tasks.named('distZip')
+distZipTask.configure {
+    dependsOn(forgeCliStartScripts, jarTask, shadowJarTask, buildCompletion)
 }
-
-tasks.named('clean') {
-    dependsOn 'cleanup'
+tasks.named('distTar').configure {
+    dependsOn(forgeCliStartScripts, jarTask, shadowJarTask, buildCompletion)
 }
-
-tasks.named('assemble') {
-    dependsOn('exploded')
+tasks.named('build').configure {
+    it.dependsOn(distZipTask)
+}
+tasks.named('assemble').configure {
+    dependsOn(distZipTask)
+}
+tasks.named('installDist').configure {
+    it.dependsOn forgeCliStartScripts, buildCompletion
 }
 
 configurations.configureEach {

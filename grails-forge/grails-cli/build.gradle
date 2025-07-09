@@ -71,7 +71,7 @@ apply {
 TaskProvider<Jar> jarTask = tasks.named('jar', Jar)
 jarTask.configure { Jar it ->
     it.manifest {
-        attributes 'Main-Class': project.property('startMainClass')
+        attributes 'Main-Class': findProperty('startMainClass')
     }
 }
 
@@ -126,22 +126,30 @@ project.extensions.getByType(DistributionContainer).configureEach {
 
         from(cliStartScripts) {
             into 'bin'
-            fileMode = 0755
+            it.filePermissions { permissions ->
+                permissions.unix(0755)
+            }
         }
 
         from(shellCliStartScripts) {
             into 'bin'
-            fileMode = 0755
+            it.filePermissions { permissions ->
+                permissions.unix(0755)
+            }
         }
 
         from(forgeCliStartScripts) {
             into 'bin'
-            fileMode = 0755
+            it.filePermissions { permissions ->
+                permissions.unix(0755)
+            }
         }
 
-        from(rootProject.project(':grails-forge-cli').layout.buildDirectory.file('exploded/bin/grails_forge_cli_completion')) {
+        from(rootProject.project(':grails-forge-cli').layout.buildDirectory.file('build-completion/grails_forge_cli_completion')) {
             into 'bin'
-            fileMode = 0755
+            it.filePermissions { permissions ->
+                permissions.unix(0755)
+            }
         }
 
         from(rootProject.layout.projectDirectory.file('../LICENSE')) { it.into '' }
@@ -153,19 +161,19 @@ project.extensions.getByType(DistributionContainer).configureEach {
 
 def distZipTask = tasks.named('distZip')
 distZipTask.configure {
-    dependsOn cliStartScripts, forgeCliStartScripts, shellCliStartScripts, jarTask, shadowJarTask, rootProject.project(':grails-forge-cli').tasks.named('exploded')
+    dependsOn cliStartScripts, forgeCliStartScripts, shellCliStartScripts, jarTask, shadowJarTask, rootProject.project(':grails-forge-cli').tasks.named('buildCompletion')
 }
 tasks.named('build').configure {
     it.dependsOn(distZipTask)
 }
 tasks.named('assemble').configure {
-    it.dependsOn cliStartScripts, forgeCliStartScripts, shellCliStartScripts, rootProject.project(':grails-forge-cli').tasks.named('exploded')
+    it.dependsOn cliStartScripts, forgeCliStartScripts, shellCliStartScripts, rootProject.project(':grails-forge-cli').tasks.named('buildCompletion')
 }
 tasks.named('installDist').configure {
     it.dependsOn cliStartScripts, forgeCliStartScripts, shellCliStartScripts
 }
 tasks.named('distTar').configure {
-    dependsOn cliStartScripts, forgeCliStartScripts, shellCliStartScripts, jarTask, shadowJarTask, rootProject.project(':grails-forge-cli').tasks.named('exploded')
+    dependsOn cliStartScripts, forgeCliStartScripts, shellCliStartScripts, jarTask, shadowJarTask, rootProject.project(':grails-forge-cli').tasks.named('buildCompletion')
 }
 
 sdkman {
