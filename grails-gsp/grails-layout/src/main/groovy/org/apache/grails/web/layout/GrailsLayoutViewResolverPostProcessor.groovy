@@ -40,7 +40,7 @@ import org.springframework.core.Ordered
  *
  * @author Lari Hotari
  * @since 2.4.0
- * @see org.apache.grails.web.layout.EmbeddedGrailsLayoutViewResolver*
+ * @see EmbeddedGrailsLayoutViewResolver*
  */
 class GrailsLayoutViewResolverPostProcessor implements BeanDefinitionRegistryPostProcessor, Ordered {
 

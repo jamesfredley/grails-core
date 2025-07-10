@@ -33,9 +33,9 @@ import grails.util.GrailsStringUtils;
 import org.grails.core.artefact.ControllerArtefactHandler;
 import org.grails.io.support.GrailsResourceUtils;
 import org.grails.web.servlet.mvc.GrailsWebRequest;
+import org.grails.web.servlet.view.GrailsViewResolver;
 import org.grails.web.util.GrailsApplicationAttributes;
 import org.grails.web.servlet.view.AbstractGrailsView;
-import org.grails.web.servlet.view.GrailsViewResolver;
 import org.grails.web.servlet.view.LayoutViewResolver;
 import org.grails.web.util.WebUtils;
 import org.slf4j.Logger;
@@ -302,9 +302,8 @@ public class GroovyPageLayoutFinder implements ApplicationListener<ContextRefres
 
     @Override
     public void onApplicationEvent(ContextRefreshedEvent event) {
-        //TODO: With this being a singleton is this even needed?
-//        if (!(viewResolver instanceof GrailsViewResolver)) {
-//            setViewResolver(event.getApplicationContext().getBean(GrailsViewResolver.class));
-//        }
+        if (!(viewResolver instanceof GrailsViewResolver)) {
+            setViewResolver(event.getApplicationContext().getBean(GrailsViewResolver.class));
+        }
     }
 }

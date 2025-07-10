@@ -19,7 +19,6 @@
 
 package org.grails.web.taglib
 
-import com.opensymphony.module.sitemesh.RequestConstants
 import grails.build.support.MetaClassRegistryCleaner
 import grails.core.DefaultGrailsApplication
 import grails.core.GrailsApplication
@@ -309,7 +308,6 @@ abstract class AbstractGrailsTagTests {
         dependantPluginClasses << gcl.loadClass('org.grails.plugins.i18n.I18nGrailsPlugin')
         dependantPluginClasses << gcl.loadClass('org.grails.plugins.web.mapping.UrlMappingsGrailsPlugin')
         dependantPluginClasses << gcl.loadClass('org.grails.plugins.web.controllers.ControllersGrailsPlugin')
-        dependantPluginClasses << gcl.loadClass('org.grails.plugins.web.GrailsLayoutGrailsPlugin')
         dependantPluginClasses << gcl.loadClass('org.grails.plugins.web.GroovyPagesGrailsPlugin')
 
         def dependentPlugins = dependantPluginClasses.collect { new DefaultGrailsPlugin(it as Class<?>, grailsApplication) }

@@ -30,9 +30,6 @@ import grails.util.Metadata
 import grails.web.pages.GroovyPagesUriService
 import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
-import org.apache.grails.web.layout.GrailsLayoutRenderViewMutator
-import org.apache.grails.web.layout.GrailsLayoutViewResolverPostProcessor
-import org.apache.grails.web.layout.LayoutSelector
 import org.grails.core.artefact.gsp.TagLibArtefactHandler
 import org.grails.gsp.GroovyPageResourceLoader
 import org.grails.gsp.GroovyPagesTemplateEngine
@@ -42,7 +39,6 @@ import org.grails.plugins.web.taglib.ApplicationTagLib
 import org.grails.plugins.web.taglib.CountryTagLib
 import org.grails.plugins.web.taglib.FormTagLib
 import org.grails.plugins.web.taglib.FormatTagLib
-import org.grails.plugins.web.taglib.GrailsLayoutTagLib
 import org.grails.plugins.web.taglib.JavascriptTagLib
 import org.grails.plugins.web.taglib.PluginTagLib
 import org.grails.plugins.web.taglib.RenderTagLib
@@ -58,7 +54,6 @@ import org.grails.web.pages.DefaultGroovyPagesUriService
 import org.grails.web.pages.FilteringCodecsByContentTypeSettings
 import org.grails.web.pages.GroovyPagesServlet
 import org.grails.web.servlet.view.GroovyPageViewResolver
-import org.apache.grails.web.layout.GroovyPageLayoutFinder
 import org.grails.web.util.GrailsApplicationAttributes
 import org.springframework.beans.factory.config.PropertiesFactoryBean
 import org.springframework.boot.web.servlet.ServletRegistrationBean
@@ -84,7 +79,7 @@ class GroovyPagesGrailsPlugin extends Plugin {
     def grailsVersion = '7.0.0-SNAPSHOT > *'
     def dependsOn = [core: GrailsUtil.getGrailsVersion(), i18n: GrailsUtil.getGrailsVersion()]
     def observe = ['controllers']
-    def loadAfter = ['filters', 'webLayout']
+    def loadAfter = ['filters', 'grailsLayout']
 
     def providedArtefacts = [
             ApplicationTagLib,
@@ -96,7 +91,6 @@ class GroovyPagesGrailsPlugin extends Plugin {
             UrlMappingTagLib,
             ValidationTagLib,
             PluginTagLib,
-            GrailsLayoutTagLib
     ]
 
 

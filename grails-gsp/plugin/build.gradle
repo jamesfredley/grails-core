@@ -43,8 +43,6 @@ dependencies {
     implementation platform(project(':grails-bom'))
     astImplementation platform(project(':grails-bom'))
 
-    api project(':grails-layout')
-
     api project(':grails-gsp-core'), { // GroovyPageResourceLoader, GroovyPagesTemplateEngine, CachingGroovyPageStaticResourceLocator
         // API dependencies in grails-gsp
         exclude group: 'org.apache.grails.bootstrap', module: 'grails-bootstrap'

@@ -22,7 +22,7 @@ package org.apache.grails.views.gsp.layout
 import com.opensymphony.module.sitemesh.RequestConstants
 import org.apache.grails.web.layout.GSPGrailsLayoutPage
 import org.apache.grails.web.layout.EmbeddedGrailsLayoutView
-import BeforeEach
+import org.junit.jupiter.api.BeforeEach
 
 class FullGrailsLayoutLifeCycleWithNoPreprocessingTests extends FullGrailsLayoutLifeCycleTests {
 

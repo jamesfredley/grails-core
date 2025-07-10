@@ -21,18 +21,33 @@ package org.apache.grails.web.layout
 
 import grails.config.Config
 import grails.config.Settings
-import grails.plugins.Plugin
 import grails.util.Environment
 import grails.util.Metadata
+import org.grails.plugins.web.taglib.RenderGrailsLayoutTagLib
+import org.grails.plugins.web.taglib.GrailsLayoutTagLib
 
-class WebLayoutGrailsPlugin extends Plugin {
+import grails.plugins.Plugin
+import grails.util.GrailsUtil
+
+/**
+ * Plugin responsible for Grails Layout specific configuration.
+ */
+class GrailsLayoutGrailsPlugin extends Plugin {
 
     public static final String GSP_VIEW_LAYOUT_RESOLVER_ENABLED = 'grails.gsp.view.layoutViewResolver'
     public static final String DEFAULT_LAYOUT = 'grails.views.layout.default'
     public static final String GRAILS_LAYOUT_ENABLE_NONGSP = 'grails.views.layout.enable.nongsp'
 
+    def title = "Layout"
     def grailsVersion = '7.0.0-SNAPSHOT > *'
-    def title = "Web Layout"
+    def dependsOn = [core: GrailsUtil.getGrailsVersion(), i18n: GrailsUtil.getGrailsVersion()]
+    def observe = ['controllers']
+    def loadBefore = ['groovyPages']
+
+    def providedArtefacts = [
+            RenderGrailsLayoutTagLib,
+            GrailsLayoutTagLib
+    ]
 
     Closure doWithSpring() {
         { ->

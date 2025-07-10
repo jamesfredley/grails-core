@@ -30,9 +30,8 @@ import org.apache.grails.web.layout.GSPGrailsLayoutPage
 import org.apache.grails.web.layout.GrailsHTMLPageParser
 import org.apache.grails.web.layout.EmbeddedGrailsLayoutView
 import org.grails.core.io.MockStringResourceLoader
-import AbstractGrailsTagTests
-import Test
-import MockServletConfig
+import org.junit.jupiter.api.Test
+import org.springframework.mock.web.MockServletConfig
 
 /**
  * Tests the grails layout capturing and rendering tags end-to-end

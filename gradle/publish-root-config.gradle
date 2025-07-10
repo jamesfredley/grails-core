@@ -88,7 +88,6 @@ def publishedProjects = [
         'grails-web-gsp',
         'grails-web-gsp-taglib',
         'grails-web-jsp',
-        'grails-web-layout',
         'grails-web-mvc',
         'grails-web-taglib',
         'grails-web-url-mappings',
