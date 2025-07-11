@@ -333,6 +333,7 @@ jobs:
       - name: "✅ Verify grails-wrapper"
         if: success()
         run: |
+          export GRAILS_WRAPPER_ALLOWED_TYPES='SNAPSHOT'
           cp grails-wrapper/build/distributions/apache-grails-wrapper-*.zip build/wrapper.zip
           cd build
           unzip wrapper -d tmp
