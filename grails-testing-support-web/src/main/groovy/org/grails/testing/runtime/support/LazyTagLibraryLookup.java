@@ -28,7 +28,9 @@ import org.grails.taglib.TagLibraryLookup;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.GenericBeanDefinition;
 import org.springframework.context.support.GenericApplicationContext;
+import org.springframework.util.ClassUtils;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -39,8 +41,31 @@ import java.util.Map;
  */
 @SuppressWarnings({"unchecked", "rawtypes"})
 public class LazyTagLibraryLookup extends TagLibraryLookup {
-    List<Class> tagLibClasses = (List<Class>) new GroovyPagesGrailsPlugin().getProvidedArtefacts();
-    private Map<String, GrailsTagLibClass> lazyLoadableTagLibs = new HashMap<String, GrailsTagLibClass>();
+    List<Class> tagLibClasses;
+    private Map<String, GrailsTagLibClass> lazyLoadableTagLibs = new HashMap<>();
+
+    public LazyTagLibraryLookup() {
+        List<Class> mockedClasses = new ArrayList<>((List<Class>) new GroovyPagesGrailsPlugin().getProvidedArtefacts());
+        ClassLoader classLoader = LazyTagLibraryLookup.class.getClassLoader();
+        if(ClassUtils.isPresent("org.apache.grails.web.layout.LayoutGrailsPlugin", classLoader)) {
+            // sitemesh2 support
+            try {
+                mockedClasses.add(Class.forName("org.grails.plugins.web.taglib.GrailsLayoutTagLib"));
+                mockedClasses.add(Class.forName("org.grails.plugins.web.taglib.RenderGrailsLayoutTagLib"));
+            }
+            catch(Exception ignored) {
+            }
+        }
+        if(ClassUtils.isPresent("org.grails.plugins.sitemesh3.Sitemesh3GrailsPlugin", classLoader)) {
+            try {
+                mockedClasses.add(Class.forName("org.grails.plugins.web.taglib.SitemeshTagLib"));
+                mockedClasses.add(Class.forName("org.grails.plugins.web.taglib.RenderSitemeshTagLib"));
+            }
+            catch(Exception ignored) {
+            }
+        }
+        tagLibClasses = mockedClasses;
+    }
 
     @Override
     protected void registerTagLibraries() {
