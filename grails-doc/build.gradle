@@ -190,17 +190,21 @@ publishGuideTask.configure { PublishGuideTask publish ->
                 'GrailsVersion'            : projectVersion,
                 'version'                  : projectVersion,
                 'gormVersion'              : projectVersion,
-                'cacheExampleSourceDir'    : rootProject.layout.projectDirectory.dir('grails-test-examples/cache').asFile,
                 'hibernate5Version'        : getVersion("hibernate-core-jakarta"),
                 'spockVersion'             : getVersion("spock-core"),
                 'testingSupportVersion'    : getVersion("grails-testing-support-core"),
                 'grailsGradlePluginVersion': getVersion("grails-gradle-plugins"),
-                'sourcedir'                : rootProject.layout.projectDirectory.asFile,
-                'functionalSourceDir'      : rootProject.layout.projectDirectory.asFile,
                 'gparsdocs'                : "https://gpars.org/$gparsVersion/groovydoc",
                 'rxjavadocs'               : 'https://reactivex.io/RxJava/1.x/javadoc',
                 'rxjava2docs'              : 'https://reactivex.io/RxJava/2.x/javadoc',
                 'tags'                     : '../ref/Tags'
+        ] as Map<String, String>
+    }
+    publish.propertiesWithFilePaths = project.provider {
+        [
+                'cacheExampleSourceDir': rootProject.layout.projectDirectory.dir('grails-test-examples/cache').asFile,
+                'sourcedir'            : rootProject.layout.projectDirectory.asFile,
+                'functionalSourceDir'  : rootProject.layout.projectDirectory.asFile
         ] as Map<String, String>
     }
 }

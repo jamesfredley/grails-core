@@ -52,6 +52,14 @@ class PublishGuideTask extends DefaultTask {
     @Input
     final MapProperty<String, Object> properties
 
+    @Internal
+    // Used to relativize file paths in getRelativizedPropertiesWithFilePaths()
+    final DirectoryProperty rootProjectDir
+
+    @Internal
+    // Properties in this map contain file paths. @internal allows to exclude it from the cache key, instead the getRelativizedPropertiesWithFilePaths() is considered as @Input to enable cache relocatability
+    final MapProperty<String, File> propertiesWithFilePaths
+
     @Optional
     @Input
     final Property<Boolean> asciidoc
@@ -85,6 +93,8 @@ class PublishGuideTask extends DefaultTask {
         language = objects.property(String).convention(null as String)
         sourceRepo = objects.property(String)
         properties = objects.mapProperty(String, Object).convention([:])
+        rootProjectDir = objects.directoryProperty().convention(project.rootProject.layout.projectDirectory)
+        propertiesWithFilePaths = objects.mapProperty(String, File).convention([:])
         asciidoc = objects.property(Boolean).convention(true)
         propertiesFiles = objects.fileCollection()
         sourceDir = objects.directoryProperty().convention(project.layout.projectDirectory.dir("src"))
@@ -92,6 +102,14 @@ class PublishGuideTask extends DefaultTask {
         macros = objects.listProperty(Object).convention([])
         targetDir = objects.directoryProperty().convention(project.layout.buildDirectory.dir("docs"))
         group = 'documentation'
+    }
+
+    @Optional
+    @Input
+    Map<String, String> getRelativizedPropertiesWithFilePaths() {
+        return propertiesWithFilePaths.get().collectEntries { key, file ->
+            return [key, rootProjectDir.get().getAsFile().toPath().relativize(file.toPath()).toString()]
+        }
     }
 
     @TaskAction
@@ -115,6 +133,7 @@ class PublishGuideTask extends DefaultTask {
             }
         }
         combinedProperties.putAll(properties.get())
+        combinedProperties.putAll(propertiesWithFilePaths.get())
 
         File apiDir = targetDir.get().asFile
         apiDir.deleteDir()
