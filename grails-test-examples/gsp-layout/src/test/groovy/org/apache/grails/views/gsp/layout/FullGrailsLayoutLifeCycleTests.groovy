@@ -33,6 +33,8 @@ import org.grails.core.io.MockStringResourceLoader
 import org.junit.jupiter.api.Test
 import org.springframework.mock.web.MockServletConfig
 
+import static org.junit.jupiter.api.Assertions.assertEquals
+
 /**
  * Tests the grails layout capturing and rendering tags end-to-end
  *
@@ -65,12 +67,12 @@ class FullGrailsLayoutLifeCycleTests extends AbstractGrailsTagTests {
 '''
         def result = applyLayout(layout, template)
 
-        org.junit.jupiter.api.Assertions.assertEquals '''
+        assertEquals('''
 <html>
     <head><title>Decorated This is the title</title><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"></head>
     <body><h1>Hello</h1>body text</body>
 </html>
-''', result
+''', result)
     }
 
     @Test
@@ -101,7 +103,7 @@ class FullGrailsLayoutLifeCycleTests extends AbstractGrailsTagTests {
 '''
         def result = applyLayout(layout, template)
 
-        org.junit.jupiter.api.Assertions.assertEquals('''
+        assertEquals('''
 <html>
     <head><title>Decorated This is the title</title><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"></head>
     <body><h1>Hello</h1>body text</body>
@@ -174,12 +176,12 @@ class FullGrailsLayoutLifeCycleTests extends AbstractGrailsTagTests {
 '''
         def result = applyLayout(layout, template)
 
-        org.junit.jupiter.api.Assertions.assertEquals '''
+        assertEquals('''
 <html>
     <head><title>Decorated Base - Dialog - This is the title</title><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"></head>
     <body><h1>Hello</h1><div id="base"><div id="dialog">body text</div></div></body>
 </html>
-''', result
+''', result)
     }
 
     @Test
@@ -199,7 +201,7 @@ class FullGrailsLayoutLifeCycleTests extends AbstractGrailsTagTests {
 
         def result = applyLayout(layout, template)
 
-        org.junit.jupiter.api.Assertions.assertEquals '<h1>pageProperty: here!</h1>', result
+        assertEquals('<h1>pageProperty: here!</h1>', result)
     }
 
     @Test
@@ -218,7 +220,7 @@ class FullGrailsLayoutLifeCycleTests extends AbstractGrailsTagTests {
 
         def result = applyLayout(layout, template, [:])
 
-        org.junit.jupiter.api.Assertions.assertEquals 'good', result
+        assertEquals('good', result)
     }
 
     // GRAILS-11484
@@ -234,7 +236,7 @@ This is the title
 </html>
 '''
 
-        assertOutputEquals '''
+        assertOutputEquals('''
 <html>
         <head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <title>
@@ -242,7 +244,7 @@ This is the title
 </title></head>
         <body onload="test();">body text</body>
 </html>
-''', template
+''', template)
 
         def layout = '''
 <html>
@@ -252,7 +254,7 @@ This is the title
 '''
         def result = applyLayout(layout, template)
 
-        org.junit.jupiter.api.Assertions.assertEquals '''
+        assertEquals('''
 <html>
     <head><title>Decorated 
 This is the title
@@ -260,7 +262,7 @@ This is the title
 </head>
     <body><h1>Hello</h1>body text</body>
 </html>
-''', result
+''', result)
     }
 
 }
