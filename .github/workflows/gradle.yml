@@ -128,9 +128,9 @@ jobs:
       - name: "✅ Verify Forge CLI"
         run: |
           cd grails-forge
-          cp grails-forge-cli/build/distributions/grails-forge-cli-*.zip forge-cli.zip
+          cp grails-forge-cli/build/distributions/apache-grails-forge-cli-*.zip forge-cli.zip
           unzip forge-cli -d tmp
-          mv tmp/grails-forge-cli-* tmp/forge-cli
+          mv tmp/apache-grails-forge-cli-* tmp/forge-cli
           ./tmp/forge-cli/bin/grails-forge-cli --version
       - name: "✅ Verify combined CLI"
         run: |
@@ -139,6 +139,7 @@ jobs:
           unzip cli -d tmp1
           mv tmp1/apache-grails-* tmp1/cli
           ./tmp1/cli/bin/grails --version
+          ./tmp1/cli/bin/grails-forge-cli --version
       - name: "📤 Upload CLI Zip to Workflow Summary Page"
         if: ${{ matrix.java == '17' }}
         uses: actions/upload-artifact@v4
@@ -332,6 +333,7 @@ jobs:
       - name: "✅ Verify grails-wrapper"
         if: success()
         run: |
+          export GRAILS_WRAPPER_ALLOWED_TYPES='SNAPSHOT'
           cp grails-wrapper/build/distributions/apache-grails-wrapper-*.zip build/wrapper.zip
           cd build
           unzip wrapper -d tmp

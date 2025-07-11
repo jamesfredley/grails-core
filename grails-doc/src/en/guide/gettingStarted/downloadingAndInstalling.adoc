@@ -63,7 +63,7 @@ After installing, all three CLI commands: `grails`, `grails-shell-cli`, and `gra
 
 For manual installation follow these steps:
 
-* https://github.com/apache/grails-forge/releases[Download] a binary distribution of Grails and extract the resulting zip file to a location of your choice.
+* https://github.com/apache/grails-core/releases[Download] a binary distribution of Grails and extract the resulting zip file to a location of your choice.
 Then add the bin directory to your system path.
 
 ==== Unix/Linux

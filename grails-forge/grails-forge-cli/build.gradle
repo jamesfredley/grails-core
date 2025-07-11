@@ -180,7 +180,7 @@ forgeCliStartScripts.configure { CreateStartScripts t ->
 }
 
 project.extensions.getByType(DistributionContainer).configureEach {
-    it.distributionBaseName.set('apache-grails')
+    it.distributionBaseName.set('apache-grails-forge-cli')
     it.distributionClassifier.set('incubating-bin')
     it.contents {
         from(shadowJarTask) {

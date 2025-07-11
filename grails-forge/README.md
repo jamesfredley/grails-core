@@ -22,7 +22,7 @@ Generates Grails applications.
 
 ## Installation
 
-The CLI application comes in various flavours from a universal Java applications to native applications for Windows, Linux and OS X. These are available for direct download on the [releases page](https://github.com/apache/grails-forge/releases). For installation see the [Grails documentation](https://docs.grails.org/latest/guide/index.html#buildCLI).
+The CLI application comes in various flavours from a universal Java applications to native applications for Windows, Linux and OS X. These are available for direct download on the [releases page](https://github.com/apache/grails-core/releases). For installation see the [Grails documentation](https://docs.grails.org/latest/guide/index.html#buildCLI).
 
 If you prefer not to install an application to create Grails applications you can do so with `curl` directly from the API:
 
@@ -61,12 +61,12 @@ See the [Snapshot Documentation](https://grails.github.io/grails-forge/snapshot/
 
 ## Snapshots and Releases
 
-Releases are published to SDKMan via [Github Actions](https://github.com/apache/grails-forge/actions).
+Releases are published to SDKMan via the Release action on [Github Actions](https://github.com/apache/grails-core/actions).
 
 A release is performed with the following steps:
 
-* [Publish the draft release](https://github.com/apache/grails-forge/releases). There should be already a draft release created, edit and publish it. The Git Tag should start with `v`. For example `v1.0.0`.
-* [Monitor the Workflow](https://github.com/apache/grails-forge/actions?query=workflow%3ARelease) to check it passed successfully.
+* [Publish the draft release](https://github.com/apache/grails-core/releases). There should be already a draft release created, edit and publish it. The Git Tag should start with `v`. For example `v1.0.0`.
+* [Monitor the Workflow](https://github.com/apache/grails-core/actions?query=workflow%3ARelease) to check it passed successfully.
 * Celebrate!
 
 ## Architecture

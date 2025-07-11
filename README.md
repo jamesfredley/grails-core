@@ -84,12 +84,12 @@ about it, see the [documentation](https://docs.grails.org/snapshot/index.html).
 
 The legacy Apache Grails CLI is the command line interface that IntelliJ uses to interact with existing Apache Grails
 Applications. It can be used to generate applications or it can be used to interact with existing ones. To use it,
-download it to your preferred location from the [grails-forge](https://github.com/apache/grails-forge/releases) release
+download it to your preferred location from the [grails-forge](https://github.com/apache/grails-core/releases) release
 page. You can use the command `./grails-shell-cli help` to see what's possible.
 
 ### grails-forge-cli
 
-The newer Apache Grails CLI is available from the [grails-forge](https://github.com/apache/grails-forge/releases)
+The newer Apache Grails CLI is available from the [grails-forge](https://github.com/apache/grails-core/releases)
 release page. You can use the command `./grails-forge-cli --help` to see what's possible.
 
 ### SDKMAN
