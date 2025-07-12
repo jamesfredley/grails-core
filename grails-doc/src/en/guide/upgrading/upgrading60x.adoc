@@ -243,8 +243,9 @@ jakartaeeMigration {
 4. `GrailsClassUtils#getPropertyForGetter(String)` - use `getPropertyForGetter(String, Class)` instead.
 5. `AbstractGrailsClass#getPropertyDescriptors` - use `getMetaProperties` instead.
 6. `org.grails.core.metaclass.BaseApiProvider` - use traits instead.
-7. Several static variables on `ClosureEventTriggeringInterceptor` are removed - use the variables on `AbstractPersistentEvent` instead.
-8. `org.grails.plugins.databinding.DataBindingGrailsPlugin` was removed - use `DataBindingConfiguration` instead.
+7. Several static variables on `ClosureEventTriggeringInterceptor` - use the variables on `AbstractPersistentEvent` instead.
+8. `org.grails.plugins.databinding.DataBindingGrailsPlugin`- use `DataBindingConfiguration` instead.
+9. `grails.testing.gorm.DataTest#dataSource` - use `DataTest#datasource` instead.
 
 - The following deprecated classes were removed, please use the suggested replacement:
 
