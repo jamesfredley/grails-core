@@ -244,8 +244,7 @@ jakartaeeMigration {
 5. `AbstractGrailsClass#getPropertyDescriptors` - use `getMetaProperties` instead.
 6. `org.grails.core.metaclass.BaseApiProvider` - use traits instead.
 7. Several static variables on `ClosureEventTriggeringInterceptor` - use the variables on `AbstractPersistentEvent` instead.
-8. `org.grails.plugins.databinding.DataBindingGrailsPlugin`- use `DataBindingConfiguration` instead.
-9. `grails.testing.gorm.DataTest#dataSource` - use `DataTest#datasource` instead.
+8. `grails.testing.gorm.DataTest#dataSource` - use `DataTest#datasource` instead.
 
 - The following deprecated classes were removed, please use the suggested replacement:
 
@@ -255,6 +254,7 @@ jakartaeeMigration {
 4. `org.grails.plugins.CodecsGrailsPlugin` -> `org.grails.plugins.codecs.CodecsGrailsPlugin`
 5. `grails.artefact.AsyncController` -> `grails.async.web.AsyncController`
 6. `grails.beans.util.LazyBeanMap` -> `grails.beans.util.LazyMetaPropertyMap`
+7. `org.grails.plugins.databinding.DataBindingGrailsPlugin` -> `DataBindingConfiguration`
 
 ===== 12.4 Micronaut in Grails is now supported via the Micronaut Spring Boot Starter
 - This change was made based on community input: https://github.com/orgs/grails/discussions/13517
