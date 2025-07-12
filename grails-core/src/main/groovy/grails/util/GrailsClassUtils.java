@@ -883,19 +883,6 @@ public class GrailsClassUtils {
     }
 
     /**
-     * Returns a property name equivalent for the given getter name or null if it is not a valid getter. If not null
-     * or empty the getter name is assumed to be a valid identifier.
-     *
-     * @param getterName The getter name
-     * @return The property name equivalent
-     * @deprecated Use {@link #getPropertyForGetter(String, Class)} instead because this method has a defect for "is.." method with Boolean return types.
-     */
-    @Deprecated
-    public static String getPropertyForGetter(String getterName) {
-        return GrailsNameUtils.getPropertyForGetter(getterName);
-    }
-
-    /**
      * Returns a property name equivalent for the given getter name and return type or null if it is not a valid getter. If not null
      * or empty the getter name is assumed to be a valid identifier.
      *

@@ -238,6 +238,7 @@ jakartaeeMigration {
 - `org.grails.spring.beans.factory.OptimizedAutowireCapableBeanFactory` was previously deprecated and is now removed.
 - the `checkForChangesExpected` on GrailsPlugin was previously deprecated and is now removed.
 - `GrailsClassUtils#isGetter(String, Class[])` was previously deprecated and is now removed.  Use `isGetter(String, Class, Class[])` instead.
+- `GrailsClassUtils#getPropertyForGetter(String)` was previously deprecated and is now removed.  Use `getPropertyForGetter(String, Class)` instead.
 - The following deprecated classes were removed, please use the suggested replacement:
 
 1. `grails.core.GrailsTagLibClass` -> `grails.core.gsp.GrailsTagLibClass`
