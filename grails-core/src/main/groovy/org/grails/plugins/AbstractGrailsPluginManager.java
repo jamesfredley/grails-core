@@ -89,6 +89,7 @@ public abstract class AbstractGrailsPluginManager implements GrailsPluginManager
     protected boolean loadCorePlugins = true;
 
     private static final String CONFIG_BINDING_USER_HOME = "userHome";
+    private static final String CONFIG_BINDING_GRAILS_HOME = "grailsHome";
     private static final String CONFIG_BINDING_APP_NAME = "appName";
     private static final String CONFIG_BINDING_APP_VERSION = "appVersion";
 
@@ -490,6 +491,7 @@ public abstract class AbstractGrailsPluginManager implements GrailsPluginManager
         final Map<String, Object> binding = new HashMap<>();
         // configure config slurper binding
         binding.put(CONFIG_BINDING_USER_HOME, System.getProperty("user.home"));
+        binding.put(CONFIG_BINDING_GRAILS_HOME, System.getProperty("grails.home"));
         if (application != null) {
             binding.put(CONFIG_BINDING_APP_NAME, application.getMetadata().getApplicationName());
             binding.put(CONFIG_BINDING_APP_VERSION, application.getMetadata().getApplicationVersion());

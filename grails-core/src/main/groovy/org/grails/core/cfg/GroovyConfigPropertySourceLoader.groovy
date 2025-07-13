@@ -54,6 +54,7 @@ class GroovyConfigPropertySourceLoader implements PropertySourceLoader {
                 ConfigSlurper configSlurper = env ? new ConfigSlurper(env) : new ConfigSlurper()
 
                 configSlurper.setBinding(userHome: System.getProperty('user.home'),
+                        grailsHome: BuildSettings.GRAILS_HOME?.absolutePath,
                         appName: Metadata.getCurrent().getApplicationName(),
                         appVersion: Metadata.getCurrent().getApplicationVersion() )
                 try {

@@ -47,7 +47,7 @@ class GroovyConfigPropertySourceLoaderSpec extends Specification implements Envi
         def config = new PropertySourcesConfig(propertySources)
 
         then:
-        config.size() == 8
+        config.size() == 9
         config.getProperty("my.local.var", String.class) == "test"
         config.getProperty("foo.bar", String.class) == "test"
         config.getProperty("userHomeVar", String.class)
