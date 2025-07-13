@@ -25,11 +25,9 @@ import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.Map;
 
-
 import grails.core.DefaultGrailsApplication;
 import grails.core.GrailsApplication;
 import grails.plugins.exceptions.PluginException;
-import org.springframework.util.Assert;
 
 /**
  * @author Graeme Rocher

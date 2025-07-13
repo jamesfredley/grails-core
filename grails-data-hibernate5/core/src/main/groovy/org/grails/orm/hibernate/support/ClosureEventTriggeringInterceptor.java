@@ -18,7 +18,6 @@
  */
 package org.grails.orm.hibernate.support;
 
-
 import org.grails.datastore.gorm.events.AutoTimestampEventListener;
 import org.grails.datastore.gorm.events.ConfigurableApplicationContextEventPublisher;
 import org.grails.datastore.gorm.events.ConfigurableApplicationEventPublisher;
@@ -30,7 +29,6 @@ import org.grails.datastore.mapping.model.PersistentEntity;
 import org.grails.datastore.mapping.model.types.Embedded;
 import org.grails.datastore.mapping.proxy.ProxyHandler;
 import org.grails.orm.hibernate.AbstractHibernateDatastore;
-import org.grails.orm.hibernate.AbstractHibernateGormInstanceApi;
 import org.hibernate.Hibernate;
 import org.hibernate.HibernateException;
 import org.hibernate.event.spi.AbstractEvent;
