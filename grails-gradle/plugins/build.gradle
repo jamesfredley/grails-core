@@ -34,6 +34,11 @@ dependencies {
     // see: https://docs.gradle.org/current/userguide/compatibility.html#groovy
     compileOnly "org.codehaus.groovy:groovy"
 
+    implementation "org.apache.grails.bootstrap:grails-bootstrap:$project.version", {
+        exclude group: 'org.apache.groovy'
+        exclude group: 'org.spockframework'
+    }
+
     implementation project(':grails-gradle-tasks')
 
     // spock is leaking from the grails-gradle-bom through grails-gradle-model
