@@ -73,11 +73,13 @@ For Example:
     verify.sh v7.0.0-M4 /tmp/grails-verify
 ```
 
-### Download the Staged Artifacts
+Otherwise, you may follow the subsequent steps in this section to verify each step individually.
+
+### Manual Verification: Download the Staged Artifacts
 
 Use `etc/bin/download-release-artifacts.sh` to download the staged artifacts. This script will download the source distribution, wrapper binary distribution, and sdkman binary distribution. The distribution should come from [https://dist.apache.org/repos/dist/dev/incubator/grails/core/version](https://dist.apache.org/repos/dist/dev/incubator/grails/core).
 
-### Source Distribution Verification
+### Manual Verification: Source Distribution Verification
 
 The following are the source distribution artifacts:
    * `apache-grails-<version>-incubating-src.zip` - the source distribution
@@ -102,7 +104,7 @@ Extracts the zip file and verifies the contents:
    * Ensure the `PUBLISHED_ARTIFACTS` file is present so we know how to pull the various jar files.
    * Ensure the `CHECKSUMS` file is present so we can ensure those checksums match the staged artifacts.
 
-### Jar file Signature Verification (Nexus Staging Repositories)
+### Manual Verification: Jar file Signature Verification (Nexus Staging Repositories)
 
 As part of uploading to repository.apache.org the signatures are verified to match a KEY that has been distributed, but RAO does not verify that the jar files are built with a key trusted by the Grails project.
 
@@ -113,7 +115,7 @@ Example:
     ./etc/bin/verify-jar-artifacts.sh v7.0.0-M4 <grailsdownloadlocation>
 ```
 
-### Reproducible Jar File
+### Manual Verification: Reproducible Jar Files
 After all jar files are verified to be signed by a valid Grails key, we need to build a local copy to ensure the file was built with the right code base. The `very-reproducible.sh` script handles this check, but if the bootstrap needs to be manually bootstrapped, perform the following step: 
 
     gradle -p gradle bootstrap
@@ -124,13 +126,17 @@ If there are any jar file differences, confirm they are relevant by following th
 1. Extract the differing jar file using the `etc/bin/extract-build-artifact.sh <jarfilepath from diff.txt>`
 2. In IntelliJ, under `etc/bin/results` there will now be a `firstArtifact` & `secondArtifact` folder. Select them both, right click, and select `Compared Directories`  
 
-### Binary Distribution Verification
+Please note that Grails is officially built on Linux so if there are differences they may be due to the OS platform.
+There is a dockerfile checked into to assist building in an environment like GitHub actions. Please see the section
+`Appendix: Verification from a Container` for more information.
+
+### Manual Verification: Binary Distribution Verification
 
 Grails has 2 binary distributions:
    * `grailsw` - the Grails wrapper, which is a script that downloads the necessary jars to run Grails. This will exist inside of the generated applications, but can be optionally downloaded as a standalone binary distribution.
    * `grails` - the delegating CLI, which is a script that delegates to the Grails Forge CLI. This is the `sdkman` distribution.
 
-#### Verify Grails Wrapper Binary Distribution
+#### Manual Verification: Verify Grails Wrapper Binary Distribution
 
 The following are the Grails Wrapper distribution artifacts:
 * `apache-grails-wrapper-<version>-incubating-bin.zip` - the wrapper distribution
@@ -152,7 +158,7 @@ Verifies the wrapper distribution signature via the command:
 Extracts the zip file and verifies the contents:
 * Ensure the `LICENSE` & `NOTICE` files are present to ensure license compliance.
 
-#### Verify Grails Delegating CLI Binary Distribution
+#### Manual Verification: Verify Grails Delegating CLI Binary Distribution
 
 The following are the Grails distribution artifacts:
 * `apache-grails-<version>-incubating-bin.zip` - the cli distribution that will be uploaded to sdkman
@@ -176,12 +182,17 @@ Extracts the zip file and verifies the contents:
 
 ## 3. Verifying the CLIs are Functional
 
-The CLI distribution consists of various CLI's: `grailsw` (wrapper), `grails` (delegating), `grails-forge-cli`, and `grails-shell-cli`. Each CLI needs tested to ensure it's functional prior to release:
+The CLI distribution consists of various CLI's: `grailsw` (wrapper), `grails` (delegating), `grails-forge-cli`, and
+`grails-shell-cli`. Each CLI needs tested to ensure it's functional prior to release. The `verify.sh` script will output
+example commands to perform this verification. However, it if manually verifying, these are the minimum suggested steps:
 
-* testing `grailsw`:
+* Testing `grailsw`:
     * set GRAILS_REPO_URL to the staging repository (https://repository.apache.org/content/groups/staging)
     * run `grailsw` and ensure it downloads the correct jars to `.grails` (verify the checksums of the jars)
-* testing `grails-shell-cli`:
+  * Please note that the Grails Wrapper (`grailsw`) writes to the `.grails` directory in the user's home directory. If
+    not run in an isolated environment, it may attempt to use already downloaded artifacts. If the wrapper fails, try
+    removing the `.grails` directory to confirm it isn't a transient state issue.
+* Testing `grails-shell-cli`:
     * create a basic app:
     ```bash
     grails-shell-cli create-app test
@@ -310,18 +321,13 @@ Setup the key for validity:
 
 # Appendix: Verification from a Container
 
-The Grails image is officially built on linux in a GitHub action using an Ubuntu container. To run a linux container locally, you can use the following command:
+The Grails image is officially built on linux in a GitHub action using an Ubuntu container. To run a linux container
+locally, you can use the following command (substitute `<git-tag-of-release` with the tag name):
 
 ```bash
     docker build -t grails:testing -f etc/bin/Dockerfile . && docker run -it --rm -v $(pwd):/home/groovy/project -p 8080:8080 grails:testing bash
     cd grails-verify
-    verify.sh v7.0.0-M4 .
-    cd grails 
-    gradlew wrapper
-    cd grails-gradle 
-    gradlew wrapper
-    cd ../..
-    verify-reproducible.sh .
+    verify.sh <git-tag-of-release> .
 ```
 
 Please note that the argument `-p 8080:8080` is used to expose the port 8080 of the container to the host machine's port 8080 (fromContainerPort:toHostPort). This allows you to access any running Grails application in the container from your host. If you have another application on port 8080, you can change the port mapping to avoid conflicts, e.g., `-p 8080:8081`. 
