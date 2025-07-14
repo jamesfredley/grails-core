@@ -22,6 +22,7 @@ import grails.util.GrailsNameUtils
 import groovy.namespace.QName
 import io.github.gradlenexus.publishplugin.InitializeNexusStagingRepository
 import io.github.gradlenexus.publishplugin.NexusPublishPlugin
+import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.Task
@@ -178,12 +179,12 @@ Note: if project properties are used, the properties must be defined prior to ap
         projectPluginManager.apply(MavenPublishPlugin)
 
         boolean localSigning = false
+        String signingKeyId = project.findProperty('signing.keyId') ?: System.getenv('SIGNING_PASSPHRASE')
         if (isRelease) {
-            String signingKeyId = project.findProperty('signing.keyId') ?: System.getenv('SIGNING_KEY')
             extraPropertiesExtension.setProperty('signing.keyId', signingKeyId)
             String secringFile = project.findProperty('signing.secretKeyRingFile') ?: System.getenv('SIGNING_KEYRING')
             if (!secringFile) {
-                project.logger.info("No keyring file has been specified. Assuming the use of local gpgCommand instead.")
+                project.logger.lifecycle('No keyring file (SIGNING_KEYRING) has been specified. Assuming the use of local gpgCommand to sign instead.')
                 localSigning = true
                 extraPropertiesExtension.setProperty('signing.gnupg.keyName', signingKeyId)
             } else {
@@ -276,6 +277,17 @@ Note: if project properties are used, the properties must be defined prior to ap
 
                         def testRepoPath = gpe.testRepositoryPath.getOrNull()
                         if (testRepoPath) {
+                            maven {
+                                name = 'TestCaseMavenRepo'
+                                url = testRepoPath
+                            }
+                        }
+                    }
+                } else {
+                    // This is a local publish. Add the test case repository if it's defined on the extension.
+                    def testRepoPath = gpe.testRepositoryPath.getOrNull()
+                    if (testRepoPath) {
+                        repositories {
                             maven {
                                 name = 'TestCaseMavenRepo'
                                 url = testRepoPath
@@ -426,9 +438,20 @@ Note: if project properties are used, the properties must be defined prior to ap
                 // The sign task does not properly setup dependencies, see https://github.com/gradle/gradle/issues/26091
                 project.tasks.withType(Sign).configureEach {
                     it.dependsOn(project.tasks.withType(Jar))
+                    it.doFirst {
+                        if (!signingKeyId) {
+                            throw new GradleException('A signing key is required to sign a release. Set GRAILS_PUBLISH_RELEASE=false to bypass signing.')
+                        }
+                    }
                 }
                 project.tasks.withType(PublishToMavenRepository).configureEach {
                     it.mustRunAfter(project.tasks.withType(Sign))
+                }
+            }
+
+            if (project.rootProject.tasks.names.contains('publishAllPublicationsToTestCaseMavenRepoRepository')) {
+                project.rootProject.tasks.named('publishAllPublicationsToTestCaseMavenRepoRepository').configure {
+                    it.dependsOn(project.tasks.named('publishAllPublicationsToTestCaseMavenRepoRepository'))
                 }
             }
 

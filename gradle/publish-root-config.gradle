@@ -140,15 +140,8 @@ subprojects {
     }
 }
 
-project.afterEvaluate {
-    tasks.register('publishAllPublicationsToTestCaseMavenRepoRepository').configure {
-        dependsOn(
-                subprojects
-                        .findAll { it.name in publishedProjects }
-                        .collect { it.tasks.named('publishAllPublicationsToTestCaseMavenRepoRepository') }
-        )
-    }
-}
+// subprojects will register dependencies via the publish plugin
+tasks.register('publishAllPublicationsToTestCaseMavenRepoRepository')
 
 def aggregatePublishedArtifacts = tasks.register('aggregatePublishedArtifacts')
 
