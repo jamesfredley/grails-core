@@ -27,8 +27,9 @@ ext {
             .map(Long::parseLong)
             .map(Instant::ofEpochSecond)
             .orElseGet(Instant::now)
-    formattedBuildDate = DateTimeFormatter.ISO_INSTANT.format(buildInstant)
-    formattedBuildDateForCache = LocalDate.now(ZoneOffset.UTC).toString()
+    formattedBuildDate = System.getenv("SOURCE_DATE_EPOCH") ?
+            DateTimeFormatter.ISO_INSTANT.format(buildInstant) :
+            DateTimeFormatter.ISO_DATE.format(LocalDate.ofInstant(buildInstant as Instant, ZoneOffset.UTC))
     buildDate = (buildInstant as Instant).atZone(ZoneOffset.UTC) // for reproducible builds
 
     grailsVersion = projectVersion
