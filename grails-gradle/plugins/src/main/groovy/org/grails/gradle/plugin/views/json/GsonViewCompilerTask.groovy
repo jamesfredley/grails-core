@@ -20,11 +20,8 @@
 package org.grails.gradle.plugin.views.json
 
 import groovy.transform.CompileStatic
-import org.gradle.api.file.FileTree
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.tasks.CacheableTask
-import org.gradle.api.tasks.PathSensitive
-import org.gradle.api.tasks.PathSensitivity
 import org.gradle.process.ExecOperations
 import org.grails.gradle.plugin.views.AbstractGroovyTemplateCompileTask
 
@@ -38,12 +35,6 @@ import javax.inject.Inject
 @CompileStatic
 @CacheableTask
 class GsonViewCompilerTask extends AbstractGroovyTemplateCompileTask {
-
-    @PathSensitive(PathSensitivity.RELATIVE)
-    @Override
-    FileTree getSource() {
-        return super.getSource();
-    }
 
     @Inject
     GsonViewCompilerTask(ExecOperations execOperations, ObjectFactory objectFactory) {
