@@ -38,7 +38,7 @@ You'll need to unzip this somewhere convenient. For example, to unzip it to a do
 [source,bash]
 ----
 $ mkdir ~/.grails
-$ unzip grails-forge-cli/build/distributions/grails-forge-cli-VERSION.zip -d ~/.grails
+$ unzip grails-forge-cli/build/distributions/apache-grails-forge-cli-VERSION-incubating-bin.zip -d ~/.grails
 ----
 
 In your shell profile (`~/.bash_profile` if you are using the Bash shell), export the `GRAILS_HOME` directory (wherever you unzipped it to) and add the CLI path to your `PATH`:
