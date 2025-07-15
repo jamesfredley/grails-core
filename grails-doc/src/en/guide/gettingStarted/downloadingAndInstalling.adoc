@@ -30,7 +30,7 @@ The historical `grails shell` CLI has been a core part of the Grails Framework s
 Nearly all historical references to the `grails` or `grailsw` commands pertain to `grails shell` functionality.
 The `grails shell` CLI relies on Profiles, consisting of skeleton directories and YAML-based configurations for application generation.
 However, this approach is less flexible than the feature-rich application generation capabilities of `grails forge`.
-The Grails Wrapper is a lightweight script (`grailsw`) and accompanying JAR file designed to bootstrap and load the CLI within a Grails Application.
+The Grails Wrapper is a lightweight script (`grailsw`) and the accompanying JAR file is designed to bootstrap and load the CLI within a Grails Application.
 The `grails shell` CLI provides most of the same application generation functionality provided by `grails forge`.
 Importantly, it can also run scripts, such as `run-app` that call Gradle and/or your Grails Application.
 Most Grails plugins still include Grails Scripts that execute within `grails shell` CLI and have not yet been migrated to Gradle tasks.
@@ -60,7 +60,7 @@ Although some advancements have been made in this transition, substantial work i
 The `grails forge` can be extended by forking the repository and hosting your own Grails Application Forge internally, which is generally more complex than extending `grails shell` with a custom profile.
 
 ==== Both CLIs exist in Grails 7
-For the reasons listed above Grails 7 includes both CLIs.  `grails-shell`, `grails-profiles`, `grails-wrapper` and `grails-forge` projects are now all part of the grails-core project and are released together.
+For the reasons listed above, Grails 7 now includes both CLIs and a combined delegating CLI that can invoke either CLI.  `grails-shell`, `grails-profiles`, `grails-wrapper` and `grails-forge` projects are now all part of the grails-core project and are released together.
 
 Grails 7 adds the following commands to any Grails install:
 
