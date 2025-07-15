@@ -154,7 +154,7 @@ public class GrailsUpdater {
 
         final String localJarFilename = GrailsWrapperHome.CLI_COMBINED_PROJECT_NAME + "-" + version.version + "-all";
         // shadowjars will always have the 'all' classifier
-        final String remoteJarFilename = snapshotVersion != null ? GrailsWrapperHome.CLI_COMBINED_PROJECT_NAME + "-" + snapshotVersion : GrailsWrapperHome.CLI_COMBINED_PROJECT_NAME + "-" + version.version + "-all";
+        final String remoteJarFilename = snapshotVersion != null ? GrailsWrapperHome.CLI_COMBINED_PROJECT_NAME + "-" + snapshotVersion + "-all" : GrailsWrapperHome.CLI_COMBINED_PROJECT_NAME + "-" + version.version + "-all";
         final String jarFileExtension = ".jar";
 
         try {
