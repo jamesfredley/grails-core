@@ -314,6 +314,29 @@ This new approach is now the recommended way to write functional tests in Grails
 
 The previous method using WebDriver binaries remains supported for backward compatibility, although matching driver and browser versions can be challenging.
 
+====== Key Features
+
+By extending your test classes with `ContainerGebSpec`, your tests will automatically leverage a containerized browser provided by https://www.testcontainers.org[Testcontainers]. This setup eliminates the need for managing browser versions and ensures consistent test environments.
+
+====== Requirements
+
+To use `ContainerGebSpec`, ensure that you have a compatible container runtime installed. Supported options include:
+
+- **Docker Desktop**
+- **OrbStack** (macOS only)
+- **Rancher Desktop**
+- **Podman Desktop**
+- **Colima** (macOS and Linux)
+
+====== How It Works
+
+Once a compatible container runtime is installed, no additional configuration is needed. Simply extend your test classes with `ContainerGebSpec` (instead of `GebSpec`), and the following will happen:
+
+1. A container will be started automatically when you run your integration tests.
+2. The container will be configured to launch a browser capable of accessing your application under test.
+
+With this setup, you gain the benefits of containerized testing, such as isolation, reproducibility, and reduced setup complexity.
+
 ===== 12.11 Asset Pipeline
 
 The asset pipeline has a new https://github.com/wondrify/asset-pipeline[home]. Version 5.0.12 and forward is compatible with Grails 7.x.
@@ -367,30 +390,7 @@ Property Changes:
 Tag namespace changes:
 * sitemesh -> grailsLayout
 
-====== Key Features
-
-By extending your test classes with `ContainerGebSpec`, your tests will automatically leverage a containerized browser provided by https://www.testcontainers.org[Testcontainers]. This setup eliminates the need for managing browser versions and ensures consistent test environments.
-
-====== Requirements
-
-To use `ContainerGebSpec`, ensure that you have a compatible container runtime installed. Supported options include:
-
-- **Docker Desktop**
-- **OrbStack** (macOS only)
-- **Rancher Desktop**
-- **Podman Desktop**
-- **Colima** (macOS and Linux)
-
-====== How It Works
-
-Once a compatible container runtime is installed, no additional configuration is needed. Simply extend your test classes with `ContainerGebSpec` (instead of `GebSpec`), and the following will happen:
-
-1. A container will be started automatically when you run your integration tests.
-2. The container will be configured to launch a browser capable of accessing your application under test.
-
-With this setup, you gain the benefits of containerized testing, such as isolation, reproducibility, and reduced setup complexity.
-
-===== 12.10 Tomcat 10.1.42 introduced limits for part count and header size in multipart/form-data requests
+===== 12.15 Tomcat 10.1.42 introduced limits for part count and header size in multipart/form-data requests
 
 These limits can be customized using `server.tomcat.max-part-count` and `server.tomcat.max-part-header-size` respectively.
 
