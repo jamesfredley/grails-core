@@ -18,6 +18,7 @@
  */
 
 import java.time.Instant
+import java.time.LocalDate
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 
@@ -31,7 +32,9 @@ ext {
             .map(Long::parseLong)
             .map(Instant::ofEpochSecond)
             .orElseGet(Instant::now) as Instant
-    formattedBuildDate = DateTimeFormatter.ISO_INSTANT.format(buildInstant)
+    formattedBuildDate = System.getenv("SOURCE_DATE_EPOCH") ?
+            DateTimeFormatter.ISO_INSTANT.format(buildInstant) :
+            DateTimeFormatter.ISO_DATE.format(LocalDate.ofInstant(buildInstant as Instant, ZoneOffset.UTC))
     buildDate = (buildInstant as Instant).atZone(ZoneOffset.UTC) // for reproducible builds
     isCiBuild = System.getenv().containsKey('CI')
 }
