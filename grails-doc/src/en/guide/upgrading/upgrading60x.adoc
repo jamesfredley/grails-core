@@ -373,21 +373,31 @@ Grails 7 has two different layout engines: Sitemesh 2.6.x & Sitemesh 3.x. The Si
 
 If you decide to use the `grails-layout` plugin, several changes have occurred:
 
+Add the following dependency to your project:
+
+```console
+implementation "org.apache.grails:grails-layout"
+```
+
 Package Changes:
+
 * grails.web.sitemesh -> org.apache.grails.web.layout
 * org.grails.web.sitemesh -> org.apache.grails.views.gsp.layout
 
 Notable Class Moves:
+
 * org.grails.web.servlet.view.GrailsLayoutViewResolver -> org.apache.grails.web.layout.EmbeddedGrailsLayoutViewResolver
 * org.grails.web.servlet.view.SitemeshLayoutViewResolver -> org.apache.grails.web.layout.GrailsLayoutViewResolver
 * org.grails.web.sitemesh.GrailsLayoutView -> org.apache.grails.web.layout.EmbeddedGrailsLayoutView
 * org.grails.web.sitemesh.SitemeshLayoutView -> org.apache.grails.web.layout.GrailsLayoutView
 
 Property Changes:
+
 * grails.sitemesh.default.layout -> grails.views.layout.default
 * grails.sitemesh.enable.nongsp -> grails.views.layout.enable.nongsp
 
 Tag namespace changes:
+
 * sitemesh -> grailsLayout
 
 ===== 12.15 Tomcat 10.1.42 introduced limits for part count and header size in multipart/form-data requests
