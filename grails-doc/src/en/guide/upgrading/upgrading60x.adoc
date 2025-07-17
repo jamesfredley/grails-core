@@ -19,20 +19,20 @@ under the License.
 
 === Upgrade Instructions for Grails and Related Dependencies
 
-To ensure compatibility with Grails 7.0.0, please review the following upgrade instructions carefully.
+To ensure compatibility with Grails {version}, please review the following upgrade instructions carefully.
 This guide outlines the necessary steps & warnings to upgrade your Grails project.
 
 ==== 1. Java 17 as baseline:
 
-Starting from Grails 7.0.0, Java 17 serves as the baseline requirement for the framework.
-When upgrading to Grails 7.0.0, ensure that your project is configured to use Java 17. Updating to Java 17 allows you to take advantage of the latest features, security enhancements, and performance improvements provided by Java 17.
+Starting from Grails 7, Java 17 serves as the baseline requirement for the framework, matching Spring Framework and Spring Boot's minimum Java version.
+When upgrading to Grails 7, ensure that your project is configured to use Java 17. Updating to Java 17 allows you to take advantage of the latest features, security enhancements, and performance improvements provided by Java 17.
 
-Please make sure to update your project's Java version to 17 before proceeding with the Grails 7.0.0 upgrade.
+Please make sure to update your project's Java version to 17 before proceeding with the Grails 7 upgrade.
 Doing so will ensure a seamless transition to the latest version of Grails and enable you to enjoy all the benefits that Java 17 has to offer.
 
-==== 2. Groovy 4.0.27 as a baseline:
+==== 2. Groovy {groovyVersion} as a baseline:
 
-Grails 7.0.0 adopts Groovy 4.0.27 as it's baseline requirement.
+Grails {version} adopts Groovy {groovyVersion} as it's baseline requirement.
 Several changes in Groovy 4 can affect your application.
 Notable changes include:
 
@@ -51,7 +51,7 @@ In your gradle file, you can force a dependency upgrade via this code:
   configurations.configureEach {
       resolutionStrategy.eachDependency { DependencyResolveDetails details ->
           if (details.requested.group == 'org.codehaus.groovy') {
-              details.useTarget(group: 'org.apache.groovy', name: details.requested.name, version: '4.0.27')
+              details.useTarget(group: 'org.apache.groovy', name: details.requested.name, version: '{groovyVersion}')
           }
       }
   }
@@ -59,7 +59,7 @@ In your gradle file, you can force a dependency upgrade via this code:
 
 ==== 3. Unified Project Version
 
-Grails 7.0.0 moved to a mono repository.
+Grails 7 moved to a mono repository.
 As part of this move, all projects that make up a grails release now have a common version.
 Setting `grailsVersion` in `gradle.properties` is the proper way to specify a set of dependencies that are compatible with each other for a given Grails release.
 Please remove older properties such as `gormVersion` & `grailsGradlePluginVersion` and exclusively use this property going forward.
@@ -67,7 +67,7 @@ Please remove older properties such as `gormVersion` & `grailsGradlePluginVersio
 .gradle.properties
 [,,subs="attributes"]
 ----
-grailsVersion=7.0.0
+grailsVersion={version}
 ----
 
 ==== 4. Unified Bill of Materials
@@ -77,7 +77,7 @@ Instead it had a `micronaut-bom` and a `spring-bom`.
 With the removal of Micronaut from the Grails, the `micronaut-bom` is no longer needed.
 Instead, we can have a single bom that inherits from the `spring-bom`.
 
-Grails 7.0.0 introduces a BOM that includes all the dependencies required for a Grails application.
+Grails 7 introduces a BOM that includes all the dependencies required for a Grails application.
 This BOM is available in the `org.apache.grails:grails-bom` artifact.
 The BOM is automatically applied when a Grails Gradle plugin is applied via the Spring Dependency Management plugin.
 For projects that do not use a Grails Gradle plugin, you can apply the BOM via a https://docs.gradle.org/current/userguide/java_platform_plugin.html#sec:java_platform_consumption[Gradle Platform]:
@@ -100,7 +100,7 @@ Please see xref:../ref/Versions/Grails BOM.adoc[Grails BOM Dependencies] for a q
 Grails has transitioned to the Apache Software Foundation (ASF).
 As a result, the group ID for Grails artifacts has changed to `org.apache.grails`.
 This change applies to all Grails packages, including core plugins and core dependencies, maintained by the Grails team.
-When upgrading to Grails 7.0.0, ensure that you update your build configuration to use the new group ID.
+When upgrading to Grails 7, ensure that you update your build configuration to use the new group ID.
 
 There is a https://github.com/apache/grails-core/blob/7.0.x/RENAME.md[RENAME.md] in the grails-core repository that maps previous coordinate names to new names.
 Additionally, there is a script to aid in the updating of Grails projects to the new coordinates.
@@ -114,7 +114,7 @@ This script will scan any gradle file and attempt to update both exclusions & de
 
 ==== 6. Gradle Changes:
 
-One of the major changes in Grails 7.0.0 is the modernization of it's build system. As a side effect of this modernization, the Grails build is fully parallel & https://docs.gradle.org/current/userguide/task_configuration_avoidance.html[lazy]. Moreover, most tasks have been enhanced to be cacheable. When updating to Grails 7.0.0, there may be required updates to various tasks we distribute since the inputs of those tasks have changed to support lazy configuration.
+One of the major changes in Grails 7 is the modernization of it's build system. As a side effect of this modernization, the Grails build is fully parallel & https://docs.gradle.org/current/userguide/task_configuration_avoidance.html[lazy]. Moreover, most tasks have been enhanced to be cacheable. When updating to Grails {version}, there may be required updates to various tasks we distribute since the inputs of those tasks have changed to support lazy configuration.
 
 ===== 6.1. Gradle Plugin Changes
 As part of the cacheable task changes, some tasks have slightly new behaviors:
@@ -127,11 +127,11 @@ As part of the cacheable task changes, some tasks have slightly new behaviors:
 
 ===== 6.2. Upgrading Gradle:
 
-It is recommended to set your gradle version to a version of 8.14 or higher:
+It is recommended to set your gradle version to a version of {gradleVersion} or higher:
 
 [,console,subs="attributes"]
 ----
-./gradlew wrapper --gradle-version 8.14
+./gradlew wrapper --gradle-version {gradleVersion}
 ----
 
 This command will download the specified Gradle version and update the Gradle wrapper settings in your project.
@@ -143,7 +143,7 @@ The `distributionUrl` in the file should now point to the specified Gradle versi
 
 [,,subs="attributes"]
 ----
-distributionUrl=https\://services.gradle.org/distributions/gradle-8.14-bin.zip
+distributionUrl=https\://services.gradle.org/distributions/gradle-{gradleVersion}-bin.zip
 ----
 
 ===== 6.4. Removed Gradle Plugins
@@ -166,15 +166,15 @@ The benefits of reproducible builds are well documented, but for Grails applicat
 To make your local build reproducible, you'll want to set the environment variable `SOURCE_DATE_EPOCH` to a fixed date.
 For Grails, we set this value to the last commit in git via the bash command: `SOURCE_DATE_EPOCH=$(git log -1 --pretty=%ct)`
 
-==== 8. Spring 6.2.6:
+==== 8. Spring {springVersion}:
 
-Grails 7.0.0 is built on the Spring Framework, version 6.2.6. If your project uses Spring-specific features, refer to the https://github.com/spring-projects/spring-framework/wiki/Upgrading-to-Spring-Framework-6.x[Upgrading to Spring 6 guide].
+Grails {version} is built on the Spring Framework, version {springVersion}. If your project uses Spring-specific features, refer to the https://github.com/spring-projects/spring-framework/wiki/Upgrading-to-Spring-Framework-6.x[Upgrading to Spring 6 guide].
 
 This update introduces enhancements and fixes to the Spring Framework, providing you with the latest improvements in dependency injection, web frameworks, and other Spring-related functionalities.
 
-==== 9. Spring Boot 3.5.0:
+==== 9. Spring Boot {springBootVersion}:
 
-Grails 6 used Spring Boot 2.7. Grails 7.0.0 updates this to Spring Boot 3.5.0. For more information, consult the release notes for previous Spring Boot releases:
+Grails 6 used Spring Boot 2.7.x. Grails {version} updates this to Spring Boot {springBootVersion}. For more information, consult the release notes for previous Spring Boot releases:
 1. https://github.com/spring-projects/spring-boot/wiki/Spring-Boot-3.5-Release-Notes[Spring Boot 3.5 Release Notes]
 2. https://github.com/spring-projects/spring-boot/wiki/Spring-Boot-3.4-Release-Notes[Spring Boot 3.4 Release Notes]
 3. https://github.com/spring-projects/spring-boot/wiki/Spring-Boot-3.4-Release-Notes[Spring Boot 3.3 Release Notes]
@@ -205,7 +205,7 @@ Both the legacy `grails-shell-cli` and `grails-forge-cli` are now included with 
 
 ==== 12. Breaking changes
 
-Grails 7.0.0 introduces several breaking changes that may require updates to your application.
+Grails 7 introduces several breaking changes that may require updates to your application.
 
 ===== 12.1
 
@@ -314,41 +314,6 @@ This new approach is now the recommended way to write functional tests in Grails
 
 The previous method using WebDriver binaries remains supported for backward compatibility, although matching driver and browser versions can be challenging.
 
-===== 12.11 Asset Pipeline
-
-The asset pipeline has a new https://github.com/wondrify/asset-pipeline[home]. Version 5.0.12 and forward is compatible with Grails 7.x.
-
-===== 12.12 API Changes
-
-As part of any major release, APIs can change.  For Grails 7.0, the list of renamed APIs follows:
-
-* GrailsClassUtils#isMatchBetweenPrimativeAndWrapperTypes -> GrailsClassUtils#isMatchBetweenPrimitiveAndWrapperTypes
-
-====== 12.13 Layout Plugins
-
-Grails 7 has two different layout engines: Sitemesh 2.6.x & Sitemesh 3.x. The Sitemesh2 plugin is named `grails-layout` and the Sitemesh 3 plugin is `grails-sitemesh3`. The `grails-layout` plugin is what has traditionally shipped with Grails. The `grails-sitemesh3` plugin is functional, but has some known issues. Please see the thread https://lists.apache.org/thread/8lynrl0yd6ykn749md1g2wjb8jph3s5l[Grails 7 & Reverting Sitemesh 3] for the history of why we did not exclusively use `grails-sitemesh3` for Grails 7.
-
-====== 12.14 grails-layout Configuration
-
-If you decide to use the `grails-layout` plugin, several changes have occurred:
-
-Package Changes:
-* grails.web.sitemesh -> org.apache.grails.web.layout
-* org.grails.web.sitemesh -> org.apache.grails.views.gsp.layout
-
-Notable Class Moves:
-* org.grails.web.servlet.view.GrailsLayoutViewResolver -> org.apache.grails.web.layout.EmbeddedGrailsLayoutViewResolver
-* org.grails.web.servlet.view.SitemeshLayoutViewResolver -> org.apache.grails.web.layout.GrailsLayoutViewResolver
-* org.grails.web.sitemesh.GrailsLayoutView -> org.apache.grails.web.layout.EmbeddedGrailsLayoutView
-* org.grails.web.sitemesh.SitemeshLayoutView -> org.apache.grails.web.layout.GrailsLayoutView
-
-Property Changes:
-* grails.sitemesh.default.layout -> grails.views.layout.default
-* grails.sitemesh.enable.nongsp -> grails.views.layout.enable.nongsp
-
-Tag namespace changes:
-* sitemesh -> grailsLayout
-
 ====== Key Features
 
 By extending your test classes with `ContainerGebSpec`, your tests will automatically leverage a containerized browser provided by https://www.testcontainers.org[Testcontainers]. This setup eliminates the need for managing browser versions and ensures consistent test environments.
@@ -372,7 +337,70 @@ Once a compatible container runtime is installed, no additional configuration is
 
 With this setup, you gain the benefits of containerized testing, such as isolation, reproducibility, and reduced setup complexity.
 
-===== 12.10 Tomcat 10.1.42 introduced limits for part count and header size in multipart/form-data requests
+===== 12.11 Asset Pipeline
+
+The asset pipeline has a new https://github.com/wondrify/asset-pipeline[home]. Version 5.0.12 and forward is compatible with Grails 7.x.
+
+Updated maven coordinates:
+
+```console
+cloud.wondrify:asset-pipeline-gradle
+cloud.wondrify:asset-pipeline-grails
+```
+
+Gradle plugin:
+```console
+plugins {
+    id "cloud.wondrify.asset-pipeline"
+}
+
+or
+
+apply plugin: "cloud.wondrify.asset-pipeline"
+```
+
+===== 12.12 API Changes
+
+As part of any major release, APIs can change.  For Grails 7.0, the list of renamed APIs follows:
+
+* GrailsClassUtils#isMatchBetweenPrimativeAndWrapperTypes -> GrailsClassUtils#isMatchBetweenPrimitiveAndWrapperTypes
+
+===== 12.13 Layout Plugins
+
+Grails 7 has two different layout engines: Sitemesh 2.6.x & Sitemesh 3.x. The Sitemesh2 plugin is named `grails-layout` and the Sitemesh 3 plugin is `grails-sitemesh3`. The `grails-layout` plugin is what has traditionally shipped with Grails. The `grails-sitemesh3` plugin is functional, but has some known issues. Please see the thread https://lists.apache.org/thread/8lynrl0yd6ykn749md1g2wjb8jph3s5l[Grails 7 & Reverting Sitemesh 3] for the history of why we did not exclusively use `grails-sitemesh3` for Grails 7.
+
+===== 12.14 grails-layout Configuration
+
+If you decide to use the `grails-layout` plugin, several changes have occurred:
+
+Add the following dependency to your project:
+
+```console
+implementation "org.apache.grails:grails-layout"
+```
+
+Package Changes:
+
+* grails.web.sitemesh -> org.apache.grails.web.layout
+* org.grails.web.sitemesh -> org.apache.grails.views.gsp.layout
+
+Notable Class Moves:
+
+* org.grails.web.servlet.view.GrailsLayoutViewResolver -> org.apache.grails.web.layout.EmbeddedGrailsLayoutViewResolver
+* org.grails.web.servlet.view.SitemeshLayoutViewResolver -> org.apache.grails.web.layout.GrailsLayoutViewResolver
+* org.grails.web.sitemesh.GrailsLayoutView -> org.apache.grails.web.layout.EmbeddedGrailsLayoutView
+* org.grails.web.sitemesh.SitemeshLayoutView -> org.apache.grails.web.layout.GrailsLayoutView
+
+Property Changes:
+
+* grails.sitemesh.default.layout -> grails.views.layout.default
+* grails.sitemesh.enable.nongsp -> grails.views.layout.enable.nongsp
+
+Tag namespace changes:
+
+* sitemesh -> grailsLayout
+
+===== 12.15 Tomcat 10.1.42 introduced limits for part count and header size in multipart/form-data requests
 
 These limits can be customized using `server.tomcat.max-part-count` and `server.tomcat.max-part-header-size` respectively.
 
