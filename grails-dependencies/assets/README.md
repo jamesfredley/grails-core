@@ -14,5 +14,6 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-## grails-dependencies
+## grails-dependencies-assets
+A meta-project that aggregates all Grails assets files under one place.
 
