@@ -18,17 +18,16 @@
  */
 
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
-import com.github.jengelman.gradle.plugins.shadow.transformers.ApacheLicenseResourceTransformer
-import com.github.jengelman.gradle.plugins.shadow.transformers.ApacheNoticeResourceTransformer
+import org.apache.grails.buildsrc.GrailsShadowLicenseTransform
+import org.apache.grails.buildsrc.GrailsShadowNoticeTransform
 import org.grails.forge.internal.tasks.GenerateManpageAsciidoc
 import org.grails.forge.internal.tasks.PicocliBuildCompletionTask
 
 plugins {
     id 'groovy'
     id 'java-library'
-    id 'distribution'
-    id 'com.gradleup.shadow'
     id 'org.grails.forge.rocker'
+    id 'com.gradleup.shadow'
 }
 
 version = projectVersion
@@ -108,6 +107,35 @@ dependencies {
     testImplementation "org.codehaus.groovy:groovy-test:$groovyVersion"
 }
 
+TaskProvider<Jar> shadowJarTask = tasks.named('shadowJar', ShadowJar)
+shadowJarTask.configure { ShadowJar it ->
+    it.archiveClassifier.set('all')
+
+    // services & custom grails.factories have to be merged since commands can be created from both sources
+    it.mergeServiceFiles()
+    it.mergeServiceFiles('META-INF/grails.factories')
+
+    // groovy extensions are shipped with grails-core
+    it.mergeGroovyExtensionModules()
+
+    // combines all NOTICE files
+    it.transform(GrailsShadowNoticeTransform) {
+        it.projectName = 'Apache Grails'
+        it.inceptionYear = '2005'
+    }
+
+    // combines all LICENSE files
+    it.transform(GrailsShadowLicenseTransform) {
+        it.licenseText = rootProject.layout.projectDirectory.file('../licenses/LICENSE-Apache-2.0.txt').getAsFile().text
+    }
+
+    it.exclude(
+            'DISCLAIMER', // because we include our own jars, we need to exclude any files that we include
+            'META-INF/DEPENDENCIES', // until we publish our own SBOM, this won't be correct so exclude
+            'about.html' // restatement of the Eclipse Distribution License - Version 1.0 for jakarta
+    )
+}
+
 rocker {
     postProcessing = ['org.grails.forge.rocker.plugin.WhitespaceProcessor']
 }
@@ -154,72 +182,6 @@ jarTask.configure { Jar it ->
     it.manifest {
         attributes 'Main-Class': project.property('startMainClass')
     }
-}
-
-TaskProvider<Jar> shadowJarTask = tasks.named('shadowJar', ShadowJar)
-shadowJarTask.configure { ShadowJar it ->
-    it.archiveClassifier.set('all')
-
-    // TODO: This needs reworked so we have one consistent license view, for now the disclaimer is shipped so this should suffice until this is fixed.
-    it.transform(ApacheLicenseResourceTransformer)
-    it.transform(ApacheNoticeResourceTransformer)
-    it.exclude('DISCLAIMER', 'license.header', 'licenses/**', 'META-INF/NOTICE.md', 'META-INF/NOTICE', 'META-INF/NOTICE.md', 'META-INF/licenses/**', 'META-INF/LICENSE.md')
-
-    it.mergeServiceFiles()
-}
-// publish shadow jar separately from the regular library
-artifacts           { archives shadowJarTask }
-
-TaskProvider<CreateStartScripts> forgeCliStartScripts = tasks.register('createForgeCliStartScripts', CreateStartScripts)
-forgeCliStartScripts.configure { CreateStartScripts t ->
-    t.dependsOn jarTask, shadowJarTask
-    t.outputDir = layout.buildDirectory.dir('generated-forge-cli-scripts').get().asFile
-    t.applicationName = 'grails-forge-cli'
-    t.mainClass = findProperty('startMainClass') as String
-    t.classpath = files(shadowJarTask)
-}
-
-project.extensions.getByType(DistributionContainer).configureEach {
-    it.distributionBaseName.set('apache-grails-forge-cli')
-    it.distributionClassifier.set('incubating-bin')
-    it.contents {
-        from(shadowJarTask) {
-            into "lib"
-        }
-
-        from(layout.buildDirectory.dir('build-completion')) {
-            into 'bin'
-            it.filePermissions { permissions ->
-                permissions.unix(0755)
-            }
-        }
-
-        from(forgeCliStartScripts) {
-            into 'bin'
-            it.filePermissions { permissions ->
-                permissions.unix(0755)
-            }
-        }
-
-        from(rootProject.layout.projectDirectory.file('../LICENSE')) { it.into '' }
-        from(rootProject.layout.projectDirectory.file('../NOTICE')) { it.into '' }
-        from(rootProject.layout.projectDirectory.file('../INSTALL')) { it.into '' }
-        from(rootProject.layout.projectDirectory.file('../DISCLAIMER')) { it.into '' }
-    }
-}
-
-def distZipTask = tasks.named('distZip')
-distZipTask.configure {
-    dependsOn(forgeCliStartScripts, jarTask, shadowJarTask, buildCompletion)
-}
-tasks.named('distTar').configure {
-    dependsOn(forgeCliStartScripts, jarTask, shadowJarTask, buildCompletion)
-}
-tasks.named('assemble').configure {
-    dependsOn(distZipTask)
-}
-tasks.named('installDist').configure {
-    it.dependsOn forgeCliStartScripts, buildCompletion
 }
 
 configurations.configureEach {
