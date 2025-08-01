@@ -19,6 +19,9 @@ skeleton:
 repositories:
     - "https://repository.apache.org/content/groups/public"
     - "https://repo.grails.org/grails/restricted"
+features:
+  defaults:
+    - events
 build:
     repositories:
         - "https://repository.apache.org/content/groups/public"
