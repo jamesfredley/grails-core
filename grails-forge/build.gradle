@@ -62,6 +62,15 @@ allprojects {
                 includeGroupByRegex('org[.]apache[.]grails.*')
             }
         }
+        maven {
+            url = 'https://central.sonatype.com/repository/maven-snapshots'
+            content {
+                includeVersionByRegex 'cloud[.]wondrify.*', '.*', '.*-SNAPSHOT'
+            }
+            mavenContent {
+                snapshotsOnly()
+            }
+        }
     }
 
     tasks.withType(Test).configureEach { Task testTask ->
