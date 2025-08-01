@@ -27,7 +27,6 @@ build:
         - eclipse
         - idea
         - org.apache.grails.gradle.grails-app
-        - groovy
 dependencies:
     - scope: build
       coords: "org.apache.grails:grails-gradle-plugins"
