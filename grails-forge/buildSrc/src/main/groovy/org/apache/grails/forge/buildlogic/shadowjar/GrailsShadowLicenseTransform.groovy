@@ -28,7 +28,9 @@ import org.gradle.api.tasks.Input
 import java.util.regex.Pattern
 
 /**
- * supports combining into a single license file.
+ * This transformer assists in combining all known licenses into a single META-INF/LICENSE file. Please note that the
+ * shadow plugin will initially copy all dependencies that are in the local project and then it will copy all other external
+ * dependencies. Transformers only apply to the copied jar file dependencies, and not to the local project dependencies.
  */
 @CompileStatic
 class GrailsShadowLicenseTransform implements Transformer {
@@ -59,12 +61,22 @@ class GrailsShadowLicenseTransform implements Transformer {
     @Input
     Boolean separators = false
 
+    /**
+     * Whether this transformer can process the given resource. If set to true, it's expected the transformer will
+     * write the resource.
+     */
     @Override
     boolean canTransformResource(FileTreeElement element) {
         def path = element.relativePath.pathString
         LICENSE_PATTERNS.any { pattern -> pattern.matcher(path).matches() }
     }
 
+    /**
+     * Parses any file that matches the license patterns and extracts the license text, deduplicating & combining where
+     * possible.
+     *
+     * @param context contains the input stream of the resource to transform
+     */
     @Override
     // Multiple assignments without list expressions on the right hand side are unsupported in static type checking mode
     @CompileDynamic
@@ -95,6 +107,10 @@ class GrailsShadowLicenseTransform implements Transformer {
         }
     }
 
+    /**
+     * Some libraries ship with a license.header file that contains a Java block comment. This method strips the
+     * Java block comment syntax and returns the text without the comment.
+     */
     private static String stripJavaBlockComment(String text) {
         if (!text.startsWith('/*')) {
             return text
@@ -109,6 +125,15 @@ class GrailsShadowLicenseTransform implements Transformer {
                 .join('\n')
     }
 
+    /**
+     * Normalizes the license text by collapsing whitespace and uppercasing all characters. It also returns a mapping
+     * of the normalized text to the original license text, where each character in the normalized text maps to its
+     * original index in the license text. This allows us to index into the normalized text from sections of the license text
+     * for deduplication purposes.
+     *
+     * @param license the original license text
+     * @return a tuple containing the normalized license text and a list of index mappings
+     */
     private static Tuple2<String, List<Integer>> normalize(String license) {
         def sb = new StringBuilder()
         List<Integer> indexMappings = [] // each char in sb maps to original index
@@ -135,6 +160,13 @@ class GrailsShadowLicenseTransform implements Transformer {
         new Tuple2<String, List<Integer>>(normalized, indexMappings[startTrim..<endTrim])
     }
 
+    /**
+     * For a given license, this method will extract the duplicate license text and return the remaining text
+     * @param license the original license text
+     * @param normalized a normalized version of the license text, with all whitespace collapsed and all characters uppercased
+     * @param indexMappings a mapping of the normalized text to the original license text, where each character in the normalized text maps to its original index in the license text
+     * @return either null if no additional license text was found or the additional license text
+     */
     private String resectLicense(String license, String normalized, List<Integer> indexMappings) {
         if (!normalized.startsWith(licenseTermsStart.toUpperCase())) {
             return license // not ASF license, return as is
@@ -171,17 +203,36 @@ class GrailsShadowLicenseTransform implements Transformer {
         license
     }
 
+    /**
+     * Some licenses mix http & https links, handles simple variations of the license to ensure the license can be
+     * deduplicated.
+     *
+     * @param license the license text
+     * @return a list of variations of the license text
+     */
     private static List<String> getVariations(String license) {
         [license.trim()].collectMany {
             [it, it.replace('http://', 'https://'), it.replace('https://', 'http://')]
         }
     }
 
+    /**
+     * Whether this transformer will modify the output stream.
+     */
     @Override
     boolean hasTransformedResource() {
+        // Must always be true since we want to write the LICENSE file and all license files originate from jar files
+        // after our project restructure
         true
     }
 
+    /**
+     * Writes the combined license file to the output stream. The file will be written to
+     * META-INF/LICENSE and will contain all licenses found in the project
+     *
+     * @param os the jar file output stream
+     * @param preserveFileTimestamps whether to preserve file timestamps in the output jar
+     */
     @Override
     void modifyOutputStream(ZipOutputStream os, boolean preserveFileTimestamps) {
         ZipEntry zipEntry = new ZipEntry(LICENSE_PATH)
