@@ -38,17 +38,13 @@ ext {
 version = projectVersion
 group = 'org.apache.grails'
 
-evaluationDependsOn(':grails-forge-cli')
-evaluationDependsOn(':grails-shell-cli-shadow')
+evaluationDependsOn(':grails-cli-shadow')
 dependencies {
     implementation platform("org.apache.grails:grails-bom:$projectVersion")
     implementation 'org.apache.groovy:groovy'
 
-    // shell-cli dependencies
-    runtimeOnly files(project(':grails-shell-cli-shadow').tasks.named('shadowJar'))
-
-    // forge dependencies
-    runtimeOnly files(project(':grails-forge-cli').tasks.named('shadowJar'))
+    // forge & shell-cli dependencies have to be pulled via a file to ensure the transforms are applied to both dependencies and our own projects
+    runtimeOnly files(project(':grails-cli-shadow').tasks.named('shadowJar'))
 }
 
 apply {

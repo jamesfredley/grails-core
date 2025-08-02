@@ -27,7 +27,6 @@ plugins {
     id 'groovy'
     id 'java-library'
     id 'org.grails.forge.rocker'
-    id 'com.gradleup.shadow'
 }
 
 version = projectVersion
@@ -105,35 +104,6 @@ dependencies {
     testImplementation "org.objenesis:objenesis:$objenesisVersion"
     testRuntimeOnly "ch.qos.logback:logback-classic:$logbackClassicVersion"
     testImplementation "org.codehaus.groovy:groovy-test:$groovyVersion"
-}
-
-TaskProvider<Jar> shadowJarTask = tasks.named('shadowJar', ShadowJar)
-shadowJarTask.configure { ShadowJar it ->
-    it.archiveClassifier.set('all')
-
-    // services & custom grails.factories have to be merged since commands can be created from both sources
-    it.mergeServiceFiles()
-    it.mergeServiceFiles('META-INF/grails.factories')
-
-    // groovy extensions are shipped with grails-core
-    it.mergeGroovyExtensionModules()
-
-    // combines all NOTICE files
-    it.transform(GrailsShadowNoticeTransform) {
-        it.projectName = 'Apache Grails'
-        it.inceptionYear = '2005'
-    }
-
-    // combines all LICENSE files
-    it.transform(GrailsShadowLicenseTransform) {
-        it.licenseText = rootProject.layout.projectDirectory.file('../licenses/LICENSE-Apache-2.0.txt').getAsFile().text
-    }
-
-    it.exclude(
-            'DISCLAIMER', // because we include our own jars, we need to exclude any files that we include
-            'META-INF/DEPENDENCIES', // until we publish our own SBOM, this won't be correct so exclude
-            'about.html' // restatement of the Eclipse Distribution License - Version 1.0 for jakarta
-    )
 }
 
 rocker {

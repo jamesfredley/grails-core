@@ -41,6 +41,11 @@ dependencies {
     implementation 'org.apache.grails:grails-core' // for ApplicationContextCommandFactory to lookup commands
     implementation 'org.apache.grails:grails-url-mappings' // for UrlMappingsReportCommand
     // profiles will add additional libraries as needed to surface commands
+
+    // forge dependencies
+    implementation project(':grails-forge-cli'), {
+        exclude group: 'org.slf4j', module: 'slf4j-nop'
+    }
 }
 
 apply {

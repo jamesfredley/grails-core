@@ -54,7 +54,7 @@ include(
         'grails-cli',
         'grails-forge-core',
         'grails-forge-cli',
-        'grails-shell-cli-shadow', // used by delegating cli, but not published
+        'grails-cli-shadow', // to allow us to transform our own artifacts
         'test-core',
         'grails-forge-api',
         'grails-forge-web-netty',
