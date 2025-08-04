@@ -18,38 +18,37 @@
 plugins {
     id 'groovy'
     id 'java-library'
-    id 'project-report'
 }
 
 version = projectVersion
-group = 'org.apache.grails.common'
+group = 'org.apache.grails.gradle.common'
+
+ext {
+    pomTitle = 'Grails Gradle Common'
+    pomDescription = 'Various common utilities that are shared between Grails Gradle code and the Grails Framework'
+    pomDevelopers = ['jdaugherty': 'James Daugherty']
+}
 
 dependencies {
-    implementation platform(project(':grails-bom'))
+    compileOnly platform(project(':grails-gradle-bom'))
 
-    api 'org.apache.grails.gradle.common:grails-gradle-common'
+    // compile with the Groovy version provided by Gradle
+    // to ensure build compatibility with Gradle, currently Groovy 3.0.x
+    // see: https://docs.gradle.org/current/userguide/compatibility.html#groovy
+    compileOnly 'org.codehaus.groovy:groovy'
 
-    // WARNING: this file is not to depend on grails-core; it is meant to be a shared library that can be used
-    // independently of Grails.  Mainly to share data between Grails & GORM
-
-    // the annotation metadata readers are used by both GORM & grails-core so it can be placed in a shared build
-    implementation 'org.springframework:spring-core'
-
-    api 'org.apache.groovy:groovy'
-
-    testImplementation 'org.apache.groovy:groovy-test-junit5'
+    // Testing
+    testImplementation platform(project(':grails-gradle-bom'))
+    testImplementation 'org.slf4j:slf4j-simple'
+    testImplementation('org.spockframework:spock-core') { transitive = false }
+    testImplementation 'org.codehaus.groovy:groovy-test-junit5'
     testImplementation 'org.junit.jupiter:junit-jupiter-api'
     testImplementation 'org.junit.platform:junit-platform-runner'
 
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
 
-    // Logging
-    api 'org.slf4j:slf4j-api'
-    api 'org.slf4j:jcl-over-slf4j'
-
-    // Testing
-    testImplementation 'org.slf4j:slf4j-simple'
-    testImplementation('org.spockframework:spock-core') { transitive = false }
+    // for easier setting of environment variables in tests
+    testImplementation 'uk.org.webcompere:system-stubs-core:2.1.8'
 }
 
 apply {
