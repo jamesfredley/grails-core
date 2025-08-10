@@ -40,6 +40,7 @@ dependencies {
     // see: https://docs.gradle.org/current/userguide/compatibility.html#groovy
     compileOnly "org.codehaus.groovy:groovy"
 
+    implementation project(':grails-gradle-common')
     implementation project(':grails-gradle-tasks')
 
     // spock is leaking from the grails-gradle-bom through grails-gradle-model
