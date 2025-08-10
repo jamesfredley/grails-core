@@ -19,8 +19,6 @@
 
 package micronaut
 
-import jakarta.servlet.ServletContext
-
 class BootStrap {
 
     def init = {
