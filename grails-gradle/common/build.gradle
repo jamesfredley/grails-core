@@ -37,18 +37,14 @@ dependencies {
     // see: https://docs.gradle.org/current/userguide/compatibility.html#groovy
     compileOnly 'org.codehaus.groovy:groovy'
 
-    // Testing
     testImplementation platform(project(':grails-gradle-bom'))
     testImplementation 'org.slf4j:slf4j-simple'
     testImplementation('org.spockframework:spock-core') { transitive = false }
     testImplementation 'org.codehaus.groovy:groovy-test-junit5'
-    testImplementation 'org.junit.jupiter:junit-jupiter-api'
-    testImplementation 'org.junit.platform:junit-platform-runner'
-
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
-
     // for easier setting of environment variables in tests
     testImplementation 'uk.org.webcompere:system-stubs-core:2.1.8'
+
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
 }
 
 apply {

@@ -31,7 +31,7 @@ import org.gradle.api.file.FileTreeElement
 @CompileStatic
 class GrailsGroovyExtensionTransformer implements Transformer {
 
-    private static final String GROOVY_EXTENSION_MODULE_DESCRIPTOR_PATH = "META-INF/groovy/org.codehaus.groovy.runtime.ExtensionModule"
+    private static final String GROOVY_EXTENSION_MODULE_DESCRIPTOR_PATH = 'META-INF/groovy/org.codehaus.groovy.runtime.ExtensionModule'
 
     private static final String MODULE_NAME_KEY = 'moduleName'
     private static final String MODULE_VERSION_KEY = 'moduleVersion'

@@ -26,7 +26,7 @@ import java.util.regex.Pattern
 
 @CompileStatic
 final class PropertyFileUtils {
-    private final static Pattern TIME_REGEX = Pattern.compile('^#(?:Sun|Mon|Tue|Wed|Thu|Fri|Sat)(?:,|\\s).*$')
+    private final static Pattern TIME_REGEX = ~'^#(?:Sun|Mon|Tue|Wed|Thu|Fri|Sat)(?:,|\\s).*$'
 
     private PropertyFileUtils() {
         // prevent  instantiation
@@ -60,7 +60,7 @@ final class PropertyFileUtils {
         lines.each { String line ->
             if (!dateReplaced && TIME_REGEX.matcher(line).matches()) {
                 dateReplaced = true
-                IOGroovyMethods.writeLine(writer, "# SOURCE_DATE_EPOCH = ${sourceDateEpoch}" as String)
+                IOGroovyMethods.writeLine(writer, "# SOURCE_DATE_EPOCH = $sourceDateEpoch" as String)
                 return
             }
 
@@ -69,12 +69,9 @@ final class PropertyFileUtils {
     }
 
     private static String determineSourceDateEpoch() {
-        String sourceDateEpoch = System.getenv('SOURCE_DATE_EPOCH')
-        if (!sourceDateEpoch) {
-            sourceDateEpoch = LocalDate.now(ZoneOffset.UTC)
-                    .atStartOfDay(ZoneOffset.UTC)
-                    .toEpochSecond().toString()
-        }
-        sourceDateEpoch
+        System.getenv('SOURCE_DATE_EPOCH') ?:
+                LocalDate.now(ZoneOffset.UTC)
+                        .atStartOfDay(ZoneOffset.UTC)
+                        .toEpochSecond().toString()
     }
 }
