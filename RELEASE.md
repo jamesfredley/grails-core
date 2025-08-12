@@ -341,7 +341,9 @@ In the event that artifacts differ, simply copy them to your project directory a
 
 # Appendix: Versioning
 
-Apache Grails uses a versioning scheme that follows the format:
+As Apache Grails is built on the Spring Framework(Spring Boot), we follow the Spring release versioning scheme and also release soon after a Spring Boot release.
+
+The versioning scheme format:
 
 - MAJOR.MINOR.PATCH[-MODIFIER]
 
@@ -356,8 +358,10 @@ Where:
   - For snapshots, we will use `-SNAPSHOT`.
   - For final releases, there will be no modifier.
 
-Milestones are used for progress before the release is considered feature complete and Release Candidates are when the features are considered complete.
-
 Snapshot versions are used for ongoing development and can be updated frequently.
+
+Milestones are used for progress before the release is considered feature complete and Release Candidates are when the features are considered complete.  
+
+These release type definitions differ from the official [ASF definitions](https://apache.org/legal/release-policy.html#release-types) in that our Milestone and Release Candidates go through the same release process as the final release and are official project releases for public use.
 
 After an RC release has been vetted by the community, then a final release will follow without a modifier.

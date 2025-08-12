@@ -119,7 +119,7 @@ the [LICENSE](./LICENSE).
 
 ## Versioning
 
-The Apache Grails versioning scheme is defined in [RELEASE.md Appendix: Versioning](https://github.com/apache/grails-core/blob/7.0.x/RELEASE.md#appendix-versioning).
+The Apache Grails versioning scheme is defined in [RELEASE.md Appendix: Versioning](RELEASE.md#appendix-versioning).
 
 ## Performing a Release
 
