@@ -21,13 +21,19 @@ Spring Boot Developer Tools, JRebel, and Hotswap Agent are tools designed to imp
 
 === Spring Boot Developer Tools
 
-Spring Boot Developer Tools is a feature of Spring Boot that provides automatic restarts and live reload capabilities. It is enabled by default in generated Grails applications. When you make changes to your code, the application automatically restarts, allowing you to see the changes without manually stopping and starting the server.  This works well until your application becomes very large, at which point restarts may take longer or fail. Best developer reloading tool to start with.
+Spring Boot Developer Tools is a feature of Spring Boot that provides automatic restarts and live reload capabilities. It is enabled by default in generated Grails applications. When you make changes to your code, the application automatically restarts, allowing you to see the changes without manually stopping and starting the server.  Best developer reloading tool to start with.
+
+For larger applications, you may need to adjust the default settings for optimal performance.  This works well until your application becomes very large, at which point restarts may take longer or fail.
+
+Please see the Spring Boot documentation for more details: https://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#using-boot-devtools[Spring Boot Developer Tools].
 
 *Reloading Mechanism:* Auto-restarts the application context on code changes using dual class loaders; supports live reload for static resources like views/templates.
 
 === JRebel
 
 JRebel is a commercial tool that provides advanced hot swapping capabilities, allowing developers to make changes to their code without restarting the application. It supports a wide range of frameworks and libraries, including Grails. JRebel requires a license for use.
+
+Please see the JRebel documentation for more details: https://manuals.jrebel.com/jrebel/standalone/springboot.html[JRebel].
 
 *Reloading Mechanism:* True hot swapping via bytecode instrumentation; reloads classes, configurations, and resources without restarting the JVM, preserving application state.
 
