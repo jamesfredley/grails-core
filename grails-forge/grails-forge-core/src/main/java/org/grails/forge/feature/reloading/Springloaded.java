@@ -80,6 +80,6 @@ public class Springloaded implements ReloadingFeature {
 
     @Override
     public String getDocumentation() {
-        return "https://docs.micronaut.io/latest/guide/index.html#springloaded";
+        return "https://github.com/spring-projects/spring-loaded;
     }
 }
