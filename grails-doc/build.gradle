@@ -190,6 +190,7 @@ publishGuideTask.configure { PublishGuideTask publish ->
                 'hibernate5Guide'          : hibernate5Guide,
                 'hibernate5GuideFromRef'    : '../' + hibernate5Guide,
                 'mongodb5Guide'            : '../grails-data/mongodb/manual/',
+                'rxGORMGuide'              : 'https://gorm.grails.org/7.3.4/rx/manual/', // last version released
                 'hibernate5Reference'      : 'https://docs.jboss.org/hibernate/orm/5.6/userguide/html_single/Hibernate_User_Guide.html',
                 'springbootapi'            : "https://docs.spring.io/spring-boot/${springBootVersion}/api/java/",
                 'springBootReference'      : "https://docs.spring.io/spring-boot/${springBootVersion}/reference/",
