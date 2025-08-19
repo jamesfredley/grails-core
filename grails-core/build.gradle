@@ -23,6 +23,10 @@ plugins {
     id 'project-report'
 }
 
+// Apply centralized unused code detection
+apply from: rootProject.file('gradle/codenarc-config.gradle')
+apply from: rootProject.file('gradle/unused-code-detection.gradle')
+
 version = projectVersion
 group = 'org.apache.grails'
 

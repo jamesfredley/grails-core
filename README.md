@@ -112,6 +112,38 @@ Once your Apache Grails Application is created, you can start it with the comman
 
 For further information, please consult the [documentation](https://docs.grails.org).
 
+## Code Quality and Maintenance
+
+### Unused Code Detection
+
+Apache Grails includes comprehensive unused code and dead file detection capabilities to help maintain clean, efficient codebases. The system combines static analysis with dead file detection to identify potentially unused code elements.
+
+#### Quick Start
+
+```bash
+# Analyze all Grails modules
+./gradlew detectUnusedCodeAll
+
+# Analyze specific modules only
+./gradlew detectUnusedCodeGrailsModules
+
+# Analyze individual module
+./gradlew :grails-core:detectDeadFiles
+./gradlew :grails-core:codenarcMain
+```
+
+#### Features
+
+- **Dead File Detection**: Identifies files not referenced anywhere in the codebase
+- **Unused Code Analysis**: Detects unused variables, methods, fields, and imports using CodeNarc
+- **Comprehensive Reporting**: HTML and text reports with actionable insights
+- **Multi-Module Support**: Project-wide analysis across all Grails modules
+- **CI/CD Integration**: Automated detection in build pipelines
+
+#### Documentation
+
+For complete usage instructions, configuration options, and best practices, see [docs/UNUSED_CODE_DETECTION.md](docs/UNUSED_CODE_DETECTION.md).
+
 ## Licensing
 
 Apache Grails is licensed under the Apache License, Version 2.0. For details, see
