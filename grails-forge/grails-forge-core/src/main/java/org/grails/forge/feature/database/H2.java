@@ -99,6 +99,7 @@ public class H2 extends DatabaseDriverFeature implements DefaultFeature {
 
     @Override
     public boolean shouldApply(ApplicationType applicationType, Options options, Set<Feature> selectedFeatures) {
-        return selectedFeatures.stream().noneMatch(f -> f instanceof DatabaseDriverFeature);
+        return options.getGormImpl().getName().equals("gorm-hibernate5") &&
+                selectedFeatures.stream().noneMatch(f -> f instanceof DatabaseDriverFeature);
     }
 }
