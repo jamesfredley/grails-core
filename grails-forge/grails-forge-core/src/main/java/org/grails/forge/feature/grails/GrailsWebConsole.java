@@ -42,12 +42,12 @@ public class GrailsWebConsole implements Feature {
 
     @Override
     public String getTitle() {
-        return "Grails Web Console";
+        return "Web Console";
     }
 
     @Override
     public String getDescription() {
-        return "A web-based Groovy console for interactive runtime application management and debugging";
+        return "A web-based Groovy console for interactive runtime application management and debugging.";
     }
 
     @Override

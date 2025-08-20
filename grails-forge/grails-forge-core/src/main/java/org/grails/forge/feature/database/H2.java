@@ -25,7 +25,7 @@ import org.grails.forge.build.dependencies.Dependency;
 
 @Singleton
 @Primary
-public class H2 extends DatabaseDriverFeature {
+public class H2 extends DatabaseDriverFeature implements DefaultFeature {
 
     @Override
     public String getName() {
@@ -39,7 +39,8 @@ public class H2 extends DatabaseDriverFeature {
 
     @Override
     public String getDescription() {
-        return "Adds the H2 driver and default config";
+        return "Add the H2 database with default configuration. " +
+                "H2 is a lightweight in-memory database for development and testing.";
     }
 
     @Override

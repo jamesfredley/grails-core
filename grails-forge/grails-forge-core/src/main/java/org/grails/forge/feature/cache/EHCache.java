@@ -34,12 +34,13 @@ public class EHCache implements CacheFeature {
 
     @Override
     public String getTitle() {
-        return "Grails EHCache Plugin";
+        return "Ehcache";
     }
 
     @Override
     public String getDescription() {
-        return "The Grails Cache Ehcache plugin extends the Cache plugin and uses Ehcache as the storage provider for cached content.";
+        return "The Grails Ehcache Plugin extends the Cache Plugin and uses Ehcache " +
+                "as the storage provider for cached content.";
     }
 
     @Override
@@ -55,12 +56,12 @@ public class EHCache implements CacheFeature {
 
     @Override
     public String getThirdPartyDocumentation() {
-        return "https://www.ehcache.org/";
+        return "https://www.ehcache.org";
     }
 
     @Override
     public String getDocumentation() {
-        return "https://grails-plugins.github.io/grails-cache-ehcache/latest/";
+        return "https://grails-plugins.github.io/grails-cache-ehcache/latest";
     }
 
 }

@@ -46,12 +46,12 @@ public class EmbeddedMongo implements Feature {
 
     @Override
     public String getTitle() {
-        return "Embedded MongoDB Grails Plugin";
+        return "Embedded MongoDB";
     }
 
     @Override
     public String getDescription() {
-        return "Executes an embedded mongo database for integration or functional testing";
+        return "Add an embedded MongoDB database for integration and functional testing.";
     }
 
     @Override

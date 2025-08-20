@@ -45,12 +45,12 @@ public class GrailsWrapper implements DefaultFeature {
 
     @Override
     public String getTitle() {
-        return "Grails Wrapper for Grails";
+        return "Grails Wrapper";
     }
 
     @Override
     public String getDescription() {
-        return "Gives you the ability to run grails shell from terminal.";
+        return "Enables running the Grails CLI directly from the terminal without requiring a local Grails distribution.";
     }
 
     @Override

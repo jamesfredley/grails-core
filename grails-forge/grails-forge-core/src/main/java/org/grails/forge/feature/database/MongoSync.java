@@ -45,7 +45,7 @@ public class MongoSync extends MongoFeature {
 
     @Override
     public String getDescription() {
-        return "Adds support for the MongoDB Synchronous Driver";
+        return "Add support for the MongoDB Synchronous Driver.";
     }
 
     @Override
@@ -71,7 +71,7 @@ public class MongoSync extends MongoFeature {
 
     @Override
     public String getDocumentation() {
-        return "https://docs.mongodb.com/drivers/java/sync/current/";
+        return "https://docs.mongodb.com/drivers/java/sync/current";
     }
 
     @Override

@@ -51,7 +51,7 @@ public class TestContainers implements Feature {
 
     @Override
     public String getDescription() {
-        return "Use Testcontainers to run a database or other software in a Docker container for tests";
+        return "Use Testcontainers to run databases and other services in Docker containers for testing.";
     }
 
     @Override
@@ -138,6 +138,6 @@ public class TestContainers implements Feature {
     @Nullable
     @Override
     public String getThirdPartyDocumentation() {
-        return "https://www.testcontainers.org/";
+        return "https://www.testcontainers.org";
     }
 }
