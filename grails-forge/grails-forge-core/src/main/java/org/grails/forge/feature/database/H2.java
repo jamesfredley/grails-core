@@ -20,8 +20,14 @@ package org.grails.forge.feature.database;
 
 import io.micronaut.context.annotation.Primary;
 import jakarta.inject.Singleton;
+import org.grails.forge.application.ApplicationType;
 import org.grails.forge.application.generator.GeneratorContext;
 import org.grails.forge.build.dependencies.Dependency;
+import org.grails.forge.feature.DefaultFeature;
+import org.grails.forge.feature.Feature;
+import org.grails.forge.options.Options;
+
+import java.util.Set;
 
 @Singleton
 @Primary
@@ -89,5 +95,10 @@ public class H2 extends DatabaseDriverFeature implements DefaultFeature {
                 .groupId("com.h2database")
                 .artifactId("h2")
                 .runtimeOnly());
+    }
+
+    @Override
+    public boolean shouldApply(ApplicationType applicationType, Options options, Set<Feature> selectedFeatures) {
+        return selectedFeatures.stream().noneMatch(f -> f instanceof DatabaseDriverFeature);
     }
 }
