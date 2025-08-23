@@ -50,7 +50,7 @@ public class GrailsWrapper implements DefaultFeature {
 
     @Override
     public String getDescription() {
-        return "Enables running the Grails CLI directly without requiring a local Grails distribution installed.";
+        return "A tiny wrapper script that enables running the Grails CLI directly by auto-downloading and transparently delegating commands.";
     }
 
     @Override
