@@ -71,11 +71,11 @@ public class MongoSync extends MongoFeature {
 
     @Override
     public String getDocumentation() {
-        return "https://docs.mongodb.com/drivers/java/sync/current";
+        return "https://www.mongodb.com/docs/drivers/java/sync/current/";
     }
 
     @Override
     public String getThirdPartyDocumentation() {
-        return "https://docs.mongodb.com";
+        return "https://www.mongodb.com/docs/";
     }
 }

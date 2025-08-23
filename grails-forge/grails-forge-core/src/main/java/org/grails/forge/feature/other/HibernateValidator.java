@@ -63,6 +63,6 @@ public class HibernateValidator implements Feature {
 
     @Override
     public String getDocumentation() {
-        return "https://hibernate.org/validator";
+        return "https://hibernate.org/validator/";
     }
 }

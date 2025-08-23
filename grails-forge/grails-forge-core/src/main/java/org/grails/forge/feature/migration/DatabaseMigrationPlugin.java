@@ -46,7 +46,7 @@ public class DatabaseMigrationPlugin implements MigrationFeature {
     }
 
     public String getThirdPartyDocumentation() {
-        return "https://www.liquibase.org";
+        return "https://docs.liquibase.com/home.html";
     }
 
     @Override

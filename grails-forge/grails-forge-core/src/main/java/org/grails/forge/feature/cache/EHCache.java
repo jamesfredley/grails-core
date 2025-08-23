@@ -56,12 +56,12 @@ public class EHCache implements CacheFeature {
 
     @Override
     public String getThirdPartyDocumentation() {
-        return "https://www.ehcache.org";
+        return "https://www.ehcache.org/";
     }
 
     @Override
     public String getDocumentation() {
-        return "https://grails-plugins.github.io/grails-cache-ehcache/latest";
+        return "https://grails-plugins.github.io/grails-cache-ehcache/latest/";
     }
 
 }
