@@ -63,12 +63,7 @@ public class Scaffolding implements DefaultFeature {
 
     @Override
     public String getDocumentation() {
-        return "https://docs.grails.org/latest/guide/scaffolding.html";
-    }
-
-    @Override
-    public String getThirdPartyDocumentation() {
-        return "https://docs.grails.org/latest/guide/scaffolding.html";
+        return "https://docs.grails.org/" + VersionInfo.getDocumentationVersion() + "/guide/scaffolding.html";
     }
 
     @Override
