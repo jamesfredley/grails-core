@@ -98,7 +98,7 @@ combinedGroovydoc.configure { Groovydoc gdoc ->
     List<File> includedBuildSourceDirs = gradle.includedBuilds
             .collectMany { includedBuild ->
                 def sourceDirs = []
-                includedBuild.projectDir.eachDirRecurse { File dir ->
+                includedBuild.projectDir.eachDir { File dir ->
                     ['src/main/java', 'src/main/groovy'].each { rel ->
                         File sourceDir = new File(dir, rel)
                         if (sourceDir.isDirectory()) {
@@ -110,8 +110,6 @@ combinedGroovydoc.configure { Groovydoc gdoc ->
             }
 
     gdoc.source(project.files((baseSourceDirs + includedBuildSourceDirs).unique()))
-    // Exclude files that are not part of the public API and cause duplicate class errors when combined with other source sets
-    gdoc.exclude('org/grails/example/**', 'org.grails.example/**', 'another/**', 'TestJava**')
 
     gdoc.classpath = files(sources.collect { SourceSet it -> it.compileClasspath.filter(File.&isDirectory) }.flatten().unique())
     gdoc.destinationDir = project.layout.buildDirectory.dir('combined-api/api').get().asFile
