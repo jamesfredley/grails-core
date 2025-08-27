@@ -59,11 +59,6 @@
             <version>9.0.2</version>
         </dependency>
         <dependency>
-            <groupId>com.github.erdi</groupId>
-            <artifactId>webdriver-binaries-gradle-plugin</artifactId>
-            <version>3.2</version>
-        </dependency>
-        <dependency>
             <groupId>org.zeroturnaround</groupId>
             <artifactId>gradle-jrebel-plugin</artifactId>
             <version>1.2.1</version>
