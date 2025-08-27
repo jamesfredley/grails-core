@@ -55,7 +55,7 @@
         </dependency>
         <dependency>
             <groupId>com.gradleup.shadow</groupId>
-            <artifactId>com.gradleup.shadow.gradle.plugin</artifactId>
+            <artifactId>shadow-gradle-plugin</artifactId>
             <version>9.0.2</version>
         </dependency>
         <dependency>
