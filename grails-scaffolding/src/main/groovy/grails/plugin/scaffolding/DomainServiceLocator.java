@@ -19,6 +19,19 @@
 
 package grails.plugin.scaffolding;
 
+import grails.plugin.scaffolding.GormService;
+import grails.util.GrailsNameUtils;
+import grails.util.Holders;
+import org.grails.datastore.gorm.GormEntity;
+import org.springframework.aop.support.AopUtils;
+import org.springframework.context.ApplicationContext;
+
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+
 /**
  * Resolves the appropriate *Service bean for a given domain class by:
  *   1) Fast-path bean name guesses ("<simpleName>Service", "<packageLeaf><SimpleName>Service"),
