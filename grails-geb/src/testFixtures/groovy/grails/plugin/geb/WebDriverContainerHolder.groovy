@@ -31,9 +31,9 @@ import groovy.util.logging.Slf4j
 import com.github.dockerjava.api.model.ContainerNetwork
 import geb.Browser
 import geb.Configuration
+import geb.ConfigurationLoader
 import geb.spock.SpockGebTestManagerBuilder
 import geb.test.GebTestManager
-import org.openqa.selenium.WebDriver
 import org.openqa.selenium.chrome.ChromeOptions
 import org.openqa.selenium.remote.RemoteWebDriver
 import org.spockframework.runtime.extension.IMethodInvocation
@@ -114,50 +114,82 @@ class WebDriverContainerHolder {
                 grailsGebSettings.recordingFormat
         )
 
-        Map prefs = [
-            'credentials_enable_service': false,
-            'profile.password_manager_enabled': false,
-            'profile.password_manager_leak_detection': false
-        ]
-
-        ChromeOptions chromeOptions = new ChromeOptions()
-        // TODO: guest would be preferred, but this causes issues with downloads
-        // see https://issues.chromium.org/issues/42323769
-        // chromeOptions.addArguments("--guest")
-        chromeOptions.setExperimentalOption('prefs', prefs)
-
-        currentContainer.tap {
+        currentContainer.with {
             withEnv('SE_ENABLE_TRACING', grailsGebSettings.tracingEnabled)
             withAccessToHost(true)
             withImagePullPolicy(PullPolicy.ageBased(Duration.of(1, ChronoUnit.DAYS)))
-            withCapabilities(chromeOptions)
             start()
         }
         if (hostnameChanged) {
             currentContainer.execInContainer('/bin/sh', '-c', "echo '$hostIp\t${currentConfiguration.hostName}' | sudo tee -a /etc/hosts")
         }
 
-        ConfigObject configObject = new ConfigObject()
+        // Create a Geb Configuration the same way as an empty Browser constructor would do
+        Configuration gebConfig = new ConfigurationLoader().conf
+
+        // Ensure driver points to re-initialized container with correct host
+        // Driver is explicitly quit by us in stop() method to fulfill our resulting responsibility
+        gebConfig.cacheDriver = false
+
+        // "If driver caching is disabled then this setting defaults to true" - we override to false
+        gebConfig.quitDriverOnBrowserReset = false
+
+        gebConfig.baseUrl = currentContainer.seleniumAddress.toString()
         if (currentConfiguration.reporting) {
-            configObject.reportsDir = grailsGebSettings.reportingDirectory
-            configObject.reporter = (invocation.sharedInstance as ContainerGebSpec).createReporter()
+            gebConfig.reportsDir = grailsGebSettings.reportingDirectory
+            gebConfig.reporter = (invocation.sharedInstance as ContainerGebSpec).createReporter()
         }
+
+        if (gebConfig.driverConf instanceof RemoteWebDriver) {
+            // Similar to Browser#getDriverConf's Exception
+            throw new IllegalStateException(
+                    "The 'driver' config value is an instance of RemoteWebDriver. " +
+                            'You need to wrap the driver instance in a closure.'
+            )
+        }
+        if (gebConfig.driverConf == null) {
+            // If no driver was set in GebConfig.groovy, default to Chrome
+            gebConfig.driverConf = { ->
+                log.info('Using default Chrome RemoteWebDriver for {}', currentContainer.seleniumAddress)
+                new RemoteWebDriver(currentContainer.seleniumAddress, new ChromeOptions().tap {
+                    // See https://issues.chromium.org/issues/42323769
+                    setExperimentalOption('prefs', [
+                            'credentials_enable_service': false,
+                            'profile.password_manager_enabled': false,
+                            'profile.password_manager_leak_detection': false
+                    ])
+                })
+            }
+        }
+
+        // If `GebConfig` instantiates a `RemoteWebDriver` without using it's `remoteAddress` constructor,
+        // the `RemoteWebDriver` will be instantiated using the `webdriver.remote.server` system property.
+        String existingPropertyValue = System.getProperty('webdriver.remote.server')
+        System.setProperty('webdriver.remote.server', currentContainer.seleniumAddress.toString())
+        gebConfig.driver // This will implicitly call `createDriver()`
+
+        // Restore the `webdriver.remote.server` system property
+        if (existingPropertyValue == null) {
+            System.clearProperty('webdriver.remote.server')
+        } else {
+            System.setProperty('webdriver.remote.server', existingPropertyValue)
+        }
+
+        currentBrowser = new Browser(gebConfig)
+
         if (currentConfiguration.fileDetector != NullContainerFileDetector) {
             ServiceRegistry.setInstance(ContainerFileDetector, currentConfiguration.fileDetector)
         }
-
-        currentBrowser = new Browser(new Configuration(configObject, new Properties(), null, null))
-
-        WebDriver driver = new RemoteWebDriver(currentContainer.seleniumAddress, chromeOptions)
         ContainerFileDetector fileDetector = ServiceRegistry.getInstance(ContainerFileDetector, DefaultContainerFileDetector)
-        ((RemoteWebDriver) driver).setFileDetector(fileDetector)
-        driver.manage().timeouts().with {
-            implicitlyWait(Duration.ofSeconds(grailsGebSettings.implicitlyWait))
-            pageLoadTimeout(Duration.ofSeconds(grailsGebSettings.pageLoadTimeout))
-            scriptTimeout(Duration.ofSeconds(grailsGebSettings.scriptTimeout))
-        }
+        ((RemoteWebDriver) currentBrowser.driver).setFileDetector(fileDetector)
 
-        currentBrowser.driver = driver
+        // Overwrite `GebConfig` timeouts with values explicitly set in `GrailsGebSettings` (via system properties)
+        if (grailsGebSettings.implicitlyWait != GrailsGebSettings.DEFAULT_TIMEOUT_IMPLICITLY_WAIT)
+            currentBrowser.driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(grailsGebSettings.implicitlyWait))
+        if (grailsGebSettings.pageLoadTimeout != GrailsGebSettings.DEFAULT_TIMEOUT_PAGE_LOAD)
+            currentBrowser.driver.manage().timeouts().pageLoadTimeout(Duration.ofSeconds(grailsGebSettings.pageLoadTimeout))
+        if (grailsGebSettings.scriptTimeout != GrailsGebSettings.DEFAULT_TIMEOUT_SCRIPT)
+            currentBrowser.driver.manage().timeouts().scriptTimeout(Duration.ofSeconds(grailsGebSettings.scriptTimeout))
 
         // There's a bit of a chicken and egg problem here: the container & browser are initialized when
         // the static/shared fields are initialized, which is before the grails server has started so the
