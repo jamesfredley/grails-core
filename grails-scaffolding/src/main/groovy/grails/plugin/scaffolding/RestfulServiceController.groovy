@@ -22,7 +22,6 @@ package grails.plugin.scaffolding
 import grails.artefact.Artefact
 import grails.gorm.transactions.ReadOnly
 import grails.rest.RestfulController
-import grails.util.Holders
 import org.grails.datastore.gorm.GormEntityApi
 
 @Artefact('Controller')
