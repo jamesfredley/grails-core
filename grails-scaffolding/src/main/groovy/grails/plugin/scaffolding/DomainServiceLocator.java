@@ -19,7 +19,6 @@
 
 package grails.plugin.scaffolding;
 
-import grails.plugin.scaffolding.GormService;
 import grails.util.GrailsNameUtils;
 import grails.util.Holders;
 import org.grails.datastore.gorm.GormEntity;
