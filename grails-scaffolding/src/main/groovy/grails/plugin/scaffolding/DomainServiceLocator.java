@@ -25,10 +25,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-
 import grails.util.GrailsNameUtils;
 import grails.util.Holders;
-
 import org.grails.datastore.gorm.GormEntity;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.context.ApplicationContext;
