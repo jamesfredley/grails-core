@@ -26,12 +26,12 @@ import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+import org.springframework.aop.support.AopUtils;
+import org.springframework.context.ApplicationContext;
+
 import grails.util.GrailsNameUtils;
 import grails.util.Holders;
 import org.grails.datastore.gorm.GormEntity;
-
-import org.springframework.aop.support.AopUtils;
-import org.springframework.context.ApplicationContext;
 
 /**
  * Resolves the appropriate *Service bean for a given domain class by:
