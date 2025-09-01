@@ -47,23 +47,21 @@ class GrailsMicronautGrailsPlugin extends Plugin {
         }
 
         if (!applicationContext.containsBean('micronautApplicationContext')) {
-            throw new IllegalStateException("A Micronaut Application Context should exist prior to the loading of the Grails Micronaut plugin.")
+            throw new IllegalStateException('A Micronaut Application Context should exist prior to the loading of the Grails Micronaut plugin.')
         }
 
         ConfigurableApplicationContext micronautContext = applicationContext.getBean('micronautApplicationContext', ConfigurableApplicationContext)
-        Environment micronautEnv = micronautContext.getEnvironment()
+        Environment micronautEnv = micronautContext.environment
 
-        log.debug("Loading configurations from the plugins to the parent Micronaut context")
-        final GrailsPlugin[] plugins = pluginManager.allPlugins
-        final GrailsPlugin[] pluginsFromContext = pluginManagerFromContext ? pluginManagerFromContext.allPlugins : new GrailsPlugin[]{}
-        Integer priority = AbstractPropertySourceLoader.DEFAULT_POSITION
+        log.debug('Loading configurations from the plugins to the parent Micronaut context')
+        GrailsPlugin[] plugins = pluginManager.allPlugins
+        GrailsPlugin[] pluginsFromContext = pluginManagerFromContext ? pluginManagerFromContext.allPlugins : new GrailsPlugin[]{}
+        int priority = AbstractPropertySourceLoader.DEFAULT_POSITION
         [plugins, pluginsFromContext].each { GrailsPlugin[] pluginsToProcess ->
             Arrays.stream(pluginsToProcess)
                     .filter({ GrailsPlugin plugin -> plugin.propertySource != null })
                     .forEach({ GrailsPlugin plugin ->
-                        if (log.isDebugEnabled()) {
-                            log.debug("Loading configurations from {} plugin to the parent Micronaut context", plugin.name)
-                        }
+                        log.debug('Loading configurations from {} plugin to the parent Micronaut context', plugin.name)
                         // If invoking the source as `.source`, the NavigableMapPropertySource will return null, while invoking the getter, it will return the correct value
                         micronautEnv.addPropertySource(PropertySource.of("grails.plugins.$plugin.name", (Map) plugin.propertySource.getSource(), --priority))
                     })
