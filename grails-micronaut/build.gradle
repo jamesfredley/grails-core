@@ -33,10 +33,7 @@ dependencies {
 
     api platform("io.micronaut.platform:micronaut-platform:$micronautPlatformVersion")
     api 'io.micronaut.spring:micronaut-spring-boot-starter'
-    api 'io.micronaut.spring:micronaut-spring-context', {
-        // required to load the micronaut environment with plugin configuration
-        exclude group: 'org.slf4j', module: 'slf4j-simple'
-    }
+    api 'io.micronaut.spring:micronaut-spring-context'
 
     // For the grails plugin interface
     compileOnly platform(project(':grails-bom'))
