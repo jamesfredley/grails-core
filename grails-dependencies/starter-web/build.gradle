@@ -45,7 +45,6 @@ def configurations = [
                 ':grails-encoder',
                 ':grails-events',
                 ':grails-gsp',
-                ':grails-i18n',
                 ':grails-interceptors',
                 System.getenv('SITEMESH3_TESTING_ENABLED') == 'true' ? ':grails-sitemesh3' : ':grails-layout',
                 ':grails-logging',
