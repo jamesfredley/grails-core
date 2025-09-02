@@ -19,12 +19,13 @@
 
 package org.grails.plugins.web
 
-import org.grails.web.servlet.view.GroovyPageViewResolver
 import org.springframework.beans.BeansException
 import org.springframework.beans.factory.support.BeanDefinitionRegistry
 import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor
 import org.springframework.beans.factory.support.GenericBeanDefinition
 import org.springframework.core.Ordered
+
+import org.grails.web.servlet.view.GroovyPageViewResolver
 
 /**
  * Registers a jspViewResolver bean definition if one does not already exist.
@@ -39,10 +40,11 @@ class GroovyPagesPostProcessor implements BeanDefinitionRegistryPostProcessor, O
     @Override
     void postProcessBeanDefinitionRegistry(BeanDefinitionRegistry registry) throws BeansException {
         if (!registry.containsBeanDefinition(JSP_VIEW_RESOLVER_BEAN_NAME)) {
-            GenericBeanDefinition beanDefinition = new GenericBeanDefinition()
-            beanDefinition.beanClass = GroovyPageViewResolver
-            beanDefinition.parentName = 'abstractViewResolver'
-            beanDefinition.lazyInit = true
+            GenericBeanDefinition beanDefinition = new GenericBeanDefinition().tap {
+                beanClass = GroovyPageViewResolver
+                parentName = 'abstractViewResolver'
+                lazyInit = true
+            }
             registry.registerBeanDefinition(JSP_VIEW_RESOLVER_BEAN_NAME, beanDefinition)
         }
     }

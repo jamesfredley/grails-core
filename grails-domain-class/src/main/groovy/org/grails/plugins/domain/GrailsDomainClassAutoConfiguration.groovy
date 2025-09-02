@@ -19,16 +19,8 @@
 
 package org.grails.plugins.domain
 
-import grails.core.GrailsApplication
-import grails.validation.ConstraintsEvaluator
 import groovy.transform.CompileStatic
-import org.grails.datastore.gorm.validation.constraints.factory.ConstraintFactory
-import org.grails.datastore.mapping.model.MappingContext
-import org.grails.plugins.domain.support.ConstraintEvaluatorAdapter
-import org.grails.plugins.domain.support.DefaultConstraintEvaluatorFactoryBean
-import org.grails.plugins.domain.support.DefaultMappingContextFactoryBean
-import org.grails.plugins.domain.support.ValidatorRegistryFactoryBean
-import org.grails.plugins.i18n.I18nAutoConfiguration
+
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.autoconfigure.AutoConfiguration
@@ -37,6 +29,16 @@ import org.springframework.context.ApplicationContext
 import org.springframework.context.MessageSource
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Lazy
+
+import grails.core.GrailsApplication
+import grails.validation.ConstraintsEvaluator
+import org.grails.datastore.gorm.validation.constraints.factory.ConstraintFactory
+import org.grails.datastore.mapping.model.MappingContext
+import org.grails.plugins.domain.support.ConstraintEvaluatorAdapter
+import org.grails.plugins.domain.support.DefaultConstraintEvaluatorFactoryBean
+import org.grails.plugins.domain.support.DefaultMappingContextFactoryBean
+import org.grails.plugins.domain.support.ValidatorRegistryFactoryBean
+import org.grails.plugins.i18n.I18nAutoConfiguration
 
 @CompileStatic
 // TODO: datasource plugin is supposed to always load after this (currently will because this is a configuration)
@@ -54,34 +56,30 @@ class GrailsDomainClassAutoConfiguration {
     List<MessageSource> messageSources
 
     @Lazy
-    @Bean('grailsDomainClassMappingContext')
-    DefaultMappingContextFactoryBean grailsDomainClassMappingContext(
-            List<ConstraintFactory> constraintFactories
-    ) {
-        def bean = new DefaultMappingContextFactoryBean(grailsApplication, messageSources)
-        bean.constraintFactories = constraintFactories ?: []
-        bean
+    @Bean(name = 'grailsDomainClassMappingContext')
+    DefaultMappingContextFactoryBean grailsDomainClassMappingContext(List<ConstraintFactory> factories) {
+        new DefaultMappingContextFactoryBean(grailsApplication, messageSources).tap {
+            constraintFactories = factories ?: []
+        }
     }
 
     @Lazy
     @Bean
-    DefaultConstraintEvaluatorFactoryBean validateableConstraintsEvaluator(@Qualifier('grailsDomainClassMappingContext') MappingContext grailsDomainClassMappingContext) {
-
-        new DefaultConstraintEvaluatorFactoryBean(messageSources, grailsDomainClassMappingContext, grailsApplication)
+    DefaultConstraintEvaluatorFactoryBean validateableConstraintsEvaluator(@Qualifier('grailsDomainClassMappingContext') MappingContext mappingContext) {
+        new DefaultConstraintEvaluatorFactoryBean(messageSources, mappingContext, grailsApplication)
     }
 
     @Lazy
     @Bean(name = ConstraintsEvaluator.BEAN_NAME)
     ConstraintEvaluatorAdapter constraintsEvaluator(DefaultConstraintEvaluatorFactoryBean validateableConstraintsEvaluator) {
-        def bean = new ConstraintEvaluatorAdapter(validateableConstraintsEvaluator.getObject())
-        bean
+        new ConstraintEvaluatorAdapter(validateableConstraintsEvaluator.object)
     }
 
     @Lazy
     @Bean
-    ValidatorRegistryFactoryBean gormValidatorRegistry(@Qualifier('grailsDomainClassMappingContext') MappingContext grailsDomainClassMappingContext) {
-        def bean = new ValidatorRegistryFactoryBean()
-        bean.mappingContext = grailsDomainClassMappingContext
-        bean
+    ValidatorRegistryFactoryBean gormValidatorRegistry(@Qualifier('grailsDomainClassMappingContext') MappingContext mappingContext) {
+        new ValidatorRegistryFactoryBean().tap {
+            it.mappingContext = mappingContext
+        }
     }
 }
