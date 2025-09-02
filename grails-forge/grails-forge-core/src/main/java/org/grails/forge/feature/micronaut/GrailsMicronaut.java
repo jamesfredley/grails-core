@@ -16,7 +16,7 @@
  *  specific language governing permissions and limitations
  *  under the License.
  */
-package org.grails.forge.feature.other;
+package org.grails.forge.feature.micronaut;
 
 import io.micronaut.core.annotation.NonNull;
 import jakarta.inject.Singleton;
@@ -27,22 +27,22 @@ import org.grails.forge.feature.Category;
 import org.grails.forge.feature.Feature;
 
 @Singleton
-public class MicronautHttpClient implements Feature {
+public class GrailsMicronaut implements Feature {
 
     @Override
     @NonNull
     public String getName() {
-        return "micronaut-http-client";
+        return "grails-micronaut";
     }
 
     @Override
     public String getTitle() {
-        return "Micronaut HTTP Client";
+        return "Micronaut Support";
     }
 
     @Override
     public String getDescription() {
-        return "Add support for the Micronaut HTTP client.";
+        return "Adds support for Micronaut to Grails using the Spring Starter";
     }
 
     @Override
@@ -52,26 +52,21 @@ public class MicronautHttpClient implements Feature {
 
     @Override
     public String getCategory() {
-        return Category.CLIENT;
+        return Category.SPRING;
     }
 
     @Override
     public String getDocumentation() {
-        return "https://docs.micronaut.io/latest/guide/index.html#httpClient";
+        return "https://micronaut-projects.github.io/micronaut-spring/latest/guide/#springBootStarter";
     }
 
     @Override
     public void apply(GeneratorContext generatorContext) {
         generatorContext.addDependency(Dependency.builder()
-                .groupId("io.micronaut")
-                .lookupArtifactId("micronaut-http-client")
+                .groupId("org.apache.grails")
+                .artifactId("grails-micronaut")
                 .implementation());
 
-
-        // micronaut-http-client no longer provides the jackson implementation
-        generatorContext.addDependency(Dependency.builder()
-                .groupId("io.micronaut.serde")
-                .lookupArtifactId("micronaut-serde-jackson")
-                .implementation());
+        generatorContext.getBuildProperties().put("micronautPlatformVersion", "4.9.2");
     }
 }
