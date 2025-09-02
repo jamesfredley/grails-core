@@ -46,14 +46,15 @@ import org.grails.plugins.i18n.I18nAutoConfiguration
 @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
 class GrailsDomainClassAutoConfiguration {
 
-    @Autowired
     GrailsApplication grailsApplication
 
-    @Autowired
-    ApplicationContext applicationContext
+    List<MessageSource> messageSources
 
     @Autowired
-    List<MessageSource> messageSources
+    GrailsDomainClassAutoConfiguration(GrailsApplication grailsApplication, List<MessageSource> messageSources) {
+        this.grailsApplication = grailsApplication
+        this.messageSources = messageSources
+    }
 
     @Lazy
     @Bean(name = 'grailsDomainClassMappingContext')
