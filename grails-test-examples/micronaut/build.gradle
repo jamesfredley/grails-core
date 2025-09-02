@@ -33,6 +33,7 @@ dependencies {
 
     implementation 'org.apache.grails:grails-dependencies-starter-web'
     implementation 'org.apache.grails:grails-micronaut'
+    implementation 'org.apache.grails:grails-scaffolding'
 
     testAndDevelopmentOnly platform(project(':grails-bom'))
     testAndDevelopmentOnly 'org.apache.grails:grails-dependencies-assets'
