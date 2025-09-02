@@ -40,7 +40,7 @@ class GroovyPagesPostProcessor implements BeanDefinitionRegistryPostProcessor, O
     @Override
     void postProcessBeanDefinitionRegistry(BeanDefinitionRegistry registry) throws BeansException {
         if (!registry.containsBeanDefinition(JSP_VIEW_RESOLVER_BEAN_NAME)) {
-            GenericBeanDefinition beanDefinition = new GenericBeanDefinition().tap {
+            def beanDefinition = new GenericBeanDefinition().tap {
                 beanClass = GroovyPageViewResolver
                 parentName = 'abstractViewResolver'
                 lazyInit = true

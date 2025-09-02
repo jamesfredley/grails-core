@@ -21,9 +21,11 @@ package org.apache.grails.micronaut
 
 import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
+
 import io.micronaut.context.ConfigurableApplicationContext
 import io.micronaut.context.env.AbstractPropertySourceLoader
 import io.micronaut.context.env.PropertySource
+
 import grails.plugins.GrailsPlugin
 import grails.plugins.GrailsPluginManager
 import grails.plugins.Plugin
