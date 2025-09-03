@@ -17,21 +17,19 @@
  *  under the License.
  */
 
-version = '0.1-SNAPSHOT'
-group 'issue11767.plugin'
+package issue11767.plugin
 
-apply plugin: 'org.apache.grails.gradle.grails-plugin'
+import grails.boot.GrailsApp
+import grails.boot.config.GrailsAutoConfiguration
+import grails.plugins.metadata.PluginSource
+import groovy.transform.CompileStatic
+import org.springframework.context.annotation.ComponentScan
 
-dependencies {
-    implementation platform(project(':grails-bom'))
-
-    annotationProcessor 'io.micronaut:micronaut-inject-java'
-    implementation 'org.apache.grails:grails-core'
-    compileOnly 'io.micronaut:micronaut-inject-groovy'
-}
-
-apply {
-    from rootProject.layout.projectDirectory.file('gradle/functional-test-config.gradle')
-    from rootProject.layout.projectDirectory.file('gradle/java-config.gradle')
-    from rootProject.layout.projectDirectory.file('gradle/grails-extension-gradle-config.gradle')
+@CompileStatic
+@PluginSource
+@ComponentScan(basePackages = 'issue11767.plugin')
+class Application extends GrailsAutoConfiguration {
+    static void main(String[] args) {
+        GrailsApp.run(Application, args)
+    }
 }

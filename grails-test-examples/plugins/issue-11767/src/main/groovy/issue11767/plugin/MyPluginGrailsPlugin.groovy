@@ -17,25 +17,19 @@
  *  under the License.
  */
 
-apply plugin: 'io.micronaut.build.internal.docs'
+package issue11767.plugin
 
-configurations {
-    asciidocs {
-        canBeResolved = true
-        canBeConsumed = false
-    }
-}
 
-dependencies {
-    asciidocs project(path: ':grails-forge-cli', configuration: 'asciidocPages')
-}
+import grails.plugins.Plugin
 
-tasks.named('publishGuide') {
-    group = 'documentation'
-    inputs.files(configurations.asciidocs)
-    properties.put('includedir', providers.provider { configurations.asciidocs.incoming.files.singleFile })
-}
+class Issue11767GrailsPlugin extends Plugin {
 
-tasks.named('docs') {
-    group = 'documentation'
+    def title = 'Issue 11767'
+    def author = 'Mattias Reichel'
+    def authorEmail = ''
+    def description = ''
+
+    Closure doWithSpring() {{ ->
+        pluginGroovySpringBean(PluginGroovySpringBean)
+    }}
 }
