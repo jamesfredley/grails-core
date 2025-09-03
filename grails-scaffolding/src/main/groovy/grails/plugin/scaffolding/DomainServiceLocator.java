@@ -19,26 +19,20 @@
 
 package grails.plugin.scaffolding;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-import org.springframework.aop.support.AopUtils;
 import org.springframework.context.ApplicationContext;
 
-import grails.util.GrailsNameUtils;
 import grails.util.Holders;
 import org.grails.datastore.gorm.GormEntity;
 
 /**
- * Resolves the appropriate *Service bean for a given domain class by:
- *   1) Fast-path bean name guesses ("<simpleName>Service", "<packageLeaf><SimpleName>Service"),
- *      validated by resource.instanceOf(domainClass).
- *   2) Scanning beans that extend GormService<?> (directly or indirectly) and matching via resource.instanceOf(..).
- *   3) Tie-breakers: prefer guessed bean names, then same package-leaf as the domain.
+ * Resolves the appropriate service bean for a given domain class by:
+ *   - Scanning only beans of type GormService
+ *   - Matching via: ((GormEntity<?>) service.getResource()).instanceOf(domainClass)
  *
  * Keeps a single shared cache for the whole app.
  */
@@ -54,7 +48,9 @@ public final class DomainServiceLocator {
     }
 
     /** Clear cache (useful in tests/dev reloads). */
-    public static void clear() { CACHE.clear(); }
+    public static void clear() {
+        CACHE.clear();
+    }
 
     // ---------------------------------------------------------------------
     // Core resolution
@@ -63,185 +59,43 @@ public final class DomainServiceLocator {
     private static Object findService(Class<?> domainClass) {
         ApplicationContext ctx = Holders.getGrailsApplication().getMainContext();
 
-        // Fast-path guesses: <simpleName>Service, <packageLeaf><SimpleName>Service
-        String simpleNameBean = GrailsNameUtils.getPropertyName(domainClass.getSimpleName()) + "Service";
-        String altName = null;
-        Package pkg = domainClass.getPackage();
-        if (pkg != null) {
-            String[] parts = pkg.getName().split("\\.");
-            String leaf = parts[parts.length - 1];
-            altName = GrailsNameUtils.getPropertyName(leaf + domainClass.getSimpleName()) + "Service";
-        }
-
-        // 1) Try guessed bean names first (validate via resource.instanceOf(domainClass))
-        if (ctx.containsBean(simpleNameBean)) {
-            Object bean = ctx.getBean(simpleNameBean);
-            if (serviceMatchesDomain(bean, domainClass)) return bean;
-        }
-        if (altName != null && ctx.containsBean(altName)) {
-            Object bean = ctx.getBean(altName);
-            if (serviceMatchesDomain(bean, domainClass)) return bean;
-        }
-
-        // 2) Collect all beans that ultimately extend GormService<?>
-        List<Object> candidates = collectGormServiceCandidates(ctx);
-
-        // Filter by match (resource.instanceOf(..))
-        List<Object> matches = new ArrayList<>();
-        for (Object cand : candidates) {
-            if (serviceMatchesDomain(cand, domainClass)) matches.add(cand);
-        }
-
-        if (matches.size() == 1) return matches.get(0);
-        if (matches.isEmpty()) {
-            // Optional last-resort: scan any *Service bean and try matching
-            List<Object> fallback = scanAllServiceBeansAndMatch(ctx, domainClass);
-            if (fallback.size() == 1) return fallback.get(0);
-            if (fallback.isEmpty()) {
-                throw new IllegalStateException(
-                        "No service found for domain " + domainClass.getName() +
-                                " (checked bean name and resource.instanceOf(..) across GormService subclasses)."
-                );
-            }
-            return pickFromMultiple(fallback, simpleNameBean, altName, domainClass);
-        }
-
-        // Multiple matches: tie-breakers
-        return pickFromMultiple(matches, simpleNameBean, altName, domainClass);
-    }
-
-    // ---------------------------------------------------------------------
-    // Candidate collection & matching
-    // ---------------------------------------------------------------------
-
-    /** Collect beans that extend GormService<?> (directly or via subclasses like GormMongoService<?>). */
-    private static List<Object> collectGormServiceCandidates(ApplicationContext ctx) {
-        List<Object> candidates = new ArrayList<>();
-
-        // Fast path: any bean assignable to GormService
         String[] names = ctx.getBeanNamesForType(GormService.class);
-        for (String n : names) candidates.add(ctx.getBean(n));
-        if (!candidates.isEmpty()) return candidates;
+        Object match = null;
+        List<String> matchingBeanNames = new ArrayList<>();
 
-        // Fallback: scan all *Service beans, keep those whose class ultimately extends GormService
-        for (String name : ctx.getBeanDefinitionNames()) {
-            if (!name.endsWith("Service")) continue;
+        for (String name : names) {
             Object bean = ctx.getBean(name);
-            if (extendsGormService(AopUtils.getTargetClass(bean))) candidates.add(bean);
-        }
-        return candidates;
-    }
 
-    /** True if the given class or any superclass equals GormService. */
-    private static boolean extendsGormService(Class<?> type) {
-        Class<?> c = type;
-        while (c != null && c != Object.class) {
-            if (GormService.class.equals(c)) return true;
-            c = c.getSuperclass();
-        }
-        return false;
-    }
-
-    /** Robust domain match: use service.resource.instanceOf(domainClass). */
-    private static boolean serviceMatchesDomain(Object bean, Class<?> domainClass) {
-        Object resource = extractResource(bean);
-        if (resource instanceof GormEntity) {
+            // Cast to GormService to call getResource() directly
             @SuppressWarnings("unchecked")
-            GormEntity<?> ge = (GormEntity<?>) resource;
-            return ge.instanceOf(domainClass);
-        }
-        return false;
-    }
+            GormService<?> svc = (GormService<?>) bean;
 
-    /** Try to read service.resource (Groovy property → getResource()) or direct field access on target class. */
-    private static Object extractResource(Object bean) {
-        try {
-            Method m = bean.getClass().getMethod("getResource");
-            return m.invoke(bean);
-        } catch (NoSuchMethodException e) {
-            Class<?> target = AopUtils.getTargetClass(bean);
-            Field f = findField(target, "resource");
-            if (f != null) {
-                try {
-                    f.setAccessible(true);
-                    return f.get(bean);
-                } catch (Throwable ignore) { /* fall through */ }
-            }
-        } catch (Throwable ignore) {
-            // ignore and treat as not found
-        }
-        return null;
-    }
-
-    /** Find a declared field in the class hierarchy. */
-    private static Field findField(Class<?> type, String name) {
-        Class<?> c = type;
-        while (c != null && c != Object.class) {
-            try {
-                return c.getDeclaredField(name);
-            } catch (NoSuchFieldException e) {
-                c = c.getSuperclass();
-            }
-        }
-        return null;
-    }
-
-    /** Last-resort scan across all *Service beans using the same resource-based match. */
-    private static List<Object> scanAllServiceBeansAndMatch(ApplicationContext ctx, Class<?> domainClass) {
-        List<Object> matches = new ArrayList<>();
-        for (String name : ctx.getBeanDefinitionNames()) {
-            if (!name.endsWith("Service")) continue;
-            Object bean = ctx.getBean(name);
-            if (serviceMatchesDomain(bean, domainClass)) matches.add(bean);
-        }
-        return matches;
-    }
-
-    // ---------------------------------------------------------------------
-    // Tie-breakers
-    // ---------------------------------------------------------------------
-
-    private static Object pickFromMultiple(List<Object> matches, String simpleNameBean, String altName, Class<?> domainClass) {
-        ApplicationContext ctx = Holders.getGrailsApplication().getMainContext();
-
-        // Prefer bean whose name equals a fast-path guess (compare target classes)
-        for (String guess : new String[]{simpleNameBean, altName}) {
-            if (guess == null) continue;
-            if (ctx.containsBean(guess)) {
-                Object bean = ctx.getBean(guess);
-                Class<?> guessTarget = AopUtils.getTargetClass(bean);
-                for (Object m : matches) {
-                    if (AopUtils.getTargetClass(m).equals(guessTarget)) return m;
+            Object resource = svc.getResource();
+            if (resource instanceof GormEntity) {
+                @SuppressWarnings("unchecked")
+                GormEntity<?> ge = (GormEntity<?>) resource;
+                if (ge.instanceOf(domainClass)) {
+                    matchingBeanNames.add(name);
+                    if (match == null) {
+                        match = bean;
+                    } else {
+                        // More than one match → ambiguous
+                        throw new IllegalStateException(
+                            "Multiple GormService beans match domain " + domainClass.getName() +
+                            ": " + matchingBeanNames
+                        );
+                    }
                 }
             }
         }
 
-        // Prefer same package *leaf* as the domain (e.g., "admin" for org.website.admin.User)
-        String domainLeaf = packageLeaf(domainClass);
-        if (domainLeaf != null) {
-            List<Object> sameLeaf = new ArrayList<>();
-            for (Object m : matches) {
-                String leaf = packageLeaf(AopUtils.getTargetClass(m));
-                if (domainLeaf.equals(leaf)) sameLeaf.add(m);
-            }
-            if (sameLeaf.size() == 1) return sameLeaf.get(0);
+        if (match == null) {
+            throw new IllegalStateException(
+                "No GormService bean found for domain " + domainClass.getName() +
+                " using resource.instanceOf(..). Scanned " + names.length + " GormService beans."
+            );
         }
 
-        throw new IllegalStateException("Multiple services match domain " + domainClass.getName() +
-                ": " + classNames(matches));
-    }
-
-    private static String packageLeaf(Class<?> clazz) {
-        Package p = clazz.getPackage();
-        if (p == null) return null;
-        String name = p.getName();
-        int idx = name.lastIndexOf('.');
-        return (idx >= 0) ? name.substring(idx + 1) : name;
-    }
-
-    private static String classNames(List<Object> beans) {
-        List<String> names = new ArrayList<>(beans.size());
-        for (Object b : beans) names.add(AopUtils.getTargetClass(b).getName());
-        return names.toString();
+        return match;
     }
 }
