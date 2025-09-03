@@ -38,13 +38,19 @@ import org.grails.datastore.gorm.GormEntity;
  */
 public final class DomainServiceLocator {
 
-    private static final ConcurrentMap<Class<?>, Object> CACHE = new ConcurrentHashMap<>();
+    private static final ConcurrentMap<Class<?>, GormService<?>> CACHE = new ConcurrentHashMap<>();
 
     private DomainServiceLocator() {}
 
     /** Resolve (and cache) a service bean for the given domain class. */
-    public static Object resolve(Class<?> domainClass) {
-        return CACHE.computeIfAbsent(domainClass, DomainServiceLocator::findService);
+    public static <T extends GormEntity<T>> GormService<T> resolve(Class<T> domainClass) {
+        @SuppressWarnings("unchecked")
+        GormService<T> cached = (GormService<T>) CACHE.get(domainClass);
+        if (cached != null) return cached;
+
+        GormService<T> found = findService(domainClass);
+        CACHE.put(domainClass, found);
+        return found;
     }
 
     /** Clear cache (useful in tests/dev reloads). */
@@ -52,39 +58,29 @@ public final class DomainServiceLocator {
         CACHE.clear();
     }
 
-    // ---------------------------------------------------------------------
-    // Core resolution
-    // ---------------------------------------------------------------------
-
-    private static Object findService(Class<?> domainClass) {
+    private static <T extends GormEntity<T>> GormService<T> findService(Class<T> domainClass) {
         ApplicationContext ctx = Holders.getGrailsApplication().getMainContext();
 
         String[] names = ctx.getBeanNamesForType(GormService.class);
-        Object match = null;
+        GormService<T> match = null;
         List<String> matchingBeanNames = new ArrayList<>();
 
         for (String name : names) {
-            Object bean = ctx.getBean(name);
-
-            // Cast to GormService to call getResource() directly
-            @SuppressWarnings("unchecked")
-            GormService<?> svc = (GormService<?>) bean;
-
-            Object resource = svc.getResource();
+            GormService<?> gs = (GormService<?>) ctx.getBean(name);
+            Object resource = gs.getResource();
             if (resource instanceof GormEntity) {
-                @SuppressWarnings("unchecked")
                 GormEntity<?> ge = (GormEntity<?>) resource;
                 if (ge.instanceOf(domainClass)) {
                     matchingBeanNames.add(name);
-                    if (match == null) {
-                        match = bean;
-                    } else {
-                        // More than one match → ambiguous
+                    if (match != null) {
                         throw new IllegalStateException(
                             "Multiple GormService beans match domain " + domainClass.getName() +
                             ": " + matchingBeanNames
                         );
                     }
+                    @SuppressWarnings("unchecked")
+                    GormService<T> svc = (GormService<T>) gs;
+                    match = svc;
                 }
             }
         }
@@ -99,3 +95,4 @@ public final class DomainServiceLocator {
         return match;
     }
 }
+
