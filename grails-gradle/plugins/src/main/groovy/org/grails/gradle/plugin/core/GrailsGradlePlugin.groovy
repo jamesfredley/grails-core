@@ -512,6 +512,8 @@ class GrailsGradlePlugin extends GroovyPlugin {
         for (String f in grailsAppResourceDirs) {
             grailsResourceDirs.add(project.file("grails-app/${f}"))
         }
+        // force a defined order for build reproducibility
+        grailsResourceDirs.sort { File a, File b -> a.name <=> b.name }
         grailsResourceDirs
     }
 
@@ -527,6 +529,8 @@ class GrailsGradlePlugin extends GroovyPlugin {
             }
         }
         grailsSourceDirs.add(project.file('src/main/groovy'))
+        // force a defined order for build reproducibility
+        grailsSourceDirs.sort { File a, File b -> a.name <=> b.name }
         grailsSourceDirs
     }
 
