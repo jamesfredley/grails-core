@@ -437,7 +437,7 @@ To learn more about development reloading options, please see the link:gettingSt
 
 ===== 12.19 hibernate.cache.region.factory_class
 
-`org.hibernate.cache.ehcache.SingletonEhCacheRegionFactory` is deprecated in Hibernate 5.6 and removed in Hibernate 6.0. Additionally, it is not compatible with hibernate-jakarta 5.6.x, which is used by Grails 7.
+`org.hibernate.cache.ehcache.SingletonEhCacheRegionFactory` is deprecated in Hibernate 5.6 and is not compatible with `org.hibernate:hibernate-core-jakarta:{hibernate5Version}`, which is used in Grails 7.
 
 ```console
     hibernate:
