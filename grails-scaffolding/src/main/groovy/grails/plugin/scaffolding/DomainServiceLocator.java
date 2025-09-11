@@ -26,6 +26,7 @@ import java.util.concurrent.ConcurrentMap;
 
 import org.springframework.context.ApplicationContext;
 
+import grails.util.Environment;
 import grails.util.Holders;
 import org.grails.datastore.gorm.GormEntity;
 
@@ -44,12 +45,16 @@ public final class DomainServiceLocator {
 
     /** Resolve (and cache) a service bean for the given domain class. */
     public static <T extends GormEntity<T>> GormService<T> resolve(Class<T> domainClass) {
-        @SuppressWarnings("unchecked")
-        GormService<T> cached = (GormService<T>) CACHE.get(domainClass);
-        if (cached != null) return cached;
+        if (!Environment.isDevelopmentMode()) {
+            @SuppressWarnings("unchecked")
+            GormService<T> cached = (GormService<T>) CACHE.get(domainClass);
+            if (cached != null) return cached;
+        }
 
         GormService<T> found = findService(domainClass);
-        CACHE.put(domainClass, found);
+        if (!Environment.isDevelopmentMode()) {
+            CACHE.put(domainClass, found);
+        }
         return found;
     }
 
