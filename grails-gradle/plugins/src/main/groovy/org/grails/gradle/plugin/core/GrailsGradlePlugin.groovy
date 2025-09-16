@@ -36,7 +36,6 @@ import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.Dependency
 import org.gradle.api.artifacts.DependencyResolveDetails
 import org.gradle.api.artifacts.DependencySet
-import org.gradle.api.file.Directory
 import org.gradle.api.file.DuplicatesStrategy
 import org.gradle.api.file.FileCollection
 import org.gradle.api.file.RegularFile
@@ -107,7 +106,7 @@ class GrailsGradlePlugin extends GroovyPlugin {
         // reset the environment to ensure it is resolved again for each invocation
         Environment.reset()
 
-        if (project.tasks.findByName('compileGroovy') == null) {
+        if (!project.tasks.names.contains('compileGroovy')) {
             super.apply(project)
         }
 
@@ -156,20 +155,6 @@ class GrailsGradlePlugin extends GroovyPlugin {
         configureRunCommand(project)
 
         configureGroovyCompiler(project)
-
-        addGroovyCompilerScript('GrailsCore', project) {
-            if (!project.extensions.findByType(GrailsExtension).importJavaTime) {
-                return null
-            }
-
-            '''
-                withConfig(configuration) {
-                    imports {
-                        star 'java.time'
-                    }
-                }
-            '''.stripIndent(16)
-        }
     }
 
     private static Provider<String> getMainClassProvider(Project project) {
@@ -185,94 +170,56 @@ class GrailsGradlePlugin extends GroovyPlugin {
     }
 
     private void configureGroovyCompiler(Project project) {
-        Provider<Directory> sourceConfigFiles = project.layout.buildDirectory.dir('groovyCompilerConfiguration')
         Provider<RegularFile> groovyCompilerConfigFile = project.layout.buildDirectory.file('grailsGroovyCompilerConfig.groovy')
-        if (!project.tasks.findByName('configureGroovyCompiler')) {
-            TaskProvider<Task> cleanGroovyConfigProvider = project.tasks.register('cleanGroovyCompilerConfig')
-            cleanGroovyConfigProvider.configure { Task task ->
-                task.group = 'build'
-                task.doFirst {
-                    sourceConfigFiles.get().asFile.deleteDir()
-                    sourceConfigFiles.get().asFile.mkdirs()
 
-                    File combinedFile = groovyCompilerConfigFile.get().asFile
-                    if (!combinedFile.exists()) {
-                        combinedFile.parentFile.mkdirs()
-                        combinedFile.createNewFile()
-                    }
-                    combinedFile.write('// Placeholder for grails metadata and other configuration')
+        project.tasks.withType(GroovyCompile).configureEach { GroovyCompile c ->
+            c.outputs.file(groovyCompilerConfigFile)
+
+            Closure<String> userScriptGenerator = getGroovyCompilerScript(c, project)
+            c.doFirst {
+                // This isn't ideal - we're performing configuration at execution time, but the alternative would be having
+                // to maintain a clean / configuration task and then gradle would want to cache those tasks.  Since the inputs
+                // to those tasks would effectively be the runtimeClasspath, dependency problems can arise if another task
+                // changes the runtimeClasspath. To prevent having to add those tasks into the dependency chain, use doFirst
+                File combinedFile = groovyCompilerConfigFile.get().asFile
+                if (!combinedFile.exists()) {
+                    combinedFile.parentFile.mkdirs()
+                    combinedFile.createNewFile()
                 }
-            }
-            // Merge the script at runtime so we don't suffer a performance penalty as part of every gradle task run
-            TaskProvider<Task> configureTaskProvider = project.tasks.register('configureGroovyCompiler')
-            configureTaskProvider.configure { Task task ->
-                task.group = 'build'
-                task.dependsOn('cleanGroovyCompilerConfig')
 
-                // Gradle will cache the output based on the directory, so we must ensure it exists
-                sourceConfigFiles.get().asFile.mkdirs()
-
-                task.inputs.dir(sourceConfigFiles)
-                task.outputs.file(groovyCompilerConfigFile)
-
-                task.doLast {
-                    List<String> scripts = sourceConfigFiles.get().asFile.listFiles({ File dir, String name ->
-                        name.endsWithIgnoreCase('groovy')
-                    } as FilenameFilter).collect { it.text }
-
-                    GroovyCompile compileTask = project.tasks.named('compileGroovy', GroovyCompile).get()
-                    if (compileTask.groovyOptions.configurationScript) {
-                        scripts << compileTask.groovyOptions.configurationScript.text
-                    }
-
-                    String combinedScripts = scripts.findResults { it?.trim() }.join('\n').trim()
-                    if (combinedScripts) {
-                        File combinedFile = groovyCompilerConfigFile.get().asFile
-                        combinedFile.parentFile.mkdirs()
-                        combinedFile.write(combinedScripts)
-                        compileTask.groovyOptions.configurationScript = combinedFile
-                    }
+                String configuredScript = null
+                if (c.groovyOptions.configurationScript) {
+                    configuredScript = c.groovyOptions.configurationScript.text?.trim() ?: null
                 }
-            }
+                String grailsScript = userScriptGenerator?.call()
 
-            // Because the gradle plugin extends the groovy plugin, this will always exist at this point
-            project.tasks.withType(GroovyCompile).configureEach {
-                it.dependsOn(configureTaskProvider, cleanGroovyConfigProvider)
+                String combinedScripts = """
+                    // Grails groovy compilation configuration to ensure ASTs are applied correctly
+                    
+                    ${grailsScript?.trim() ?: ''}
+
+                    ${configuredScript?.trim() ?: ''}
+                """
+                combinedFile.write(combinedScripts)
+                c.groovyOptions.configurationScript = combinedFile
             }
         }
     }
 
-    protected TaskProvider<Task> addGroovyCompilerScript(String uniqueScriptName, Project project, Closure scriptGenerator) {
-        String taskName = "configureGroovyCompiler${uniqueScriptName}" as String
-        if (taskName in project.tasks.names) {
-            return project.tasks.named(taskName)
+    protected Closure<String> getGroovyCompilerScript(GroovyCompile compile, Project project) {
+        GrailsExtension grails = project.extensions.findByType(GrailsExtension)
+        if (!grails.importJavaTime) {
+            return null
         }
 
-        TaskProvider<Task> configScriptTask = project.tasks.register(taskName)
-        configScriptTask.configure { Task task ->
-            task.group = 'build'
-
-            Provider<RegularFile> targetConfigFile = project.layout.buildDirectory.file("groovyCompilerConfiguration/${uniqueScriptName}Config.groovy")
-            task.outputs.file(targetConfigFile)
-            task.inputs.files(project.configurations.named('runtimeClasspath'))
-            task.dependsOn('cleanGroovyCompilerConfig')
-
-            task.doLast {
-                File file = targetConfigFile.get().asFile
-                file.delete()
-
-                String script = scriptGenerator.call(project)
-                if (script) {
-                    file.text = script
+        return { ->
+            '''withConfig(configuration) {
+                    imports {
+                        star 'java.time'
+                    }
                 }
-            }
+            '''
         }
-
-        project.tasks.named('configureGroovyCompiler').configure { Task task ->
-            task.dependsOn(configScriptTask)
-        }
-
-        return configScriptTask
     }
 
     protected void excludeDependencies(Project project) {

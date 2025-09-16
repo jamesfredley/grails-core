@@ -69,21 +69,6 @@ class GrailsPluginGradlePlugin extends GrailsGradlePlugin {
 
         configureAstSources(project)
 
-        addGroovyCompilerScript('GrailsPlugin', project) {
-            """
-                withConfig(configuration) {
-                    inline(phase: 'CONVERSION') { source, context, classNode ->
-                        classNode.putNodeMetaData('projectVersion', '${project.version}')
-                        classNode.putNodeMetaData('projectName', '${project.name}')
-                        classNode.putNodeMetaData('isPlugin', 'true')
-                    }
-                }
-            """.stripIndent(16)
-        }.configure { Task task ->
-            task.inputs.property('version', project.provider { project.version.toString() })
-            task.inputs.property('name', project.provider { project.name })
-        }
-
         configureAssembleTask(project)
 
         configurePluginResources(project)
@@ -91,8 +76,30 @@ class GrailsPluginGradlePlugin extends GrailsGradlePlugin {
         configureJarTask(project)
 
         configureSourcesJarTask(project)
+    }
 
-        configureExplodedDirConfiguration(project)
+    @Override
+    protected Closure<String> getGroovyCompilerScript(GroovyCompile compile, Project project) {
+        def versionProvider = project.provider { project.version.toString() }
+        compile.inputs.property('version', versionProvider)
+
+        def projectNameProvider = project.provider { project.name }
+        compile.inputs.property('name', projectNameProvider)
+
+        Closure<String> parent = super.getGroovyCompilerScript(compile, project)
+        return { ->
+            """${parent?.call() ?: ''}
+
+            withConfig(configuration) {
+                inline(phase: 'CONVERSION') { source, context, classNode ->
+                    classNode.putNodeMetaData('projectVersion', '${versionProvider.get()}')
+                    classNode.putNodeMetaData('projectName', '${projectNameProvider.get()}')
+                    classNode.putNodeMetaData('isPlugin', 'true')
+                }
+            }
+            """ as String
+        }
+
     }
 
     protected String getDefaultProfile() {
