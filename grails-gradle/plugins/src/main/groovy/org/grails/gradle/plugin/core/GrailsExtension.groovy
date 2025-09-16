@@ -68,6 +68,13 @@ class GrailsExtension {
     boolean springDependencyManagement = true
 
     /**
+     * Whether the Micronaut `annotationProcessor` dependencies should be auto-added to the project
+     * on detection of the `grails-micronaut` plugin, and the version defined by the `micronautPlatformVersion`
+     * Gradle property is enforced.
+     */
+    boolean micronautAutoSetup = true
+
+    /**
      * Configure the reloading agent
      */
     Agent agent = new Agent()
