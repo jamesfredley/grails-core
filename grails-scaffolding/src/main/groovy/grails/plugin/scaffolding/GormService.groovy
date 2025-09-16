@@ -46,12 +46,8 @@ class GormService<T extends GormEntity<T>> {
         resourceName = GrailsNameUtils.getPropertyName(resource)
     }
 
-    protected T queryForResource(Serializable id) {
-        resource.get(id)
-    }
-
     T get(Serializable id) {
-        queryForResource(id)
+        resource.get(id)
     }
 
     List<T> list(Map args) {
