@@ -112,6 +112,7 @@ subprojects {
 apply {
     from layout.projectDirectory.file('gradle/publish-root-config.gradle')
     from layout.projectDirectory.file('gradle/rat-root-config.gradle')
+    from layout.projectDirectory.file('gradle/unused-code-root.gradle')
 }
 
 // For debugging the gradle task graph: Uncomment to show task dependencies when a task is run

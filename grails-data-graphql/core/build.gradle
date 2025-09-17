@@ -21,7 +21,9 @@ repositories {
     mavenCentral()
     maven { url "https://repo.grails.org/grails/restricted" }
 }
-apply plugin: 'codenarc'
+// Apply centralized unused code detection configuration
+apply from: rootProject.file('gradle/codenarc-config.gradle')
+apply from: rootProject.file('gradle/unused-code-detection.gradle')
 
 dependencies {
     documentation "org.codehaus.groovy:groovy-cli-picocli"
@@ -32,8 +34,6 @@ dependencies {
     api 'com.github.javaparser:javaparser-core:3.25.7'
     api 'org.apache.grails:grails-views-gson:2.3.2'
     api "org.javassist:javassist:$javassistVersion"
-
-    codenarc "org.codenarc:CodeNarc:$codenarcVersion"
 
     testImplementation "org.apache.grails.data:grails-data-hibernate5-core:${gormHibernateVersion}"
     testImplementation "org.apache.grails.data:grails-data-mongodb-core:${gormMongoDbVersion}"
@@ -47,14 +47,7 @@ dependencies {
 targetCompatibility = 1.8
 sourceCompatibility = 1.8
 
-codenarc {
-    toolVersion = codenarcVersion
-    configFile = file("${projectDir}/config/codenarc/rules.groovy")
-    maxPriority1Violations = 0
-    maxPriority2Violations = 0
-    maxPriority3Violations = 0
-}
-
+// Additional CodeNarc excludes specific to this module
 codenarcMain {
     exclude '**/CustomScalars.groovy'
 }

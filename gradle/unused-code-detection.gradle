@@ -1,0 +1,257 @@
+/*
+ *  Licensed to the Apache Software Foundation (ASF) under one
+ *  or more contributor license agreements.  See the NOTICE file
+ *  distributed with this work for additional information
+ *  regarding copyright ownership.  The ASF licenses this file
+ *  to you under the Apache License, Version 2.0 (the
+ *  "License"); you may not use this file except in compliance
+ *  with the License.  You may obtain a copy of the License at
+ *
+ *    https://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing,
+ *  software distributed under the License is distributed on an
+ *  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ *  KIND, either express or implied.  See the License for the
+ *  specific language governing permissions and limitations
+ *  under the License.
+ */
+
+/**
+ * Dead file detection and comprehensive unused code analysis tasks
+ */
+
+import java.util.regex.Pattern
+
+// Task to detect dead files (files not referenced anywhere in the codebase)
+task detectDeadFiles {
+    group = 'verification'
+    description = 'Detect files that are not referenced anywhere in the codebase'
+    
+    doLast {
+        def projectDir = project.projectDir
+        def sourceFiles = []
+        def allFiles = []
+        def references = [:]
+        
+        logger.lifecycle("Starting dead file detection for ${project.name}...")
+        
+        // Collect all source files
+        project.fileTree(projectDir) {
+            include '**/*.java'
+            include '**/*.groovy'
+            include '**/*.gradle'
+            exclude '**/build/**'
+            exclude '**/target/**' 
+            exclude '**/.gradle/**'
+            exclude '**/node_modules/**'
+        }.visit { fileDetails ->
+            if (!fileDetails.isDirectory()) {
+                def relativePath = fileDetails.relativePath.pathString
+                allFiles << relativePath
+                
+                // Extract class name and package for reference tracking
+                if (relativePath.endsWith('.java') || relativePath.endsWith('.groovy')) {
+                    def fileName = fileDetails.name.replaceAll(/\.(java|groovy)$/, '')
+                    sourceFiles << [
+                        path: relativePath,
+                        name: fileName,
+                        file: fileDetails.file
+                    ]
+                }
+            }
+        }
+        
+        logger.lifecycle("Found ${sourceFiles.size()} source files to analyze")
+        
+        // Build reference map by scanning file contents
+        sourceFiles.each { sourceFile ->
+            try {
+                def content = sourceFile.file.text
+                
+                // Look for imports, class references, method calls, etc.
+                sourceFiles.each { otherFile ->
+                    if (sourceFile.path != otherFile.path) {
+                        def className = otherFile.name
+                        
+                        // Check for various reference patterns
+                        def patterns = [
+                            "import.*${className}",
+                            "extends\\s+${className}",
+                            "implements.*${className}",
+                            "new\\s+${className}",
+                            "${className}\\s*\\.",
+                            "${className}\\s*\\(",
+                            "@${className}",
+                            "\\<${className}\\>",
+                            "class.*${className}",
+                            "${className}\\s*(extends|implements)"
+                        ]
+                        
+                        patterns.each { pattern ->
+                            if (content.contains(className) && content.matches(/(?s).*${pattern}.*/)) {
+                                if (!references[otherFile.path]) {
+                                    references[otherFile.path] = []
+                                }
+                                references[otherFile.path] << sourceFile.path
+                            }
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                logger.warn("Error reading file ${sourceFile.path}: ${e.message}")
+            }
+        }
+        
+        // Find potentially dead files
+        def deadFiles = []
+        sourceFiles.each { sourceFile ->
+            def isReferenced = references[sourceFile.path]
+            def isTestFile = sourceFile.path.contains('test/') || sourceFile.path.contains('Test') || sourceFile.path.endsWith('Spec.groovy')
+            def isMainClass = sourceFile.name.contains('Main') || sourceFile.name.contains('Application')
+            def isConfigFile = sourceFile.path.contains('config/') || sourceFile.name.contains('Config')
+            
+            // Skip files that are expected to not have references
+            if (!isReferenced && !isTestFile && !isMainClass && !isConfigFile) {
+                deadFiles << sourceFile.path
+            }
+        }
+        
+        // Generate report
+        def reportDir = file("${project.reporting.baseDir}/unused-code")
+        reportDir.mkdirs()
+        
+        def reportFile = file("${reportDir}/dead-files-report.txt")
+        reportFile.withWriter { writer ->
+            writer.println("Dead File Detection Report for ${project.name}")
+            writer.println("Generated: ${new Date()}")
+            writer.println("=" * 60)
+            writer.println()
+            
+            writer.println("SUMMARY:")
+            writer.println("- Total source files analyzed: ${sourceFiles.size()}")
+            writer.println("- Files with references: ${references.size()}")
+            writer.println("- Potentially dead files: ${deadFiles.size()}")
+            writer.println()
+            
+            if (deadFiles.size() > 0) {
+                writer.println("POTENTIALLY DEAD FILES:")
+                writer.println("-" * 30)
+                deadFiles.each { deadFile ->
+                    writer.println("- ${deadFile}")
+                }
+                writer.println()
+            }
+            
+            writer.println("REFERENCE MAP:")
+            writer.println("-" * 30)
+            references.each { file, refs ->
+                writer.println("${file}:")
+                refs.each { ref ->
+                    writer.println("  <- ${ref}")
+                }
+                writer.println()
+            }
+        }
+        
+        logger.lifecycle("Dead file detection completed")
+        logger.lifecycle("Found ${deadFiles.size()} potentially dead files")
+        logger.lifecycle("Report saved to: ${reportFile.absolutePath}")
+        
+        if (deadFiles.size() > 0) {
+            logger.lifecycle("Potentially dead files:")
+            deadFiles.each { deadFile ->
+                logger.lifecycle("  - ${deadFile}")
+            }
+        }
+    }
+}
+
+// Task to consolidate all unused code analysis results
+task unusedCodeReport {
+    group = 'verification'
+    description = 'Generate consolidated report of unused code and dead files'
+    dependsOn 'detectDeadFiles'
+    
+    doLast {
+        def reportDir = file("${project.reporting.baseDir}/unused-code")
+        reportDir.mkdirs()
+        
+        def consolidatedReport = file("${reportDir}/unused-code-summary.html")
+        
+        consolidatedReport.withWriter { writer ->
+            writer.println("""
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Unused Code Analysis Report - ${project.name}</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .header { background-color: #f0f0f0; padding: 10px; border-radius: 5px; }
+        .section { margin: 20px 0; }
+        .dead-files { background-color: #ffebee; padding: 15px; border-radius: 5px; }
+        .codenarc-results { background-color: #e8f5e8; padding: 15px; border-radius: 5px; }
+        .summary { background-color: #fff3e0; padding: 15px; border-radius: 5px; }
+        .file-list { margin-left: 20px; }
+        .file-item { margin: 5px 0; font-family: monospace; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Unused Code Analysis Report</h1>
+        <p><strong>Project:</strong> ${project.name}</p>
+        <p><strong>Generated:</strong> ${new Date()}</p>
+    </div>
+    
+    <div class="section summary">
+        <h2>Summary</h2>
+        <p>This report provides a comprehensive analysis of unused code and dead files in the project.</p>
+        <ul>
+            <li><strong>Dead File Detection:</strong> Files that appear to have no references in the codebase</li>
+            <li><strong>CodeNarc Analysis:</strong> Unused variables, methods, fields, and other code elements</li>
+        </ul>
+    </div>
+    
+    <div class="section dead-files">
+        <h2>Dead File Detection</h2>
+        <p>Files that do not appear to be referenced anywhere in the codebase.</p>
+        <p><em>See ${reportDir}/dead-files-report.txt for detailed analysis.</em></p>
+    </div>
+    
+    <div class="section codenarc-results">
+        <h2>CodeNarc Analysis</h2>
+        <p>Unused code elements detected by CodeNarc static analysis.</p>
+        <p><em>Run 'gradle codenarcMain' to generate detailed CodeNarc reports.</em></p>
+    </div>
+    
+    <div class="section">
+        <h2>Next Steps</h2>
+        <ol>
+            <li>Review the dead files list and confirm they can be safely removed</li>
+            <li>Check CodeNarc reports for unused variables, methods, and fields</li>
+            <li>Consider refactoring or removing identified unused code</li>
+            <li>Update imports and dependencies after removing unused code</li>
+        </ol>
+    </div>
+    
+    <div class="section">
+        <h2>Files Generated</h2>
+        <ul>
+            <li><code>${reportDir}/dead-files-report.txt</code> - Detailed dead file analysis</li>
+            <li><code>${reportDir}/unused-code-summary.html</code> - This summary report</li>
+        </ul>
+    </div>
+</body>
+</html>
+            """.stripIndent())
+        }
+        
+        logger.lifecycle("Consolidated unused code report generated: ${consolidatedReport.absolutePath}")
+    }
+}
+
+// Add the unused code analysis to all modules that apply this configuration
+if (project.hasProperty('applyUnusedCodeAnalysis') && project.applyUnusedCodeAnalysis) {
+    // Auto-apply to projects that opt in
+    apply from: "${rootProject.projectDir}/gradle/codenarc-config.gradle"
+}
