@@ -92,7 +92,7 @@ class GrailsGradlePlugin extends GroovyPlugin {
 
     List<Class<Plugin>> basePluginClasses = [IntegrationTestGradlePlugin] as List<Class<Plugin>>
     List<String> excludedGrailsAppSourceDirs = ['migrations', 'assets']
-    List<String> grailsAppResourceDirs = ['views', 'i18n', 'conf']
+    List<String> grailsAppResourceDirs = ['views', 'i18n', 'conf', 'migrations']
     private final ToolingModelBuilderRegistry registry
 
     @Inject
