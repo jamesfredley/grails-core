@@ -144,15 +144,13 @@ sbomTask.configure { CycloneDxTask it ->
                 'pkg:maven/com.oracle.coherence.ce/coherence-bom@25.03.1?type=pom' : 'UPL-1.0', // does not have map based on license id
                 'pkg:maven/com.oracle.coherence.ce/coherence-bom@22.06.2?type=pom' : 'UPL-1.0', // does not have map based on license id
                 'pkg:maven/opensymphony/sitemesh@2.6.0?type=jar' : 'OpenSymphony', // custom license approved by legal LEGAL-707
+                'pkg:maven/org.jruby/jzlib@1.1.5?type=jar': 'BSD-3-Clause'// https://web.archive.org/web/20240822213507/http://www.jcraft.com/jzlib/LICENSE.txt shows it's a 3 clause
         ]
 
         // we don't distribute these so these licenses are considered acceptable, but we still prefer ASF licenses.
         // Require a whitelist of any case of category X licenses to prevent accidental inclusion in a distributed artifact
         // this list will need to be updated anytime we change versions so we can revise the licenses
         def licenseExceptions = [
-                'grails-docs-core' : [
-                        'pkg:maven/org.jruby/jzlib@1.1.5?type=jar': 'BSD-4-Clause', // jruby is used in asciidoc
-                ],
                 'grails-data-hibernate5-core': [
                         'pkg:maven/org.hibernate.common/hibernate-commons-annotations@5.1.2.Final?type=jar': 'LGPL-2.1-only', // hibernate 5 is LGPL, we are migrating to ASF license in hibernate 7
                         'pkg:maven/org.hibernate/hibernate-core-jakarta@5.6.15.Final?type=jar': 'LGPL-2.1-only', // hibernate 5 is LGPL, we are migrating to ASF license in hibernate 7
