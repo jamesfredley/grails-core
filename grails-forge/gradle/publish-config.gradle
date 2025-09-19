@@ -17,7 +17,6 @@
  *  under the License.
  */
 
-
 import org.gradle.crypto.checksum.Checksum
 import org.apache.grails.gradle.publish.GrailsPublishExtension
 
