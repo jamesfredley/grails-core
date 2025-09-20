@@ -199,10 +199,7 @@ trait DatabaseMigrationCommand {
     }
 
     ResourceAccessor createResourceAccessor() {
-        new CompositeResourceAccessor(
-            new FileSystemResourceAccessor(changeLogLocation),
-            new ClassLoaderResourceAccessor())
-
+        new ClassLoaderResourceAccessor()
     }
 
     void withDatabase(Map<String, String> dataSourceConfig = null, @ClosureParams(value = SimpleType, options = 'liquibase.database.Database') Closure closure) {

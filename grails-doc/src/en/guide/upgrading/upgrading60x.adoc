@@ -522,3 +522,20 @@ grails {
 ----
 
 NOTE: Expanded class files & resource files will only be used over the jar file if the plugin applies the gradle plugin `org.apache.grails.gradle.grails-exploded` & the plugin is a subproject of your Gradle build.
+
+===== 12.22 Database Migration Plugin migrations directory in the main sourceSet
+
+It is no longer necessary to add the `grails-app/migrations` directory to the `main` sourceSet in order for the Database Migration Plugin to find your changelogs.
+This is now done automatically by the `org.apache.grails.gradle.grails-plugin` Gradle plugin.
+
+[source,groovy]
+.build.gradle
+----
+sourceSets {
+    main {
+        resources {
+            srcDir 'grails-app/migrations'
+        }
+    }
+}
+----
