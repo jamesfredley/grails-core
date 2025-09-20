@@ -65,8 +65,6 @@ import liquibase.lockservice.LockService
 import liquibase.lockservice.LockServiceFactory
 import liquibase.parser.ChangeLogParserFactory
 import liquibase.resource.ClassLoaderResourceAccessor
-import liquibase.resource.CompositeResourceAccessor
-import liquibase.resource.FileSystemResourceAccessor
 import liquibase.resource.ResourceAccessor
 import liquibase.statement.core.RawSqlStatement
 import liquibase.structure.core.Catalog
