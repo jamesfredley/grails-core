@@ -77,8 +77,8 @@ sbomTask.configure { CycloneDxTask it ->
     // cyclonedx does not support "choosing" the license placed in the sbom
     // see: https://github.com/CycloneDX/cyclonedx-gradle-plugin/issues/16
     it.doLast {
-        // ordered so that first value is the most preferred
-        def preferredLicenses = ['Apache-2.0', 'EPL-1.0', 'BSD-3-Clause', 'EPL-2.0', 'MIT', 'MIT-0', 'UPL-1.0']
+        // ordered so that first value is the most preferred, this list is from https://www.apache.org/legal/resolved.html
+        def preferredLicenses = ['Apache-2.0', 'EPL-1.0', 'BSD-3-Clause', 'EPL-2.0', 'MIT', 'MIT-0', '0BSD', 'UPL-1.0', 'CC0-1.0', 'ICU', 'Xnet', 'NCSA', 'W3C', 'Zlib', 'AFL-3.0', 'MS-PL', 'PSF-2.0', 'APAFML', 'BSL-1.0', 'WTFPL', 'Unlicense', 'HPND', 'EPICS', 'TCL']
 
         // licenses are standardized @ https://spdx.org/licenses/
         def licenses = [
@@ -250,6 +250,10 @@ sbomTask.configure { CycloneDxTask it ->
 
 // for now, we only publish the sbom inside of the binary jar (our bom projects won't have a jar file)
 pluginManager.withPlugin('java') {
+    tasks.named('assemble').configure {
+        dependsOn tasks.named('cyclonedxBom')
+    }
+
     if (!project.findProperty('skipJavaComponent')) {
         tasks.named('jar', Jar).configure { Jar jar ->
             jar.dependsOn tasks.named('cyclonedxBom')
