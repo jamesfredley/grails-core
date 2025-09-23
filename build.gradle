@@ -105,8 +105,6 @@ subprojects {
             cacheChangingModulesFor(cacheHours, 'hours')
         }
     }
-
-    apply from: rootProject.layout.projectDirectory.file('gradle/dependency-licenses.gradle')
 }
 
 apply {
