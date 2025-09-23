@@ -240,6 +240,11 @@ pluginManager.withPlugin('java') {
                     'sbom.json'
                 }
             }
+
+            jar.manifest {
+                attributes('Sbom-Location': 'META-INF/sbom.json')
+                attributes('Sbom-Format': 'CycloneDX')
+            }
         }
     }
 }
