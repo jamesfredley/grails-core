@@ -30,6 +30,7 @@ extensions.configure(GrailsPublishExtension) {
     it.developers = findProperty('pomDevelopers') as Map<String, String> ?: [puneetbehl: 'Peter Behl']
     it.pomCustomization = findProperty('pomCustomization') as Closure
     it.publishTestSources = findProperty('pomPublishTestSources') ?: false
+    it.addComponents = !findProperty('skipJavaComponent')
 }
 
 if (!project.findProperty('skipJavaComponent')) {
