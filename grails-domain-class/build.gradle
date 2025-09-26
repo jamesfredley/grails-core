@@ -48,6 +48,10 @@ dependencies {
     }
     api project(':grails-datastore-core')
 
+    implementation project(':grails-common'), {
+        // impl: GrailsMessageSourceUtils
+    }
+
     compileOnly 'jakarta.servlet:jakarta.servlet-api'
     compileOnly 'org.springframework:spring-test', {
         // MockHttpServletRequest/Response/Context used in many classes
