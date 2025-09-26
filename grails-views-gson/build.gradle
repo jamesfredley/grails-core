@@ -37,6 +37,9 @@ dependencies {
     api project(':grails-views-core') // Used in public API
     api project(':grails-rest-transforms') // Used in public API
 
+    implementation project(':grails-common'), {
+        // impl: GrailsMessageSourceUtils
+    }
     implementation project(':grails-encoder')
     implementation 'org.apache.groovy:groovy'
     implementation 'org.apache.groovy:groovy-json'

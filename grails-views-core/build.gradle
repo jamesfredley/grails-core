@@ -41,6 +41,9 @@ dependencies {
     api 'org.springframework:spring-context' // MessageSource is used in public API
 
     implementation project(':grails-bootstrap')
+    implementation project(':grails-common'), {
+        // impl: GrailsMessageSourceUtils
+    }
     implementation project(':grails-core')
     implementation project(':grails-datamapping-support')
     implementation 'org.slf4j:slf4j-api'

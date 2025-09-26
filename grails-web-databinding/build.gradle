@@ -37,6 +37,10 @@ dependencies {
     api project(':grails-encoder')
     api 'org.apache.groovy:groovy'
 
+    implementation project(':grails-common'), {
+        // impl: GrailsMessageSourceUtils
+    }
+
     testRuntimeOnly "org.apache.grails.views:grails-gsp-core", {
         exclude module: 'grails-encoder'
         exclude module: 'grails-core'
