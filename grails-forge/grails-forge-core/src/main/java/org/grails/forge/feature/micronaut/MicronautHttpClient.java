@@ -62,16 +62,25 @@ public class MicronautHttpClient implements Feature {
 
     @Override
     public void apply(GeneratorContext generatorContext) {
+        generatorContext.getBuildProperties().put("micronautPlatformVersion", "4.9.2");
+
+        generatorContext.addDependency(Dependency.builder()
+                .groupId("io.micronaut.platform")
+                .artifactId("micronaut-platform")
+                .pom(true)
+                .version("$micronautPlatformVersion")
+                .implementation()
+            .build());
+
         generatorContext.addDependency(Dependency.builder()
                 .groupId("io.micronaut")
-                .lookupArtifactId("micronaut-http-client")
+                .artifactId("micronaut-http-client")
                 .implementation());
-
 
         // micronaut-http-client no longer provides the jackson implementation
         generatorContext.addDependency(Dependency.builder()
                 .groupId("io.micronaut.serde")
-                .lookupArtifactId("micronaut-serde-jackson")
+                .artifactId("micronaut-serde-jackson")
                 .implementation());
     }
 }

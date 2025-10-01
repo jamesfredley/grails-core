@@ -25,6 +25,9 @@ under the License.
 
 package @project.getPackageName()
 
+@if(features.contains("grails-micronaut")) {
+import io.micronaut.spring.boot.starter.EnableMicronaut
+}
 import grails.boot.GrailsApp
 import grails.boot.config.GrailsAutoConfiguration
 @if(applicationType.equals(ApplicationType.PLUGIN) || applicationType.equals(ApplicationType.WEB_PLUGIN)) {
@@ -34,6 +37,9 @@ import groovy.transform.CompileStatic
 
 @if(applicationType.equals(ApplicationType.PLUGIN) || applicationType.equals(ApplicationType.WEB_PLUGIN)) {
 @@PluginSource
+}
+@if(features.contains("grails-micronaut")) {
+@@EnableMicronaut
 }
 @@CompileStatic
 class Application extends GrailsAutoConfiguration {
