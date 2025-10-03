@@ -23,7 +23,6 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -140,6 +139,7 @@ public abstract class GroovyPage extends Script {
             setPluginContextPath(metaInfo.getPluginPath());
         }
     }
+
     public void initRun(Writer target, OutputContext outputContext, GroovyPageMetaInfo metaInfo) {
         OutputEncodingStackAttributes.Builder attributesBuilder = new OutputEncodingStackAttributes.Builder();
         if (metaInfo != null) {

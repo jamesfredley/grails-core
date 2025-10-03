@@ -26,11 +26,15 @@ import java.io.Reader;
 import java.io.Writer;
 import java.util.LinkedHashMap;
 import java.util.Map;
+
 import groovy.lang.Binding;
 import groovy.lang.Writable;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import grails.util.Environment;
+
 import org.grails.taglib.AbstractTemplateVariableBinding;
 import org.grails.taglib.TemplateVariableBinding;
 import org.grails.taglib.encoder.OutputContext;
@@ -291,6 +295,4 @@ public class GroovyPageWritable implements Writable {
             in.close();
         }
     }
-
-
 }
