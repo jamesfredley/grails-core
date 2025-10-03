@@ -22,12 +22,22 @@ import io.micronaut.core.annotation.NonNull;
 import jakarta.inject.Singleton;
 import org.grails.forge.application.ApplicationType;
 import org.grails.forge.application.generator.GeneratorContext;
+import org.grails.forge.build.dependencies.Coordinate;
 import org.grails.forge.build.dependencies.Dependency;
+import org.grails.forge.build.dependencies.PomDependencyVersionResolver;
 import org.grails.forge.feature.Category;
 import org.grails.forge.feature.Feature;
 
+import java.util.Optional;
+
 @Singleton
 public class MicronautHttpClient implements Feature {
+
+    private final PomDependencyVersionResolver versionResolver;
+
+    public MicronautHttpClient(PomDependencyVersionResolver versionResolver) {
+        this.versionResolver = versionResolver;
+    }
 
     @Override
     @NonNull
@@ -62,7 +72,14 @@ public class MicronautHttpClient implements Feature {
 
     @Override
     public void apply(GeneratorContext generatorContext) {
-        generatorContext.getBuildProperties().put("micronautPlatformVersion", "4.9.2");
+        Optional<Coordinate> micronautPlatformVersion =
+            versionResolver.resolve("micronaut-platform");
+        micronautPlatformVersion.ifPresent(coordinate ->
+            generatorContext.getBuildProperties().put(
+                "micronautPlatformVersion",
+                coordinate.getVersion()
+            )
+        );
 
         generatorContext.addDependency(Dependency.builder()
                 .groupId("io.micronaut.platform")

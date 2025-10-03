@@ -33,6 +33,12 @@
     </repositories>
     <dependencies>
         <dependency>
+            <groupId>io.micronaut.platform</groupId>
+            <artifactId>micronaut-platform</artifactId>
+            <type>pom</type>
+            <version>4.9.2</version>
+        </dependency>
+        <dependency>
             <groupId>org.grails.plugins</groupId>
             <artifactId>grails-web-console</artifactId>
             <version>7.0.0-M3</version>
