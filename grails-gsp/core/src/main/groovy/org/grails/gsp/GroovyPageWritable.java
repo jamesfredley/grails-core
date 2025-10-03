@@ -34,7 +34,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import grails.util.Environment;
-
 import org.grails.taglib.AbstractTemplateVariableBinding;
 import org.grails.taglib.TemplateVariableBinding;
 import org.grails.taglib.encoder.OutputContext;

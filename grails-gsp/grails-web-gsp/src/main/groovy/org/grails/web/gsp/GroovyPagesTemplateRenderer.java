@@ -212,7 +212,7 @@ public class GroovyPagesTemplateRenderer implements InitializingBean {
         out = newOut;
 
         String var = getStringValue(attrs, "var");
-        Map b = new LinkedHashMap<String, Object>();
+        LinkedHashMap<String, Object> b = new LinkedHashMap<>();
         b.put("body", body);
         if (attrs.get("model") instanceof Map) {
             b.putAll((Map) attrs.get("model"));
@@ -233,8 +233,8 @@ public class GroovyPagesTemplateRenderer implements InitializingBean {
                 if (key == null && GrailsStringUtils.isBlank(var) && it != null) {
                     key = GrailsNameUtils.getPropertyName(it.getClass());
                 }
-                Map itmap = new LinkedHashMap<String, Object>();
-                itmap.putAll(b);
+                Map itmap = (Map) b.clone();
+
                 if (GrailsStringUtils.isNotBlank(var)) {
                     itmap.put(var, it);
                 }
