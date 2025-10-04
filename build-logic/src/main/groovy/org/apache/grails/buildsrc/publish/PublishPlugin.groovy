@@ -204,22 +204,35 @@ class PublishPlugin implements Plugin<Project> {
                 return
             }
 
-            def projectLicense = project.layout.projectDirectory.file('src/main/resources/META-INF/LICENSE')
-            if (!projectLicense.asFile.exists()) {
-                project.logger.info('Did not find license file for project {} for jar file {}', project.name, jar.archiveFileName.getOrNull())
-                def basicLicense = grailsCoreRoot.file('licenses/LICENSE-Apache-2.0.txt')
-                jar.from(basicLicense) { CopySpec spec ->
-                    spec.into('META-INF')
-                    spec.rename { 'LICENSE' }
-                }
+            def jarHasFiles = project.providers.provider {
+                !jar.source.asFileTree.matching {
+                    exclude('META-INF/LICENSE', 'META-INF/NOTICE')
+                }.isEmpty()
             }
 
-            def projectNotice = project.layout.projectDirectory.file('src/main/resources/META-INF/NOTICE')
-            if (!projectNotice.asFile.exists()) {
-                project.logger.info('Did not find notice file for project {} for jar file {}', project.name, jar.archiveFileName.getOrNull())
-                def basicNotice = grailsCoreRoot.file('grails-core/src/main/resources/META-INF/NOTICE')
-                jar.from(basicNotice) { CopySpec spec ->
-                    spec.into('META-INF')
+            def licenseInProject = project.layout.projectDirectory.file('src/main/resources/META-INF/LICENSE')
+            def needsLicense = project.providers.provider { !licenseInProject.asFile.exists() }
+            def fallbackLicense = grailsCoreRoot.file('licenses/LICENSE-Apache-2.0.txt')
+            jar.from(fallbackLicense) { CopySpec spec ->
+                spec.into 'META-INF'
+                spec.rename { 'LICENSE' }
+                spec.include { needsLicense.get() && jarHasFiles.get() }
+            }
+
+            def noticeInProject  = project.layout.projectDirectory.file('src/main/resources/META-INF/NOTICE')
+            def needsNotice  = project.providers.provider { !noticeInProject.asFile.exists() }
+            def fallbackNotice  = grailsCoreRoot.file('grails-core/src/main/resources/META-INF/NOTICE')
+            jar.from(fallbackNotice) { CopySpec spec ->
+                spec.into 'META-INF'
+                spec.include { needsNotice.get() && jarHasFiles.get() }
+            }
+
+            jar.doFirst {
+                if (needsLicense.get()) {
+                    jar.logger.info('Did not find license file for project {} for jar file {}, using fallback license', project.name, jar.archiveFileName.getOrNull())
+                }
+                if (needsNotice.get()) {
+                    jar.logger.info('Did not find notice file for project {} for jar file {}, using notice license', project.name, jar.archiveFileName.getOrNull())
                 }
             }
         }
