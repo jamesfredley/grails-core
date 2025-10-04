@@ -16,6 +16,7 @@
  */
 plugins {
 	id 'org.apache.grails.gradle.grails-profile'
+    id 'org.apache.grails.buildsrc.publish'
 }
 
 group = 'org.apache.grails.profiles'
@@ -34,6 +35,5 @@ dependencies {
 }
 
 apply {
-	from rootProject.layout.projectDirectory.file('gradle/publish-config.gradle')
 	from rootProject.layout.projectDirectory.file('gradle/sbom-config.gradle')
 }

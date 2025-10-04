@@ -24,6 +24,7 @@ plugins {
     id 'distribution'
     id 'com.gradleup.shadow'
     id 'io.sdkman.vendors'
+    id 'org.apache.grails.buildsrc.publish'
 }
 
 ext {
@@ -79,7 +80,6 @@ dependencies {
 apply {
     from rootProject.layout.projectDirectory.file('gradle/java-config.gradle')
     from rootProject.layout.projectDirectory.file('gradle/code-style-config.gradle')
-    from rootProject.layout.projectDirectory.file('gradle/publish-config.gradle')
     from rootProject.layout.projectDirectory.file('../gradle/sbom-config.gradle')
 }
 

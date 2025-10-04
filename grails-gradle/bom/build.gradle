@@ -20,6 +20,7 @@
 plugins {
     id 'java-platform'
     id 'maven-publish'
+    id 'org.apache.grails.buildsrc.publish'
 }
 
 version = projectVersion
@@ -164,6 +165,5 @@ ext {
 }
 
 apply {
-    from rootProject.layout.projectDirectory.file('gradle/publish-config.gradle')
     from rootProject.layout.projectDirectory.file('../gradle/sbom-config.gradle')
 }

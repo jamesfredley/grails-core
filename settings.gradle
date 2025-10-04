@@ -23,6 +23,39 @@ pluginManagement {
     includeBuild('./grails-gradle') {
         name = 'grails-gradle'
     }
+    includeBuild('./build-logic') {
+        name = 'build-logic'
+    }
+    repositories {
+        // because our publish plugin uses other plugins, those dependencies have to be resolvable
+        // mavenLocal()
+        mavenCentral()
+        gradlePluginPortal()
+        maven {
+            url = 'https://repository.apache.org/content/groups/snapshots'
+            content {
+                includeVersionByRegex('org[.]apache[.]grails[.]gradle.*', '.*', '.*-SNAPSHOT')
+            }
+        }
+        maven {
+            url = 'https://central.sonatype.com/repository/maven-snapshots'
+            content {
+                includeVersionByRegex('cloud[.]wondrify.*', '.*', '.*-SNAPSHOT')
+            }
+            mavenContent {
+                snapshotsOnly()
+            }
+        }
+        maven {
+            url = 'https://repository.apache.org/content/groups/staging'
+            content {
+                includeModuleByRegex('org[.]apache[.]grails[.]gradle', 'grails-publish')
+            }
+            mavenContent {
+                releasesOnly()
+            }
+        }
+    }
 }
 plugins {
     id 'com.gradle.develocity' version '4.1.1'
