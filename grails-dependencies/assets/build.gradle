@@ -27,7 +27,6 @@ version = projectVersion
 group = 'org.apache.grails'
 
 ext {
-    skipJavaComponent = true
     pomDescription = 'A meta-project that aggregates all Grails assets files under one place.'
 }
 
