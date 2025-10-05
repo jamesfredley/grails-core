@@ -65,7 +65,7 @@ During the staging step, we must create a source distribution & stage any binary
      * upload the grails-wrapper binary distribution to https://dist.apache.org/repos/dist/dev/grails/core/VERSION/distribution
      * upload the grails binary distribution to https://dist.apache.org/repos/dist/dev/grails/core/VERSION/distribution (note: this is the sdkman artifact)
    * upload a file containing the SVN revision for the uploaded artifacts
-   * generate vote email templates for the Grails PMC
+   * generate vote email template for the Grails PMC
 
 ## 2. Verifying Artifacts are Authentic
 
