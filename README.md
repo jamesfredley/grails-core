@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# Apache Grails (Incubating)
+# Apache Grails
 
 [![Documentation](https://img.shields.io/badge/Documentation-595959)](https://docs.grails.org)
 [![Develocity](https://img.shields.io/badge/Develocity-06A0CE?logo=Gradle&labelColor=06A0CE)](https://ge.grails.org/scans)
