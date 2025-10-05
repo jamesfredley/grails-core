@@ -297,12 +297,15 @@ public class GroovyPageMetaInfo implements GrailsApplicationAware {
         SoftReference<GroovyPage> pageSoftRef = pageInstance.get();
 
         GroovyPage pageCacheEntry = pageSoftRef != null ? pageSoftRef.get() : null;
-        if (pageCacheEntry == null) {
-            LOG.info("Loading Page: " + pageClass.getName());
+        if (!isModelFieldsMode() && pageCacheEntry == null) {
             pageCacheEntry = (GroovyPage) pageClassConstructor.newInstance();
             pageCacheEntry.initCommonRun(this);
             pageInstance.set(new SoftReference<>(pageCacheEntry));
+        } else {
+            pageCacheEntry = (GroovyPage) pageClassConstructor.newInstance();
+            pageCacheEntry.initCommonRun(this);
         }
+
         return pageCacheEntry;
     }
 

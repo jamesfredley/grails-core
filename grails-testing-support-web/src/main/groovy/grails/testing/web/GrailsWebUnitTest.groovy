@@ -228,7 +228,7 @@ trait GrailsWebUnitTest implements GrailsUnitTest {
     void applyTemplate(StringWriter sw, String template, Map params = [:]) {
         def engine = applicationContext.getBean(GroovyPagesTemplateEngine)
 
-        def t = engine.createTemplate(template, 'test_' + System.currentTimeMillis())
+        def t = engine.createTemplate(template, 'test_' + System.currentTimeMillis(),false)
         renderTemplateToStringWriter(sw, t, params)
     }
 

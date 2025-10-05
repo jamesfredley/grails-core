@@ -211,6 +211,8 @@ public abstract class GroovyPage extends Script {
 
     public void cleanup() {
         outputStack.pop(true);
+       // setBinding(new Binding());
+
     }
 
     public final void createClosureForHtmlPart(int partNumber, int bodyClosureIndex) {
