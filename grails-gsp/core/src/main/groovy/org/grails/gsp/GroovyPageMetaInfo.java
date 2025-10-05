@@ -295,17 +295,14 @@ public class GroovyPageMetaInfo implements GrailsApplicationAware {
 
     public GroovyPage getPageClassInstance() throws InstantiationException, IllegalAccessException, NoSuchMethodException, InvocationTargetException {
         SoftReference<GroovyPage> pageSoftRef = pageInstance.get();
-
         GroovyPage pageCacheEntry = pageSoftRef != null ? pageSoftRef.get() : null;
-        if (!isModelFieldsMode() && pageCacheEntry == null) {
+        if (pageCacheEntry == null) {
             pageCacheEntry = (GroovyPage) pageClassConstructor.newInstance();
             pageCacheEntry.initCommonRun(this);
-            pageInstance.set(new SoftReference<>(pageCacheEntry));
-        } else {
-            pageCacheEntry = (GroovyPage) pageClassConstructor.newInstance();
-            pageCacheEntry.initCommonRun(this);
+            if(!isModelFieldsMode()) {
+                pageInstance.set(new SoftReference<>(pageCacheEntry));
+            }
         }
-
         return pageCacheEntry;
     }
 

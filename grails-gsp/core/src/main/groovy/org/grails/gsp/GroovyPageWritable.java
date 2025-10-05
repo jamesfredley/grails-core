@@ -134,15 +134,15 @@ public class GroovyPageWritable implements Writable {
             if (hasRequest) {
                 outputContext.setBinding(binding);
             }
-
+            Binding existingBinding = null;
             GroovyPage page = null;
             try {
-
                 page = metaInfo.getPageClassInstance();
-
+                existingBinding = page.getBinding();
             } catch (Exception e) {
                 throw new GroovyPagesException("Problem instantiating page class", e);
             }
+
             page.setBinding(binding);
             binding.setOwner(page);
 
@@ -152,6 +152,9 @@ public class GroovyPageWritable implements Writable {
                 page.run();
             }
             finally {
+                if(existingBinding!=null) {
+                    page.setBinding(existingBinding);
+                }
                 page.cleanup();
                 if (hasRequest) {
                     if (newParentCreated) {

@@ -83,6 +83,7 @@ public abstract class GroovyPage extends Script {
     public static final String LINK_NAMESPACE = "link";
     public static final String TEMPLATE_NAMESPACE = "tmpl";
     public static final String PAGE_SCOPE = "pageScope";
+    private OutputEncodingStackAttributes.Builder attributesBuilder;
 
     public static final Collection<String> RESERVED_NAMES = CollectionUtils.newSet(
             OUT,
@@ -130,7 +131,12 @@ public abstract class GroovyPage extends Script {
     }
 
     public void initCommonRun(GroovyPageMetaInfo metaInfo) {
+        attributesBuilder = new OutputEncodingStackAttributes.Builder();
         if (metaInfo != null) {
+            attributesBuilder.outEncoder(metaInfo.getOutEncoder());
+            attributesBuilder.staticEncoder(metaInfo.getStaticEncoder());
+            attributesBuilder.expressionEncoder(metaInfo.getExpressionEncoder());
+            attributesBuilder.defaultTaglibEncoder(metaInfo.getTaglibEncoder());
             setHtmlParts(metaInfo.getHtmlParts());
             setHtmlPartsSet(metaInfo.getHtmlPartsSet());
             setJspTags(metaInfo.getJspTags());
@@ -138,20 +144,16 @@ public abstract class GroovyPage extends Script {
             setGspTagLibraryLookup(metaInfo.getTagLibraryLookup());
             setPluginContextPath(metaInfo.getPluginPath());
         }
+        attributesBuilder.allowCreate(true).autoSync(false).pushTop(true);
+        attributesBuilder.inheritPreviousEncoders(false);
     }
 
     public void initRun(Writer target, OutputContext outputContext, GroovyPageMetaInfo metaInfo) {
-        OutputEncodingStackAttributes.Builder attributesBuilder = new OutputEncodingStackAttributes.Builder();
         if (metaInfo != null) {
-            attributesBuilder.outEncoder(metaInfo.getOutEncoder());
-            attributesBuilder.staticEncoder(metaInfo.getStaticEncoder());
-            attributesBuilder.expressionEncoder(metaInfo.getExpressionEncoder());
-            attributesBuilder.defaultTaglibEncoder(metaInfo.getTaglibEncoder());
             applyModelFieldsFromBinding(metaInfo.getModelFields());
         }
-        attributesBuilder.allowCreate(true).topWriter(target).autoSync(false).pushTop(true);
         attributesBuilder.outputContext(outputContext);
-        attributesBuilder.inheritPreviousEncoders(false);
+        attributesBuilder.topWriter(target);
         outputStack = OutputEncodingStack.currentStack(attributesBuilder.build());
 
         out = outputStack.getOutWriter();
@@ -211,8 +213,6 @@ public abstract class GroovyPage extends Script {
 
     public void cleanup() {
         outputStack.pop(true);
-       // setBinding(new Binding());
-
     }
 
     public final void createClosureForHtmlPart(int partNumber, int bodyClosureIndex) {
