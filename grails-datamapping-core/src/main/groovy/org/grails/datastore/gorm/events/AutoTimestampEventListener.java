@@ -34,6 +34,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEvent;
 
 import grails.gorm.annotation.AutoTimestamp;
+import grails.gorm.annotation.CreatedDate;
+import grails.gorm.annotation.LastModifiedDate;
 import org.grails.datastore.gorm.timestamp.DefaultTimestampProvider;
 import org.grails.datastore.gorm.timestamp.TimestampProvider;
 import org.grails.datastore.mapping.config.Entity;
@@ -191,12 +193,18 @@ public class AutoTimestampEventListener extends AbstractPersistenceEventListener
                         storeTimestampAvailability(entitiesWithDateCreated, persistentEntity, property);
                     } else {
                         Field field = getFieldFromHierarchy(persistentEntity.getJavaClass(), property.getName());
-                        if (field != null && field.isAnnotationPresent(AutoTimestamp.class)) {
-                            AutoTimestamp autoTimestamp = field.getAnnotation(AutoTimestamp.class);
-                            if (autoTimestamp.value() == AutoTimestamp.EventType.UPDATED) {
-                                storeTimestampAvailability(entitiesWithLastUpdated, persistentEntity, property);
-                            } else {
+                        if (field != null) {
+                            if (field.isAnnotationPresent(CreatedDate.class)) {
                                 storeTimestampAvailability(entitiesWithDateCreated, persistentEntity, property);
+                            } else if (field.isAnnotationPresent(LastModifiedDate.class)) {
+                                storeTimestampAvailability(entitiesWithLastUpdated, persistentEntity, property);
+                            } else if (field.isAnnotationPresent(AutoTimestamp.class)) {
+                                AutoTimestamp autoTimestamp = field.getAnnotation(AutoTimestamp.class);
+                                if (autoTimestamp.value() == AutoTimestamp.EventType.UPDATED) {
+                                    storeTimestampAvailability(entitiesWithLastUpdated, persistentEntity, property);
+                                } else {
+                                    storeTimestampAvailability(entitiesWithDateCreated, persistentEntity, property);
+                                }
                             }
                         }
                     }
