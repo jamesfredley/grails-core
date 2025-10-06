@@ -65,6 +65,14 @@ class GrailsExtension {
     boolean importJavaTime = false
 
     /**
+     * Whether grails annotation packages should be default import packages.
+     * When enabled, automatically imports:
+     * - grails.gorm.annotation.* (if grails-datamapping-core is in classpath)
+     * - grails.plugin.scaffolding.annotation.* (if grails-scaffolding is in classpath)
+     */
+    boolean importGrailsAnnotations = false
+
+    /**
      * Whether the spring dependency management plugin should be applied by default
      */
     boolean springDependencyManagement = true
