@@ -40,6 +40,7 @@ import org.grails.gsp.GroovyPageMetaInfo
 import org.grails.gsp.compiler.transform.GroovyPageInjectionOperation
 import org.grails.taglib.encoder.OutputEncodingSettings
 import org.grails.gsp.GroovyPage
+
 /**
  * Used to compile GSP files into a specified target directory. The compiler creates 3 files per page.
  * Firstly, it generates a {@link GroovyPage} derived class which is then compiled to a .class file.
@@ -83,8 +84,8 @@ class GroovyPageCompiler {
     }
 
     /**
-    * Compiles the given GSP pages and returns a Map of URI to classname mappings
-    */
+     * Compiles the given GSP pages and returns a Map of URI to classname mappings
+     */
     Map compile() {
         if (srcFiles && targetDir && viewsDir) {
             if (!generatedGroovyPagesDirectory) {
@@ -100,8 +101,7 @@ class GroovyPageCompiler {
                     if (f.exists()) {
                         if (f.name.endsWith('.yml')) {
                             codeGenConfig.loadYml(f)
-                        }
-                        else if (f.name.endsWith('.groovy')) {
+                        } else if (f.name.endsWith('.groovy')) {
                             codeGenConfig.loadGroovy(f)
                         }
                     }
@@ -206,8 +206,7 @@ class GroovyPageCompiler {
         String fullClassName
         if (packageName) {
             fullClassName = packageName + '.' + className
-        }
-        else {
+        } else {
             fullClassName = className
         }
 
@@ -225,11 +224,11 @@ class GroovyPageCompiler {
                 gpp.generateGsp(gsptarget)
                 gsptarget.flush()
                 // write static html parts to data file (read from classpath at runtime)
-                File htmlDataFile = new File(new File(targetDir, packageDir),  className + GroovyPageMetaInfo.HTML_DATA_POSTFIX)
+                File htmlDataFile = new File(new File(targetDir, packageDir), className + GroovyPageMetaInfo.HTML_DATA_POSTFIX)
                 htmlDataFile.parentFile.mkdirs()
                 gpp.writeHtmlParts(htmlDataFile)
                 // write linenumber mapping info to data file
-                File lineNumbersDataFile = new File(new File(targetDir, packageDir),  className + GroovyPageMetaInfo.LINENUMBERS_DATA_POSTFIX)
+                File lineNumbersDataFile = new File(new File(targetDir, packageDir), className + GroovyPageMetaInfo.LINENUMBERS_DATA_POSTFIX)
                 gpp.writeLineNumbers(lineNumbersDataFile)
 
                 // register viewuri -> classname mapping
@@ -240,8 +239,7 @@ class GroovyPageCompiler {
                 unit.addSource(gspgroovyfile.name, gsptarget.toString())
                 unit.compile()
             }
-        }
-        else {
+        } else {
             compileGSPResults[viewuri] = fullClassName
         }
 
@@ -270,8 +268,7 @@ class GroovyPageCompiler {
             if (ch == '/') {
                 nextMustBeStartChar = true
                 sb.append(ch)
-            }
-            else {
+            } else {
                 // package or class name cannot start with a number
                 if (nextMustBeStartChar && !Character.isJavaIdentifierStart(ch)) {
                     sb.append('_')

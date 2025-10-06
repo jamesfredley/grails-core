@@ -144,8 +144,7 @@ public class GroovyPageMetaInfo implements GrailsApplicationAware {
 
         try {
             readHtmlData();
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             throw new RuntimeException("Problem reading html data for page class " + pageClass, e);
         }
     }
@@ -228,8 +227,7 @@ public class GroovyPageMetaInfo implements GrailsApplicationAware {
                     htmlParts[i] = input.readUTF();
                 }
             }
-        }
-        finally {
+        } finally {
             IOUtils.closeQuietly(input);
         }
     }
@@ -250,8 +248,7 @@ public class GroovyPageMetaInfo implements GrailsApplicationAware {
             for (int i = 0; i < arrayLen; i++) {
                 lineNumbers[i] = input.readInt();
             }
-        }
-        finally {
+        } finally {
             IOUtils.closeQuietly(input);
         }
     }
@@ -299,7 +296,7 @@ public class GroovyPageMetaInfo implements GrailsApplicationAware {
         if (pageCacheEntry == null) {
             pageCacheEntry = (GroovyPage) pageClassConstructor.newInstance();
             pageCacheEntry.initCommonRun(this);
-            if(!isModelFieldsMode()) {
+            if (!isModelFieldsMode()) {
                 pageInstance.set(new SoftReference<>(pageCacheEntry));
             }
         }
@@ -354,8 +351,7 @@ public class GroovyPageMetaInfo implements GrailsApplicationAware {
         if (lineNumbers == null) {
             try {
                 readLineNumbers();
-            }
-            catch (IOException e) {
+            } catch (IOException e) {
                 LOG.warn("Problem reading precompiled linenumbers", e);
             }
         }
@@ -437,22 +433,18 @@ public class GroovyPageMetaInfo implements GrailsApplicationAware {
             urlc.setDoInput(false);
             urlc.setDoOutput(false);
             last = urlc.getLastModified();
-        }
-        catch (FileNotFoundException fnfe) {
+        } catch (FileNotFoundException fnfe) {
             last = -1;
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             last = -1;
-        }
-        finally {
+        } finally {
             if (urlc != null) {
                 try {
                     InputStream is = urlc.getInputStream();
                     if (is != null) {
                         is.close();
                     }
-                }
-                catch (IOException e) {
+                } catch (IOException e) {
                     // ignore
                 }
             }

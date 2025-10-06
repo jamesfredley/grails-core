@@ -101,8 +101,7 @@ public class GroovyPageWritable implements Writable {
             // Set it to TEXT
             outputContext.setContentType(GROOVY_SOURCE_CONTENT_TYPE); // must come before response.getOutputStream()
             writeGroovySourceToResponse(metaInfo, out);
-        }
-        else {
+        } else {
             // Set it to HTML by default
             if (metaInfo.getCompilationException() != null) {
                 throw metaInfo.getCompilationException();
@@ -150,9 +149,8 @@ public class GroovyPageWritable implements Writable {
 
             try {
                 page.run();
-            }
-            finally {
-                if(existingBinding!=null) {
+            } finally {
+                if (existingBinding != null) {
                     page.setBinding(existingBinding);
                 }
                 page.cleanup();
@@ -223,13 +221,12 @@ public class GroovyPageWritable implements Writable {
             Reader reader = new InputStreamReader(in, "UTF-8");
             char[] buf = new char[8192];
 
-            for (;;) {
+            for (; ; ) {
                 int read = reader.read(buf);
                 if (read <= 0) break;
                 out.write(buf, 0, read);
             }
-        }
-        finally {
+        } finally {
             out.close();
             in.close();
         }
@@ -252,8 +249,7 @@ public class GroovyPageWritable implements Writable {
         try {
             try {
                 in.reset();
-            }
-            catch (IOException e) {
+            } catch (IOException e) {
                 // ignore
             }
             BufferedReader reader = new BufferedReader(new InputStreamReader(in, "UTF-8"));
@@ -291,8 +287,7 @@ public class GroovyPageWritable implements Writable {
                 out.write(line);
                 out.write('\n');
             }
-        }
-        finally {
+        } finally {
             out.close();
             in.close();
         }
