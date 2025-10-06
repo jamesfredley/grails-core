@@ -241,14 +241,11 @@ example commands to perform this verification. However, it if manually verifying
 
 ## 4. Voting
 
-After all artifacts are uploaded, verified, and tested, we can vote on the release.  As an ASF project, we follow the voting guidelines set forth by the [Apache Voting Process](https://www.apache.org/foundation/voting.html). We are also an ASF software project, so there are 2 votes.  Details for each follow: 
+After all artifacts are uploaded, verified, and tested, we can vote on the release.  As an ASF project, we follow the voting guidelines set forth by the [Apache Voting Process](https://www.apache.org/foundation/voting.html).  
 
 ### Apache Grails PMC
 
-The release vote is conducted on
-the [Grails dev mailing list](https://lists.apache.org/list.html?dev@grails.apache.org).  
-Only votes from members of the Apache Grails PMC are binding, but the community is welcome to participate to express
-their support.
+The release vote is conducted on the [Grails dev mailing list](https://lists.apache.org/list.html?dev@grails.apache.org). Only votes from members of the Apache Grails PMC are binding, but the community is welcome to participate to express their support.
 
 The vote runs for a minimum of 72 hours.  
 The vote email is automatically generated as part of the release process — see the `upload` job in the `Release`
