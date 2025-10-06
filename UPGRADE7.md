@@ -43,6 +43,15 @@ Experienced while upgrading modules for Grails 7
           }
       }
 
+## Mongo DB
+- `Instant` persistence switched from epoch milliseconds (BSON int64) to BSON DateTime (same BSON type as `java.util.Date`); `LocalDateTime` continues to be converted to BSON DateTime using the configured zone.  If you currently using domain objects with property type `Instant`, you will need to convert them prior to upgrading. For more info, see [#1511](https://github.com/apache/grails-core/pull/15111)
+
+```
+db.Example.updateMany(
+  { created: { $type: "long" } },
+  [ { $set: { created: { $toDate: "$created" } } } ]
+);
+```
 
 ## NOTE: This document is a draft and the explanations are only highlights and will be expanded further prior to release of 7.0.
 
