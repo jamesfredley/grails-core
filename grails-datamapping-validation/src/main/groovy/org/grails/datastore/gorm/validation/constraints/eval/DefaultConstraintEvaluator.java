@@ -19,6 +19,7 @@
 
 package org.grails.datastore.gorm.validation.constraints.eval;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -305,6 +306,11 @@ public class DefaultConstraintEvaluator implements ConstraintsEvaluator {
             return NameUtils.isNotConfigurational(propertyName);
         }
         else {
+            // Check if property has @CreatedDate or @LastModifiedDate annotations
+            if (hasAutoTimestampAnnotation(persistentProperty)) {
+                return false;
+            }
+
             return !propertyName.equals(GormProperties.VERSION) &&
                     !propertyName.equals(GormProperties.DATE_CREATED) &&
                     !propertyName.equals(GormProperties.LAST_UPDATED) &&
@@ -313,6 +319,45 @@ public class DefaultConstraintEvaluator implements ConstraintsEvaluator {
                     !((persistentProperty instanceof ToOne) && ((ToOne) persistentProperty).isBidirectional() && ((ToOne) persistentProperty).isCircular());
         }
 
+    }
+
+    /**
+     * Checks if a property has @CreatedDate, @LastModifiedDate, or @AutoTimestamp annotation.
+     * These annotations indicate auto-timestamp properties that should be nullable.
+     * Uses reflection by annotation name to avoid circular dependency issues.
+     */
+    protected boolean hasAutoTimestampAnnotation(PersistentProperty persistentProperty) {
+        try {
+            Field field = getFieldFromHierarchy(persistentProperty.getOwner().getJavaClass(), persistentProperty.getName());
+            if (field != null) {
+                for (java.lang.annotation.Annotation annotation : field.getDeclaredAnnotations()) {
+                    String annotationName = annotation.annotationType().getName();
+                    if ("grails.gorm.annotation.CreatedDate".equals(annotationName) ||
+                        "grails.gorm.annotation.LastModifiedDate".equals(annotationName) ||
+                        "grails.gorm.annotation.AutoTimestamp".equals(annotationName)) {
+                        return true;
+                    }
+                }
+            }
+        } catch (Exception e) {
+            LOG.debug("Unable to check for auto-timestamp annotations on property: " + persistentProperty.getName(), e);
+        }
+        return false;
+    }
+
+    /**
+     * Gets a field from the class hierarchy, checking superclasses if necessary.
+     */
+    private static Field getFieldFromHierarchy(Class<?> entity, String fieldName) {
+        Class<?> clazz = entity;
+        while (clazz != null) {
+            try {
+                return clazz.getDeclaredField(fieldName);
+            } catch (NoSuchFieldException e) {
+                clazz = clazz.getSuperclass();
+            }
+        }
+        return null;
     }
 
 }
