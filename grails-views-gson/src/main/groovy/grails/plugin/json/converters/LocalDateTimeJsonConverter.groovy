@@ -20,6 +20,7 @@
 package grails.plugin.json.converters
 
 import java.time.LocalDateTime
+import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 
 import groovy.transform.CompileStatic
@@ -41,6 +42,6 @@ class LocalDateTimeJsonConverter implements JsonGenerator.Converter {
 
     @Override
     Object convert(Object value, String key) {
-        DateTimeFormatter.ISO_LOCAL_DATE_TIME.format((LocalDateTime) value)
+        ((LocalDateTime) value).atZone(ZoneOffset.UTC).format(DateTimeFormatter.ISO_INSTANT)
     }
 }
