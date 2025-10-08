@@ -19,6 +19,7 @@
 
 package org.grails.scaffolding.model
 
+import java.lang.reflect.Field
 import java.lang.reflect.Method
 
 import groovy.transform.CompileStatic
@@ -107,13 +108,121 @@ class DomainModelServiceImpl implements DomainModelService {
      * <li>version
      * <li>dateCreated
      * <li>lastUpdated
+     * <li>Any properties with @CreatedDate, @LastModifiedDate, or @AutoTimestamp annotations (if excludeAnnotatedTimestamps is true)
+     * </ul><p>
+     *
+     * @see {@link DomainModelServiceImpl#getProperties}
+     * @param domainClass The persistent entity
+     * @param blackList Custom blacklist (optional)
+     * @param excludeAnnotatedTimestamps If true, exclude @CreatedDate/@LastModifiedDate/@AutoTimestamp properties
+     */
+    List<DomainProperty> getInputProperties(PersistentEntity domainClass, List<String> blackList, boolean excludeAnnotatedTimestamps) {
+        getInputPropertiesInternal(domainClass, new ArrayList<>(blackList ?: ['version', 'dateCreated', 'lastUpdated']), excludeAnnotatedTimestamps)
+    }
+
+    /**
+     * <p>Blacklist:<ul>
+     * <li>version
+     * <li>dateCreated
+     * <li>lastUpdated
+     * <li>Any properties with @CreatedDate, @LastModifiedDate, or @AutoTimestamp annotations
      * </ul><p>
      *
      * @see {@link DomainModelServiceImpl#getProperties}
      * @param domainClass The persistent entity
      */
     List<DomainProperty> getInputProperties(PersistentEntity domainClass, List<String> blackList = null) {
-        getProperties(domainClass, new ArrayList<>(blackList ?: ['version', 'dateCreated', 'lastUpdated']))
+        getInputProperties(domainClass, blackList, true)
+    }
+
+    /**
+     * Internal method that checks for auto-timestamp annotations and adds them to the blacklist
+     */
+    protected List<DomainProperty> getInputPropertiesInternal(PersistentEntity domainClass, List<String> blacklist, boolean excludeAnnotatedTimestamps) {
+        List<DomainProperty> properties = domainClass.persistentProperties.collect {
+            domainPropertyFactory.build(it)
+        }
+
+        // Add properties with auto-timestamp annotations to blacklist only if excludeAnnotatedTimestamps is true
+        if (excludeAnnotatedTimestamps) {
+            properties.each { DomainProperty property ->
+                if (hasAutoTimestampAnnotation(property.persistentProperty)) {
+                    if (!blacklist.contains(property.name)) {
+                        blacklist.add(property.name)
+                    }
+                }
+            }
+        }
+
+        Object scaffoldProp = GrailsClassUtils.getStaticPropertyValue(domainClass.javaClass, 'scaffold')
+        if (scaffoldProp instanceof Map) {
+            Map scaffold = (Map) scaffoldProp
+            if (scaffold.containsKey('exclude')) {
+                if (scaffold.exclude instanceof Collection) {
+                    blacklist.addAll((Collection) scaffold.exclude)
+                } else if (scaffold.exclude instanceof String) {
+                    blacklist.add((String) scaffold.exclude)
+                }
+            }
+        }
+
+        properties.removeAll {
+            if (it.name in blacklist) {
+                return true
+            }
+            Constrained constrained = it.constrained
+            if (constrained && !constrained.display) {
+                return true
+            }
+            if (derivedMethod != null) {
+                Property property = it.mapping.mappedForm
+                if (derivedMethod.invoke(property, (Object[]) null)) {
+                    return true
+                }
+            }
+
+            false
+        }
+        properties.sort()
+        properties
+    }
+
+    /**
+     * Checks if a property has @CreatedDate, @LastModifiedDate, or @AutoTimestamp annotation.
+     * These annotations indicate auto-timestamp properties that should not be editable.
+     */
+    protected boolean hasAutoTimestampAnnotation(PersistentProperty persistentProperty) {
+        try {
+            Field field = getFieldFromHierarchy(persistentProperty.owner.javaClass, persistentProperty.name)
+            if (field != null) {
+                for (java.lang.annotation.Annotation annotation : field.declaredAnnotations) {
+                    String annotationName = annotation.annotationType().name
+                    if (annotationName == 'grails.gorm.annotation.CreatedDate' ||
+                        annotationName == 'grails.gorm.annotation.LastModifiedDate' ||
+                        annotationName == 'grails.gorm.annotation.AutoTimestamp') {
+                        return true
+                    }
+                }
+            }
+        } catch (Exception ignored) {
+            // If we can't check for annotations, default to false
+        }
+        return false
+    }
+
+    /**
+     * Gets a field from the class hierarchy, checking superclasses if necessary.
+     */
+    private static Field getFieldFromHierarchy(Class<?> entity, String fieldName) {
+        Class<?> clazz = entity
+        while (clazz != null) {
+            try {
+                return clazz.getDeclaredField(fieldName)
+            } catch (NoSuchFieldException e) {
+                clazz = clazz.superclass
+            }
+        }
+        return null
     }
 
     /**
