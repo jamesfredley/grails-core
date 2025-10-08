@@ -52,9 +52,11 @@ class JSONDateTimeMarshallingSpec extends Specification implements GrailsWebUnit
             createdInstant: instant
         ] as JSON).toString()
 
-        then: "Date, Calendar, and Instant render with Z suffix"
-        json.contains('"createdDate":"2025-10-07T21:14:31Z"')
-        json.contains('"createdCalendar":"2025-10-07T21:14:31Z"')
+        then: "Date and Calendar render with Z suffix and milliseconds"
+        json.contains('"createdDate":"2025-10-07T21:14:31.000Z"')
+        json.contains('"createdCalendar":"2025-10-07T21:14:31.000Z"')
+
+        and: "Instant renders with Z suffix"
         json.contains('"createdInstant":"2025-10-07T21:14:31Z"')
 
         and: "LocalDateTime renders without timezone (ISO_LOCAL_DATE_TIME)"
@@ -62,34 +64,34 @@ class JSONDateTimeMarshallingSpec extends Specification implements GrailsWebUnit
     }
 
     void "test Instant renders with ISO-8601 format instead of object structure"() {
-        given: "An Instant value"
-        def instant = Instant.parse("2025-10-07T21:14:31.123Z")
+        given: "An Instant value with nanosecond precision"
+        def instant = Instant.parse("2025-10-07T21:14:31.407254Z") // 407.254 milliseconds = 407254000 nanoseconds
 
         when: "The Instant is converted to JSON"
         def json = ([timestamp: instant] as JSON).toString()
 
-        then: "Instant renders as ISO-8601 string, not object properties"
-        json == '{"timestamp":"2025-10-07T21:14:31.123Z"}'
+        then: "Instant renders as ISO-8601 string with full precision, not object properties"
+        json == '{"timestamp":"2025-10-07T21:14:31.407254Z"}'
         !json.contains('epochSecond')
         !json.contains('nano')
     }
 
     void "test LocalDateTime renders without timezone suffix"() {
-        given: "A LocalDateTime value"
-        def localDateTime = LocalDateTime.of(2025, 10, 7, 21, 14, 31, 456000000)
+        given: "A LocalDateTime value with nanosecond precision"
+        def localDateTime = LocalDateTime.of(2025, 10, 7, 21, 14, 31, 407254000) // 407.254 milliseconds
 
         when: "The LocalDateTime is converted to JSON"
         def json = ([dateTime: localDateTime] as JSON).toString()
 
-        then: "LocalDateTime renders as ISO-8601 without Z suffix (local time, no timezone)"
-        json == '{"dateTime":"2025-10-07T21:14:31.456"}'
+        then: "LocalDateTime renders as ISO-8601 with full precision, without Z suffix"
+        json == '{"dateTime":"2025-10-07T21:14:31.407254"}'
         !json.contains('Z')
         !json.contains('year')
         !json.contains('month')
         !json.contains('dayOfMonth')
     }
 
-    void "test Calendar renders with Z suffix"() {
+    void "test Calendar renders with Z suffix and milliseconds"() {
         given: "A Calendar value"
         def calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"))
         calendar.set(2025, Calendar.OCTOBER, 7, 21, 14, 31)
@@ -98,8 +100,8 @@ class JSONDateTimeMarshallingSpec extends Specification implements GrailsWebUnit
         when: "The Calendar is converted to JSON"
         def json = ([timestamp: calendar] as JSON).toString()
 
-        then: "Calendar renders as ISO-8601 with Z suffix, not as object properties"
-        json == '{"timestamp":"2025-10-07T21:14:31Z"}'
+        then: "Calendar renders as ISO-8601 with Z suffix and milliseconds, not as object properties"
+        json == '{"timestamp":"2025-10-07T21:14:31.000Z"}'
         !json.contains('timeInMillis')
         !json.contains('firstDayOfWeek')
         !json.contains('lenient')

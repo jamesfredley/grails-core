@@ -84,14 +84,14 @@ json {
 }
 '''
 
-        and: "An Instant value"
-        def instant = Instant.parse("2025-10-07T21:14:31.123Z")
+        and: "An Instant value with nanosecond precision"
+        def instant = Instant.parse("2025-10-07T21:14:31.407254Z") // 407.254 milliseconds = 407254000 nanoseconds
 
         when: "The view is rendered"
         def result = render(source, [timestamp: instant])
 
-        then: "Instant renders as ISO-8601 string, not epoch milliseconds"
-        result.json.timestamp == "2025-10-07T21:14:31.123Z"
+        then: "Instant renders as ISO-8601 string with full precision, not epoch milliseconds"
+        result.json.timestamp == "2025-10-07T21:14:31.407254Z"
         result.json.timestamp instanceof String
     }
 
@@ -109,14 +109,14 @@ json {
 }
 '''
 
-        and: "A LocalDateTime value"
-        def localDateTime = LocalDateTime.of(2025, 10, 7, 21, 14, 31, 456000000)
+        and: "A LocalDateTime value with nanosecond precision"
+        def localDateTime = LocalDateTime.of(2025, 10, 7, 21, 14, 31, 407254000) // 407.254 milliseconds
 
         when: "The view is rendered"
         def result = render(source, [dateTime: localDateTime])
 
-        then: "LocalDateTime renders as ISO-8601 without timezone (local time)"
-        result.json.dateTime == "2025-10-07T21:14:31.456"
+        then: "LocalDateTime renders as ISO-8601 with full precision, without timezone"
+        result.json.dateTime == "2025-10-07T21:14:31.407254"
         result.json.dateTime instanceof String
     }
 
