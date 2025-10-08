@@ -124,7 +124,7 @@ class SbomPlugin implements Plugin<Project> {
         def sbomOutputLocation = project.layout.buildDirectory.file(
             project.provider {
                 def artifactId = lookupProperty(project, 'pomArtifactId', project.name)
-                def version = lookupProperty(project, 'projectVersion', '')
+                def version = lookupProperty(project, 'projectVersion', String)
                 "${artifactId}-${version}-sbom.json" as String
             }
         )
