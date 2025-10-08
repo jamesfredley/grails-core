@@ -573,7 +573,7 @@ db.Example.updateMany(
 
 ===== 12.25 JSON Rendering of Date/Time Types
 
-JSON rendering of `java.util.Calendar`, `java.time.Instant`, `java.time.LocalDateTime`, `java.time.OffsetDateTime`, and `java.time.ZonedDateTime` has been updated for consistency across both standard JSON converters (`render ... as JSON`) and JSON views (`.gson` files).
+JSON rendering of `java.util.Calendar`, `java.time.Instant`, `java.time.LocalDate`, `java.time.LocalDateTime`, `java.time.OffsetDateTime`, and `java.time.ZonedDateTime` has been updated for consistency across both standard JSON converters (`render ... as JSON`) and JSON views (`.gson` files).
 
 ====== Changes to JSON Output
 
@@ -602,6 +602,17 @@ JSON rendering of `java.util.Calendar`, `java.time.Instant`, `java.time.LocalDat
 {"timestamp": "2025-10-07T21:14:31.602Z"}
 ----
 
+*LocalDate*: Previously rendered as a complex object structure. Now consistently renders as ISO-8601 date format (YYYY-MM-DD):
+
+[source,json]
+----
+// Before
+{"date": {"year": 2025, "month": "OCTOBER", "dayOfMonth": 8, ...}}
+
+// After
+{"date": "2025-10-08"}
+----
+
 *LocalDateTime*: Previously rendered as a complex object structure (JSON views) or inconsistently. Now consistently renders as ISO-8601 format without timezone (matching Spring Boot behavior):
 
 [source,json]
@@ -613,7 +624,7 @@ JSON rendering of `java.util.Calendar`, `java.time.Instant`, `java.time.LocalDat
 {"dateTime": "2025-10-07T21:14:31"}
 ----
 
-NOTE: `LocalDateTime` does not include timezone information, so it renders without the Z suffix, unlike `Date`, `Calendar`, and `Instant` which represent specific points in time.
+NOTE: `LocalDate` and `LocalDateTime` do not include timezone information, so they render without the Z suffix, unlike `Date`, `Calendar`, and `Instant` which represent specific points in time.
 
 *OffsetDateTime*: Previously rendered as a complex object structure. Now consistently renders as ISO-8601 format with timezone offset:
 
@@ -646,15 +657,16 @@ NOTE: `LocalDateTime` does not include timezone information, so it renders witho
 
 ====== Migration Impact
 
-If your application or API consumers depend on the previous JSON format for `Calendar`, `Instant`, `LocalDateTime`, `OffsetDateTime`, or `ZonedDateTime` fields:
+If your application or API consumers depend on the previous JSON format for `Calendar`, `Instant`, `LocalDate`, `LocalDateTime`, `OffsetDateTime`, or `ZonedDateTime` fields:
 
 1. **API Responses**: Client applications may need updates to parse the new ISO-8601 string format instead of epoch milliseconds or object structures.
 
-2. **Date Parsing**: The new format is a standard ISO-8601 string that can be parsed using `Instant.parse()`, `LocalDateTime.parse()`, `OffsetDateTime.parse()`, or `ZonedDateTime.parse()` with appropriate formatters.
+2. **Date Parsing**: The new format is a standard ISO-8601 string that can be parsed using `Instant.parse()`, `LocalDate.parse()`, `LocalDateTime.parse()`, `OffsetDateTime.parse()`, or `ZonedDateTime.parse()` with appropriate formatters.
 
 3. **Consistency**:
    - Temporal types with timezone information (`Date`, `Calendar`, `Instant`) render with **Z suffix** (UTC)
-   - `LocalDateTime` (which has no timezone) renders **without suffix**
+   - `LocalDate` (date only) renders as **YYYY-MM-DD**
+   - `LocalDateTime` (date and time, no timezone) renders **without Z suffix**
    - `OffsetDateTime` and `ZonedDateTime` render with their **timezone offset** (e.g., `-07:00`)
    - All formatting matches Spring Boot's behavior
 

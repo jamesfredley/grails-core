@@ -22,6 +22,7 @@ import grails.plugin.json.view.test.JsonViewTest
 import spock.lang.Specification
 
 import java.time.Instant
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.OffsetDateTime
 import java.time.ZonedDateTime
@@ -167,5 +168,30 @@ json {
         then: "ZonedDateTime renders with offset (no zone ID brackets)"
         result.json.dateTime == "2025-10-08T00:48:46.407254-07:00"
         result.json.dateTime instanceof String
+    }
+
+    void "Test LocalDate renders as date only (YYYY-MM-DD)"() {
+        given: "A view that renders a LocalDate"
+        String source = '''
+import java.time.LocalDate
+
+model {
+    LocalDate date
+}
+
+json {
+    date date
+}
+'''
+
+        and: "A LocalDate value"
+        def localDate = LocalDate.of(2025, 10, 8)
+
+        when: "The view is rendered"
+        def result = render(source, [date: localDate])
+
+        then: "LocalDate renders as date only (no time)"
+        result.json.date == "2025-10-08"
+        result.json.date instanceof String
     }
 }

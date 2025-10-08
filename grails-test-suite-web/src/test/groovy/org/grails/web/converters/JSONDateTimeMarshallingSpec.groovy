@@ -23,13 +23,14 @@ import grails.testing.web.GrailsWebUnitTest
 import spock.lang.Specification
 
 import java.time.Instant
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.OffsetDateTime
 import java.time.ZonedDateTime
 import java.time.ZoneOffset
 
 /**
- * Tests for JSON marshalling of Date, Calendar, Instant, LocalDateTime, OffsetDateTime, and ZonedDateTime types.
+ * Tests for JSON marshalling of Date, Calendar, Instant, LocalDate, LocalDateTime, OffsetDateTime, and ZonedDateTime types.
  *
  * @since 7.0
  */
@@ -128,5 +129,19 @@ class JSONDateTimeMarshallingSpec extends Specification implements GrailsWebUnit
         json == '{"dateTime":"2025-10-08T00:48:46.407254-07:00"}'
         !json.contains('[')
         !json.contains('zone')
+    }
+
+    void "test LocalDate renders as date only (YYYY-MM-DD)"() {
+        given: "A LocalDate value"
+        def localDate = LocalDate.of(2025, 10, 8)
+
+        when: "The LocalDate is converted to JSON"
+        def json = ([date: localDate] as JSON).toString()
+
+        then: "LocalDate renders as ISO-8601 date only (no time)"
+        json == '{"date":"2025-10-08"}'
+        !json.contains('T')
+        !json.contains('year')
+        !json.contains('month')
     }
 }
