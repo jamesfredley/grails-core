@@ -146,7 +146,7 @@ jobs:
         if: ${{ matrix.java == '17' }}
         uses: actions/upload-artifact@v4
         with:
-          name: 'apache-grails-SNAPSHOT-incubating-bin.zip'
+          name: 'apache-grails-SNAPSHOT-bin.zip'
           include-hidden-files: true
           path: grails-forge/tmp1/cli/**/*
           if-no-files-found: 'error'
@@ -352,7 +352,7 @@ jobs:
       - name: "📤 Upload Wrapper Zip to Workflow Summary Page"
         uses: actions/upload-artifact@v4
         with:
-          name: apache-grails-wrapper-SNAPSHOT-incubating-bin
+          name: apache-grails-wrapper-SNAPSHOT-bin
           path: tmp/wrapper
   publishForge:
     if: github.repository_owner == 'apache' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')

@@ -409,11 +409,13 @@ Notable Class Moves:
 * org.grails.web.servlet.view.SitemeshLayoutViewResolver -> org.apache.grails.web.layout.GrailsLayoutViewResolver
 * org.grails.web.sitemesh.GrailsLayoutView -> org.apache.grails.web.layout.EmbeddedGrailsLayoutView
 * org.grails.web.sitemesh.SitemeshLayoutView -> org.apache.grails.web.layout.GrailsLayoutView
+* org.grails.web.sitemesh.GSPSitemeshPage -> org.apache.grails.web.layout.GSPGrailsLayoutPage
 
 Property Changes:
 
 * grails.sitemesh.default.layout -> grails.views.layout.default
 * grails.sitemesh.enable.nongsp -> grails.views.layout.enable.nongsp
+* org.grails.web.sitemesh.GrailsLayoutView.GSP_SITEMESH_PAGE -> org.apache.grails.web.layout.EmbeddedGrailsLayoutView.GSP_GRAILS_LAYOUT_PAGE
 
 Tag namespace changes:
 
@@ -555,4 +557,16 @@ tasks.withType(Test).configureEach {
 tasks.withType(JavaExec).configureEach {
    jvmArgs('-XX:+TieredCompilation', '-XX:TieredStopAtLevel=1', '-XX:CICompilerCount=3')
 }
+----
+
+===== 12.24 MongoDB
+
+`Instant` persistence switched from epoch milliseconds (BSON int64) to BSON DateTime (same BSON type as `java.util.Date`); `LocalDateTime` continues to be converted to BSON DateTime using the configured zone. If you currently using domain objects with property type `Instant`, you will need to convert them prior to upgrading. For more info, see https://github.com/apache/grails-core/pull/15111[#15111].
+
+[source,javascript]
+----
+db.Example.updateMany(
+  { created: { $type: "long" } },
+  [ { $set: { created: { $toDate: "$created" } } } ]
+);
 ----
