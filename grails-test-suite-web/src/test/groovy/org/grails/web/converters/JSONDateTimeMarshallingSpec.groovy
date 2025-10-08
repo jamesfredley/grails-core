@@ -27,27 +27,31 @@ import java.time.LocalDateTime
 import java.time.ZoneOffset
 
 /**
- * Tests for JSON marshalling of Date, Instant, and LocalDateTime types.
+ * Tests for JSON marshalling of Date, Calendar, Instant, and LocalDateTime types.
  *
  * @since 7.0
  */
 class JSONDateTimeMarshallingSpec extends Specification implements GrailsWebUnitTest {
 
-    void "test Date, LocalDateTime, and Instant render consistently in ISO-8601 format with Z"() {
-        given: "All three date types representing the same point in time"
+    void "test Date, Calendar, LocalDateTime, and Instant render consistently in ISO-8601 format with Z"() {
+        given: "All four date types representing the same point in time"
         def instant = Instant.parse("2025-10-07T21:14:31Z")
         def date = Date.from(instant)
+        def calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"))
+        calendar.setTime(date)
         def localDateTime = LocalDateTime.ofInstant(instant, ZoneOffset.UTC)
 
-        when: "All three are converted to JSON"
+        when: "All four are converted to JSON"
         def json = ([
             createdDate: date,
+            createdCalendar: calendar,
             createdLocalDateTime: localDateTime,
             createdInstant: instant
         ] as JSON).toString()
 
-        then: "All three date types render as ISO-8601 format with Z suffix"
+        then: "All four date types render as ISO-8601 format with Z suffix"
         json.contains('"createdDate":"2025-10-07T21:14:31Z"')
+        json.contains('"createdCalendar":"2025-10-07T21:14:31Z"')
         json.contains('"createdLocalDateTime":"2025-10-07T21:14:31Z"')
         json.contains('"createdInstant":"2025-10-07T21:14:31Z"')
     }
@@ -77,5 +81,21 @@ class JSONDateTimeMarshallingSpec extends Specification implements GrailsWebUnit
         !json.contains('year')
         !json.contains('month')
         !json.contains('dayOfMonth')
+    }
+
+    void "test Calendar renders with Z suffix"() {
+        given: "A Calendar value"
+        def calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"))
+        calendar.set(2025, Calendar.OCTOBER, 7, 21, 14, 31)
+        calendar.set(Calendar.MILLISECOND, 0)
+
+        when: "The Calendar is converted to JSON"
+        def json = ([timestamp: calendar] as JSON).toString()
+
+        then: "Calendar renders as ISO-8601 with Z suffix, not as object properties"
+        json == '{"timestamp":"2025-10-07T21:14:31Z"}'
+        !json.contains('timeInMillis')
+        !json.contains('firstDayOfWeek')
+        !json.contains('lenient')
     }
 }

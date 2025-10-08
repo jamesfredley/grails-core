@@ -571,11 +571,22 @@ db.Example.updateMany(
 );
 ----
 
-===== 12.25 JSON Rendering of Java 8 Date/Time Types
+===== 12.25 JSON Rendering of Date/Time Types
 
-JSON rendering of `java.time.Instant` and `java.time.LocalDateTime` has been updated for consistency across both standard JSON converters (`render ... as JSON`) and JSON views (`.gson` files).
+JSON rendering of `java.util.Calendar`, `java.time.Instant`, and `java.time.LocalDateTime` has been updated for consistency across both standard JSON converters (`render ... as JSON`) and JSON views (`.gson` files).
 
 ====== Changes to JSON Output
+
+*Calendar*: Previously rendered as a complex object with all properties. Now consistently renders as ISO-8601 format with Z suffix:
+
+[source,json]
+----
+// Before
+{"timestamp": {"time": 1759869218602, "timeZone": {...}, "firstDayOfWeek": 1, ...}}
+
+// After
+{"timestamp": "2025-10-07T21:14:31Z"}
+----
 
 *Instant*: Previously rendered as either epoch milliseconds (standard converters) or a complex object structure (JSON views). Now consistently renders as ISO-8601 format with Z suffix:
 
@@ -611,12 +622,12 @@ JSON rendering of `java.time.Instant` and `java.time.LocalDateTime` has been upd
 
 ====== Migration Impact
 
-If your application or API consumers depend on the previous JSON format for `Instant` or `LocalDateTime` fields:
+If your application or API consumers depend on the previous JSON format for `Calendar`, `Instant`, or `LocalDateTime` fields:
 
 1. **API Responses**: Client applications may need updates to parse the new ISO-8601 string format instead of epoch milliseconds or object structures.
 
 2. **Date Parsing**: The new format is a standard ISO-8601 string that can be parsed using `Instant.parse()` or `LocalDateTime.parse()` with appropriate formatters.
 
-3. **Consistency**: All temporal types now render consistently, making it easier to handle dates uniformly across your application.
+3. **Consistency**: All temporal types (`Date`, `Calendar`, `Instant`, `LocalDateTime`) now render consistently, making it easier to handle dates uniformly across your application.
 
 This change applies to both the `grails-converters` module (standard JSON rendering) and the `grails-views-gson` module (JSON views).
