@@ -41,6 +41,7 @@ import org.grails.datastore.gorm.timestamp.TimestampProvider;
 import org.grails.datastore.mapping.config.Entity;
 import org.grails.datastore.mapping.config.Settings;
 import org.grails.datastore.mapping.core.Datastore;
+import org.grails.datastore.mapping.dirty.checking.DirtyCheckable;
 import org.grails.datastore.mapping.engine.EntityAccess;
 import org.grails.datastore.mapping.engine.event.AbstractPersistenceEvent;
 import org.grails.datastore.mapping.engine.event.AbstractPersistenceEventListener;
@@ -150,10 +151,25 @@ public class AutoTimestampEventListener extends AbstractPersistenceEventListener
     public boolean beforeUpdate(PersistentEntity entity, EntityAccess ea) {
         Set<String> props = getLastUpdatedPropertyNames(entity.getName());
         if (props != null) {
+            Object entityObject = ea.getEntity();
+            boolean isDirtyCheckable = entityObject instanceof DirtyCheckable;
+
+            // For dirty-checking datastores (e.g., MongoDB), only set autotimestamp if entity has dirty properties
+            if (isDirtyCheckable) {
+                List<String> dirtyPropertyNames = ((DirtyCheckable) entityObject).listDirtyPropertyNames();
+                if (dirtyPropertyNames.isEmpty()) {
+                    return true;
+                }
+            }
+
             for (String prop : props) {
                 Class<?> lastUpdateType = ea.getPropertyType(prop);
                 Object timestamp = timestampProvider.createTimestamp(lastUpdateType);
                 ea.setProperty(prop, timestamp);
+                // Mark property as dirty for datastores that use dirty checking (e.g., MongoDB)
+                if (isDirtyCheckable) {
+                    ((DirtyCheckable) entityObject).markDirty(prop);
+                }
             }
         }
         return true;
