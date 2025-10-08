@@ -28,7 +28,9 @@ class GradleUtils {
 
     static Directory findRootGrailsCoreDir(Project project) {
         def rootLayout = project.rootProject.layout
-        if (rootLayout.projectDirectory.dir('.github').asFile.exists()) {
+        // .github / .git related directories are purged from source releases, so use the .asf.yaml as an indicator of
+        // the parent directory
+        if (rootLayout.projectDirectory.file('.asf.yaml').asFile.exists()) {
             return rootLayout.projectDirectory
         }
 
