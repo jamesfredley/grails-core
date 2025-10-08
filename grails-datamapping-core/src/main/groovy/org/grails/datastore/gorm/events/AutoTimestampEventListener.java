@@ -32,6 +32,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEvent;
+import org.springframework.util.ReflectionUtils;
 
 import grails.gorm.annotation.AutoTimestamp;
 import grails.gorm.annotation.CreatedDate;
@@ -185,18 +186,6 @@ public class AutoTimestampEventListener extends AbstractPersistenceEventListener
         return properties == null ? null : properties.orElse(null);
     }
 
-    private static Field getFieldFromHierarchy(Class<?> entity, String fieldName) {
-        Class<?> clazz = entity;
-        while (clazz != null) {
-            try {
-                return clazz.getDeclaredField(fieldName);
-            } catch (NoSuchFieldException e) {
-                clazz = clazz.getSuperclass();
-            }
-        }
-        return null;
-    }
-
     protected void storeDateCreatedAndLastUpdatedInfo(PersistentEntity persistentEntity) {
         if (persistentEntity.isInitialized()) {
             ClassMapping<?> classMapping = persistentEntity.getMapping();
@@ -208,7 +197,7 @@ public class AutoTimestampEventListener extends AbstractPersistenceEventListener
                     } else if (property.getName().equals(DATE_CREATED_PROPERTY)) {
                         storeTimestampAvailability(entitiesWithDateCreated, persistentEntity, property);
                     } else {
-                        Field field = getFieldFromHierarchy(persistentEntity.getJavaClass(), property.getName());
+                        Field field = ReflectionUtils.findField(persistentEntity.getJavaClass(), property.getName());
                         if (field != null) {
                             if (field.isAnnotationPresent(CreatedDate.class)) {
                                 storeTimestampAvailability(entitiesWithDateCreated, persistentEntity, property);

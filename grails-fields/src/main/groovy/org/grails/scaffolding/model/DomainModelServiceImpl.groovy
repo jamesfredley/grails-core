@@ -25,6 +25,7 @@ import java.lang.reflect.Method
 import groovy.transform.CompileStatic
 
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.util.ReflectionUtils
 
 import grails.util.GrailsClassUtils
 import org.grails.datastore.mapping.config.Property
@@ -193,7 +194,7 @@ class DomainModelServiceImpl implements DomainModelService {
      */
     protected boolean hasAutoTimestampAnnotation(PersistentProperty persistentProperty) {
         try {
-            Field field = getFieldFromHierarchy(persistentProperty.owner.javaClass, persistentProperty.name)
+            Field field = ReflectionUtils.findField(persistentProperty.owner.javaClass, persistentProperty.name)
             if (field != null) {
                 for (java.lang.annotation.Annotation annotation : field.declaredAnnotations) {
                     String annotationName = annotation.annotationType().name
@@ -208,21 +209,6 @@ class DomainModelServiceImpl implements DomainModelService {
             // If we can't check for annotations, default to false
         }
         return false
-    }
-
-    /**
-     * Gets a field from the class hierarchy, checking superclasses if necessary.
-     */
-    private static Field getFieldFromHierarchy(Class<?> entity, String fieldName) {
-        Class<?> clazz = entity
-        while (clazz != null) {
-            try {
-                return clazz.getDeclaredField(fieldName)
-            } catch (NoSuchFieldException e) {
-                clazz = clazz.superclass
-            }
-        }
-        return null
     }
 
     /**

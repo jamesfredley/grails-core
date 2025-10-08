@@ -39,6 +39,7 @@ import org.slf4j.LoggerFactory;
 
 import org.springframework.context.MessageSource;
 import org.springframework.context.support.StaticMessageSource;
+import org.springframework.util.ReflectionUtils;
 
 import grails.gorm.validation.Constrained;
 import grails.gorm.validation.ConstrainedProperty;
@@ -328,7 +329,7 @@ public class DefaultConstraintEvaluator implements ConstraintsEvaluator {
      */
     protected boolean hasAutoTimestampAnnotation(PersistentProperty persistentProperty) {
         try {
-            Field field = getFieldFromHierarchy(persistentProperty.getOwner().getJavaClass(), persistentProperty.getName());
+            Field field = ReflectionUtils.findField(persistentProperty.getOwner().getJavaClass(), persistentProperty.getName());
             if (field != null) {
                 for (java.lang.annotation.Annotation annotation : field.getDeclaredAnnotations()) {
                     String annotationName = annotation.annotationType().getName();
@@ -343,21 +344,6 @@ public class DefaultConstraintEvaluator implements ConstraintsEvaluator {
             LOG.debug("Unable to check for auto-timestamp annotations on property: " + persistentProperty.getName(), e);
         }
         return false;
-    }
-
-    /**
-     * Gets a field from the class hierarchy, checking superclasses if necessary.
-     */
-    private static Field getFieldFromHierarchy(Class<?> entity, String fieldName) {
-        Class<?> clazz = entity;
-        while (clazz != null) {
-            try {
-                return clazz.getDeclaredField(fieldName);
-            } catch (NoSuchFieldException e) {
-                clazz = clazz.getSuperclass();
-            }
-        }
-        return null;
     }
 
 }
