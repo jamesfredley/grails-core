@@ -573,7 +573,7 @@ db.Example.updateMany(
 
 ===== 12.25 JSON Rendering of Date/Time Types
 
-JSON rendering of `java.util.Calendar`, `java.time.Instant`, and `java.time.LocalDateTime` has been updated for consistency across both standard JSON converters (`render ... as JSON`) and JSON views (`.gson` files).
+JSON rendering of `java.util.Calendar`, `java.time.Instant`, `java.time.LocalDateTime`, `java.time.OffsetDateTime`, and `java.time.ZonedDateTime` has been updated for consistency across both standard JSON converters (`render ... as JSON`) and JSON views (`.gson` files).
 
 ====== Changes to JSON Output
 
@@ -615,6 +615,28 @@ JSON rendering of `java.util.Calendar`, `java.time.Instant`, and `java.time.Loca
 
 NOTE: `LocalDateTime` does not include timezone information, so it renders without the Z suffix, unlike `Date`, `Calendar`, and `Instant` which represent specific points in time.
 
+*OffsetDateTime*: Previously rendered as a complex object structure. Now consistently renders as ISO-8601 format with timezone offset:
+
+[source,json]
+----
+// Before
+{"dateTime": {"offset": {...}, "year": 2025, "month": "OCTOBER", ...}}
+
+// After
+{"dateTime": "2025-10-08T00:48:46.407254-07:00"}
+----
+
+*ZonedDateTime*: Previously rendered with zone ID brackets like `[America/Los_Angeles]`. Now consistently renders as ISO-8601 format with timezone offset only (matching Spring Boot):
+
+[source,json]
+----
+// Before
+{"dateTime": "2025-10-08T00:48:46.407254-07:00[America/Los_Angeles]"}
+
+// After
+{"dateTime": "2025-10-08T00:48:46.407254-07:00"}
+----
+
 *java.util.Date*: Continues to render as ISO-8601 with Z suffix (unchanged):
 
 [source,json]
@@ -624,12 +646,18 @@ NOTE: `LocalDateTime` does not include timezone information, so it renders witho
 
 ====== Migration Impact
 
-If your application or API consumers depend on the previous JSON format for `Calendar`, `Instant`, or `LocalDateTime` fields:
+If your application or API consumers depend on the previous JSON format for `Calendar`, `Instant`, `LocalDateTime`, `OffsetDateTime`, or `ZonedDateTime` fields:
 
 1. **API Responses**: Client applications may need updates to parse the new ISO-8601 string format instead of epoch milliseconds or object structures.
 
-2. **Date Parsing**: The new format is a standard ISO-8601 string that can be parsed using `Instant.parse()` or `LocalDateTime.parse()` with appropriate formatters.
+2. **Date Parsing**: The new format is a standard ISO-8601 string that can be parsed using `Instant.parse()`, `LocalDateTime.parse()`, `OffsetDateTime.parse()`, or `ZonedDateTime.parse()` with appropriate formatters.
 
-3. **Consistency**: Temporal types with timezone information (`Date`, `Calendar`, `Instant`) render with Z suffix, while `LocalDateTime` (which has no timezone) renders without it, matching Spring Boot's behavior.
+3. **Consistency**:
+   - Temporal types with timezone information (`Date`, `Calendar`, `Instant`) render with **Z suffix** (UTC)
+   - `LocalDateTime` (which has no timezone) renders **without suffix**
+   - `OffsetDateTime` and `ZonedDateTime` render with their **timezone offset** (e.g., `-07:00`)
+   - All formatting matches Spring Boot's behavior
+
+4. **ZonedDateTime**: Note that the zone ID (e.g., `[America/Los_Angeles]`) is no longer included in the output, matching Spring Boot's behavior.
 
 This change applies to both the `grails-converters` module (standard JSON rendering) and the `grails-views-gson` module (JSON views).

@@ -23,6 +23,8 @@ import spock.lang.Specification
 
 import java.time.Instant
 import java.time.LocalDateTime
+import java.time.OffsetDateTime
+import java.time.ZonedDateTime
 import java.time.ZoneOffset
 
 class DateTimeRenderingSpec extends Specification implements JsonViewTest {
@@ -114,6 +116,56 @@ json {
 
         then: "LocalDateTime renders as ISO-8601 without timezone (local time)"
         result.json.dateTime == "2025-10-07T21:14:31.456"
+        result.json.dateTime instanceof String
+    }
+
+    void "Test OffsetDateTime renders with timezone offset"() {
+        given: "A view that renders an OffsetDateTime"
+        String source = '''
+import java.time.OffsetDateTime
+
+model {
+    OffsetDateTime dateTime
+}
+
+json {
+    dateTime dateTime
+}
+'''
+
+        and: "An OffsetDateTime value with -07:00 offset"
+        def offsetDateTime = OffsetDateTime.of(2025, 10, 8, 0, 48, 46, 407254000, ZoneOffset.ofHours(-7))
+
+        when: "The view is rendered"
+        def result = render(source, [dateTime: offsetDateTime])
+
+        then: "OffsetDateTime renders with offset"
+        result.json.dateTime == "2025-10-08T00:48:46.407254-07:00"
+        result.json.dateTime instanceof String
+    }
+
+    void "Test ZonedDateTime renders with timezone offset (no zone ID)"() {
+        given: "A view that renders a ZonedDateTime"
+        String source = '''
+import java.time.ZonedDateTime
+
+model {
+    ZonedDateTime dateTime
+}
+
+json {
+    dateTime dateTime
+}
+'''
+
+        and: "A ZonedDateTime value"
+        def zonedDateTime = ZonedDateTime.of(2025, 10, 8, 0, 48, 46, 407254000, ZoneOffset.ofHours(-7))
+
+        when: "The view is rendered"
+        def result = render(source, [dateTime: zonedDateTime])
+
+        then: "ZonedDateTime renders with offset (no zone ID brackets)"
+        result.json.dateTime == "2025-10-08T00:48:46.407254-07:00"
         result.json.dateTime instanceof String
     }
 }

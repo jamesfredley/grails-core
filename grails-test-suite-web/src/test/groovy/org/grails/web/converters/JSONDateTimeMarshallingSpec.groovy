@@ -24,10 +24,12 @@ import spock.lang.Specification
 
 import java.time.Instant
 import java.time.LocalDateTime
+import java.time.OffsetDateTime
+import java.time.ZonedDateTime
 import java.time.ZoneOffset
 
 /**
- * Tests for JSON marshalling of Date, Calendar, Instant, and LocalDateTime types.
+ * Tests for JSON marshalling of Date, Calendar, Instant, LocalDateTime, OffsetDateTime, and ZonedDateTime types.
  *
  * @since 7.0
  */
@@ -100,5 +102,31 @@ class JSONDateTimeMarshallingSpec extends Specification implements GrailsWebUnit
         !json.contains('timeInMillis')
         !json.contains('firstDayOfWeek')
         !json.contains('lenient')
+    }
+
+    void "test OffsetDateTime renders with timezone offset"() {
+        given: "An OffsetDateTime value with -07:00 offset"
+        def offsetDateTime = OffsetDateTime.of(2025, 10, 8, 0, 48, 46, 407254000, ZoneOffset.ofHours(-7))
+
+        when: "The OffsetDateTime is converted to JSON"
+        def json = ([dateTime: offsetDateTime] as JSON).toString()
+
+        then: "OffsetDateTime renders as ISO-8601 with offset"
+        json == '{"dateTime":"2025-10-08T00:48:46.407254-07:00"}'
+        !json.contains('offset')
+        !json.contains('nano')
+    }
+
+    void "test ZonedDateTime renders with timezone offset (without zone ID)"() {
+        given: "A ZonedDateTime value"
+        def zonedDateTime = ZonedDateTime.of(2025, 10, 8, 0, 48, 46, 407254000, ZoneOffset.ofHours(-7))
+
+        when: "The ZonedDateTime is converted to JSON"
+        def json = ([dateTime: zonedDateTime] as JSON).toString()
+
+        then: "ZonedDateTime renders as ISO-8601 with offset (no zone ID brackets)"
+        json == '{"dateTime":"2025-10-08T00:48:46.407254-07:00"}'
+        !json.contains('[')
+        !json.contains('zone')
     }
 }
