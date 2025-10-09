@@ -1,21 +1,17 @@
 buildscript {
     repositories {
         mavenCentral()
-@buildRepositories@
+        @buildRepositories@
         maven {
             url = 'https://repository.apache.org/content/groups/snapshots'
             content {
-              includeVersionByRegex('org[.]apache[.]grails.*', '.*', '.*-SNAPSHOT')
-              includeVersionByRegex('org[.]apache[.]groovy.*', '.*', '.*-SNAPSHOT')
-            }
-            mavenContent {
-                snapshotsOnly()
+                includeVersionByRegex('org[.]apache[.](grails|groovy).*', '.*', '.*-SNAPSHOT')
             }
         }
     }
     dependencies {
         classpath platform("org.apache.grails:grails-bom:$grailsVersion")
-@buildDependencies@
+        @buildDependencies@
     }
 }
 
@@ -26,17 +22,17 @@ group = "@grails.app.group@"
 
 repositories {
     mavenCentral()
-@repositories@
+    @repositories@
     maven {
-       url = 'https://repository.apache.org/content/groups/snapshots'
-       content {
-          includeVersionByRegex('org[.]apache[.](grails|groovy).*', '.*', '.*-SNAPSHOT')
-       }
+        url = 'https://repository.apache.org/content/groups/snapshots'
+        content {
+            includeVersionByRegex('org[.]apache[.](grails|groovy).*', '.*', '.*-SNAPSHOT')
+        }
     }
 }
 
 dependencies {
-@dependencies@
+    @dependencies@
 }
 
 compileJava.options.release = 17
