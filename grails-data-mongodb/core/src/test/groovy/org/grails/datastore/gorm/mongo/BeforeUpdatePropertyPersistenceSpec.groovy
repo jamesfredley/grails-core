@@ -18,6 +18,7 @@
  */
 package org.grails.datastore.gorm.mongo
 
+import grails.gorm.annotation.AutoTimestamp
 import grails.persistence.Entity
 import org.apache.grails.data.mongo.core.GrailsDataMongoTckManager
 import org.apache.grails.data.testing.tck.base.GrailsDataTckSpec
@@ -132,11 +133,13 @@ class BeforeUpdatePropertyPersistenceSpec extends GrailsDataTckSpec<GrailsDataMo
         user.random == "Not Updated"
         user.dateCreated != null
         user.lastUpdated != null
+        user.modified != null
 
         when: "The user's name is updated"
         sleep 100 // ensure lastUpdated differs
         def previousRandom = user.random
         def previousLastUpdated = user.lastUpdated
+        def previousModified = user.modified
         user.name = "Bob"
         user.save(flush: true)
         manager.session.clear()
@@ -149,6 +152,7 @@ class BeforeUpdatePropertyPersistenceSpec extends GrailsDataTckSpec<GrailsDataMo
         user.random != "Not Updated"
         user.random.length() == 5
         user.lastUpdated > previousLastUpdated
+        user.modified > previousModified
     }
 }
 
@@ -180,9 +184,11 @@ class UserWithBeforeUpdateAndAutoTimestamp {
     String random
     Date dateCreated
     Date lastUpdated
+    @AutoTimestamp Date modified
 
     static constraints = {
         random nullable: true
+        modified nullable: true
     }
 
     def beforeInsert() {
