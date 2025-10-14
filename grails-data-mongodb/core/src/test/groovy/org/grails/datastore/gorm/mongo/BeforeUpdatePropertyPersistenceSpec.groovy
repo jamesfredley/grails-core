@@ -34,7 +34,8 @@ class BeforeUpdatePropertyPersistenceSpec extends GrailsDataTckSpec<GrailsDataMo
     void setupSpec() {
         manager.domainClasses.addAll([UserWithBeforeUpdate, UserWithBeforeUpdateAndAutoTimestamp])
     }
-    
+
+    @Issue('GRAILS-15139')
     void "Test that properties set in beforeUpdate are persisted"() {
         given: "A user is created"
         def user = new UserWithBeforeUpdate(name: "Fred")
@@ -115,7 +116,7 @@ class BeforeUpdatePropertyPersistenceSpec extends GrailsDataTckSpec<GrailsDataMo
         user.random.length() == 5
     }
 
-    @Issue('GPMONGODB-XXX')
+    @Issue('GRAILS-15120')
     void "Test that properties set in beforeUpdate with AutoTimestamp are persisted"() {
         given: "A user with auto timestamp is created"
         def user = new UserWithBeforeUpdateAndAutoTimestamp(name: "Fred")
