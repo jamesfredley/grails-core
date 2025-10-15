@@ -217,11 +217,19 @@ class SbomPlugin implements Plugin<Project> {
                         // components[*].licenses
                         def comps = (bom instanceof Map && bom.components instanceof List) ? bom.components : []
                         comps.each { c ->
-                            if (c instanceof Map && c.licenses instanceof List && !(c.licenses as List).isEmpty()) {
+                            if (c instanceof Map && c.licenses instanceof List && !(c.licenses as List).empty) {
                                 def chosen = pickLicense(task, c['bom-ref'] as String, c.licenses as List)
                                 if (chosen != null) {
                                     c.licenses = [chosen]
                                 }
+                            }
+                        }
+
+                        // dependencies[*].dependsOn is not reproducible, so sort it
+                        def dependencies = (bom instanceof Map && bom.dependencies instanceof List) ? bom.dependencies : []
+                        dependencies.each { d ->
+                            if(d instanceof Map && d.dependsOn instanceof List && !(d.dependsOn as List).empty) {
+                                d.dependsOn = (d.dependsOn as List).sort()
                             }
                         }
 
