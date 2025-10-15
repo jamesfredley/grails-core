@@ -18,8 +18,7 @@
  */
 package org.grails.datastore.gorm.mongo
 
-import spock.lang.PendingFeature
-
+import grails.gorm.annotation.AutoTimestamp
 import grails.persistence.Entity
 import org.apache.grails.data.mongo.core.GrailsDataMongoTckManager
 import org.apache.grails.data.testing.tck.base.GrailsDataTckSpec
@@ -37,7 +36,7 @@ class BeforeUpdatePropertyPersistenceSpec extends GrailsDataTckSpec<GrailsDataMo
         manager.domainClasses.addAll([UserWithBeforeUpdate, UserWithBeforeUpdateAndAutoTimestamp])
     }
 
-    @PendingFeature
+    @Issue('GRAILS-15139')
     void "Test that properties set in beforeUpdate are persisted"() {
         given: "A user is created"
         def user = new UserWithBeforeUpdate(name: "Fred")
@@ -92,7 +91,6 @@ class BeforeUpdatePropertyPersistenceSpec extends GrailsDataTckSpec<GrailsDataMo
         user.random.length() == 5
     }
 
-    @PendingFeature
     void "Test that multiple updates continue to trigger beforeUpdate"() {
         given: "A user is created"
         def user = new UserWithBeforeUpdate(name: "Fred")
@@ -119,8 +117,7 @@ class BeforeUpdatePropertyPersistenceSpec extends GrailsDataTckSpec<GrailsDataMo
         user.random.length() == 5
     }
 
-    @PendingFeature
-    @Issue('GPMONGODB-XXX')
+    @Issue('GRAILS-15120')
     void "Test that properties set in beforeUpdate with AutoTimestamp are persisted"() {
         given: "A user with auto timestamp is created"
         def user = new UserWithBeforeUpdateAndAutoTimestamp(name: "Fred")
@@ -136,11 +133,13 @@ class BeforeUpdatePropertyPersistenceSpec extends GrailsDataTckSpec<GrailsDataMo
         user.random == "Not Updated"
         user.dateCreated != null
         user.lastUpdated != null
+        user.modified != null
 
         when: "The user's name is updated"
         sleep 100 // ensure lastUpdated differs
         def previousRandom = user.random
         def previousLastUpdated = user.lastUpdated
+        def previousModified = user.modified
         user.name = "Bob"
         user.save(flush: true)
         manager.session.clear()
@@ -153,6 +152,7 @@ class BeforeUpdatePropertyPersistenceSpec extends GrailsDataTckSpec<GrailsDataMo
         user.random != "Not Updated"
         user.random.length() == 5
         user.lastUpdated > previousLastUpdated
+        user.modified > previousModified
     }
 }
 
@@ -184,9 +184,11 @@ class UserWithBeforeUpdateAndAutoTimestamp {
     String random
     Date dateCreated
     Date lastUpdated
+    @AutoTimestamp Date modified
 
     static constraints = {
         random nullable: true
+        modified nullable: true
     }
 
     def beforeInsert() {
