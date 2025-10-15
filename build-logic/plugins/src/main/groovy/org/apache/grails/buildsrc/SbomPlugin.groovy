@@ -164,16 +164,32 @@ class SbomPlugin implements Plugin<Project> {
                         )
                     ]
                 ))
-                task.@externalReferences.set([
-                    new ExternalReference(
-                        url: 'https://grails.apache.org',
-                        type: ExternalReference.Type.WEBSITE
-                    ),
-                    new ExternalReference(
-                            url: 'https://github.com/apache/grails-core',
-                            type: ExternalReference.Type.VCS
+
+                def projectVersion = project.findProperty('projectVersion').toString()
+                def references = [
+                        new ExternalReference(
+                                url: 'https://grails.apache.org',
+                                type: ExternalReference.Type.WEBSITE
+                        ),
+                        new ExternalReference(
+                                url: 'https://github.com/apache/grails-core',
+                                type: ExternalReference.Type.VCS
+                        ),
+                        new ExternalReference(
+                                url: projectVersion.endsWith('SNAPSHOT') ? 'dev@grails.apache.org' : 'users@grails.apache.org',
+                                type: ExternalReference.Type.MAILING_LIST
+                        )
+                ]
+
+                if(!projectVersion.endsWith('SNAPSHOT')) {
+                    references.add(
+                            new ExternalReference(
+                                    url: "https://grails.apache.org/docs/${project.findProperty('projectVersion')}/index.html",
+                                    type: ExternalReference.Type.DOCUMENTATION
+                            )
                     )
-                ])
+                }
+                task.@externalReferences.set(references)
 
                 // sboms are published for the purposes of vulnerability analysis so only include the runtime classpath
                 includeConfigs = ['runtimeClasspath']
