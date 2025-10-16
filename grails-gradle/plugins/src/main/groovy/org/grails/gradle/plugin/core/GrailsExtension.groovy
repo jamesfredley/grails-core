@@ -65,12 +65,13 @@ class GrailsExtension {
     boolean importJavaTime = false
 
     /**
-     * Whether grails annotation packages should be default import packages.
+     * Whether grails annotation packages and common validation annotations should be default import packages.
      * When enabled, automatically imports:
+     * - jakarta.validation.constraints.*
      * - grails.gorm.annotation.* (if grails-datamapping-core is in classpath)
      * - grails.plugin.scaffolding.annotation.* (if grails-scaffolding is in classpath)
      */
-    boolean importGrailsAnnotations = false
+    boolean importGrailsCommonAnnotations = false
 
     /**
      * Whether the spring dependency management plugin should be applied by default

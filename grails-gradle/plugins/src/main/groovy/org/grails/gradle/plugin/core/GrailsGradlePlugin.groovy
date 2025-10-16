@@ -234,8 +234,11 @@ class GrailsGradlePlugin extends GroovyPlugin {
             starImports.add('java.time')
         }
 
-        // Add Grails annotation packages if enabled and dependencies are present
-        if (grails.importGrailsAnnotations) {
+        // Add Grails annotation packages and common validation annotations if enabled
+        if (grails.importGrailsCommonAnnotations) {
+            // Always add jakarta.validation.constraints
+            starImports.add('jakarta.validation.constraints')
+
             // Check for grails-datamapping-core (grails.gorm.annotation.*)
             def datamappingCoreDep = project.configurations.getByName('compileClasspath').dependencies.find { Dependency d ->
                 d.group == 'org.apache.grails.data' && d.name == 'grails-datamapping-core'
