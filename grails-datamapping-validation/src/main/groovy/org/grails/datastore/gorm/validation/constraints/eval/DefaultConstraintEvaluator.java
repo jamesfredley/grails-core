@@ -19,7 +19,6 @@
 
 package org.grails.datastore.gorm.validation.constraints.eval;
 
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -39,7 +38,6 @@ import org.slf4j.LoggerFactory;
 
 import org.springframework.context.MessageSource;
 import org.springframework.context.support.StaticMessageSource;
-import org.springframework.util.ReflectionUtils;
 
 import grails.gorm.validation.Constrained;
 import grails.gorm.validation.ConstrainedProperty;
@@ -50,6 +48,7 @@ import org.grails.datastore.gorm.validation.constraints.registry.ConstraintRegis
 import org.grails.datastore.gorm.validation.constraints.registry.DefaultConstraintRegistry;
 import org.grails.datastore.mapping.config.Property;
 import org.grails.datastore.mapping.keyvalue.mapping.config.KeyValueMappingContext;
+import org.grails.datastore.mapping.model.AutoTimestampUtils;
 import org.grails.datastore.mapping.model.MappingContext;
 import org.grails.datastore.mapping.model.PersistentEntity;
 import org.grails.datastore.mapping.model.PersistentProperty;
@@ -308,7 +307,7 @@ public class DefaultConstraintEvaluator implements ConstraintsEvaluator {
         }
         else {
             // Check if property has @CreatedDate or @LastModifiedDate annotations
-            if (hasAutoTimestampAnnotation(persistentProperty)) {
+            if (AutoTimestampUtils.hasAutoTimestampAnnotation(persistentProperty)) {
                 return false;
             }
 
@@ -320,30 +319,6 @@ public class DefaultConstraintEvaluator implements ConstraintsEvaluator {
                     !((persistentProperty instanceof ToOne) && ((ToOne) persistentProperty).isBidirectional() && ((ToOne) persistentProperty).isCircular());
         }
 
-    }
-
-    /**
-     * Checks if a property has @CreatedDate, @LastModifiedDate, or @AutoTimestamp annotation.
-     * These annotations indicate auto-timestamp properties that should be nullable.
-     * Uses reflection by annotation name to avoid circular dependency issues.
-     */
-    protected boolean hasAutoTimestampAnnotation(PersistentProperty persistentProperty) {
-        try {
-            Field field = ReflectionUtils.findField(persistentProperty.getOwner().getJavaClass(), persistentProperty.getName());
-            if (field != null) {
-                for (java.lang.annotation.Annotation annotation : field.getDeclaredAnnotations()) {
-                    String annotationName = annotation.annotationType().getName();
-                    if ("grails.gorm.annotation.CreatedDate".equals(annotationName) ||
-                        "grails.gorm.annotation.LastModifiedDate".equals(annotationName) ||
-                        "grails.gorm.annotation.AutoTimestamp".equals(annotationName)) {
-                        return true;
-                    }
-                }
-            }
-        } catch (Exception e) {
-            LOG.debug("Unable to check for auto-timestamp annotations on property: " + persistentProperty.getName(), e);
-        }
-        return false;
     }
 
 }

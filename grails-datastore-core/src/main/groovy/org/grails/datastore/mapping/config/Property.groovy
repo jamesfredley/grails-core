@@ -137,6 +137,28 @@ class Property implements Cloneable {
     private List<String> uniquenessGroup = new ArrayList<String>()
     private String propertyName
     private EnumType enumType
+    /**
+     * The auto-timestamp type for this property, cached to avoid repeated reflection calls
+     */
+    AutoTimestampType autoTimestampType
+
+    /**
+     * Enum representing the type of auto-timestamp annotation on a property
+     */
+    static enum AutoTimestampType {
+        /**
+         * Property has @CreatedDate annotation or @AutoTimestamp(CREATED)
+         */
+        CREATED,
+        /**
+         * Property has @LastModifiedDate annotation or @AutoTimestamp(UPDATED)
+         */
+        UPDATED,
+        /**
+         * Property has no auto-timestamp annotation
+         */
+        NONE
+    }
 
     protected void setUniquenessGroup(List<String> uniquenessGroup) {
         this.uniquenessGroup = uniquenessGroup
@@ -161,6 +183,7 @@ class Property implements Cloneable {
         if (inList != null) {
             cloned.inList = new ArrayList<>(inList)
         }
+        cloned.autoTimestampType = this.autoTimestampType
 
         return cloned
     }

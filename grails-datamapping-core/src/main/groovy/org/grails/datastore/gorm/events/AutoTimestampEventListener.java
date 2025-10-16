@@ -32,11 +32,9 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEvent;
-import org.springframework.util.ReflectionUtils;
 
 import grails.gorm.annotation.AutoTimestamp;
-import grails.gorm.annotation.CreatedDate;
-import grails.gorm.annotation.LastModifiedDate;
+import org.grails.datastore.mapping.config.Property.AutoTimestampType;
 import org.grails.datastore.gorm.timestamp.DefaultTimestampProvider;
 import org.grails.datastore.gorm.timestamp.TimestampProvider;
 import org.grails.datastore.mapping.config.Entity;
@@ -48,6 +46,7 @@ import org.grails.datastore.mapping.engine.event.AbstractPersistenceEventListene
 import org.grails.datastore.mapping.engine.event.EventType;
 import org.grails.datastore.mapping.engine.event.PreInsertEvent;
 import org.grails.datastore.mapping.engine.event.PreUpdateEvent;
+import org.grails.datastore.mapping.model.AutoTimestampUtils;
 import org.grails.datastore.mapping.model.ClassMapping;
 import org.grails.datastore.mapping.model.MappingContext;
 import org.grails.datastore.mapping.model.PersistentEntity;
@@ -181,20 +180,11 @@ public class AutoTimestampEventListener extends AbstractPersistenceEventListener
                     } else if (property.getName().equals(DATE_CREATED_PROPERTY)) {
                         storeTimestampAvailability(entitiesWithDateCreated, persistentEntity, property);
                     } else {
-                        Field field = ReflectionUtils.findField(persistentEntity.getJavaClass(), property.getName());
-                        if (field != null) {
-                            if (field.isAnnotationPresent(CreatedDate.class)) {
-                                storeTimestampAvailability(entitiesWithDateCreated, persistentEntity, property);
-                            } else if (field.isAnnotationPresent(LastModifiedDate.class)) {
-                                storeTimestampAvailability(entitiesWithLastUpdated, persistentEntity, property);
-                            } else if (field.isAnnotationPresent(AutoTimestamp.class)) {
-                                AutoTimestamp autoTimestamp = field.getAnnotation(AutoTimestamp.class);
-                                if (autoTimestamp.value() == AutoTimestamp.EventType.UPDATED) {
-                                    storeTimestampAvailability(entitiesWithLastUpdated, persistentEntity, property);
-                                } else {
-                                    storeTimestampAvailability(entitiesWithDateCreated, persistentEntity, property);
-                                }
-                            }
+                        AutoTimestampType timestampType = AutoTimestampUtils.getAutoTimestampType(property);
+                        if (timestampType == AutoTimestampType.CREATED) {
+                            storeTimestampAvailability(entitiesWithDateCreated, persistentEntity, property);
+                        } else if (timestampType == AutoTimestampType.UPDATED) {
+                            storeTimestampAvailability(entitiesWithLastUpdated, persistentEntity, property);
                         }
                     }
                 }

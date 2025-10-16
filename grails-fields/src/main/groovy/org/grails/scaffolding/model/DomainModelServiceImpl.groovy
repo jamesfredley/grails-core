@@ -19,16 +19,15 @@
 
 package org.grails.scaffolding.model
 
-import java.lang.reflect.Field
 import java.lang.reflect.Method
 
 import groovy.transform.CompileStatic
 
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.util.ReflectionUtils
 
 import grails.util.GrailsClassUtils
 import org.grails.datastore.mapping.config.Property
+import org.grails.datastore.mapping.model.AutoTimestampUtils
 import org.grails.datastore.mapping.model.PersistentEntity
 import org.grails.datastore.mapping.model.PersistentProperty
 import org.grails.datastore.mapping.model.types.Embedded
@@ -147,7 +146,7 @@ class DomainModelServiceImpl implements DomainModelService {
         // Add properties with auto-timestamp annotations to blacklist only if excludeAnnotatedTimestamps is true
         if (excludeAnnotatedTimestamps) {
             properties.each { DomainProperty property ->
-                if (hasAutoTimestampAnnotation(property.persistentProperty)) {
+                if (AutoTimestampUtils.hasAutoTimestampAnnotation(property.persistentProperty)) {
                     if (!blacklist.contains(property.name)) {
                         blacklist.add(property.name)
                     }
@@ -186,29 +185,6 @@ class DomainModelServiceImpl implements DomainModelService {
         }
         properties.sort()
         properties
-    }
-
-    /**
-     * Checks if a property has @CreatedDate, @LastModifiedDate, or @AutoTimestamp annotation.
-     * These annotations indicate auto-timestamp properties that should not be editable.
-     */
-    protected boolean hasAutoTimestampAnnotation(PersistentProperty persistentProperty) {
-        try {
-            Field field = ReflectionUtils.findField(persistentProperty.owner.javaClass, persistentProperty.name)
-            if (field != null) {
-                for (java.lang.annotation.Annotation annotation : field.declaredAnnotations) {
-                    String annotationName = annotation.annotationType().name
-                    if (annotationName == 'grails.gorm.annotation.CreatedDate' ||
-                        annotationName == 'grails.gorm.annotation.LastModifiedDate' ||
-                        annotationName == 'grails.gorm.annotation.AutoTimestamp') {
-                        return true
-                    }
-                }
-            }
-        } catch (Exception ignored) {
-            // If we can't check for annotations, default to false
-        }
-        return false
     }
 
     /**
