@@ -19,6 +19,8 @@
 
 package grails.plugin.formfields.taglib
 
+import java.time.Instant
+
 import grails.core.support.proxy.DefaultProxyHandler
 import grails.plugin.formfields.BeanPropertyAccessorFactory
 import grails.plugin.formfields.FieldsGrailsPlugin
@@ -45,7 +47,7 @@ abstract class AbstractFormFieldsTagLibSpec extends Specification implements Gra
 		personInstance.address = new Address(street: "94 Evergreen Terrace", city: "Springfield", country: "USA")
 		personInstance.emails = [home: "bart@thesimpsons.net", school: "bart.simpson@springfieldelementary.edu"]
         productInstance = new Product(netPrice: 12.33, name: "<script>alert('XSS');</script>")
-		cyborgInstance = new Cyborg(name: "Hal", password: "monolith", gender: null)
+		cyborgInstance = new Cyborg(name: "Hal", password: "monolith", gender: null, timestamp: Instant.parse("2025-10-16T00:12:15.195Z"))
 	}
 
 	def cleanup() {

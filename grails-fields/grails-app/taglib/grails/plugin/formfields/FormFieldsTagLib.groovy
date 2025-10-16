@@ -20,8 +20,11 @@ package grails.plugin.formfields
 
 import java.sql.Blob
 import java.text.NumberFormat
+import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.OffsetDateTime
+import java.time.ZonedDateTime
 
 import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
@@ -725,7 +728,7 @@ class FormFieldsTagLib {
         }
 
         // TODO: https://github.com/apache/grails-core/issues/14198
-        boolean datePicker = model.type in [Date, Calendar, java.sql.Date, java.sql.Time, LocalDate, LocalDateTime]
+        boolean datePicker = model.type in [Date, Calendar, java.sql.Date, java.sql.Time, LocalDate, LocalDateTime, Instant, ZonedDateTime, OffsetDateTime]
         if (!datePicker) {
             attrs.remove('selectDateClass')
         }
@@ -953,6 +956,9 @@ class FormFieldsTagLib {
             case java.sql.Time:
             case LocalDate:
             case LocalDateTime:
+            case Instant:
+            case ZonedDateTime:
+            case OffsetDateTime:
                 g.formatDate(date: model.value)
                 break
             default:

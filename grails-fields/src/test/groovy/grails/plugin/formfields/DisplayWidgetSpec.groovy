@@ -18,6 +18,7 @@
  */
 package grails.plugin.formfields
 
+import grails.plugin.formfields.mock.Cyborg
 import grails.plugin.formfields.mock.Person
 import grails.plugin.formfields.taglib.AbstractFormFieldsTagLibSpec
 import grails.testing.web.taglib.TagLibUnitTest
@@ -27,7 +28,7 @@ class DisplayWidgetSpec extends AbstractFormFieldsTagLibSpec implements TagLibUn
 	def mockFormFieldsTemplateService = Mock(FormFieldsTemplateService)
 
 	def setupSpec() {
-		mockDomain(Person)
+		mockDomains(Person, Cyborg)
 	}
 
 	def setup() {
@@ -38,6 +39,11 @@ class DisplayWidgetSpec extends AbstractFormFieldsTagLibSpec implements TagLibUn
 	void 'f:displayWidget without template and a date value renders the formatted date'() {
 		expect:
 		applyTemplate('<f:displayWidget bean="personInstance" property="dateOfBirth"/>', [personInstance: personInstance]) == applyTemplate('<g:formatDate date="${personInstance.dateOfBirth}"/>', [personInstance: personInstance])
+	}
+
+	void 'f:displayWidget without template and an instant value renders the formatted date'() {
+		expect:
+		applyTemplate('<f:displayWidget bean="cyborgInstance" property="timestamp"/>', [cyborgInstance: cyborgInstance]) == applyTemplate('<g:formatDate date="${cyborgInstance.timestamp}"/>', [cyborgInstance: cyborgInstance])
 	}
 
 	void 'f:displayWidget without template and a boolean value renders the formatted boolean'() {
