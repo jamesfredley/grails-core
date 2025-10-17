@@ -18,7 +18,6 @@
  */
 package org.grails.datastore.gorm.events;
 
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -33,11 +32,10 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEvent;
 
-import grails.gorm.annotation.AutoTimestamp;
-import org.grails.datastore.mapping.config.Property.AutoTimestampType;
 import org.grails.datastore.gorm.timestamp.DefaultTimestampProvider;
 import org.grails.datastore.gorm.timestamp.TimestampProvider;
 import org.grails.datastore.mapping.config.Entity;
+import org.grails.datastore.mapping.config.Property.AutoTimestampType;
 import org.grails.datastore.mapping.config.Settings;
 import org.grails.datastore.mapping.core.Datastore;
 import org.grails.datastore.mapping.engine.EntityAccess;
