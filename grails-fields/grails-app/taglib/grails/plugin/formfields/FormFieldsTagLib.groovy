@@ -23,6 +23,7 @@ import java.text.NumberFormat
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.LocalTime
 import java.time.OffsetDateTime
 import java.time.ZonedDateTime
 
@@ -954,9 +955,12 @@ class FormFieldsTagLib {
             case java.sql.Date:
                 g.formatDate(date: model.value, format: 'yyyy-MM-dd')
                 break
+            case java.sql.Time:
+            case LocalTime:
+                g.formatDate(date: model.value, type: 'TIME')
+                break
             case Calendar:
             case Date:
-            case java.sql.Time:
             case LocalDateTime:
             case Instant:
             case ZonedDateTime:
