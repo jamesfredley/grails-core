@@ -29,9 +29,13 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ApplicationEvent;
 
+import org.grails.datastore.gorm.timestamp.AuditorAware;
 import org.grails.datastore.gorm.timestamp.DefaultTimestampProvider;
 import org.grails.datastore.gorm.timestamp.TimestampProvider;
 import org.grails.datastore.mapping.config.Entity;
@@ -51,12 +55,12 @@ import org.grails.datastore.mapping.model.PersistentEntity;
 import org.grails.datastore.mapping.model.PersistentProperty;
 
 /**
- * An event listener that adds support for GORM-style auto-timestamping
+ * An event listener that adds support for GORM-style auto-timestamping and auditing
  *
  * @author Graeme Rocher
  * @since 1.0
  */
-public class AutoTimestampEventListener extends AbstractPersistenceEventListener implements MappingContext.Listener {
+public class AutoTimestampEventListener extends AbstractPersistenceEventListener implements MappingContext.Listener, ApplicationContextAware {
 
     // if false, will not set timestamp on insert event if value is not null
     @Value("${" + Settings.SETTING_AUTO_TIMESTAMP_INSERT_OVERWRITE + ":true}")
@@ -67,9 +71,12 @@ public class AutoTimestampEventListener extends AbstractPersistenceEventListener
 
     protected Map<String, Optional<Set<String>>> entitiesWithDateCreated = new ConcurrentHashMap<>();
     protected Map<String, Optional<Set<String>>> entitiesWithLastUpdated = new ConcurrentHashMap<>();
+    protected Map<String, Optional<Set<String>>> entitiesWithCreatedBy = new ConcurrentHashMap<>();
+    protected Map<String, Optional<Set<String>>> entitiesWithUpdatedBy = new ConcurrentHashMap<>();
     protected Collection<String> uninitializedEntities = new ConcurrentLinkedQueue<>();
 
     private TimestampProvider timestampProvider = new DefaultTimestampProvider();
+    private AuditorAware<?> auditorAware;
 
     public AutoTimestampEventListener(final Datastore datastore) {
         super(datastore);
@@ -82,6 +89,13 @@ public class AutoTimestampEventListener extends AbstractPersistenceEventListener
         super(null);
 
         initForMappingContext(mappingContext);
+    }
+
+    @Override
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+        try {
+            this.auditorAware = applicationContext.getBean(AuditorAware.class);
+        } catch (BeansException ignore) {}
     }
 
     protected void initForMappingContext(MappingContext mappingContext) {
@@ -135,6 +149,33 @@ public class AutoTimestampEventListener extends AbstractPersistenceEventListener
                 }
             }
         }
+
+        // Handle auditor fields
+        if (auditorAware != null) {
+            Optional<?> currentAuditor = auditorAware.getCurrentAuditor();
+            if (currentAuditor.isPresent()) {
+                Object auditor = currentAuditor.get();
+
+                props = getCreatedByPropertyNames(name);
+                if (props != null) {
+                    for (String prop : props) {
+                        if (insertOverwrite || ea.getPropertyValue(prop) == null) {
+                            ea.setProperty(prop, auditor);
+                        }
+                    }
+                }
+
+                props = getUpdatedByPropertyNames(name);
+                if (props != null) {
+                    for (String prop : props) {
+                        if (insertOverwrite || ea.getPropertyValue(prop) == null) {
+                            ea.setProperty(prop, auditor);
+                        }
+                    }
+                }
+            }
+        }
+
         return true;
     }
 
@@ -154,6 +195,22 @@ public class AutoTimestampEventListener extends AbstractPersistenceEventListener
                 ea.setProperty(prop, timestamp);
             }
         }
+
+        // Handle auditor fields
+        if (auditorAware != null) {
+            Optional<?> currentAuditor = auditorAware.getCurrentAuditor();
+            if (currentAuditor.isPresent()) {
+                Object auditor = currentAuditor.get();
+
+                props = getUpdatedByPropertyNames(entity.getName());
+                if (props != null) {
+                    for (String prop : props) {
+                        ea.setProperty(prop, auditor);
+                    }
+                }
+            }
+        }
+
         return true;
     }
 
@@ -164,6 +221,16 @@ public class AutoTimestampEventListener extends AbstractPersistenceEventListener
 
     protected Set<String> getDateCreatedPropertyNames(String entityName) {
         Optional<Set<String>> properties = entitiesWithDateCreated.get(entityName);
+        return properties == null ? null : properties.orElse(null);
+    }
+
+    protected Set<String> getCreatedByPropertyNames(String entityName) {
+        Optional<Set<String>> properties = entitiesWithCreatedBy.get(entityName);
+        return properties == null ? null : properties.orElse(null);
+    }
+
+    protected Set<String> getUpdatedByPropertyNames(String entityName) {
+        Optional<Set<String>> properties = entitiesWithUpdatedBy.get(entityName);
         return properties == null ? null : properties.orElse(null);
     }
 
@@ -183,6 +250,10 @@ public class AutoTimestampEventListener extends AbstractPersistenceEventListener
                             storeTimestampAvailability(entitiesWithDateCreated, persistentEntity, property);
                         } else if (timestampType == AutoTimestampType.UPDATED) {
                             storeTimestampAvailability(entitiesWithLastUpdated, persistentEntity, property);
+                        } else if (timestampType == AutoTimestampType.CREATED_BY) {
+                            storeAuditorAvailability(entitiesWithCreatedBy, persistentEntity, property);
+                        } else if (timestampType == AutoTimestampType.UPDATED_BY) {
+                            storeAuditorAvailability(entitiesWithUpdatedBy, persistentEntity, property);
                         }
                     }
                 }
@@ -204,6 +275,18 @@ public class AutoTimestampEventListener extends AbstractPersistenceEventListener
         }
     }
 
+    protected void storeAuditorAvailability(Map<String, Optional<Set<String>>> auditorAvailabilityMap, PersistentEntity persistentEntity, PersistentProperty<?> property) {
+        if (property != null) {
+            Optional<Set<String>> auditorProperties = auditorAvailabilityMap.computeIfAbsent(persistentEntity.getName(), k -> Optional.of(new HashSet<>()));
+            if (auditorProperties.isPresent()) {
+                auditorProperties.get().add(property.getName());
+            }
+            else {
+                throw new IllegalStateException("Auditor properties for entity [" + persistentEntity.getName() + "] have been disabled. Cannot add property [" + property.getName() + "]");
+            }
+        }
+    }
+
     public void persistentEntityAdded(PersistentEntity entity) {
         storeDateCreatedAndLastUpdatedInfo(entity);
     }
@@ -214,6 +297,14 @@ public class AutoTimestampEventListener extends AbstractPersistenceEventListener
 
     public void setTimestampProvider(TimestampProvider timestampProvider) {
         this.timestampProvider = timestampProvider;
+    }
+
+    public AuditorAware<?> getAuditorAware() {
+        return auditorAware;
+    }
+
+    public void setAuditorAware(AuditorAware<?> auditorAware) {
+        this.auditorAware = auditorAware;
     }
 
     private void processAllEntries(final Set<Map.Entry<String, Optional<Set<String>>>> entries, final Runnable runnable) {

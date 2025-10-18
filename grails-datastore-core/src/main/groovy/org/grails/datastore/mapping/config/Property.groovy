@@ -155,6 +155,14 @@ class Property implements Cloneable {
          */
         UPDATED,
         /**
+         * Property has @CreatedBy annotation - populated with current auditor on insert
+         */
+        CREATED_BY,
+        /**
+         * Property has @LastModifiedBy annotation - populated with current auditor on insert and update
+         */
+        UPDATED_BY,
+        /**
          * Property has no auto-timestamp annotation
          */
         NONE
