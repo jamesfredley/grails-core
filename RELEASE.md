@@ -286,12 +286,10 @@ an example call to the checked in script to move the distributions.
 ### Update ASF Reporter
 
 After moving the distributions, you will receive an email from the ASF reporter. Click the link in the email to mark the
-release as published. The `release` job in the `Release` workflow has a step to remind you of this.
+release as published or go to https://reporter.apache.org/addrelease.html?grails. The `release` job in the `Release` workflow has a step to remind you of this.
 
 For example, if the release is out of core with version `7.0.0-M4`, then the release name with be `CORE-7.0.0-M4`. Enter
 the date you moved the distribution artifacts and report the release.
-
-NOTE: Grails as a podling, cannot currently do this.
 
 ### Deploy grails-forge so the release is accessible on start.grails.org
 
