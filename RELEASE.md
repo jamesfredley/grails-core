@@ -313,7 +313,7 @@ this step.
 ### Publish `grails-core` documentation
 
 Open the release workflow in `grails-core` and approve the `Publish Documentation` step. Wait until finished, and a
-workflow should eventually kick off in `grails-doc` to publish to https://github.com/apache/grails-website/tree/asf-site-production/docs.
+workflow should eventually kick off in `grails-doc` to publish to https://github.com/apache/grails-website/tree/asf-site-production/docs and https://grails.apache.org/docs/.
 
 ### Advertise the release via SDKMAN
 
