@@ -953,7 +953,7 @@ class FormFieldsTagLib {
                 break
             case LocalDate:
             case java.sql.Date:
-                g.formatDate(date: model.value, format: 'yyyy-MM-dd')
+                g.formatDate(date: model.value, type: 'DATE')
                 break
             case java.sql.Time:
             case LocalTime:
