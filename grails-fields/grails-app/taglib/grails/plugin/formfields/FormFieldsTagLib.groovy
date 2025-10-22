@@ -729,7 +729,7 @@ class FormFieldsTagLib {
         }
 
         // TODO: https://github.com/apache/grails-core/issues/14198
-        boolean datePicker = model.type in [Date, Calendar, java.sql.Date, java.sql.Time, LocalDate, LocalDateTime, Instant, ZonedDateTime, OffsetDateTime]
+        boolean datePicker = model.type in [Date, Calendar, java.sql.Date, java.sql.Time, java.sql.Timestamp, LocalDate, LocalDateTime, Instant, ZonedDateTime, OffsetDateTime]
         if (!datePicker) {
             attrs.remove('selectDateClass')
         }
@@ -962,6 +962,7 @@ class FormFieldsTagLib {
             case Calendar:
             case Date:
             case LocalDateTime:
+            case java.sql.Timestamp:
             case Instant:
             case ZonedDateTime:
             case OffsetDateTime:
