@@ -65,9 +65,9 @@
             <version>9.2.2</version>
         </dependency>
         <dependency>
-            <groupId>com.github.erdi</groupId>
-            <artifactId>webdriver-binaries-gradle-plugin</artifactId>
-            <version>3.2</version>
+            <groupId>org.ysb33r</groupId>
+            <artifactId>webdriver-binaries</artifactId>
+            <version>4.0.0</version>
         </dependency>
         <dependency>
             <groupId>org.zeroturnaround</groupId>
