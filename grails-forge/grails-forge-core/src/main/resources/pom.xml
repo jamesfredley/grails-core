@@ -46,7 +46,7 @@
         <dependency>
             <groupId>org.apache.grails</groupId>
             <artifactId>grails-quartz</artifactId>
-            <version>4.0.0-M3</version>
+            <version>4.0.0</version>
         </dependency>
         <dependency>
             <!-- Last released Feb 24, 2021 -->
