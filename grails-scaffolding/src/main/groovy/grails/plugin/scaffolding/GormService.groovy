@@ -35,15 +35,15 @@ import org.grails.datastore.gorm.GormEntityApi
 @CompileStatic
 class GormService<T extends GormEntity<T>> {
 
-    private Class<T> resourceClass
     private GormAllOperations<T> resource
+    Class<T> resourceClass
     String resourceName
     String resourceClassName
     boolean readOnly
 
     GormService(Class<T> resource, boolean readOnly) {
-        this.resourceClass = resource
         this.readOnly = readOnly
+        resourceClass = resource
         resourceClassName = resource.simpleName
         resourceName = GrailsNameUtils.getPropertyName(resource)
     }
