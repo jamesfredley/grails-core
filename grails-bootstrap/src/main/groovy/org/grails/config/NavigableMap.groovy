@@ -187,7 +187,7 @@ class NavigableMap implements Map<String, Object>, Cloneable {
     private static boolean springProfileExclude(Map sourceMap, String path) {
 
         // Is there an active Spring profile?
-        def activeSpringProfile = System.getProperty(SPRING_PROFILES)
+        def activeSpringProfile = System.getProperty(SPRING_PROFILES) ?: null
 
         // Is there a 'spring.config.activate.on-profile' property defined in the source map?
         def sourceMapProfile1 = ((Map) ((Map)((Map)sourceMap?.get(SPRING))?.get(CONFIG))?.get(ACTIVATE))?.get(ON_PROFILE)
