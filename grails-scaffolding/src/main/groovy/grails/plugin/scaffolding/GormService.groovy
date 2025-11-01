@@ -35,37 +35,37 @@ import org.grails.datastore.gorm.GormEntityApi
 @CompileStatic
 class GormService<T extends GormEntity<T>> {
 
-    private GormAllOperations<T> resource
-    Class<T> resourceClass
+    private GormAllOperations<T> gormStaticApi
+    Class<T> resource
     String resourceName
     String resourceClassName
     boolean readOnly
 
     GormService(Class<T> resource, boolean readOnly) {
+        this.resource = resource
         this.readOnly = readOnly
-        resourceClass = resource
         resourceClassName = resource.simpleName
         resourceName = GrailsNameUtils.getPropertyName(resource)
     }
 
-    protected GormAllOperations<T> getResource() {
-        if (resource == null) {
+    protected GormAllOperations<T> getGormStaticApi() {
+        if (gormStaticApi == null) {
             // Lazy initialization - happens on first access when GORM is ready
-            resource = GormEnhancer.findStaticApi(resourceClass) as GormAllOperations<T>
+            gormStaticApi = GormEnhancer.findStaticApi(resource) as GormAllOperations<T>
         }
-        return resource
+        return gormStaticApi
     }
 
     T get(Serializable id) {
-        getResource().get(id)
+        getGormStaticApi().get(id)
     }
 
     List<T> list(Map args) {
-        getResource().list(args)
+        getGormStaticApi().list(args)
     }
 
     Long count(Map args) {
-        getResource().count()
+        getGormStaticApi().count()
     }
 
     @Transactional
