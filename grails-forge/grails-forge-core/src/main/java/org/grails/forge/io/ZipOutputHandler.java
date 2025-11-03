@@ -31,12 +31,17 @@ import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.attribute.FileTime;
+import java.time.Instant;
+import java.util.HashSet;
+import java.util.Set;
 
 public class ZipOutputHandler implements OutputHandler {
 
     private final ZipArchiveOutputStream zipOutputStream;
     private final File zip;
     private final String directory;
+    private final Set<String> createdDirs = new HashSet<>();
 
     public ZipOutputHandler(Project project) throws IOException {
         File baseDirectory = new File(".").getCanonicalFile();
@@ -78,10 +83,19 @@ public class ZipOutputHandler implements OutputHandler {
 
     @Override
     public void write(String path, Template contents) throws IOException {
-        ZipArchiveEntry zipEntry = new ZipArchiveEntry(directory != null ? StringUtils.prependUri(directory, path) : path);
-        if (contents.isExecutable()) {
-            zipEntry.setUnixMode(UnixStat.FILE_FLAG | 0755);
-        }
+        String entryName = (directory != null ? StringUtils.prependUri(directory, path) : path);
+        FileTime lastModified = FileTime.from(Instant.now());
+
+        // ensure parent directories exist as explicit dir entries
+        // https://github.com/apache/grails-core/issues/15186
+        createParentDirs(entryName, lastModified);
+
+        ZipArchiveEntry zipEntry = new ZipArchiveEntry(entryName);
+        setZipEntryMetadata(
+                zipEntry,
+                lastModified,
+                UnixStat.FILE_FLAG | (contents.isExecutable() ? 0755 : 0644)
+        );
         zipOutputStream.putArchiveEntry(zipEntry);
         contents.write(zipOutputStream);
         zipOutputStream.closeArchiveEntry();
@@ -91,5 +105,28 @@ public class ZipOutputHandler implements OutputHandler {
     public void close() throws IOException {
         zipOutputStream.finish();
         zipOutputStream.close();
+    }
+
+    private void createParentDirs(String entryName, FileTime lastModified) throws IOException {
+        int slash = entryName.lastIndexOf('/');
+        if (slash < 0) return;
+
+        int i = 0;
+        while ((i = entryName.indexOf('/', i)) >= 0) {
+            String dir = entryName.substring(0, i + 1);
+            if (createdDirs.add(dir)) {
+                ZipArchiveEntry directoryEntry = new ZipArchiveEntry(dir);
+                setZipEntryMetadata(directoryEntry, lastModified, UnixStat.DIR_FLAG | 0755);
+                zipOutputStream.putArchiveEntry(directoryEntry);
+                zipOutputStream.closeArchiveEntry();
+            }
+            i++;
+        }
+    }
+
+    private void setZipEntryMetadata(ZipArchiveEntry zipEntry, FileTime lastModified, int unixMode) {
+        zipEntry.setLastModifiedTime(lastModified);
+        zipEntry.setTime(lastModified.toMillis());
+        zipEntry.setUnixMode(unixMode);
     }
 }
