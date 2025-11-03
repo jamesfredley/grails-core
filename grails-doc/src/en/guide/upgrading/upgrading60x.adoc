@@ -480,13 +480,17 @@ You will need to change it to `jcache` and add the Ehcache dependency as follows
         use_second_level_cache: true
         use_query_cache: false
         region:
-        factory_class: 'jcache'
+            factory_class: 'jcache'
 ----
 
 [source,groovy]
 .build.gradle
 ----
-    implementation 'org.ehcache:ehcache'
+    implementation 'org.ehcache:ehcache', {
+        capabilities {
+            requireCapability('org.ehcache:ehcache-jakarta')
+        }
+    }
 ----
 
 Alternatively, you can define the hibernate-ehcache dependency explicitly and adjust it to exclude `hibernate-core` and add the `jboss-transaction-api_1.3_spec` see link:upgrading.html#_12_5_hibernate_ehcache[Hibernate-ehcache]
