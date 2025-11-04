@@ -19,9 +19,10 @@ on:
     types: [ published ]
 permissions: { }
 env:
+  DIST_NAME: apache-grails
   # to prevent throttling of the github api, include the github token in an environment variable since the build will check for it
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  GRAILS_PUBLISH_RELEASE: true
+  GRAILS_PUBLISH_RELEASE: 'true'
   JAVA_DISTRIBUTION: liberica
   JAVA_VERSION: 17.0.17 # this must be a specific version for reproducible builds, keep it synced with .sdkmanrc
   PROJECT_DESC: >
@@ -32,6 +33,7 @@ env:
   REPO_NAME: ${{ github.event.repository.name }}
   REPO_SLUG: ${{ github.repository }}
   SVN_FOLDER: core
+  SVN_PROJECT: grails
   TAG: ${{ github.event.release.tag_name }}
   TARGET_BRANCH: ${{ github.event.release.target_commitish }}
   VERSION: will be computed in each job
@@ -50,6 +52,7 @@ jobs:
       - name: "📥 Checkout repository"
         uses: actions/checkout@v5
         with:
+          fetch-tags: true # needed for guide release dropdown generation
           ref: ${{ env.TAG }}
           token: ${{ secrets.GITHUB_TOKEN }}
       - name: "📅 Store common build date" # to ensure a reproducible build
@@ -90,22 +93,22 @@ jobs:
           --pinentry-mode loopback
           --armor
           --detach-sign
-          grails-wrapper/build/distributions/apache-grails-wrapper-${VERSION}-bin.zip
+          grails-wrapper/build/distributions/${DIST_NAME}-wrapper-${VERSION}-bin.zip
       - name: "📦 Create grails-wrapper checksum"
         run: |
           cd grails-wrapper/build/distributions
           ls
-          sha512sum apache-grails-wrapper-${VERSION}-bin.zip > apache-grails-wrapper-${VERSION}-bin.zip.sha512
+          sha512sum ${DIST_NAME}-wrapper-${VERSION}-bin.zip > ${DIST_NAME}-wrapper-${VERSION}-bin.zip.sha512
           echo "Generated checksum for grails wrapper ZIP:"
-          cat apache-grails-wrapper-${VERSION}-bin.zip.sha512
+          cat ${DIST_NAME}-wrapper-${VERSION}-bin.zip.sha512
       - name: "📤 Upload grails-wrapper ZIP"
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ env.TAG }}
           files: |
-            grails-wrapper/build/distributions/apache-grails-wrapper-${{ env.VERSION }}-bin.zip
-            grails-wrapper/build/distributions/apache-grails-wrapper-${{ env.VERSION }}-bin.zip.sha512
-            grails-wrapper/build/distributions/apache-grails-wrapper-${{ env.VERSION }}-bin.zip.asc
+            grails-wrapper/build/distributions/${{ env.DIST_NAME }}-wrapper-${{ env.VERSION }}-bin.zip
+            grails-wrapper/build/distributions/${{ env.DIST_NAME }}-wrapper-${{ env.VERSION }}-bin.zip.sha512
+            grails-wrapper/build/distributions/${{ env.DIST_NAME }}-wrapper-${{ env.VERSION }}-bin.zip.asc
       - name: "🔏 Sign grails-cli ZIP"
         run: >
           gpg
@@ -115,22 +118,22 @@ jobs:
           --pinentry-mode loopback
           --armor
           --detach-sign
-          grails-forge/grails-cli/build/distributions/apache-grails-${VERSION}-bin.zip
+          grails-forge/grails-cli/build/distributions/${DIST_NAME}-${VERSION}-bin.zip
       - name: "📦 Create grails-cli checksum"
         run: |
           cd grails-forge/grails-cli/build/distributions
           ls
-          sha512sum apache-grails-${VERSION}-bin.zip > apache-grails-${VERSION}-bin.zip.sha512
+          sha512sum ${DIST_NAME}-${VERSION}-bin.zip > ${DIST_NAME}-${VERSION}-bin.zip.sha512
           echo "Generated checksum for grails cli ZIP:"
-          cat apache-grails-${VERSION}-bin.zip.sha512
+          cat ${DIST_NAME}-${VERSION}-bin.zip.sha512
       - name: "📤 Upload grails-cli ZIP"
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ env.TAG }}
           files: |
-            grails-forge/grails-cli/build/distributions/apache-grails-${{ env.VERSION }}-bin.zip
-            grails-forge/grails-cli/build/distributions/apache-grails-${{ env.VERSION }}-bin.zip.sha512
-            grails-forge/grails-cli/build/distributions/apache-grails-${{ env.VERSION }}-bin.zip.asc
+            grails-forge/grails-cli/build/distributions/${{ env.DIST_NAME }}-${{ env.VERSION }}-bin.zip
+            grails-forge/grails-cli/build/distributions/${{ env.DIST_NAME }}-${{ env.VERSION }}-bin.zip.sha512
+            grails-forge/grails-cli/build/distributions/${{ env.DIST_NAME }}-${{ env.VERSION }}-bin.zip.asc
       - name: "✨ Create Staging Repository"
         env:
           NEXUS_PUBLISH_USERNAME: ${{ secrets.NEXUS_STAGE_DEPLOYER_USER }}
@@ -269,7 +272,7 @@ jobs:
       - name: "📦 Create source distribution ZIP"
         run: >
           zip -r
-          apache-grails-${VERSION}-src.zip
+          ${DIST_NAME}-${VERSION}-src.zip
           grails
           -x 'grails/.git/*'
           -x 'grails/.github/*'
@@ -286,17 +289,17 @@ jobs:
           --pinentry-mode loopback
           --armor
           --detach-sign
-          apache-grails-${VERSION}-src.zip
+          ${DIST_NAME}-${VERSION}-src.zip
       - name: "📦 Create source distribution checksum"
-        run: sha512sum apache-grails-${VERSION}-src.zip > apache-grails-${VERSION}-src.zip.sha512
+        run: sha512sum ${DIST_NAME}-${VERSION}-src.zip > ${DIST_NAME}-${VERSION}-src.zip.sha512
       - name: "🚀 Upload ZIP and Signature to GitHub Release"
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ env.TAG }}
           files: |
-            apache-grails-${{ env.VERSION }}-src.zip
-            apache-grails-${{ env.VERSION }}-src.zip.sha512
-            apache-grails-${{ env.VERSION }}-src.zip.asc
+            ${{ env.DIST_NAME }}-${{ env.VERSION }}-src.zip
+            ${{ env.DIST_NAME }}-${{ env.VERSION }}-src.zip.sha512
+            ${{ env.DIST_NAME }}-${{ env.VERSION }}-src.zip.asc
       - name: "🗑️ Remove CHECKSUMS.txt asset from release"
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -341,37 +344,37 @@ jobs:
         run: echo "VERSION=${TAG#v}" >> "$GITHUB_ENV"
       - name: "⚙️ Setup SVN and Tools"
         run: sudo apt-get install -y subversion subversion-tools tree gettext-base
-      - name: "👀 Ensure dev/grails folder exists"
+      - name: "👀 Ensure dev/${{ env.SVN_PROJECT }} folder exists"
         run: |
           set -e
-          if svn ls https://dist.apache.org/repos/dist/dev/grails --username "${SVN_USERNAME}" --password "${SVN_PASSWORD}" --non-interactive; then
-            echo "Dev Folder [grails] already exists — skipping creation"
+          if svn ls https://dist.apache.org/repos/dist/dev/${SVN_PROJECT} --username "${SVN_USERNAME}" --password "${SVN_PASSWORD}" --non-interactive; then
+            echo "Dev Folder [${SVN_PROJECT}] already exists — skipping creation"
           else
-            echo "Dev Folder [grails] does not exist, creating"
+            echo "Dev Folder [${SVN_PROJECT}] does not exist, creating"
             svnmucc --username "${SVN_USERNAME}" --password "${SVN_PASSWORD}" --non-interactive \
-              mkdir https://dist.apache.org/repos/dist/dev/grails \
-              -m "Create 'grails' dev folder"
+              mkdir https://dist.apache.org/repos/dist/dev/${SVN_PROJECT} \
+              -m "Create '${SVN_PROJECT}' dev folder"
           fi
-      - name: "👀 Ensure dev/grails/${{ env.SVN_FOLDER }} folder exists"
+      - name: "👀 Ensure dev/${{ env.SVN_PROJECT }}/${{ env.SVN_FOLDER }} folder exists"
         run: |
           set -e
-          if svn ls https://dist.apache.org/repos/dist/dev/grails/${SVN_FOLDER} --username "${SVN_USERNAME}" --password "${SVN_PASSWORD}" --non-interactive; then
-            echo "Dev Folder [grails/${SVN_FOLDER}] already exists — skipping creation"
+          if svn ls https://dist.apache.org/repos/dist/dev/${SVN_PROJECT}/${SVN_FOLDER} --username "${SVN_USERNAME}" --password "${SVN_PASSWORD}" --non-interactive; then
+            echo "Dev Folder [${SVN_PROJECT}/${SVN_FOLDER}] already exists — skipping creation"
           else
-            echo "Dev Folder [grails/${SVN_FOLDER}] does not exist, creating"
+            echo "Dev Folder [${SVN_PROJECT}/${SVN_FOLDER}] does not exist, creating"
             svnmucc --username "${SVN_USERNAME}" --password "${SVN_PASSWORD}" --non-interactive \
-              mkdir https://dist.apache.org/repos/dist/dev/grails/${SVN_FOLDER} \
-              -m "Create 'grails/${SVN_FOLDER}' dev folder"
+              mkdir https://dist.apache.org/repos/dist/dev/${SVN_PROJECT}/${SVN_FOLDER} \
+              -m "Create '${SVN_PROJECT}/${SVN_FOLDER}' dev folder"
           fi
       - name: "📥 Checkout dev repo"
         run: |
-          svn checkout --username "${SVN_USERNAME}" --password "${SVN_PASSWORD}" --non-interactive "https://dist.apache.org/repos/dist/dev/grails/${SVN_FOLDER}" dev-repo
+          svn checkout --username "${SVN_USERNAME}" --password "${SVN_PASSWORD}" --non-interactive "https://dist.apache.org/repos/dist/dev/${SVN_PROJECT}/${SVN_FOLDER}" dev-repo
       - name: "🗑️ Remove existing dev version"
         run: |
           cd dev-repo
           if [ -d "${VERSION}" ]; then
             svn delete "${VERSION}"
-            svn commit -m "Remove grails ${SVN_FOLDER} dev version ${VERSION}" --username "${SVN_USERNAME}" --password "${SVN_PASSWORD}" --non-interactive
+            svn commit -m "Remove ${SVN_PROJECT} ${SVN_FOLDER} dev version ${VERSION}" --username "${SVN_USERNAME}" --password "${SVN_PASSWORD}" --non-interactive
           else
             echo "No existing dev version ${VERSION} to remove"
           fi
@@ -380,9 +383,9 @@ jobs:
           cd dev-repo
           mkdir -p ${VERSION}/sources          
           cd ${VERSION}/sources
-          curl -f -LO https://github.com/${REPO_SLUG}/releases/download/${TAG}/apache-grails-${VERSION}-src.zip
-          curl -f -LO https://github.com/${REPO_SLUG}/releases/download/${TAG}/apache-grails-${VERSION}-src.zip.sha512
-          curl -f -LO https://github.com/${REPO_SLUG}/releases/download/${TAG}/apache-grails-${VERSION}-src.zip.asc
+          curl -f -LO https://github.com/${REPO_SLUG}/releases/download/${TAG}/${DIST_NAME}-${VERSION}-src.zip
+          curl -f -LO https://github.com/${REPO_SLUG}/releases/download/${TAG}/${DIST_NAME}-${VERSION}-src.zip.sha512
+          curl -f -LO https://github.com/${REPO_SLUG}/releases/download/${TAG}/${DIST_NAME}-${VERSION}-src.zip.asc
           echo "Downloaded the following files:"
           ls -l
       - name: "📥 Fetch binary distributions"
@@ -390,12 +393,12 @@ jobs:
           cd dev-repo
           mkdir -p ${VERSION}/distribution          
           cd ${VERSION}/distribution
-          curl -f -LO https://github.com/${REPO_SLUG}/releases/download/${TAG}/apache-grails-${VERSION}-bin.zip
-          curl -f -LO https://github.com/${REPO_SLUG}/releases/download/${TAG}/apache-grails-${VERSION}-bin.zip.sha512
-          curl -f -LO https://github.com/${REPO_SLUG}/releases/download/${TAG}/apache-grails-${VERSION}-bin.zip.asc
-          curl -f -LO https://github.com/${REPO_SLUG}/releases/download/${TAG}/apache-grails-wrapper-${VERSION}-bin.zip
-          curl -f -LO https://github.com/${REPO_SLUG}/releases/download/${TAG}/apache-grails-wrapper-${VERSION}-bin.zip.sha512
-          curl -f -LO https://github.com/${REPO_SLUG}/releases/download/${TAG}/apache-grails-wrapper-${VERSION}-bin.zip.asc
+          curl -f -LO https://github.com/${REPO_SLUG}/releases/download/${TAG}/${DIST_NAME}-${VERSION}-bin.zip
+          curl -f -LO https://github.com/${REPO_SLUG}/releases/download/${TAG}/${DIST_NAME}-${VERSION}-bin.zip.sha512
+          curl -f -LO https://github.com/${REPO_SLUG}/releases/download/${TAG}/${DIST_NAME}-${VERSION}-bin.zip.asc
+          curl -f -LO https://github.com/${REPO_SLUG}/releases/download/${TAG}/${DIST_NAME}-wrapper-${VERSION}-bin.zip
+          curl -f -LO https://github.com/${REPO_SLUG}/releases/download/${TAG}/${DIST_NAME}-wrapper-${VERSION}-bin.zip.sha512
+          curl -f -LO https://github.com/${REPO_SLUG}/releases/download/${TAG}/${DIST_NAME}-wrapper-${VERSION}-bin.zip.asc
           echo "Downloaded the following files:"
           ls -l
       - name: "🚀 Upload distributions"
@@ -506,7 +509,7 @@ jobs:
         run: |
           echo "::group::Manual ASF Reporter Update"
           TODAY=$(date +"%Y-%m-%d")
-          echo "Check email from no-reply@reporter.apache.org & update https://reporter.apache.org/addrelease.html?grails to add ${SVN_FOLDER^^}-${VERSION} as complete as of ${TODAY}"
+          echo "Check email from no-reply@reporter.apache.org & update https://reporter.apache.org/addrelease.html?${SVN_PROJECT} to add ${SVN_FOLDER^^}-${VERSION} as complete as of ${TODAY}"
           echo "::endgroup::"
       - name: "🚀 MANUAL - Deploy Grails Forge"
         run: |
@@ -541,7 +544,7 @@ jobs:
       - name: "📥 Checkout repository"
         uses: actions/checkout@v5
         with:
-          fetch-depth: 0 # need the full history to find all tags
+          fetch-tags: true # needed for guide release dropdown generation
           token: ${{ secrets.GITHUB_TOKEN }}
           ref: ${{ env.TAG }}
       - name: "📅 Ensure Common Build Date" # to ensure a reproducible build
