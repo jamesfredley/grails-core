@@ -65,7 +65,7 @@ echo "Using Java at ..."
 which java
 java -version
 
-echo "Writing out custom repo script"
+echo "Writing Gradle init script to use staging repo"
 echo """
   allprojects {
       buildscript {
@@ -83,8 +83,8 @@ echo """
       }
   }
 
-""" > "${DOWNLOAD_LOCATION}/custom-repos.gradle"
-echo "✅ Custom repo script written"
+""" > "${DOWNLOAD_LOCATION}/use-staging-repo.gradle"
+echo "✅ Gradle staging repo init script written"
 
 echo "Determining Gradle on PATH ..."
 if GRADLE_CMD="$(command -v gradlew 2>/dev/null)"; then
@@ -114,11 +114,12 @@ set -e
 echo "✅ Reproducible Build Verified"
 
 echo "Be sure to do the following:"
-echo "☑️   Set the override repo: 'export GRAILS_REPO_URL=https://repository.apache.org/content/groups/staging' "
-echo "☑️   Run the wrapper ShellApp:  cd ${DOWNLOAD_LOCATION}/apache-grails-wrapper-${VERSION}-bin/ShellApp && ./gradlew bootRun --init-script ~/grails-verify/custom-repos.gradle"
-echo "☑️   Run the wrapper ForgeApp:  cd ${DOWNLOAD_LOCATION}/apache-grails-wrapper-${VERSION}-bin/ForgeApp && ./gradlew bootRun --init-script ~/grails-verify/custom-repos.gradle"
-echo "☑️   Run the cli ShellApp: cd ${DOWNLOAD_LOCATION}/apache-grails-${VERSION}-bin/bin/ShellApp && ./gradlew bootRun --init-script ~/grails-verify/custom-repos.gradle"
-echo "☑️   Run the cli ForgeApp: cd ${DOWNLOAD_LOCATION}/apache-grails-${VERSION}-bin/bin/ForgeApp && ./gradlew bootRun --init-script ~/grails-verify/custom-repos.gradle"
+echo "☑️   Set the override repo: 'export GRAILS_REPO_URL=https://repository.apache.org/content/groups/staging'"
+echo "☑️   Run the wrapper ShellApp: cd ${DOWNLOAD_LOCATION}/apache-grails-wrapper-${VERSION}-bin/ShellApp && ./gradlew bootRun --init-script ${DOWNLOAD_LOCATION}/use-staging-repo.gradle"
+echo "☑️   Run the wrapper ForgeApp: cd ${DOWNLOAD_LOCATION}/apache-grails-wrapper-${VERSION}-bin/ForgeApp && ./gradlew bootRun --init-script ${DOWNLOAD_LOCATION}/use-staging-repo.gradle"
+echo "☑️   Run the cli ShellApp: cd ${DOWNLOAD_LOCATION}/apache-grails-${VERSION}-bin/bin/ShellApp && ./gradlew bootRun --init-script ${DOWNLOAD_LOCATION}/use-staging-repo.gradle"
+echo "☑️   Run the cli ForgeApp: cd ${DOWNLOAD_LOCATION}/apache-grails-${VERSION}-bin/bin/ForgeApp && ./gradlew bootRun --init-script ${DOWNLOAD_LOCATION}/use-staging-repo.gradle"
+# BELOW STEP NEEDS CLARIFICATION
 echo "☑️   Add the local repos to the application and then run the shell cli from one of the applications and ensure all commands show as expected - pay attention to the scaffolding ones since they are dynamically loaded"
 
 echo "✅✅✅ Verification finished, see above instructions for remaining manual testing."
