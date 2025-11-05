@@ -59,9 +59,11 @@ jobs:
         run: echo "SOURCE_DATE_EPOCH=$(git log -1 --pretty=%ct)" >> "$GITHUB_ENV"
       - name: "📅 Ensure source files use common date"
         run: find . -depth \( -type f -o -type d \) -exec touch -d "@${SOURCE_DATE_EPOCH}" {} +
-      - name: '🔐 Set up GPG'
+      - name: "🔐 Set up GPG" # Use env var to not expose the key
+        env:
+          GPG_KEY: ${{ secrets.GRAILS_GPG_KEY }}
         run: |
-          echo "${{ secrets.GRAILS_GPG_KEY }}" | gpg --batch --import
+          echo "${GPG_KEY}" | gpg --batch --import
           gpg --list-keys
       - name: "☕️ Setup JDK"
         uses: actions/setup-java@v5
@@ -276,9 +278,11 @@ jobs:
           grails
           -x 'grails/.git/*'
           -x 'grails/.github/*'
-      - name: '🔐 Set up GPG'
+      - name: "🔐 Set up GPG" # use env var to not expose the key
+        env:
+          GPG_KEY: ${{ secrets.GRAILS_GPG_KEY }}
         run: |
-          echo "${{ secrets.GRAILS_GPG_KEY }}" | gpg --batch --import
+          echo "${GPG_KEY}" | gpg --batch --import
           gpg --list-keys
       - name: "🔏 Sign source distribution ZIP"
         run: >
