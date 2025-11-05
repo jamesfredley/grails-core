@@ -227,7 +227,8 @@ class GrailsGradlePlugin extends GroovyPlugin {
     protected Closure<String> getGroovyCompilerScript(GroovyCompile compile, Project project) {
         GrailsExtension grails = project.extensions.findByType(GrailsExtension)
 
-        List<String> starImports = []
+        // Start with user-configured imports
+        Set<String> starImports = new LinkedHashSet<>(grails.starImports)
 
         // Add java.time if enabled
         if (grails.importJavaTime) {

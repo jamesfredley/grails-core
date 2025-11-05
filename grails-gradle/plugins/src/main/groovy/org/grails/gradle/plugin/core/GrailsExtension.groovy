@@ -74,6 +74,13 @@ class GrailsExtension {
     boolean importGrailsCommonAnnotations = false
 
     /**
+     * Custom star imports to add to Groovy compilation configuration.
+     * Users can add their own package imports that will be combined with
+     * imports added by importJavaTime and importGrailsCommonAnnotations flags.
+     */
+    List<String> starImports = []
+
+    /**
      * Whether the spring dependency management plugin should be applied by default
      */
     boolean springDependencyManagement = true
