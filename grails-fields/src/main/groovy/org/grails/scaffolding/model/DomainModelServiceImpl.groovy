@@ -148,10 +148,10 @@ class DomainModelServiceImpl implements DomainModelService {
             domainPropertyFactory.build(it)
         }
 
-        // Add properties with auto-timestamp annotations to blacklist only if excludeAnnotatedTimestamps is true
+        // Add properties with audit metadata annotations to blacklist only if excludeAnnotatedTimestamps is true
         if (excludeAnnotatedTimestamps) {
             properties.each { DomainProperty property ->
-                if (AutoTimestampUtils.hasAutoTimestampAnnotation(property.persistentProperty, cacheAutoTimestampAnnotations)) {
+                if (AutoTimestampUtils.hasAuditMetadataAnnotation(property.persistentProperty, cacheAutoTimestampAnnotations)) {
                     if (!blacklist.contains(property.name)) {
                         blacklist.add(property.name)
                     }
