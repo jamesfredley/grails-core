@@ -30,18 +30,18 @@ import java.util.Optional;
  * Long, String, etc.).</p>
  *
  * <p>Example implementation:</p>
- * <pre>
- * &#64;Component
- * public class SpringSecurityAuditorAware implements AuditorAware&lt;String&gt; {
- *     &#64;Override
- *     public Optional&lt;String&gt; getCurrentAuditor() {
+ * <pre>{@code
+ * @Component
+ * public class SpringSecurityAuditorAware implements AuditorAware<String> {
+ *     @Override
+ *     public Optional<String> getCurrentAuditor() {
  *         return Optional.ofNullable(SecurityContextHolder.getContext())
  *                 .map(SecurityContext::getAuthentication)
  *                 .filter(Authentication::isAuthenticated)
  *                 .map(Authentication::getName);
  *     }
  * }
- * </pre>
+ * }</pre>
  *
  * @param <T> the type of the auditor (e.g., User, Long, String)
  * @author Scott Murphy Heiberg

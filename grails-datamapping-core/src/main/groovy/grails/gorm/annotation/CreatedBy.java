@@ -29,18 +29,18 @@ import java.lang.annotation.Target;
  * bean registered in the Spring application context.
  *
  * <p>Example usage:</p>
- * <pre>
+ * <pre>{@code
  * class Book {
- *     &#64;CreatedBy
+ *     @CreatedBy
  *     String createdBy
  *
- *     &#64;CreatedBy
+ *     @CreatedBy
  *     User creator
  *
- *     &#64;CreatedBy
+ *     @CreatedBy
  *     Long creatorId
  * }
- * </pre>
+ * }</pre>
  *
  * <p>The field type should match the type parameter of your {@link org.grails.datastore.gorm.timestamp.AuditorAware}
  * implementation (e.g., String, Long, User, etc.).</p>
