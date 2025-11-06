@@ -119,9 +119,9 @@ echo "☑️   2. Verify running the wrapper shell-created app: cd ${DOWNLOAD_LO
 echo "☑️   3. Verify running the wrapper forge-created app: cd ${DOWNLOAD_LOCATION}/apache-grails-wrapper-${VERSION}-bin/ForgeApp && ./gradlew bootRun --init-script ${DOWNLOAD_LOCATION}/use-staging-repo.gradle"
 echo "☑️   4. Verify running the cli shell-created app: cd ${DOWNLOAD_LOCATION}/apache-grails-${VERSION}-bin/bin/ShellApp && ./gradlew bootRun --init-script ${DOWNLOAD_LOCATION}/use-staging-repo.gradle"
 echo "☑️   5. Verify running the cli forge-created app: cd ${DOWNLOAD_LOCATION}/apache-grails-${VERSION}-bin/bin/ForgeApp && ./gradlew bootRun --init-script ${DOWNLOAD_LOCATION}/use-staging-repo.gradle"
-echo "☑️   6.1. Add the staging repository (`https://repository.apache.org/content/groups/staging`) to the `build.gradle` file in one of the apps above."
-echo "☑️   6.2. Run `grails help` inside that app directory."
-echo "☑️   6.3. Verify that the scaffolding commands (e.g. `generate-*`) are listed."
+echo "☑️   6.1. Add the staging repository ('https://repository.apache.org/content/groups/staging') to the 'build.gradle' file in one of the apps above."
+echo "☑️   6.2. Run 'grails help' inside that app directory."
+echo "☑️   6.3. Verify that the scaffolding commands (e.g. 'generate-*') are listed."
 echo "          This confirms that dynamic command resolution is working correctly."
 
 echo "✅✅✅ Automatic verification finished. See above instructions for remaining manual testing."
