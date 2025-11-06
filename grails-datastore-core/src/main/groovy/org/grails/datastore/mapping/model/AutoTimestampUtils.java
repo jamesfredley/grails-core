@@ -111,37 +111,43 @@ public class AutoTimestampUtils {
                 for (java.lang.annotation.Annotation annotation : field.getDeclaredAnnotations()) {
                     String annotationName = annotation.annotationType().getName();
 
-                    if (CREATED_DATE_ANNOTATION.equals(annotationName) ||
-                        CREATED_DATE_SPRING_ANNOTATION.equals(annotationName)) {
-                        return AuditMetadataType.CREATED;
-                    } else if (LAST_MODIFIED_DATE_ANNOTATION.equals(annotationName) ||
-                               LAST_MODIFIED_DATE_SPRING_ANNOTATION.equals(annotationName)) {
-                        return AuditMetadataType.UPDATED;
-                    } else if (CREATED_BY_ANNOTATION.equals(annotationName) ||
-                               CREATED_BY_SPRING_ANNOTATION.equals(annotationName)) {
-                        return AuditMetadataType.CREATED_BY;
-                    } else if (LAST_MODIFIED_BY_ANNOTATION.equals(annotationName) ||
-                               LAST_MODIFIED_BY_SPRING_ANNOTATION.equals(annotationName)) {
-                        return AuditMetadataType.UPDATED_BY;
-                    } else if (AUTO_TIMESTAMP_ANNOTATION.equals(annotationName)) {
-                        // For @AutoTimestamp, check the EventType value
-                        try {
-                            Object eventTypeValue = annotation.annotationType()
-                                .getMethod("value")
-                                .invoke(annotation);
-
-                            if (eventTypeValue != null) {
-                                String eventTypeName = eventTypeValue.toString();
-                                if (eventTypeName.equals("UPDATED")) {
-                                    return AuditMetadataType.UPDATED;
-                                } else {
-                                    return AuditMetadataType.CREATED;
-                                }
-                            }
-                        } catch (Exception e) {
-                            // If we can't read the value, default to CREATED
+                    switch (annotationName) {
+                        case CREATED_DATE_ANNOTATION:
+                        case CREATED_DATE_SPRING_ANNOTATION:
                             return AuditMetadataType.CREATED;
-                        }
+
+                        case LAST_MODIFIED_DATE_ANNOTATION:
+                        case LAST_MODIFIED_DATE_SPRING_ANNOTATION:
+                            return AuditMetadataType.UPDATED;
+
+                        case CREATED_BY_ANNOTATION:
+                        case CREATED_BY_SPRING_ANNOTATION:
+                            return AuditMetadataType.CREATED_BY;
+
+                        case LAST_MODIFIED_BY_ANNOTATION:
+                        case LAST_MODIFIED_BY_SPRING_ANNOTATION:
+                            return AuditMetadataType.UPDATED_BY;
+
+                        case AUTO_TIMESTAMP_ANNOTATION:
+                            // For @AutoTimestamp, check the EventType value
+                            try {
+                                Object eventTypeValue = annotation.annotationType()
+                                    .getMethod("value")
+                                    .invoke(annotation);
+
+                                if (eventTypeValue != null) {
+                                    String eventTypeName = eventTypeValue.toString();
+                                    if (eventTypeName.equals("UPDATED")) {
+                                        return AuditMetadataType.UPDATED;
+                                    } else {
+                                        return AuditMetadataType.CREATED;
+                                    }
+                                }
+                            } catch (Exception e) {
+                                // If we can't read the value, default to CREATED
+                                return AuditMetadataType.CREATED;
+                            }
+                            break;
                     }
                 }
             }
