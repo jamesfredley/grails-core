@@ -28,7 +28,7 @@ import java.lang.annotation.Target;
  * upon gorm insert and update events. This is an alias for @AutoTimestamp(EventType.UPDATED).
  *
  * @author Scott Murphy Heiberg
- * @since 7.0
+ * @since 7.1
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.FIELD})

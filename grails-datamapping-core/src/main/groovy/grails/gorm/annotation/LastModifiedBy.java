@@ -46,7 +46,7 @@ import java.lang.annotation.Target;
  * implementation (e.g., String, Long, User, etc.).</p>
  *
  * @author Scott Murphy Heiberg
- * @since 7.0
+ * @since 7.1
  * @see org.grails.datastore.gorm.timestamp.AuditorAware
  * @see CreatedBy
  */
