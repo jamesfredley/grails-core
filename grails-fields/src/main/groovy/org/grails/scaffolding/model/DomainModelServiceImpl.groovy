@@ -121,6 +121,7 @@ class DomainModelServiceImpl implements DomainModelService {
      * @param blackList Custom blacklist (optional)
      * @param excludeAnnotatedTimestamps If true, exclude @CreatedDate/@LastModifiedDate/@AutoTimestamp properties
      */
+    @Override
     List<DomainProperty> getInputProperties(PersistentEntity domainClass, List<String> blackList, boolean excludeAnnotatedTimestamps) {
         getInputPropertiesInternal(domainClass, new ArrayList<>(blackList ?: ['version', 'dateCreated', 'lastUpdated']), excludeAnnotatedTimestamps)
     }
@@ -136,7 +137,8 @@ class DomainModelServiceImpl implements DomainModelService {
      * @see {@link DomainModelServiceImpl#getProperties}
      * @param domainClass The persistent entity
      */
-    List<DomainProperty> getInputProperties(PersistentEntity domainClass, List<String> blackList = null) {
+    @Override
+    List<DomainProperty> getInputProperties(PersistentEntity domainClass, List blackList = null) {
         getInputProperties(domainClass, blackList, true)
     }
 
