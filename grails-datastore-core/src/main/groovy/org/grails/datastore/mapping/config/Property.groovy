@@ -138,35 +138,10 @@ class Property implements Cloneable {
     private String propertyName
     private EnumType enumType
     /**
-     * The auto-timestamp type for this property, cached to avoid repeated reflection calls
+     * The audit metadata type for this property, cached to avoid repeated reflection calls.
+     * Indicates whether this property is annotated for auditing (timestamps or auditor tracking).
      */
-    AutoTimestampType autoTimestampType
-
-    /**
-     * Enum representing the type of auto-timestamp annotation on a property
-     */
-    static enum AutoTimestampType {
-        /**
-         * Property has @CreatedDate annotation or @AutoTimestamp(CREATED)
-         */
-        CREATED,
-        /**
-         * Property has @LastModifiedDate annotation or @AutoTimestamp(UPDATED)
-         */
-        UPDATED,
-        /**
-         * Property has @CreatedBy annotation - populated with current auditor on insert
-         */
-        CREATED_BY,
-        /**
-         * Property has @LastModifiedBy annotation - populated with current auditor on insert and update
-         */
-        UPDATED_BY,
-        /**
-         * Property has no auto-timestamp annotation
-         */
-        NONE
-    }
+    AuditMetadataType auditMetadataType
 
     protected void setUniquenessGroup(List<String> uniquenessGroup) {
         this.uniquenessGroup = uniquenessGroup
@@ -191,7 +166,7 @@ class Property implements Cloneable {
         if (inList != null) {
             cloned.inList = new ArrayList<>(inList)
         }
-        cloned.autoTimestampType = this.autoTimestampType
+        cloned.auditMetadataType = this.auditMetadataType
 
         return cloned
     }

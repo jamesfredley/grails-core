@@ -22,8 +22,8 @@ import java.lang.reflect.Field;
 
 import org.springframework.util.ReflectionUtils;
 
+import org.grails.datastore.mapping.config.AuditMetadataType;
 import org.grails.datastore.mapping.config.Property;
-import org.grails.datastore.mapping.config.Property.AutoTimestampType;
 
 /**
  * Utility class for detecting and caching auto-timestamp and auditing annotations on domain properties.
@@ -60,7 +60,7 @@ public class AutoTimestampUtils {
     private static final String LAST_MODIFIED_BY_SPRING_ANNOTATION = "org.springframework.data.annotation.LastModifiedBy";
 
     /**
-     * Gets the auto-timestamp type for a persistent property, using cached metadata when caching is enabled.
+     * Gets the audit metadata type for a persistent property, using cached metadata when caching is enabled.
      *
      * <p>When caching is disabled (typically in development mode), this method will always perform
      * reflection to detect the current annotation state, ensuring that annotation changes during
@@ -69,38 +69,38 @@ public class AutoTimestampUtils {
      *
      * @param persistentProperty The persistent property to check
      * @param cacheAnnotations Whether to cache the annotation metadata
-     * @return The auto-timestamp type (CREATED, UPDATED, CREATED_BY, UPDATED_BY, or NONE)
+     * @return The audit metadata type (CREATED, UPDATED, CREATED_BY, UPDATED_BY, or NONE)
      */
-    public static AutoTimestampType getAutoTimestampType(PersistentProperty<?> persistentProperty, boolean cacheAnnotations) {
+    public static AuditMetadataType getAuditMetadataType(PersistentProperty<?> persistentProperty, boolean cacheAnnotations) {
         Property mappedForm = persistentProperty.getMapping().getMappedForm();
 
         // If caching is disabled, always detect fresh to support class reloading
         if (!cacheAnnotations) {
-            return detectAutoTimestampType(persistentProperty);
+            return detectAuditMetadataType(persistentProperty);
         }
 
         // Return cached value if available
-        if (mappedForm.getAutoTimestampType() != null) {
-            return mappedForm.getAutoTimestampType();
+        if (mappedForm.getAuditMetadataType() != null) {
+            return mappedForm.getAuditMetadataType();
         }
 
         // Detect and cache the annotation type
-        AutoTimestampType type = detectAutoTimestampType(persistentProperty);
-        mappedForm.setAutoTimestampType(type);
+        AuditMetadataType type = detectAuditMetadataType(persistentProperty);
+        mappedForm.setAuditMetadataType(type);
         return type;
     }
 
     /**
-     * Detects the auto-timestamp annotation type on a property using reflection.
+     * Detects the audit metadata annotation type on a property using reflection.
      *
      * <p>When caching is enabled (production mode), this method is called once per property
      * and the result is cached. When caching is disabled (development mode), this method
      * is called on every access to ensure annotation changes are detected.</p>
      *
      * @param persistentProperty The persistent property to check
-     * @return The auto-timestamp type (CREATED, UPDATED, or NONE)
+     * @return The audit metadata type (CREATED, UPDATED, CREATED_BY, UPDATED_BY, or NONE)
      */
-    private static AutoTimestampType detectAutoTimestampType(PersistentProperty<?> persistentProperty) {
+    private static AuditMetadataType detectAuditMetadataType(PersistentProperty<?> persistentProperty) {
         try {
             Field field = ReflectionUtils.findField(
                 persistentProperty.getOwner().getJavaClass(),
@@ -113,16 +113,16 @@ public class AutoTimestampUtils {
 
                     if (CREATED_DATE_ANNOTATION.equals(annotationName) ||
                         CREATED_DATE_SPRING_ANNOTATION.equals(annotationName)) {
-                        return AutoTimestampType.CREATED;
+                        return AuditMetadataType.CREATED;
                     } else if (LAST_MODIFIED_DATE_ANNOTATION.equals(annotationName) ||
                                LAST_MODIFIED_DATE_SPRING_ANNOTATION.equals(annotationName)) {
-                        return AutoTimestampType.UPDATED;
+                        return AuditMetadataType.UPDATED;
                     } else if (CREATED_BY_ANNOTATION.equals(annotationName) ||
                                CREATED_BY_SPRING_ANNOTATION.equals(annotationName)) {
-                        return AutoTimestampType.CREATED_BY;
+                        return AuditMetadataType.CREATED_BY;
                     } else if (LAST_MODIFIED_BY_ANNOTATION.equals(annotationName) ||
                                LAST_MODIFIED_BY_SPRING_ANNOTATION.equals(annotationName)) {
-                        return AutoTimestampType.UPDATED_BY;
+                        return AuditMetadataType.UPDATED_BY;
                     } else if (AUTO_TIMESTAMP_ANNOTATION.equals(annotationName)) {
                         // For @AutoTimestamp, check the EventType value
                         try {
@@ -133,14 +133,14 @@ public class AutoTimestampUtils {
                             if (eventTypeValue != null) {
                                 String eventTypeName = eventTypeValue.toString();
                                 if (eventTypeName.equals("UPDATED")) {
-                                    return AutoTimestampType.UPDATED;
+                                    return AuditMetadataType.UPDATED;
                                 } else {
-                                    return AutoTimestampType.CREATED;
+                                    return AuditMetadataType.CREATED;
                                 }
                             }
                         } catch (Exception e) {
                             // If we can't read the value, default to CREATED
-                            return AutoTimestampType.CREATED;
+                            return AuditMetadataType.CREATED;
                         }
                     }
                 }
@@ -149,18 +149,18 @@ public class AutoTimestampUtils {
             // If reflection fails, return NONE
         }
 
-        return AutoTimestampType.NONE;
+        return AuditMetadataType.NONE;
     }
 
     /**
-     * Checks if a property has any auto-timestamp or auditing annotation.
+     * Checks if a property has any audit metadata annotation.
      *
      * @param persistentProperty The persistent property to check
      * @param cacheAnnotations Whether to cache the annotation metadata
      * @return true if the property has any supported annotation (@CreatedDate, @LastModifiedDate,
      *         @CreatedBy, @LastModifiedBy, or @AutoTimestamp) from either GORM or Spring Data
      */
-    public static boolean hasAutoTimestampAnnotation(PersistentProperty<?> persistentProperty, boolean cacheAnnotations) {
-        return persistentProperty != null && getAutoTimestampType(persistentProperty, cacheAnnotations) != AutoTimestampType.NONE;
+    public static boolean hasAuditMetadataAnnotation(PersistentProperty<?> persistentProperty, boolean cacheAnnotations) {
+        return persistentProperty != null && getAuditMetadataType(persistentProperty, cacheAnnotations) != AuditMetadataType.NONE;
     }
 }

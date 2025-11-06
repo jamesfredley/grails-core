@@ -46,6 +46,7 @@ import grails.gorm.validation.exceptions.ValidationConfigurationException;
 import org.grails.datastore.gorm.validation.constraints.builder.ConstrainedPropertyBuilder;
 import org.grails.datastore.gorm.validation.constraints.registry.ConstraintRegistry;
 import org.grails.datastore.gorm.validation.constraints.registry.DefaultConstraintRegistry;
+import org.grails.datastore.mapping.config.AuditMetadataType;
 import org.grails.datastore.mapping.config.Property;
 import org.grails.datastore.mapping.keyvalue.mapping.config.KeyValueMappingContext;
 import org.grails.datastore.mapping.model.AutoTimestampUtils;
@@ -315,8 +316,8 @@ public class DefaultConstraintEvaluator implements ConstraintsEvaluator {
             // Check if property has @CreatedDate or @LastModifiedDate annotations
             // Note: We only exclude timestamp date fields (CREATED/UPDATED), not auditor fields (CREATED_BY/UPDATED_BY)
             // because auditor fields can have various types and should support constraints (e.g., maxSize for String)
-            Property.AutoTimestampType autoTimestampType = AutoTimestampUtils.getAutoTimestampType(persistentProperty, cacheAutoTimestampAnnotations);
-            if (autoTimestampType == Property.AutoTimestampType.CREATED || autoTimestampType == Property.AutoTimestampType.UPDATED) {
+            AuditMetadataType auditMetadataType = AutoTimestampUtils.getAuditMetadataType(persistentProperty, cacheAutoTimestampAnnotations);
+            if (auditMetadataType == AuditMetadataType.CREATED || auditMetadataType == AuditMetadataType.UPDATED) {
                 return false;
             }
 

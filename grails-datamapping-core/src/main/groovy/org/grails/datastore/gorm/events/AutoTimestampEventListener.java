@@ -38,8 +38,8 @@ import org.springframework.context.ApplicationEvent;
 import org.grails.datastore.gorm.timestamp.AuditorAware;
 import org.grails.datastore.gorm.timestamp.DefaultTimestampProvider;
 import org.grails.datastore.gorm.timestamp.TimestampProvider;
+import org.grails.datastore.mapping.config.AuditMetadataType;
 import org.grails.datastore.mapping.config.Entity;
-import org.grails.datastore.mapping.config.Property.AutoTimestampType;
 import org.grails.datastore.mapping.config.Settings;
 import org.grails.datastore.mapping.core.Datastore;
 import org.grails.datastore.mapping.engine.EntityAccess;
@@ -249,14 +249,14 @@ public class AutoTimestampEventListener extends AbstractPersistenceEventListener
                     } else if (property.getName().equals(DATE_CREATED_PROPERTY)) {
                         storeTimestampAvailability(entitiesWithDateCreated, persistentEntity, property);
                     } else {
-                        AutoTimestampType timestampType = AutoTimestampUtils.getAutoTimestampType(property, cacheAutoTimestampAnnotations);
-                        if (timestampType == AutoTimestampType.CREATED) {
+                        AuditMetadataType auditMetadataType = AutoTimestampUtils.getAuditMetadataType(property, cacheAutoTimestampAnnotations);
+                        if (auditMetadataType == AuditMetadataType.CREATED) {
                             storeTimestampAvailability(entitiesWithDateCreated, persistentEntity, property);
-                        } else if (timestampType == AutoTimestampType.UPDATED) {
+                        } else if (auditMetadataType == AuditMetadataType.UPDATED) {
                             storeTimestampAvailability(entitiesWithLastUpdated, persistentEntity, property);
-                        } else if (timestampType == AutoTimestampType.CREATED_BY) {
+                        } else if (auditMetadataType == AuditMetadataType.CREATED_BY) {
                             storeAuditorAvailability(entitiesWithCreatedBy, persistentEntity, property);
-                        } else if (timestampType == AutoTimestampType.UPDATED_BY) {
+                        } else if (auditMetadataType == AuditMetadataType.UPDATED_BY) {
                             storeAuditorAvailability(entitiesWithUpdatedBy, persistentEntity, property);
                         }
                     }
