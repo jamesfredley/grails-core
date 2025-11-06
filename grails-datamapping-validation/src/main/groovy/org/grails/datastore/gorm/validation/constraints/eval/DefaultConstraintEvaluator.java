@@ -313,7 +313,10 @@ public class DefaultConstraintEvaluator implements ConstraintsEvaluator {
         }
         else {
             // Check if property has @CreatedDate or @LastModifiedDate annotations
-            if (AutoTimestampUtils.hasAutoTimestampAnnotation(persistentProperty, cacheAutoTimestampAnnotations)) {
+            // Note: We only exclude timestamp date fields (CREATED/UPDATED), not auditor fields (CREATED_BY/UPDATED_BY)
+            // because auditor fields can have various types and should support constraints (e.g., maxSize for String)
+            Property.AutoTimestampType autoTimestampType = AutoTimestampUtils.getAutoTimestampType(persistentProperty, cacheAutoTimestampAnnotations);
+            if (autoTimestampType == Property.AutoTimestampType.CREATED || autoTimestampType == Property.AutoTimestampType.UPDATED) {
                 return false;
             }
 
