@@ -410,7 +410,7 @@ ${importStatements}
                 configuration.resolutionStrategy.eachDependency { DependencyResolveDetails details ->
                     String dependencyName = details.requested.name
                     String group = details.requested.group
-                    if (group == 'io.micronaut' && dependencyName.startsWith('micronaut-platform')) {
+                    if (group == 'io.micronaut.platform' && dependencyName.startsWith('micronaut-platform')) {
                         project.logger.info('Forcing Micronaut Platform version to {}', micronautPlatformVersion)
                         details.useVersion(micronautPlatformVersion)
                     }
