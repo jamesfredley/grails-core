@@ -860,3 +860,260 @@ The `+` marker is opt-in and fully backward compatible:
 - Existing URL mappings without the `+` marker continue to work as before (splitting at the first dot)
 - No changes are required to existing applications
 - The feature can be adopted incrementally on a per-mapping basis
+
+===== 12.28 Enhanced Audit Metadata Support
+
+Grails 7.1 introduces comprehensive audit metadata support with new annotations for tracking both temporal information (when changes occurred) and auditor information (who made changes). This aligns with Spring Data's auditing model while maintaining GORM's flexibility.
+
+====== New Annotations
+
+Four new annotations have been added to simplify audit tracking:
+
+* `@CreatedDate` - Automatically populated with the creation timestamp on insert
+* `@LastModifiedDate` - Automatically populated with the modification timestamp on insert and update
+* `@CreatedBy` - Automatically populated with the current auditor on insert
+* `@LastModifiedBy` - Automatically populated with the current auditor on insert and update
+
+These annotations work with various temporal types including `Date`, `LocalDateTime`, `Instant`, `OffsetDateTime`, and `ZonedDateTime`.
+
+====== Example Domain Class
+
+[source,groovy]
+----
+import grails.gorm.annotation.CreatedBy
+import grails.gorm.annotation.CreatedDate
+import grails.gorm.annotation.LastModifiedBy
+import grails.gorm.annotation.LastModifiedDate
+import java.time.LocalDateTime
+
+class Book {
+    String title
+    String author
+
+    @CreatedDate
+    LocalDateTime created
+
+    @LastModifiedDate
+    LocalDateTime modified
+
+    @CreatedBy
+    String createdBy
+
+    @LastModifiedBy
+    String modifiedBy
+
+    static constraints = {
+        title blank: false
+        author blank: false
+        // Auditor fields should be nullable for anonymous operations
+        createdBy nullable: true
+        modifiedBy nullable: true
+    }
+}
+----
+
+====== Configuring AuditorAware
+
+To populate `@CreatedBy` and `@LastModifiedBy` fields, you need to provide an `AuditorAware` bean that returns the current auditor:
+
+[source,groovy]
+.src/main/groovy/com/example/SpringSecurityAuditorAware.groovy
+----
+package com.example
+
+import groovy.transform.CompileStatic
+import org.grails.datastore.gorm.timestamp.AuditorAware
+import org.springframework.security.core.Authentication
+import org.springframework.security.core.context.SecurityContextHolder
+
+@CompileStatic
+class SpringSecurityAuditorAware implements AuditorAware<String> {
+
+    @Override
+    Optional<String> getCurrentAuditor() {
+        Authentication authentication = SecurityContextHolder.getContext()
+                                                              .getAuthentication()
+
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return Optional.empty()
+        }
+
+        String username = authentication.getName()
+
+        // Don't set auditor for anonymous users
+        if (username == 'anonymousUser') {
+            return Optional.empty()
+        }
+
+        return Optional.of(username)
+    }
+}
+----
+
+Register the bean in your `Application.groovy`:
+
+[source,groovy]
+.grails-app/init/com/example/Application.groovy
+----
+import org.grails.datastore.gorm.timestamp.AuditorAware
+import org.springframework.context.annotation.Bean
+
+class Application extends GrailsAutoConfiguration {
+    static void main(String[] args) {
+        GrailsApp.run(Application, args)
+    }
+
+    @Bean
+    AuditorAware<String> auditorAware() {
+        return new SpringSecurityAuditorAware()
+    }
+}
+----
+
+====== Auditor Field Types
+
+Auditor fields can be different types depending on your needs:
+
+* `String` - for username strings
+* `Long` - for user ID references
+* Custom types - for embedding user objects
+
+Example with different auditor types:
+
+[source,groovy]
+----
+class Document {
+    String title
+
+    @CreatedDate
+    LocalDateTime created
+
+    @CreatedBy
+    String createdByUsername  // Store username as String
+
+    @LastModifiedBy
+    Long lastModifiedById     // Store user ID as Long
+
+    static constraints = {
+        createdByUsername nullable: true
+        lastModifiedById nullable: true
+    }
+}
+----
+
+====== Constraints on Auditor Fields
+
+Unlike timestamp fields, auditor fields can have constraints applied to them. This is useful for:
+
+* Setting `maxSize` on String auditors to match database column definitions
+* Applying validation rules
+* Customizing database mapping
+
+[source,groovy]
+----
+class Task {
+    String name
+
+    @CreatedBy
+    String createdBy
+
+    @LastModifiedBy
+    String modifiedBy
+
+    static constraints = {
+        name blank: false
+        // Apply constraints to auditor fields
+        createdBy nullable: true, maxSize: 100
+        modifiedBy nullable: true, maxSize: 100
+    }
+}
+----
+
+====== Deprecation of @AutoTimestamp
+
+The `@AutoTimestamp` annotation is now deprecated in favor of the more explicit `@CreatedDate` and `@LastModifiedDate` annotations:
+
+[source,groovy]
+----
+// Old (deprecated)
+@AutoTimestamp(AutoTimestamp.EventType.CREATED)
+LocalDateTime created
+
+@AutoTimestamp
+LocalDateTime modified
+
+// New (recommended)
+@CreatedDate
+LocalDateTime created
+
+@LastModifiedDate
+LocalDateTime modified
+----
+
+The `@AutoTimestamp` annotation is marked with `@Deprecated(forRemoval = true)` and will be removed in Grails 8.0.
+
+====== Migration Guide
+
+To migrate from `@AutoTimestamp` to the new annotations:
+
+1. Replace `@AutoTimestamp(AutoTimestamp.EventType.CREATED)` with `@CreatedDate`
+2. Replace `@AutoTimestamp` (or `@AutoTimestamp(EventType.UPDATED)`) with `@LastModifiedDate`
+3. Optionally add `@CreatedBy` and `@LastModifiedBy` fields for auditor tracking
+4. Implement and register an `AuditorAware` bean if using auditor fields
+5. Remove `nullable: true` constraints from timestamp fields (no longer needed)
+6. Keep `nullable: true` on auditor fields (required for anonymous operations)
+
+====== Automatic Imports for Annotations
+
+To reduce boilerplate when using audit annotations, you can enable automatic imports for common Grails annotations in your `build.gradle`:
+
+[source,groovy]
+.build.gradle
+----
+grails {
+    importGrailsCommonAnnotations = true
+}
+----
+
+When enabled, this automatically imports:
+
+* `jakarta.validation.constraints.*` - Jakarta validation annotations
+* `grails.gorm.annotation.*` - All GORM annotations including `@CreatedDate`, `@LastModifiedDate`, `@CreatedBy`, `@LastModifiedBy`
+* `grails.plugin.scaffolding.annotation.*` - Scaffolding annotations (if grails-scaffolding is in classpath)
+
+With this setting, you can use the annotations without explicit imports:
+
+[source,groovy]
+----
+// No import statements needed!
+class Book {
+    String title
+
+    @CreatedDate      // Automatically imported
+    LocalDateTime created
+
+    @LastModifiedDate // Automatically imported
+    LocalDateTime modified
+
+    @CreatedBy        // Automatically imported
+    String createdBy
+
+    @NotBlank         // jakarta.validation.constraints.NotBlank imported
+    @Size(max = 255)  // jakarta.validation.constraints.Size imported
+    String author
+}
+----
+
+====== Custom Star Imports
+
+You can also configure custom star imports for your own packages independently:
+
+[source,groovy]
+.build.gradle
+----
+grails {
+    starImports = ['java.util.concurrent', 'groovy.transform', 'com.myapp.annotations']
+}
+----
+
+This allows you to use classes from these packages without explicit imports throughout your Groovy code. The `starImports` configuration works independently and will be combined with any imports from `importGrailsCommonAnnotations` or `importJavaTime` flags if those are also enabled.
