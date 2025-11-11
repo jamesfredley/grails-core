@@ -754,3 +754,109 @@ grails:
 * **8.0**: `SimpleEnumMarshaller` will become the default
 
 The legacy `org.grails.web.converters.marshaller.json.EnumMarshaller` and `org.grails.web.converters.marshaller.xml.EnumMarshaller` classes are marked as `@Deprecated(forRemoval = true, since = "7.0.2")` and will be removed in Grails 8.0.
+
+===== 12.27 Greedy Extension Parameter Matching in URL Mappings
+
+Grails 7.1 introduces a new greedy extension parameter marker (`+`) for URL mappings that provides more intuitive handling of file extensions in URLs with multiple dots.
+
+====== The Problem with Default Behavior
+
+By default, Grails URL mappings with optional extensions split at the **first** dot in the path:
+
+[source,groovy]
+----
+"/$id(.$format)?"(controller: 'user', action: 'profile')
+----
+
+When matching the URL `/test.test.json`:
+- `id` = `test` (stops at first dot)
+- `format` = `test.json` (everything after first dot)
+
+This can be problematic when IDs legitimately contain dots, such as file names, qualified class names, or version numbers.
+
+====== New Greedy Matching Behavior
+
+The new `+` marker enables **greedy** matching, which splits at the **last** dot instead:
+
+[source,groovy]
+----
+"/$id+(.$format)?"(controller: 'user', action: 'profile')
+----
+
+Now the same URL `/test.test.json` matches as:
+- `id` = `test.test` (everything up to last dot)
+- `format` = `json` (extension after last dot)
+
+====== Syntax
+
+The `+` marker is added after the variable name and before the optional marker:
+
+**Required parameter with greedy extension:**
+[source,groovy]
+----
+"/$id+(.$format)?"(controller: 'file', action: 'download')
+----
+
+**Optional parameter with greedy extension:**
+[source,groovy]
+----
+"/$id+?(.$format)?"(controller: 'resource', action: 'show')
+----
+
+====== Use Cases
+
+Greedy extension matching is particularly useful for:
+
+1. **File downloads with complex names:**
++
+[source,groovy]
+----
+"/files/$filename+(.$format)?"(controller: 'file', action: 'download')
+----
++
+Matches `/files/document.final.v2.pdf` → `filename=document.final.v2`, `format=pdf`
+
+2. **Versioned resources:**
++
+[source,groovy]
+----
+"/api/$resource+(.$format)?"(controller: 'api', action: 'show')
+----
++
+Matches `/api/user.service.v1.json` → `resource=user.service.v1`, `format=json`
+
+3. **Qualified class names:**
++
+[source,groovy]
+----
+"/docs/$className+(.$format)?"(controller: 'documentation', action: 'show')
+----
++
+Matches `/docs/com.example.MyClass.html` → `className=com.example.MyClass`, `format=html`
+
+====== Behavior Details
+
+- **With dots:** The greedy marker splits at the **last** dot, treating everything before as the parameter value and everything after as the extension
+- **Without dots:** URLs without any dots match entirely as the parameter with no format
+- **Extension optional:** When the extension is marked optional `(.$format)?`, URLs work both with and without extensions
+
+**Examples:**
+
+[source,groovy]
+----
+"/$id+(.$format)?"(controller: 'resource', action: 'show')
+
+// URL Matches:
+/test.test.json    → id='test.test', format='json'
+/test.json         → id='test', format='json'
+/simpletest        → id='simpletest', format=null
+/foo.bar.baz.xml   → id='foo.bar.baz', format='xml'
+----
+
+====== Backward Compatibility
+
+The `+` marker is opt-in and fully backward compatible:
+
+- Existing URL mappings without the `+` marker continue to work as before (splitting at the first dot)
+- No changes are required to existing applications
+- The feature can be adopted incrementally on a per-mapping basis
