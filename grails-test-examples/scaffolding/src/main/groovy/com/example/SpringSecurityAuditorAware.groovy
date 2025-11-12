@@ -18,21 +18,33 @@
  */
 package com.example
 
-import grails.boot.GrailsApp
-import grails.boot.config.GrailsAutoConfiguration
-
 import groovy.transform.CompileStatic
 import org.grails.datastore.gorm.timestamp.AuditorAware
-import org.springframework.context.annotation.Bean
+import org.springframework.security.core.Authentication
+import org.springframework.security.core.context.SecurityContextHolder
 
+/**
+ * AuditorAware implementation that retrieves the current auditor from Spring Security's authentication context.
+ * This is used to automatically populate @CreatedBy and @LastModifiedBy annotated fields in domain classes.
+ */
 @CompileStatic
-class Application extends GrailsAutoConfiguration {
-    static void main(String[] args) {
-        GrailsApp.run(Application, args)
-    }
+class SpringSecurityAuditorAware implements AuditorAware<String> {
 
-    @Bean
-    AuditorAware<String> auditorAware() {
-        return new SpringSecurityAuditorAware()
+    @Override
+    Optional<String> getCurrentAuditor() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication()
+
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return Optional.empty()
+        }
+
+        String username = authentication.getName()
+
+        // Don't set auditor for anonymous users
+        if (username == 'anonymousUser') {
+            return Optional.empty()
+        }
+
+        return Optional.of(username)
     }
 }

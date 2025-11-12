@@ -226,17 +226,51 @@ class GrailsGradlePlugin extends GroovyPlugin {
 
     protected Closure<String> getGroovyCompilerScript(GroovyCompile compile, Project project) {
         GrailsExtension grails = project.extensions.findByType(GrailsExtension)
-        if (!grails.importJavaTime) {
+
+        // Start with user-configured imports
+        Set<String> starImports = new LinkedHashSet<>(grails.starImports)
+
+        // Add java.time if enabled
+        if (grails.importJavaTime) {
+            starImports.add('java.time')
+        }
+
+        // Add Grails annotation packages and common validation annotations if enabled
+        if (grails.importGrailsCommonAnnotations) {
+            // Always add jakarta.validation.constraints
+            starImports.add('jakarta.validation.constraints')
+
+            // Check for grails-datamapping-core (grails.gorm.annotation.*)
+            def datamappingCoreDep = project.configurations.getByName('compileClasspath').dependencies.find { Dependency d ->
+                d.group == 'org.apache.grails.data' && d.name == 'grails-datamapping-core'
+            }
+            if (datamappingCoreDep) {
+                starImports.add('grails.gorm.annotation')
+            }
+
+            // Check for grails-scaffolding (grails.plugin.scaffolding.annotation.*)
+            def scaffoldingDep = project.configurations.getByName('compileClasspath').dependencies.find { Dependency d ->
+                d.group == 'org.apache.grails' && d.name == 'grails-scaffolding'
+            }
+            if (scaffoldingDep) {
+                starImports.add('grails.plugin.scaffolding.annotation')
+            }
+        }
+
+        // Return null if no imports are needed
+        if (starImports.isEmpty()) {
             return null
         }
 
+        // Build the import statements
         return { ->
-            '''withConfig(configuration) {
+            def importStatements = starImports.collect { pkg -> "                        star '$pkg'" }.join('\n')
+            """withConfig(configuration) {
                     imports {
-                        star 'java.time'
+${importStatements}
                     }
                 }
-            '''
+            """
         }
     }
 

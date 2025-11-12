@@ -16,23 +16,21 @@
  *  specific language governing permissions and limitations
  *  under the License.
  */
-package com.example
+package grails.gorm.annotation;
 
-import grails.boot.GrailsApp
-import grails.boot.config.GrailsAutoConfiguration
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-import groovy.transform.CompileStatic
-import org.grails.datastore.gorm.timestamp.AuditorAware
-import org.springframework.context.annotation.Bean
-
-@CompileStatic
-class Application extends GrailsAutoConfiguration {
-    static void main(String[] args) {
-        GrailsApp.run(Application, args)
-    }
-
-    @Bean
-    AuditorAware<String> auditorAware() {
-        return new SpringSecurityAuditorAware()
-    }
+/**
+ * A property annotation used to apply auto-timestamping on a field
+ * upon gorm insert and update events. This is an alias for @AutoTimestamp(EventType.UPDATED).
+ *
+ * @author Scott Murphy Heiberg
+ * @since 7.1
+ */
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ElementType.FIELD})
+public @interface LastModifiedDate {
 }

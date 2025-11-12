@@ -24,28 +24,33 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * A property annotation used to apply auto-timestamping on a field
- * upon gorm insert and update events
+ * A property annotation used to automatically populate a field with the current auditor
+ * upon GORM insert events. The current auditor is retrieved from an {@link org.grails.datastore.gorm.timestamp.AuditorAware}
+ * bean registered in the Spring application context.
+ *
+ * <p>Example usage:</p>
+ * <pre>{@code
+ * class Book {
+ *     @CreatedBy
+ *     String createdBy
+ *
+ *     @CreatedBy
+ *     User creator
+ *
+ *     @CreatedBy
+ *     Long creatorId
+ * }
+ * }</pre>
+ *
+ * <p>The field type should match the type parameter of your {@link org.grails.datastore.gorm.timestamp.AuditorAware}
+ * implementation (e.g., String, Long, User, etc.).</p>
  *
  * @author Scott Murphy Heiberg
- * @since 7.0
- * @deprecated Use {@link CreatedDate} for creation timestamps or {@link LastModifiedDate} for update timestamps instead. This annotation will be removed in Grails 8.0.
+ * @since 7.1
+ * @see org.grails.datastore.gorm.timestamp.AuditorAware
+ * @see LastModifiedBy
  */
-@Deprecated(forRemoval = true)
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.FIELD})
-public @interface AutoTimestamp {
-
-    /**
-     * Enum to specify when auto-timestamping should occur.
-     */
-    enum EventType {
-        CREATED,
-        UPDATED
-    }
-
-    /**
-     * When to apply auto-timestamping
-     */
-    EventType value() default EventType.UPDATED;
+public @interface CreatedBy {
 }
