@@ -17,12 +17,14 @@ specific language governing permissions and limitations
 under the License.
 ////
 
-To activate JSON views, add the following dependency to the `dependencies` block of your `build.gradle`, if you use the Grails BOM:
+To activate JSON views, add the following dependency to the `dependencies` block of your `build.gradle` file.
+
+If you use the Grails BOM:
 
 [source,groovy]
 implementation "org.apache.grails:grails-views-gson"
 
-otherwise add version information
+otherwise, add the version explicitly:
 
 [source,groovy,subs="attributes"]
 implementation "org.apache.grails:grails-views-gson:{version}"
