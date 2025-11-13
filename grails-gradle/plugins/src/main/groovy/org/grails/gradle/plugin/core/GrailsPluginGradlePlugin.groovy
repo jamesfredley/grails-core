@@ -60,6 +60,8 @@ class GrailsPluginGradlePlugin extends GrailsGradlePlugin {
     void apply(Project project) {
         super.apply(project)
 
+        project.pluginManager.apply('java-library')
+
         checkForConfigurationClash(project)
 
         configureAstSources(project)
