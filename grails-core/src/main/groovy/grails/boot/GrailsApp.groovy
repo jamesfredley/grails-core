@@ -27,12 +27,10 @@ import org.codehaus.groovy.control.CompilationFailedException
 import org.codehaus.groovy.control.CompilationUnit
 import org.codehaus.groovy.control.CompilerConfiguration
 
-import org.springframework.boot.ResourceBanner
 import org.springframework.boot.SpringApplication
 import org.springframework.boot.web.context.WebServerApplicationContext
 import org.springframework.context.ConfigurableApplicationContext
 import org.springframework.core.env.ConfigurableEnvironment
-import org.springframework.core.io.ClassPathResource
 import org.springframework.core.io.ResourceLoader
 
 import grails.compiler.ast.ClassInjector
@@ -95,7 +93,7 @@ class GrailsApp extends SpringApplication {
      */
     GrailsApp(ResourceLoader resourceLoader, Class<?>... sources) {
         super(resourceLoader, sources)
-        banner = new ResourceBanner(new ClassPathResource(GRAILS_BANNER))
+        banner = new GrailsBanner(GRAILS_BANNER)
     }
 
     @Override
