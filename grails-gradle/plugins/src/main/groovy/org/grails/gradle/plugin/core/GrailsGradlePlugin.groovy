@@ -133,8 +133,6 @@ class GrailsGradlePlugin extends GroovyPlugin {
 
         registerFindMainClassTask(project)
 
-        configureGrailsBuildSettings(project)
-
         String grailsVersion = resolveGrailsVersion(project)
 
         enableNative2Ascii(project, grailsVersion)
@@ -458,12 +456,6 @@ ${importStatements}
         }
     }
 
-    @CompileStatic
-    protected String configureGrailsBuildSettings(Project project) {
-        System.setProperty(BuildSettings.APP_BASE_DIR, project.projectDir.absolutePath)
-        System.setProperty(BuildSettings.PROJECT_TARGET_DIR, project.layout.buildDirectory.get().asFile.name)
-    }
-
     @CompileDynamic
     protected void configureApplicationCommands(Project project) {
         def applicationContextCommands = FactoriesLoaderSupport.loadFactoryNames(APPLICATION_CONTEXT_COMMAND_CLASS)
@@ -577,6 +569,8 @@ ${importStatements}
             task.systemProperty(Metadata.APPLICATION_NAME, project.name)
             task.systemProperty(Metadata.APPLICATION_VERSION, (project.version instanceof Serializable ? project.version : project.version.toString()))
             task.systemProperty(Metadata.APPLICATION_GRAILS_VERSION, grailsVersion)
+            task.systemProperty(BuildSettings.APP_BASE_DIR, project.projectDir.absolutePath)
+            task.systemProperty(BuildSettings.PROJECT_TARGET_DIR, project.layout.buildDirectory.get().asFile.name)
             task.systemProperty(Environment.KEY, defaultGrailsEnv)
             task.systemProperty(Environment.FULL_STACKTRACE, System.getProperty(Environment.FULL_STACKTRACE) ?: '')
             if (task.minHeapSize == null) {
