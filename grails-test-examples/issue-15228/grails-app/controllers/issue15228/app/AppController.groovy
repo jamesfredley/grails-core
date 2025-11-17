@@ -16,28 +16,27 @@
  *  specific language governing permissions and limitations
  *  under the License.
  */
-package grails.rest.render
 
-import grails.web.mime.MimeTypeProvider
+package issue15228.app
 
-/**
- * Interface for class that render RESTful responses to implement
- *
- * @author Graeme Rocher
- * @since 2.3
- */
-interface Renderer<T> extends MimeTypeProvider {
+import org.springframework.http.HttpStatus
 
-    /**
-     * @return The target type
-     */
-    Class<T> getTargetType()
+import grails.artefact.Controller
+import grails.artefact.controller.RestResponder
 
-    /**
-     * Renders the object
-     *
-     * @param object The object to render
-     * @param context The {@link RenderContext}
-     */
-    void render(Object object, RenderContext context)
+class AppController implements Controller, RestResponder {
+
+    def normalView(ValidateableObject obj) {
+        respond(obj)
+    }
+
+    def typeView(OtherValidateableObject obj) {
+        respond(obj)
+    }
+
+    def errorView(ValidateableObject obj) {
+        respond(obj.errors, status: HttpStatus.UNPROCESSABLE_ENTITY)
+    }
+    
 }
+

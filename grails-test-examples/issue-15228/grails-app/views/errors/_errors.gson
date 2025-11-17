@@ -16,28 +16,24 @@
  *  specific language governing permissions and limitations
  *  under the License.
  */
-package grails.rest.render
+import org.springframework.validation.*
 
-import grails.web.mime.MimeTypeProvider
+model {
+    Errors errors
+}
 
-/**
- * Interface for class that render RESTful responses to implement
- *
- * @author Graeme Rocher
- * @since 2.3
- */
-interface Renderer<T> extends MimeTypeProvider {
-
-    /**
-     * @return The target type
-     */
-    Class<T> getTargetType()
-
-    /**
-     * Renders the object
-     *
-     * @param object The object to render
-     * @param context The {@link RenderContext}
-     */
-    void render(Object object, RenderContext context)
+json {
+    error {
+        if(errors.globalErrorCount == 1 && errors.fieldErrorCount == 0) {
+            message messageSource.getMessage(errors.globalError, locale)
+        } else {
+            errors(errors.allErrors) { ObjectError error ->
+                if(error instanceof FieldError) {
+                    field error.field
+                    rejectedValue error.rejectedValue
+                }
+                message messageSource.getMessage(error, locale)
+            }
+        }
+    }
 }

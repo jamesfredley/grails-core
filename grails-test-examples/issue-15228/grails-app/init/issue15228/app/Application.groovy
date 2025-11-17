@@ -16,28 +16,16 @@
  *  specific language governing permissions and limitations
  *  under the License.
  */
-package grails.rest.render
 
-import grails.web.mime.MimeTypeProvider
+package issue15228.app
 
-/**
- * Interface for class that render RESTful responses to implement
- *
- * @author Graeme Rocher
- * @since 2.3
- */
-interface Renderer<T> extends MimeTypeProvider {
+import grails.boot.GrailsApp
+import grails.boot.config.GrailsAutoConfiguration
+import groovy.transform.CompileStatic
 
-    /**
-     * @return The target type
-     */
-    Class<T> getTargetType()
-
-    /**
-     * Renders the object
-     *
-     * @param object The object to render
-     * @param context The {@link RenderContext}
-     */
-    void render(Object object, RenderContext context)
+@CompileStatic
+class Application extends GrailsAutoConfiguration {
+    static void main(String[] args) {
+        GrailsApp.run(Application, args)
+    }
 }
