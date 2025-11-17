@@ -1,0 +1,15 @@
+{
+  "groups": [],
+  "properties": [
+    {
+      "name": "grails.banner.display.art",
+      "type": "java.lang.Boolean",
+      "defaultValue": true
+    },
+    {
+      "name": "grails.banner.display.versions",
+      "type": "java.lang.Boolean",
+      "defaultValue": true
+    }
+  ]
+}

@@ -31,55 +31,74 @@ import grails.util.BuildSettings
 @CompileStatic
 class GrailsBanner implements Banner {
 
-    private static final int FALLBACK_BANNER_WIDTH = 80
-    private static final int VERSIONS_MARGIN = 4
-    private static final String VERSIONS_SEPARATOR = ' | '
+    private static final int FALLBACK_BANNER_WIDTH = 0
 
-    private final String bannerFile
-
-    GrailsBanner(String bannerFile) {
-        this.bannerFile = bannerFile
-    }
+    String bannerFile = 'grails-banner.txt'
+    int upperPadding = 1
+    int lowerPadding = 1
+    int versionsMargin = 4
+    String versionsSeparator = ' | '
 
     @Override
     void printBanner(Environment environment, Class<?> sourceClass, PrintStream out) {
+
+        def bannerWidth = FALLBACK_BANNER_WIDTH
+
+        upperPadding.times { out.println() }
+
+        if (shouldDisplayArt(environment)) {
+            def art = createBannerArt(environment)
+            bannerWidth = longestLineLength(art) ?: FALLBACK_BANNER_WIDTH
+            out.println(art)
+        }
+
+        if (shouldDisplayVersions(environment)) {
+            buildVersionRows(createBannerVersions(environment), bannerWidth)
+                    .forEach { out.println(it) }
+        }
+
+        lowerPadding.times { out.println() }
+    }
+
+    protected String createBannerArt(Environment environment) {
         def bannerResource = new ClassPathResource(bannerFile)
-        def asciiArt = bannerResource.exists() ? bannerResource.inputStream.text : ''
-        def bannerWidth = longestLineLength(asciiArt) ?: FALLBACK_BANNER_WIDTH
-        def versions = [
-                (environment.getProperty('info.app.name') ?: 'application'): environment.getProperty('info.app.version') ?: 'unknown',
-                'JVM': System.getProperty('java.vendor') + ' ' + System.getProperty('java.version'),
-                'Grails': BuildSettings.grailsVersion,
-                'Groovy': GroovySystem.version,
-                'Spring Boot': SpringBootVersion.version,
-                'Spring': SpringVersion.version
+        bannerResource.exists() ? bannerResource.inputStream.text : ''
+    }
+
+    protected Map<String,String> createBannerVersions(Environment environment) {
+        [
+            (environment.getProperty('info.app.name') ?: 'application'): environment.getProperty('info.app.version') ?: 'unknown',
+            'JVM': System.getProperty('java.vendor') + ' ' + System.getProperty('java.version'),
+            'Grails': BuildSettings.grailsVersion,
+            'Groovy': GroovySystem.version,
+            'Spring Boot': SpringBootVersion.version,
+            'Spring': SpringVersion.version
         ]
-        out.println()
-        out.println(asciiArt)
-        buildVersionRows(versions, bannerWidth)
-            .forEach { out.println(it) }
-        out.println()
     }
 
-    private static int longestLineLength(String text) {
-        text.readLines()*.size()?.max() ?: 0
+    protected boolean shouldDisplayArt(Environment environment) {
+        environment.getProperty('grails.banner.display.art', Boolean, true)
     }
 
-    private static List buildVersionRows(Map versions, int bannerWidth) {
-        def maxWidth = bannerWidth - VERSIONS_MARGIN * 2
+    protected boolean shouldDisplayVersions(Environment environment) {
+        environment.getProperty('grails.banner.display.versions', Boolean, true)
+    }
+
+    protected List buildVersionRows(Map versions, int bannerWidth) {
+        def maxWidth = bannerWidth - versionsMargin * 2
         def rows = []
         def currentRow = new StringBuilder()
         def countInRow = 0
         versions.each {
             String value = "$it.key: $it.value"
-            def proposedLength = currentRow.size() + (countInRow > 0 ? VERSIONS_SEPARATOR.size() : 0) + value.size()
+            def proposedLength = currentRow.size() + (countInRow > 0 ? versionsSeparator.size() : 0) + value.size()
             def wouldOverflow = proposedLength > maxWidth
             if (wouldOverflow) {
                 rows << currentRow.center(bannerWidth)
                 currentRow.length = 0
             }
             if (currentRow.size() > 0) {
-                currentRow << VERSIONS_SEPARATOR
+                currentRow << versionsSeparator
             }
             currentRow << value
             countInRow++
@@ -88,5 +107,9 @@ class GrailsBanner implements Banner {
             rows << currentRow.center(bannerWidth)
         }
         rows
+    }
+
+    private static int longestLineLength(String text) {
+        text.readLines()*.size()?.max() ?: 0
     }
 }
