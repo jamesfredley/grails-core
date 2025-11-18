@@ -16,28 +16,14 @@
  *  specific language governing permissions and limitations
  *  under the License.
  */
-package grails.rest.render
+package issue15228.app
 
-import grails.web.mime.MimeTypeProvider
+import grails.validation.Validateable
 
-/**
- * Interface for class that render RESTful responses to implement
- *
- * @author Graeme Rocher
- * @since 2.3
- */
-interface Renderer<T> extends MimeTypeProvider {
+class ValidateableObject implements Validateable {
+    String foo
 
-    /**
-     * @return The target type
-     */
-    Class<T> getTargetType()
-
-    /**
-     * Renders the object
-     *
-     * @param object The object to render
-     * @param context The {@link RenderContext}
-     */
-    void render(Object object, RenderContext context)
+    static constraints = {
+        foo minSize: 10
+    }
 }
