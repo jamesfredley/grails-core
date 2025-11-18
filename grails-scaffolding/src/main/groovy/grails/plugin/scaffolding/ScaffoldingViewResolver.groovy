@@ -34,6 +34,7 @@ import org.springframework.core.io.UrlResource
 import org.springframework.web.servlet.View
 
 import grails.codegen.model.ModelBuilder
+import grails.core.GrailsControllerClass
 import grails.io.IOUtils
 import grails.plugin.scaffolding.annotation.Scaffold
 import grails.util.BuildSettings
@@ -86,9 +87,16 @@ class ScaffoldingViewResolver extends GroovyPageViewResolver implements Resource
 
     ResourceLoader resourceLoader
     protected Map<String, View> generatedViewCache = new ConcurrentHashMap<>()
+    protected Map<Class, Object> scaffoldValueCache = new ConcurrentHashMap<>()
     protected boolean enableReload = false
+    protected boolean enableNamespaceViewDefaults = false
+
     void setEnableReload(boolean enableReload) {
         this.enableReload = enableReload
+    }
+
+    void setEnableNamespaceViewDefaults(boolean enableNamespaceViewDefaults) {
+        this.enableNamespaceViewDefaults = enableNamespaceViewDefaults
     }
 
     protected String buildCacheKey(String viewName) {
@@ -128,53 +136,119 @@ class ScaffoldingViewResolver extends GroovyPageViewResolver implements Resource
     @Override
     protected View loadView(String viewName, Locale locale) throws Exception {
         def view = super.loadView(viewName, locale)
-        if (view == null) {
-            String cacheKey = buildCacheKey(viewName)
-            view = enableReload ? null : generatedViewCache.get(cacheKey)
-            if (view != null) {
+
+        if (view != null) {
+            if (!enableNamespaceViewDefaults) {
                 return view
-            } else {
-                def webR = GrailsWebRequest.lookup()
-                def controllerClass = webR.controllerClass
+            }
 
-                def scaffoldValue = controllerClass?.getPropertyValue('scaffold')
-                if (!scaffoldValue) {
-                    Scaffold scaffoldAnnotation = controllerClass?.clazz?.getAnnotation(Scaffold)
-                    scaffoldValue = scaffoldAnnotation?.domain()
-                    if (scaffoldValue == Void) {
-                        scaffoldValue = null
-                    }
-                }
+            def controllerClass = GrailsWebRequest.lookup()?.controllerClass
+            if (controllerClass?.namespace) {
+                // Check if the view found is already a namespace-specific view
+                def isNamespaceSpecificView = view instanceof GroovyPageView &&
+                        view.url?.contains("/${controllerClass.namespace}/")
 
-                if (scaffoldValue instanceof Class) {
-                    def shortViewName = viewName.substring(viewName.lastIndexOf('/') + 1)
-                    Resource res = controllerClass.namespace ? resolveResource(controllerClass.clazz, "${controllerClass.namespace}/${shortViewName}") : null
-                    if (!res?.exists()) {
-                        res = resolveResource(controllerClass.clazz, shortViewName)
-                    }
-                    if (res.exists()) {
-                        def model = model((Class) scaffoldValue)
-                        def viewGenerator = new GStringTemplateEngine()
-                        Template t = viewGenerator.createTemplate(res.URL)
-
-                        def contents = new FastStringWriter()
-                        t.make(model.asMap()).writeTo(contents)
-
-                        def template = templateEngine.createTemplate(new ByteArrayResource(contents.toString().getBytes(templateEngine.gspEncoding), "view:$cacheKey"), !enableReload)
-                        view = new GroovyPageView()
-                        view.setServletContext(getServletContext())
-                        view.setTemplate(template)
-                        view.setApplicationContext(getApplicationContext())
-                        view.setTemplateEngine(templateEngine)
-                        view.afterPropertiesSet()
-                        generatedViewCache.put(cacheKey, view)
-                        return view
-                    } else {
-                        return view
-                    }
+                if (!isNamespaceSpecificView) {
+                    // View is a fallback (non-namespaced), check for namespace-specific scaffolded template
+                    return tryGenerateScaffoldedView(viewName, controllerClass) { String shortViewName ->
+                        // Only check namespace-specific template
+                        resolveResource(controllerClass.clazz, "${controllerClass.namespace}/${shortViewName}")
+                    } ?: view
                 }
             }
+            return view
         }
+
+        def controllerClass = GrailsWebRequest.lookup()?.controllerClass
+
+        return tryGenerateScaffoldedView(viewName, controllerClass) { String shortViewName ->
+            Resource res = controllerClass?.namespace ? resolveResource(controllerClass.clazz, "${controllerClass.namespace}/${shortViewName}") : null
+            if (!res?.exists()) {
+                res = resolveResource(controllerClass.clazz, shortViewName)
+            }
+            return res
+        }
+    }
+
+    /**
+     * Attempts to generate a scaffolded view for the given controller
+     * @param viewName The view name
+     * @param controllerClass The controller class
+     * @param resourceResolver Closure that resolves the scaffold template resource given a short view name
+     * @return The generated scaffolded view, or null if not applicable
+     */
+    private View tryGenerateScaffoldedView(String viewName, GrailsControllerClass controllerClass, Closure<Resource> resourceResolver) {
+        def scaffoldValue = getScaffoldValue(controllerClass)
+        if (!(scaffoldValue instanceof Class)) {
+            return null
+        }
+
+        String cacheKey = buildCacheKey(viewName)
+
+        // Check cache first
+        def cachedScaffoldedView = enableReload ? null : generatedViewCache.get(cacheKey)
+        if (cachedScaffoldedView != null) {
+            return cachedScaffoldedView
+        }
+
+        def shortViewName = viewName.substring(viewName.lastIndexOf('/') + 1)
+        Resource scaffoldResource = resourceResolver.call(shortViewName)
+
+        if (scaffoldResource?.exists()) {
+            return generateScaffoldedView(scaffoldValue, scaffoldResource, cacheKey)
+        }
+
+        return null
+    }
+
+    private Object getScaffoldValue(GrailsControllerClass controllerClass) {
+        if (!controllerClass) {
+            return null
+        }
+
+        // Cache the scaffold value to avoid repeated reflection
+        Class controllerClazz = controllerClass.clazz
+        if (scaffoldValueCache.containsKey(controllerClazz)) {
+            return scaffoldValueCache.get(controllerClazz)
+        }
+
+        def scaffoldValue = controllerClass.getPropertyValue('scaffold')
+        if (!scaffoldValue) {
+            Scaffold scaffoldAnnotation = controllerClazz?.getAnnotation(Scaffold)
+            scaffoldValue = scaffoldAnnotation?.domain()
+            if (scaffoldValue == Void) {
+                scaffoldValue = null
+            }
+        }
+
+        // Cache the result (even if null, to avoid repeated lookups)
+        scaffoldValueCache.put(controllerClazz, scaffoldValue)
+        return scaffoldValue
+    }
+
+    private View generateScaffoldedView(Class scaffoldValue, Resource res, String cacheKey) {
+        def model = model((Class) scaffoldValue)
+        def viewGenerator = new GStringTemplateEngine()
+        Template t = viewGenerator.createTemplate(res.URL)
+
+        def contents = new FastStringWriter()
+        t.make(model.asMap()).writeTo(contents)
+
+        def template = templateEngine.createTemplate(new ByteArrayResource(contents.toString().getBytes(templateEngine.gspEncoding), "view:$cacheKey"), !enableReload)
+        def view = new GroovyPageView()
+        view.setServletContext(getServletContext())
+        view.setTemplate(template)
+        view.setApplicationContext(getApplicationContext())
+        view.setTemplateEngine(templateEngine)
+        view.afterPropertiesSet()
+        generatedViewCache.put(cacheKey, view)
         return view
+    }
+
+    @Override
+    void clearCache() {
+        super.clearCache()
+        generatedViewCache.clear()
+        scaffoldValueCache.clear()
     }
 }
