@@ -98,11 +98,18 @@ repositories {
 compileJava.options.release = @features.getTargetJdk()
 
 @if (features.contains("jrebel")) {
-bootRun {
+tasks.named('bootRun') {
     dependsOn(generateRebel)
     if (project.hasProperty("rebelAgent")) {
         jvmArgs(rebelAgent)
     }
+}
+
+}
+
+@if (features.contains("grails-micronaut")) {
+tasks.named('bootJar') {
+    loaderImplementation = org.springframework.boot.loader.tools.LoaderImplementation.CLASSIC
 }
 
 }

@@ -371,6 +371,8 @@ Here's an example `gradle.properties` file:
 micronautPlatformVersion=4.9.2
 ----
 
+Please note that due to https://github.com/micronaut-projects/micronaut-spring/issues/769[this issue], Spring Boot Dev tools does not work with the micronaut integration.
+
 ===== 12.5 hibernate-ehcache
 
 The `org.hibernate:hibernate-ehcache` library is no longer provided by the `org.apache.grails:grails-hibernate5` plugin. If
