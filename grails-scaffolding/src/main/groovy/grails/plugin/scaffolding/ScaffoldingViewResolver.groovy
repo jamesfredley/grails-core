@@ -218,9 +218,15 @@ class ScaffoldingViewResolver extends GroovyPageViewResolver implements Resource
         def scaffoldValue = controllerClass.getPropertyValue('scaffold')
         if (!scaffoldValue) {
             Scaffold scaffoldAnnotation = controllerClazz?.getAnnotation(Scaffold)
-            scaffoldValue = scaffoldAnnotation?.domain()
-            if (scaffoldValue == Void) {
-                scaffoldValue = null
+            if (scaffoldAnnotation) {
+                // Check domain() attribute for view scaffolding - domain class is required for model generation.
+                // Note: For @Scaffold(RestfulServiceController<T>), the AST transformation
+                // (ScaffoldingControllerInjector) extracts T and sets it as domain() at compile time,
+                // so this works for both @Scaffold(domain = User) and @Scaffold(RestfulServiceController<User>).
+                scaffoldValue = scaffoldAnnotation.domain()
+                if (scaffoldValue == Void) {
+                    scaffoldValue = null
+                }
             }
         }
 
