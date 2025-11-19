@@ -212,7 +212,7 @@ class ScaffoldingViewResolver extends GroovyPageViewResolver implements Resource
         Class controllerClazz = controllerClass.clazz
         if (scaffoldValueCache.containsKey(controllerClazz)) {
             Object cached = scaffoldValueCache.get(controllerClazz)
-            return cached == NULL_SCAFFOLD_VALUE? null : cached
+            return cached == NULL_SCAFFOLD_VALUE ? null : cached
         }
 
         def scaffoldValue = controllerClass.getPropertyValue('scaffold')
@@ -225,7 +225,7 @@ class ScaffoldingViewResolver extends GroovyPageViewResolver implements Resource
         }
 
         // Cache the result (even if null, to avoid repeated lookups)
-        scaffoldValueCache.put(controllerClazz, scaffoldValue == null? NULL_SCAFFOLD_VALUE : scaffoldValue)
+        scaffoldValueCache.put(controllerClazz, scaffoldValue == null ? NULL_SCAFFOLD_VALUE : scaffoldValue)
         return scaffoldValue
     }
 
