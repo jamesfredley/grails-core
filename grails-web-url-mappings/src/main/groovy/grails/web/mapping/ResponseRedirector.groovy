@@ -93,15 +93,13 @@ class ResponseRedirector {
 
         boolean permanent = getBooleanArgument(ARGUMENT_PERMANENT, arguments)
         boolean moved = getBooleanArgument(ARGUMENT_MOVED, arguments, true)
-
-
         boolean absolute = getBooleanArgument(ARGUMENT_ABSOLUTE, arguments, true)
 
         final Map namedParameters = new LinkedHashMap<>(arguments)
         // we generate a relative link with no context path so that the absolute can be calculated by combining the serverBaseURL
         // which includes the contextPath
         // @Issue('11673')
-        if(absolute) namedParameters.put(LinkGenerator.ATTRIBUTE_CONTEXT_PATH, BLANK)
+        if (absolute) namedParameters.put(LinkGenerator.ATTRIBUTE_CONTEXT_PATH, BLANK)
 
         // If the request parameters contain "keepParamsWhenRedirect = true", then we add the original params. The
         // new attribute can be used from UrlMappings to redirect from old URLs to new ones while keeping the params
