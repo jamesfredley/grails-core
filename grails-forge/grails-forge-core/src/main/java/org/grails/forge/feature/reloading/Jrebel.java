@@ -21,6 +21,7 @@ package org.grails.forge.feature.reloading;
 import jakarta.inject.Singleton;
 import org.grails.forge.application.generator.GeneratorContext;
 import org.grails.forge.build.gradle.GradlePlugin;
+import org.grails.forge.options.DevelopmentReloading;
 
 @Singleton
 public class Jrebel implements ReloadingFeature {
@@ -38,6 +39,11 @@ public class Jrebel implements ReloadingFeature {
     @Override
     public String getDescription() {
         return "Adds support for class reloading with JRebel (requires separate JRebel installation)";
+    }
+
+    @Override
+    public DevelopmentReloading getReloading() {
+        return DevelopmentReloading.JREBEL;
     }
 
     @Override

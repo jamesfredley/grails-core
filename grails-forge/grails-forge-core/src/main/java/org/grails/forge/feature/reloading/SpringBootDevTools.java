@@ -25,6 +25,7 @@ import org.grails.forge.build.dependencies.Dependency;
 import org.grails.forge.build.dependencies.Scope;
 import org.grails.forge.feature.DefaultFeature;
 import org.grails.forge.feature.Feature;
+import org.grails.forge.options.DevelopmentReloading;
 import org.grails.forge.options.Options;
 
 import java.util.Set;
@@ -72,5 +73,10 @@ public class SpringBootDevTools implements ReloadingFeature, DefaultFeature {
     @Override
     public String getDocumentation() {
         return "https://docs.spring.io/spring-boot/reference/using/devtools.html";
+    }
+
+    @Override
+    public DevelopmentReloading getReloading() {
+        return DevelopmentReloading.DEVTOOLS;
     }
 }
