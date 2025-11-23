@@ -1163,3 +1163,78 @@ grails {
 ----
 
 This allows you to use classes from these packages without explicit imports throughout your Groovy code. The `starImports` configuration works independently and will be combined with any imports from `importGrailsCommonAnnotations` or `importJavaTime` flags if those are also enabled.
+
+===== 12.30 Scaffolding Namespace View Defaults
+
+Grails 7.1 introduces an opt-in feature for scaffolding that allows namespace-specific scaffolded templates to take priority over non-namespaced view fallbacks.
+
+====== Background
+
+Previously, when a namespace controller requested a view, the scaffolding plugin would only generate a scaffolded view if no view existed at all. This meant that if you had:
+
+* A namespace controller (e.g., `namespace = 'admin'`)
+* A non-namespaced view in `grails-app/views/event/index.gsp`
+* A namespace-specific scaffolded template in `src/main/templates/scaffolding/admin/index.gsp`
+
+The non-namespaced view would always be used, and the namespace-specific scaffolded template would be ignored.
+
+====== New Behavior
+
+With the new `enableNamespaceViewDefaults` configuration, namespace-specific scaffolded templates can now override non-namespaced view fallbacks. This provides better support for namespace-specific customization of scaffolded views.
+
+====== Configuration
+
+To enable this feature, add the following to your `application.yml`:
+
+[source,yml]
+.application.yml
+----
+grails:
+    scaffolding:
+        enableNamespaceViewDefaults: true
+----
+
+====== View Resolution Priority
+
+When `enableNamespaceViewDefaults` is enabled, the view resolution priority for namespace controllers is:
+
+1. **Namespace-specific view** (e.g., `grails-app/views/admin/event/index.gsp`)
+   - If exists → used (highest priority)
+
+2. **Namespace-specific scaffolded template** (e.g., `src/main/templates/scaffolding/admin/index.gsp`)
+   - If exists and no namespace view → used (overrides fallback)
+
+3. **Non-namespaced view fallback** (e.g., `grails-app/views/event/index.gsp`)
+   - Used if no namespace view or scaffolded template exists
+
+4. **Non-namespaced scaffolded template** (e.g., `src/main/templates/scaffolding/index.gsp`)
+   - Used if no views exist at all
+
+====== Example Use Case
+
+This feature is useful when you want different scaffolded views for different namespaces:
+
+[source,groovy]
+----
+// Regular event controller
+@Scaffold(RestfulServiceController<Event>)
+class EventController {
+}
+
+// Admin event controller with namespace
+@Scaffold(RestfulServiceController<Event>)
+class EventController {
+    static namespace = 'admin'
+}
+----
+
+With `enableNamespaceViewDefaults: true`, you can provide:
+
+* `src/main/templates/scaffolding/index.gsp` - Default scaffolded template
+* `src/main/templates/scaffolding/admin/index.gsp` - Admin-specific scaffolded template
+
+The admin controller will use the admin-specific template even if a non-namespaced view exists.
+
+====== Backward Compatibility
+
+This feature is **disabled by default** (`false`), ensuring complete backward compatibility. Existing applications will continue to work without any changes. Enable the feature only when you need namespace-specific scaffolded template support.
