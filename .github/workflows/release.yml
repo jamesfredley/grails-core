@@ -521,11 +521,11 @@ jobs:
           echo "::group::Manual Grails Forge deployment"
           echo "Kick off Forge-* workflow for version ${VERSION} based on the below rules:"
           cat <<'EOF'
-          * RELEASE - GA releases only
-          * NEXT - Milestones and Release Candidate
-          * SNAPSHOT - current or next version snapshot
-          * PREV - previous release version
-          * PREV-SNAPSHOT - previous version snapshot
+          * RELEASE - Full Final Releases - https://github.com/apache/grails-core/actions/workflows/forge-deploy-release.yml
+          * NEXT - Milestones and Release Candidate for Next Release (also Next version snapshot prior to Milestone) - https://github.com/apache/grails-core/actions/workflows/forge-deploy-next.yml
+          * SNAPSHOT - current or next version snapshot - https://github.com/apache/grails-core/actions/workflows/forge-deploy-snapshot.yml
+          * PREV - previous release version - https://github.com/apache/grails-core/actions/workflows/forge-deploy-prev.yml
+          * PREV-SNAPSHOT - previous version snapshot - https://github.com/apache/grails-core/actions/workflows/forge-deploy-prev-snapshot.yml
           EOF
           echo "::endgroup::"
   docs:
