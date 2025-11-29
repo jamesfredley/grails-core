@@ -111,9 +111,9 @@ class BookController {
 
 This controller will automatically locate and use the corresponding `BookService` for all data operations.
 
-===== Custom Base Classes
+===== Extending Custom Classes
 
-You can specify a custom superclass for your scaffolded controllers or services:
+You can specify a custom class to extend for your scaffolded controllers or services:
 
 [source,groovy]
 ----
@@ -255,19 +255,19 @@ The `create-scaffold-controller` command supports the following options:
 * `--force` - Overwrite existing files
 * `--namespace` - Set the controller namespace
 * `--service` - Use `grails.plugin.scaffolding.RestfulServiceController` instead of `grails.rest.RestfulController`
-* `--extends` - Specify a custom superclass (default: `grails.rest.RestfulController`)
+* `--extends` - Specify a custom class to extend (default: `grails.rest.RestfulController`)
 
 The `create-scaffold-service` command supports:
 
 * `--force` - Overwrite existing files
-* `--extends` - Specify a custom superclass (default: `grails.plugin.scaffolding.GormService`)
+* `--extends` - Specify a custom class to extend (default: `grails.plugin.scaffolding.GormService`)
 
 The `generate-scaffold-all` command supports:
 
 * `--force` - Overwrite existing files
 * `--namespace` - Set the controller namespace
-* `--serviceExtends` - Specify a custom superclass for the service (default: `grails.plugin.scaffolding.GormService`)
-* `--controllerExtends` - Specify a custom superclass for the controller (default: `grails.plugin.scaffolding.RestfulServiceController`)
+* `--serviceExtends` - Specify a custom class to extend for the service (default: `grails.plugin.scaffolding.GormService`)
+* `--controllerExtends` - Specify a custom class to extend for the controller (default: `grails.plugin.scaffolding.RestfulServiceController`)
 
 Examples:
 
@@ -276,7 +276,7 @@ Examples:
 # Generate a scaffolded controller that uses a service
 grails create-scaffold-controller Book --service
 
-# Generate with a custom base class
+# Generate with a custom class to extend
 grails create-scaffold-service Book --extends=com.example.MyCustomService
 
 # Generate both with namespace

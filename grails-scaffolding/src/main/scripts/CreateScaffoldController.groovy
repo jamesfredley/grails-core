@@ -24,7 +24,7 @@ description("Creates a scaffolded controller") {
     flag name:'force', description:"Whether to overwrite existing files"
     flag name:'namespace', description:"The namespace for the controller"
     flag name:'service', description:"Use grails.plugin.scaffolding.RestfulServiceController instead of grails.rest.RestfulController"
-    flag name:'extends', description:"The superclass for the controller (default: grails.rest.RestfulController)"
+    flag name:'extends', description:"The class to extend (default: grails.rest.RestfulController)"
  }
 
 def modelInstance = model(args[0])

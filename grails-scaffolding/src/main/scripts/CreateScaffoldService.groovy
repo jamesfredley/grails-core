@@ -22,7 +22,7 @@ description("Creates a scaffolded service") {
     completer org.grails.cli.interactive.completers.DomainClassCompleter
     argument name:'Service Name', description:"The name of service", required:true
     flag name:'force', description:"Whether to overwrite existing files"
-    flag name:'extends', description:"The superclass for the service (default: grails.plugin.scaffolding.GormService)"
+    flag name:'extends', description:"The class to extend (default: grails.plugin.scaffolding.GormService)"
  }
 
 def modelInstance = model(args[0])

@@ -43,7 +43,7 @@ import java.lang.annotation.Target;
  * @Scaffold(Car.class)
  * class CarService {}  // → extends GormService<Car>
  *
- * // Explicit: specify both base and domain
+ * // Explicit: specify both class to extend and domain
  * @Scaffold(value = GormService.class, domain = Car.class)
  * class CarService {}  // → extends GormService<Car>
  *
@@ -58,7 +58,7 @@ import java.lang.annotation.Target;
  * @Scaffold(Car.class)
  * class CarController {}  // → extends RestfulController<Car>
  *
- * // Explicit: specify both base and domain
+ * // Explicit: specify both class to extend and domain
  * @Scaffold(value = RestfulController.class, domain = Car.class)
  * class CarController {}  // → extends RestfulController<Car>
  * }</pre>
@@ -71,41 +71,41 @@ import java.lang.annotation.Target;
 public @interface Scaffold {
 
     /**
-     * Base class to extend OR domain class (context-dependent).
+     * Class to extend OR domain class (context-dependent).
      *
      * <p><b>Interpretation:</b></p>
      * <ul>
      *   <li>If value has generics (e.g., {@code GormService<Car>}):
      *     <ul>
-     *       <li>Base class = {@code GormService}</li>
+     *       <li>Extends {@code GormService}</li>
      *       <li>Domain class = {@code Car} (extracted from generic)</li>
      *     </ul>
      *   </li>
-     *   <li>If value is a known base class (e.g., {@code GormService}):
+     *   <li>If value is a scaffold class (e.g., {@code GormService}):
      *     <ul>
-     *       <li>Base class = value</li>
+     *       <li>Extends value</li>
      *       <li>Domain class = from {@link #domain()} parameter</li>
      *     </ul>
      *   </li>
      *   <li>Otherwise (e.g., {@code Car}):
      *     <ul>
      *       <li>Domain class = value</li>
-     *       <li>Base class = default for artefact type</li>
+     *       <li>Extends default for artefact type</li>
      *     </ul>
      *   </li>
      * </ul>
      *
-     * @return the base class or domain class
+     * @return the class to extend or domain class
      */
     Class<?> value() default Void.class;
 
     /**
      * Domain/entity class (alternative to value).
-     * More explicit when also specifying base class.
+     * More explicit when also specifying the class to extend.
      *
      * <p>Examples:</p>
      * <pre>{@code
-     * @Scaffold(domain = Car.class)  // Uses default base
+     * @Scaffold(domain = Car.class)  // Uses default
      * @Scaffold(value = JpaScaffoldService.class, domain = Car.class)
      * }</pre>
      *
@@ -115,7 +115,7 @@ public @interface Scaffold {
 
     /**
      * Whether this service/controller is read-only.
-     * Passed to constructor of base class.
+     * Passed to constructor of the extended class.
      *
      * <p>For services: mutations throw {@code ReadOnlyServiceException}
      * <p>For controllers: mutation endpoints may return 405 Method Not Allowed

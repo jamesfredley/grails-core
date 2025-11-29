@@ -23,8 +23,8 @@ description("Generates a scaffolded service and controller") {
     argument name:'Domain Class Name', description:"The name of domain class", required:true
     flag name:'force', description:"Whether to overwrite existing files"
     flag name:'namespace', description:"The namespace for the controller"
-    flag name:'serviceExtends', description:"The superclass for the service (default: grails.plugin.scaffolding.GormService)"
-    flag name:'controllerExtends', description:"The superclass for the controller (default: grails.plugin.scaffolding.RestfulServiceController)"
+    flag name:'serviceExtends', description:"The class to extend for the service (default: grails.plugin.scaffolding.GormService)"
+    flag name:'controllerExtends', description:"The class to extend for the controller (default: grails.plugin.scaffolding.RestfulServiceController)"
  }
 
 def modelInstance = model(args[0])
