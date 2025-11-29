@@ -56,9 +56,16 @@ class CreateScaffoldServiceCommand implements GrailsApplicationCommand, CommandL
         }
         boolean overwrite = isFlagPresent('force')
         final Model model = model(sourceClass)
+
+        String extendsClass = flag('extends')
+
+        Map<String, Object> templateModel = model.asMap()
+        templateModel.put('extendsClass', extendsClass ?: '')
+        templateModel.put('extendsClassName', extendsClass ? extendsClass.substring(extendsClass.lastIndexOf('.') + 1) : '')
+
         render(template: template('scaffolding/ScaffoldedService.groovy'),
                 destination: file("grails-app/services/${model.packagePath}/${model.convention('Service')}.groovy"),
-                model: model,
+                model: templateModel,
                 overwrite: overwrite)
         verbose('Scaffold service created for domain class')
 

@@ -1,7 +1,8 @@
 <%=packageName ? "package ${packageName}" : ''%>
 
-import grails.plugin.scaffolding.annotation.Scaffold
+import grails.plugin.scaffolding.annotation.Scaffold<% if (extendsClass) { %>
+import ${extendsClass}<% } %>
 
-@Scaffold(${className})
+<% if (extendsClass) { %>@Scaffold(${extendsClassName}<${className}>)<% } else { %>@Scaffold(${className})<% } %>
 class ${className}Service {
 }

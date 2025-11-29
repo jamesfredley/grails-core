@@ -58,11 +58,17 @@ class GenerateScaffoldAllCommand implements GrailsApplicationCommand, CommandLin
         final Model model = model(sourceClass)
 
         String namespace = flag('namespace')
+        String serviceExtends = flag('serviceExtends')
+        String controllerExtends = flag('controllerExtends')
 
         // Generate scaffolded service
+        Map<String, Object> serviceTemplateModel = model.asMap()
+        serviceTemplateModel.put('extendsClass', serviceExtends ?: '')
+        serviceTemplateModel.put('extendsClassName', serviceExtends ? serviceExtends.substring(serviceExtends.lastIndexOf('.') + 1) : '')
+
         render(template: template('scaffolding/ScaffoldedService.groovy'),
                 destination: file("grails-app/services/${model.packagePath}/${model.convention('Service')}.groovy"),
-                model: model,
+                model: serviceTemplateModel,
                 overwrite: overwrite)
         verbose('Scaffold service created for domain class')
 
@@ -70,6 +76,8 @@ class GenerateScaffoldAllCommand implements GrailsApplicationCommand, CommandLin
         Map<String, Object> templateModel = model.asMap()
         templateModel.put('useService', true)
         templateModel.put('namespace', namespace ?: '')
+        templateModel.put('extendsClass', controllerExtends ?: '')
+        templateModel.put('extendsClassName', controllerExtends ? controllerExtends.substring(controllerExtends.lastIndexOf('.') + 1) : '')
 
         String controllerDestinationPath = "grails-app/controllers/${model.packagePath}"
 

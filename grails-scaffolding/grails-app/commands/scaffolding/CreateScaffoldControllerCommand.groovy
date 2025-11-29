@@ -58,10 +58,13 @@ class CreateScaffoldControllerCommand implements GrailsApplicationCommand, Comma
 
         String namespace = flag('namespace')
         boolean useService = isFlagPresent('service')
+        String extendsClass = flag('extends')
 
         Map<String, Object> templateModel = model.asMap()
         templateModel.put('useService', useService)
         templateModel.put('namespace', namespace ?: '')
+        templateModel.put('extendsClass', extendsClass ?: '')
+        templateModel.put('extendsClassName', extendsClass ? extendsClass.substring(extendsClass.lastIndexOf('.') + 1) : '')
 
         String destinationPath = "grails-app/controllers/${model.packagePath}"
 

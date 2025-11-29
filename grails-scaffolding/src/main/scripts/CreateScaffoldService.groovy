@@ -18,18 +18,24 @@
  */
 
 description("Creates a scaffolded service") {
-  	usage 'create-service [service name]'
+  	usage 'create-scaffold-service [service name]'
     completer org.grails.cli.interactive.completers.DomainClassCompleter
     argument name:'Service Name', description:"The name of service", required:true
     flag name:'force', description:"Whether to overwrite existing files"
+    flag name:'extends', description:"The superclass for the service (default: grails.plugin.scaffolding.GormService)"
  }
 
 def modelInstance = model(args[0])
 def overwrite = flag('force') ? true : false
+def extendsClass = flag('extends')
+
+def templateModel = modelInstance.asMap()
+templateModel.put('extendsClass', extendsClass ?: '')
+templateModel.put('extendsClassName', extendsClass ? extendsClass.substring(extendsClass.lastIndexOf('.') + 1) : '')
 
 render 	 template: template('scaffolding/ScaffoldedService.groovy'),
 	     destination: file("grails-app/services/${modelInstance.packagePath}/${modelInstance.convention("Service")}.groovy"),
-	     model: modelInstance,
+	     model: templateModel,
 	     overwrite: overwrite
 
 return true
