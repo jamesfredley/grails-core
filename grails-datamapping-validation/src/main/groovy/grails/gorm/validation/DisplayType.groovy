@@ -26,8 +26,8 @@ package grails.gorm.validation
  * <ul>
  *   <li>{@link #ALL} - Display everywhere, including overriding default blacklists (e.g., dateCreated, lastUpdated)</li>
  *   <li>{@link #NONE} - Never display in any view</li>
- *   <li>{@link #INPUT} - Display only in input forms (create/edit views)</li>
- *   <li>{@link #OUTPUT} - Display only in output views (show/index views)</li>
+ *   <li>{@link #INPUT_ONLY} - Display only in input forms (create/edit views)</li>
+ *   <li>{@link #OUTPUT_ONLY} - Display only in output views (show/index views)</li>
  * </ul>
  *
  * <p>Example usage in domain class constraints:</p>
@@ -52,6 +52,7 @@ package grails.gorm.validation
  *   <li>{@code display: false} is equivalent to {@link #NONE}</li>
  * </ul>
  *
+ * @author Scott Murphy Heiberg
  * @since 7.1
  */
 enum DisplayType {
@@ -70,11 +71,11 @@ enum DisplayType {
     /**
      * Display the property only in input views (create and edit forms).
      */
-    INPUT,
+    INPUT_ONLY,
 
     /**
      * Display the property only in output views (show and index/list views).
      */
-    OUTPUT
+    OUTPUT_ONLY
 
 }

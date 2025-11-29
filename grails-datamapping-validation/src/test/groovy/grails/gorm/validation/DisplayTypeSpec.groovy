@@ -80,22 +80,22 @@ class DisplayTypeSpec extends Specification {
         constrainedProperty.display == false
     }
 
-    void "test setDisplay with DisplayType.INPUT"() {
+    void "test setDisplay with DisplayType.INPUT_ONLY"() {
         when:
-        constrainedProperty.setDisplay(DisplayType.INPUT)
+        constrainedProperty.setDisplay(DisplayType.INPUT_ONLY)
 
         then:
-        constrainedProperty.displayType == DisplayType.INPUT
-        constrainedProperty.display == true  // isDisplay still returns true for INPUT
+        constrainedProperty.displayType == DisplayType.INPUT_ONLY
+        constrainedProperty.display == true  // isDisplay still returns true for INPUT_ONLY
     }
 
-    void "test setDisplay with DisplayType.OUTPUT"() {
+    void "test setDisplay with DisplayType.OUTPUT_ONLY"() {
         when:
-        constrainedProperty.setDisplay(DisplayType.OUTPUT)
+        constrainedProperty.setDisplay(DisplayType.OUTPUT_ONLY)
 
         then:
-        constrainedProperty.displayType == DisplayType.OUTPUT
-        constrainedProperty.display == true  // isDisplay still returns true for OUTPUT
+        constrainedProperty.displayType == DisplayType.OUTPUT_ONLY
+        constrainedProperty.display == true  // isDisplay still returns true for OUTPUT_ONLY
     }
 
     void "test setDisplay with null resets to default"() {
@@ -138,10 +138,10 @@ class DisplayTypeSpec extends Specification {
 
     void "test applyConstraint with DisplayType enum"() {
         when:
-        constrainedProperty.applyConstraint("display", DisplayType.INPUT)
+        constrainedProperty.applyConstraint("display", DisplayType.INPUT_ONLY)
 
         then:
-        constrainedProperty.displayType == DisplayType.INPUT
+        constrainedProperty.displayType == DisplayType.INPUT_ONLY
         constrainedProperty.display == true
     }
 

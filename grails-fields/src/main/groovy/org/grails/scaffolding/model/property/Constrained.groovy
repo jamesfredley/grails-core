@@ -87,12 +87,12 @@ class Constrained {
 
     boolean isDisplayInput() {
         DisplayType type = getDisplayType()
-        type == null || type == DisplayType.ALL || type == DisplayType.INPUT
+        type == null || type == DisplayType.ALL || type == DisplayType.INPUT_ONLY
     }
 
     boolean isDisplayOutput() {
         DisplayType type = getDisplayType()
-        type == null || type == DisplayType.ALL || type == DisplayType.OUTPUT
+        type == null || type == DisplayType.ALL || type == DisplayType.OUTPUT_ONLY
     }
 
     boolean isEditable() {

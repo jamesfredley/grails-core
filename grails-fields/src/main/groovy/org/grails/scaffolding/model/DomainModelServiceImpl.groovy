@@ -65,11 +65,11 @@ class DomainModelServiceImpl implements DomainModelService {
      * <p>Retrieves persistent properties and excludes:<ul>
      * <li>Any properties listed in the {@code static scaffold = [exclude: []]} property on the domain class
      * <li>Any properties that have the constraint {@code [display: false]} or {@code [display: DisplayType.NONE]}
-     * <li>Any properties that have {@code [display: DisplayType.INPUT]} (output views only)
+     * <li>Any properties that have {@code [display: DisplayType.INPUT_ONLY]} (output views only)
      * <li>Any properties whose name exist in the blackList
      * </ul><p>
      *
-     * <p>Properties with {@code [display: DisplayType.ALL]} or {@code [display: DisplayType.OUTPUT]} will override the blacklist.</p>
+     * <p>Properties with {@code [display: DisplayType.ALL]} or {@code [display: DisplayType.OUTPUT_ONLY]} will override the blacklist.</p>
      *
      * @see {@link DomainModelService#getInputProperties}
      * @param domainClass The persistent entity
@@ -95,9 +95,9 @@ class DomainModelServiceImpl implements DomainModelService {
             Constrained constrained = it.constrained
             DisplayType displayType = constrained?.displayType
 
-            if (displayType == DisplayType.ALL || displayType == DisplayType.OUTPUT) {
+            if (displayType == DisplayType.ALL || displayType == DisplayType.OUTPUT_ONLY) {
                 // Explicit DisplayType overrides blacklist
-            } else if (displayType == DisplayType.NONE || displayType == DisplayType.INPUT) {
+            } else if (displayType == DisplayType.NONE || displayType == DisplayType.INPUT_ONLY) {
                 return true
             } else {
                 if (it.name in blacklist) {
@@ -190,9 +190,9 @@ class DomainModelServiceImpl implements DomainModelService {
             Constrained constrained = it.constrained
             DisplayType displayType = constrained?.displayType
 
-            if (displayType == DisplayType.ALL || displayType == DisplayType.INPUT) {
+            if (displayType == DisplayType.ALL || displayType == DisplayType.INPUT_ONLY) {
                 // Explicit DisplayType overrides blacklist
-            } else if (displayType == DisplayType.NONE || displayType == DisplayType.OUTPUT) {
+            } else if (displayType == DisplayType.NONE || displayType == DisplayType.OUTPUT_ONLY) {
                 return true
             } else {
                 if (it.name in blacklist) {
