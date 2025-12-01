@@ -52,16 +52,6 @@ class CompilePlugin implements Plugin<Project> {
             it.withSourcesJar()
         }
 
-        // TODO: Causes the imports autoconfiguration file to be duplicated in grails-core b/c main gets copied twice
-        // TODO: this was for grails-gradle specifically in the past, we need to figure out which additional source sets are included
-//        project.tasks.named('sourcesJar', Jar).configure { Jar jar ->
-//            SourceSetContainer sourceSets = project.extensions.getByType(JavaPluginExtension).sourceSets
-//
-//            // don't only include main, but any source set
-//            jar.from(sourceSets.collect { it.allSource })
-//            jar.inputs.files(sourceSets.collect { it.allSource })
-//        }
-
         // Grails determines the grails version via the META-INF/MANIFEST.MF file
         // Note: we exclude attributes such as Built-By, Build-Jdk, Created-By to ensure the build is reproducible.
         project.tasks.withType(Jar).configureEach { Jar jar ->
@@ -75,7 +65,7 @@ class CompilePlugin implements Plugin<Project> {
                     'Implementation-Version': lookupPropertyByType(project, 'grailsVersion', String),
                     'Implementation-Vendor': 'grails.apache.org'
             )
-            // TODO: forge used to be include, grails used to exclude
+            // Explicitly fail since duplicates indicate a double configuration that needs fixed
             jar.duplicatesStrategy = DuplicatesStrategy.FAIL
         }
     }
