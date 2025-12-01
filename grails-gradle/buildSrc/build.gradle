@@ -55,13 +55,6 @@ repositories {
     }
 }
 
-file('../../gradle.properties').withInputStream {
-    Properties props = new Properties()
-    props.load(it)
-    project.ext.gradleProperties = props
-}
-
 dependencies {
     implementation "${gradleBomDependencies['grails-publish-plugin']}"
-    implementation "org.gradle.crypto.checksum:org.gradle.crypto.checksum.gradle.plugin:${gradleProperties.gradleChecksumPluginVersion}"
 }

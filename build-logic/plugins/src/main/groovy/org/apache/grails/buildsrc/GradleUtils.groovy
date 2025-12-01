@@ -39,6 +39,31 @@ class GradleUtils {
     }
 
     static <T> T lookupProperty(Project project, String name, T defaultValue = null) {
-        project.findProperty(name) as T ?: defaultValue
+        T v = lookupPropertyByType(project, name, defaultValue?.class) as T
+        return v == null ? defaultValue : v
+    }
+
+    static <T> T lookupPropertyByType(Project project, String name, Class<T> type) {
+        // a cast exception will occur without this
+        if(type && (type == Integer || type == int.class)) {
+            def v = findProperty(project, name)
+            return v == null ? null : Integer.valueOf(v as String) as T
+        }
+
+        findProperty(project, name) as T
+    }
+
+    static Object findProperty(Project project, String name) {
+        def property = project.findProperty(name)
+        if(property != null) {
+            return property
+        }
+
+        def ext = project.extensions.getExtraProperties()
+        if(ext.has(name)) {
+            return ext.get(name)
+        }
+
+        null
     }
 }
