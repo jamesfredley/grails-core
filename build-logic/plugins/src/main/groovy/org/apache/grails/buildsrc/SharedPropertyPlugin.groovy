@@ -4,9 +4,10 @@ import groovy.transform.CompileStatic
 
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.file.Directory
+import org.gradle.api.plugins.ExtraPropertiesExtension
 
 import static org.apache.grails.buildsrc.GradleUtils.findRootGrailsCoreDir
-import static org.apache.grails.buildsrc.GradleUtils.lookupPropertyByType
 
 /**
  * Gradle can't share properties across buildSrc or composite projects. This plugin ensures that properties not defined
@@ -14,38 +15,42 @@ import static org.apache.grails.buildsrc.GradleUtils.lookupPropertyByType
  * prior to the access of any property for it to work properly
  */
 @CompileStatic
-class SharedPropertyPlugin  implements Plugin<Project> {
+class SharedPropertyPlugin implements Plugin<Project> {
 
     @Override
     void apply(Project project) {
         def ext = project.extensions.getExtraProperties()
-        ext.set('grailsVersion', lookupPropertyByType(project, 'projectVersion', String))
 
         def rootGrailsCoreDir = findRootGrailsCoreDir(project)
-        if(project.layout.projectDirectory.asFile.name == 'build-src') {
-            // Load the subproject properties first
-            def parentProject = project.layout.projectDirectory.dir('..')
-            if(parentProject.asFile.absolutePath != rootGrailsCoreDir.asFile.absolutePath) {
-                parentProject.file('gradle.properties').asFile.withInputStream {
-                    Properties projectProperties = new Properties()
-                    projectProperties.load(it)
+        populateParentProperties(project.layout.projectDirectory, rootGrailsCoreDir, ext, project)
+    }
 
-                    for (String key : projectProperties.stringPropertyNames()) {
-                        ext.set(key, projectProperties.getProperty(key))
+    void populateParentProperties(Directory projectDirectory, Directory rootDirectory, ExtraPropertiesExtension ext, Project project) {
+        if (!rootDirectory) {
+            throw new IllegalStateException('Could not locate the root directory to populate up to')
+        }
+
+        if (projectDirectory.file('gradle.properties').asFile.exists()) {
+            def propertyPath = rootDirectory.asFile.relativePath(projectDirectory.asFile)
+            project.logger.info('Using properties from grails-core/{}gradle.properties', propertyPath ? "${propertyPath}/" : '')
+            projectDirectory.file('gradle.properties').asFile.withInputStream {
+                Properties rootProperties = new Properties()
+                rootProperties.load(it)
+
+                for (String key : rootProperties.stringPropertyNames()) {
+                    if (!ext.has(key)) {
+                        ext.set(key, rootProperties.getProperty(key))
                     }
+                }
+
+                if (rootProperties.containsKey('projectVersion')) {
+                    ext.set('grailsVersion', rootProperties.getProperty('projectVersion'))
                 }
             }
         }
 
-        rootGrailsCoreDir.file('gradle.properties').asFile.withInputStream {
-            Properties rootProperties = new Properties()
-            rootProperties.load(it)
-
-            for (String key : rootProperties.stringPropertyNames()) {
-                if(!ext.has(key)) {
-                    ext.set(key, rootProperties.getProperty(key))
-                }
-            }
+        if (projectDirectory.asFile.absolutePath != rootDirectory.asFile.absolutePath) {
+            populateParentProperties(projectDirectory.dir('..'), rootDirectory, ext, project)
         }
     }
 }

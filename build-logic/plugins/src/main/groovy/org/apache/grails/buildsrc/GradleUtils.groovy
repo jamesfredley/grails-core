@@ -27,15 +27,20 @@ import org.gradle.api.file.Directory
 class GradleUtils {
 
     static Directory findRootGrailsCoreDir(Project project) {
-        def rootLayout = project.rootProject.layout
+        def rootLayout = project.layout
+
         // .github / .git related directories are purged from source releases, so use the .asf.yaml as an indicator of
         // the parent directory
-        if (rootLayout.projectDirectory.file('.asf.yaml').asFile.exists()) {
-            return rootLayout.projectDirectory
+        findAsfRoot(rootLayout.projectDirectory)
+    }
+
+    static Directory findAsfRoot(Directory currentDirectory) {
+        def asfFile = currentDirectory.file('.asf.yaml').asFile
+        if (asfFile.exists()) {
+            return currentDirectory
         }
 
-        // we currently only nest 1 project level deep
-        rootLayout.projectDirectory.dir('../')
+        findAsfRoot(currentDirectory.dir('../'))
     }
 
     static <T> T lookupProperty(Project project, String name, T defaultValue = null) {
