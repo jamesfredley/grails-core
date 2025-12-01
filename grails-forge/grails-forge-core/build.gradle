@@ -1,5 +1,3 @@
-import org.apache.grails.buildsrc.WriteGrailsVersionInfoTask
-
 /*
  *  Licensed to the Apache Software Foundation (ASF) under one
  *  or more contributor license agreements.  See the NOTICE file
@@ -18,6 +16,8 @@ import org.apache.grails.buildsrc.WriteGrailsVersionInfoTask
  *  specific language governing permissions and limitations
  *  under the License.
  */
+
+import org.apache.grails.buildsrc.WriteGrailsVersionInfoTask
 
 plugins {
     id 'groovy'
