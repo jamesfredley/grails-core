@@ -16,7 +16,6 @@
  */
 
 plugins {
-    id 'java'
     id 'groovy'
     id 'distribution'
     id 'org.apache.grails.buildsrc.properties'
