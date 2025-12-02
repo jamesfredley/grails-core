@@ -1287,3 +1287,99 @@ Boolean values continue to work as before:
 * `display: false` - Equivalent to `DisplayType.NONE`
 
 No changes are required for existing applications using boolean values.
+
+===== 12.32 @Scaffold Annotation (Preferred Approach)
+
+Starting in Grails 7.1, the `@Scaffold` annotation is the preferred approach for enabling scaffolding on controllers and services. While the legacy `static scaffold = Domain` syntax is still supported, the annotation provides additional features and flexibility.
+
+====== Benefits of @Scaffold
+
+* **Supports both controllers and services** - The annotation works on both artefact types
+* **Custom class extension** - Specify a custom class to extend using the generic syntax
+* **Service-backed controllers** - Create controllers that delegate to a service layer for better separation of concerns
+* **Read-only mode** - Built-in support for read-only scaffolding
+
+====== Migration Examples
+
+**Basic controller scaffolding:**
+
+[source,groovy]
+----
+// Legacy syntax
+class BookController {
+    static scaffold = Book
+}
+
+// New preferred syntax
+import grails.plugin.scaffolding.annotation.Scaffold
+
+@Scaffold(Book)
+class BookController {
+}
+----
+
+**Scaffolded service:**
+
+[source,groovy]
+----
+import grails.plugin.scaffolding.annotation.Scaffold
+
+@Scaffold(Book)
+class BookService {
+}
+----
+
+**Service-backed controller (delegates to BookService):**
+
+[source,groovy]
+----
+import grails.plugin.scaffolding.annotation.Scaffold
+import grails.plugin.scaffolding.RestfulServiceController
+
+@Scaffold(RestfulServiceController<Book>)
+class BookController {
+}
+----
+
+**Custom class to extend:**
+
+[source,groovy]
+----
+import grails.plugin.scaffolding.annotation.Scaffold
+import com.example.MyCustomService
+
+@Scaffold(MyCustomService<Book>)
+class BookService {
+}
+----
+
+**Read-only scaffolding:**
+
+[source,groovy]
+----
+import grails.plugin.scaffolding.annotation.Scaffold
+
+@Scaffold(domain = Book, readOnly = true)
+class BookController {
+}
+----
+
+====== CLI Commands
+
+New CLI commands are available to generate scaffolded controllers and services:
+
+[source,bash]
+----
+# Generate a scaffolded controller
+grails create-scaffold-controller Book
+
+# Generate a scaffolded service
+grails create-scaffold-service Book
+
+# Generate both service and controller
+grails generate-scaffold-all Book
+----
+
+These commands support options like `--extends` to specify a custom class to extend, `--namespace` for controller namespacing, and `--service` to use `RestfulServiceController`.
+
+For full details, see the link:{guidePath}scaffolding.html[Scaffolding] documentation.
