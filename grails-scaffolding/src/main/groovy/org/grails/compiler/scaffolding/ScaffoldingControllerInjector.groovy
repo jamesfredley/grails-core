@@ -71,7 +71,7 @@ class ScaffoldingControllerInjector implements GrailsArtefactClassInjector {
 
         def expression = propertyNode?.getInitialExpression()
         if (expression instanceof ClassExpression || annotationNode) {
-            if (expression instanceof ClassExpression && !annotationNode) {
+            if (!annotationNode) {
                 ClassNode domainClassNode = ((ClassExpression) expression).getType()
                 String domainClassName = domainClassNode.getNameWithoutPackage()
                 String controllerClassName = classNode.getNameWithoutPackage()
