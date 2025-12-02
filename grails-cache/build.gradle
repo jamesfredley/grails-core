@@ -32,7 +32,6 @@ group = 'org.apache.grails'
 ext {
     pomTitle = 'Grails Cache Plugin'
     pomDescription = 'Provides AST transformations for caching method calls'
-    pomDevelopers = [jeffbrown: 'Jeff Scott Brown', 'puneetbehl': 'Puneet Behl']
 }
 
 dependencies {

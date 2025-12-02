@@ -30,12 +30,6 @@ group = 'org.apache.grails'
 ext {
     pomTitle = 'Grails Wrapper Downloader'
     pomDescription = 'Downloads necessary libraries for the Grails Wrapper'
-    pomDevelopers = [
-            'graemerocher'  : 'Graeme Rocher',
-            'jeffscottbrown': 'Jeff Brown',
-            'puneetbehl'    : 'Puneet Behl',
-            'jdaugherty'    : 'James Daugherty'
-    ]
     cliProject = true
     startMainClass = 'grails.init.Start'
     sbomProjectType = org.cyclonedx.model.Component.Type.APPLICATION.name()

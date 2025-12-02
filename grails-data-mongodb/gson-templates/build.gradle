@@ -32,7 +32,6 @@ group = 'org.apache.grails'
 ext {
     pomTitle = 'Grails MongoDB JSON Views'
     pomDescription = 'Provides JSON Views for MongoDB to the Grails framework.'
-    pomDevelopers = ['puneetbehl': 'Puneet Behl']
 }
 
 dependencies {

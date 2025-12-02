@@ -30,7 +30,6 @@ group = 'org.apache.grails'
 
 ext {
     pomDescription = 'Grails Markup Views'
-    pomDevelopers = [ 'graemerocher': 'Graeme Rocher', 'puneetbehl': 'Puneet Behl' ]
 }
 
 dependencies {

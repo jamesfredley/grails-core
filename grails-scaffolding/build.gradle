@@ -33,7 +33,6 @@ group = 'org.apache.grails'
 ext {
     pomTitle = 'Grails Scaffolding Plugin'
     pomDescription = 'Provides scaffolding for Grails applications'
-    pomDevelopers = [puneetbehl: 'Puneet Behl']
 }
 
 dependencies {

@@ -29,6 +29,7 @@ import org.gradle.api.Task
 import org.gradle.api.file.CopySpec
 import org.gradle.api.publish.PublishingExtension
 import org.gradle.api.publish.maven.MavenArtifact
+import org.gradle.api.publish.maven.MavenPomDeveloper
 import org.gradle.api.publish.maven.MavenPublication
 import org.gradle.api.publish.maven.tasks.AbstractPublishToMaven
 import org.gradle.api.tasks.TaskProvider
@@ -172,7 +173,6 @@ class PublishPlugin implements Plugin<Project> {
 
     private static void configureGrailsPublish(Project project) {
         project.extensions.configure(GrailsPublishExtension) {
-            // Explicit `it` is required here
             it.artifactId.set(project.provider { lookupProperty(project, 'pomArtifactId', project.name) })
             it.githubSlug.set(project.provider { lookupProperty(project, 'githubSlug', 'apache/grails-core')})
             it.license.name = 'Apache-2.0'
@@ -182,12 +182,60 @@ class PublishPlugin implements Plugin<Project> {
                 it.name.set('Apache Software Foundation')
                 it.url.set('https://apache.org/')
             }
-            it.developers.set(project.provider { lookupProperty(project, 'pomDevelopers', determineDevelopers(project))})
+            it.developers.set(getProjectDevelopers(project))
             it.pomCustomization.set(project.provider { lookupProperty(project, 'pomCustomization') as Closure })
             it.publishTestSources.set(project.provider { lookupProperty(project, 'pomPublishTestSources', false)})
             it.testRepositoryPath.set(project.provider { shouldSkipJavaComponent(project) ? null : findRootGrailsCoreDir(project).dir('build/local-maven')})
             it.publicationName.set(project.provider { lookupProperty(project, 'pomMavenPublicationName', 'maven')})
             it.addComponents.set(project.provider { !shouldSkipJavaComponent(project) && !project.pluginManager.hasPlugin('java-gradle-plugin')})
+        }
+    }
+
+    private static List<MavenPomDeveloper> getProjectDevelopers(Project project) {
+        // Note: id is typically the github user id if the user has a github account (historically, not always true)
+        [
+            // Founders
+            founder('dierk', 'Dierk König', project),
+            founder('glaforge', 'Guillaume LaForge', project),
+            founder('graemerocher', 'Graeme Rocher', project),
+            founder('stevendevijver', 'Steven Devijver', project),
+            // Developers - `active` contributors (should have an ASF account)
+            developer('codeconsole', 'Scott Murphy Heiberg', project),
+            developer('jamesfredley', 'James Fredley', project),
+            developer('jdaugherty', 'James Daugherty', project),
+            developer('lhotari', 'Lari Hotari', project),
+            developer('matrei', 'Mattias Reichel', project),
+            developer('sbglasius', 'Søren Berg Glasius', project),
+            developer('sdelamo', 'Sergio del Amo', project),
+            // Past Developers, Criteria:
+            // - non-apache members go here until their ASF account is created
+            // - non-active, no contributions across mailing lists, commits, or grails processes in the last 12 months
+            emeritus('burtbeckwith', 'Burt Beckwith', project),
+            emeritus('jameskleeh', 'James Kleeh', project),
+            emeritus('jeffscottbrown', 'Jeff Brown', project),
+            emeritus('k4zuki', 'Kazuki Yamamoto', project),
+            emeritus('puneetbehl', 'Puneet Behl', project),
+            emeritus('robfletcher', 'Rob Fletcher', project),
+        ]
+    }
+
+    private static MavenPomDeveloper founder(String id, String name, Project project) {
+        pomDeveloper('Founder', id, name, project)
+    }
+
+    private static MavenPomDeveloper developer(String id, String name, Project project) {
+        pomDeveloper('Developer', id, name, project)
+    }
+
+    private static MavenPomDeveloper emeritus(String id, String name, Project project) {
+        pomDeveloper('Developer Emeritus', id, name, project)
+    }
+
+    private static MavenPomDeveloper pomDeveloper(String role, String id, String name, Project project) {
+        project.objects.newInstance(MavenPomDeveloper).tap {
+            it.roles.add(role)
+            it.id.set(id)
+            it.name.set(name)
         }
     }
 

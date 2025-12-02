@@ -30,7 +30,6 @@ group = 'org.apache.grails.gradle'
 ext {
     pomTitle = 'Grails Gradle Common'
     pomDescription = 'Various common utilities that are shared between Grails Gradle code and the Grails Framework'
-    pomDevelopers = ['jdaugherty': 'James Daugherty']
 }
 
 dependencies {

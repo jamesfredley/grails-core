@@ -31,13 +31,6 @@ group = 'org.apache.grails'
 ext {
     pomTitle = 'Grails Geb Plugin'
     pomDescription = 'Provides Integration with Geb for Functional Testing'
-    pomDevelopers = [
-            graemerocher: 'Graeme Rocher',
-            puneetbehl: 'Puneet Behl',
-            sbglasius: 'Søren Berg Glasius',
-            matrei: 'Mattias Reichel',
-            jdaugherty: 'James Daugherty'
-    ]
 }
 
 dependencies {

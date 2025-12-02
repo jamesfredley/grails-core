@@ -32,9 +32,6 @@ group = 'org.apache.grails.testing'
 
 ext {
     pomDescription = 'Provides a helper extension to start MongoDB in a unit test and integration test'
-    pomDevelopers = [
-            jdaugherty: 'James Daugherty'
-    ]
 }
 
 dependencies {

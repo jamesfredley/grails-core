@@ -33,7 +33,6 @@ group = 'org.apache.grails.gradle'
 ext {
     pomTitle = 'Grails Gradle Model'
     pomDescription = 'Classes to support the Grails Gradle Plugins'
-    pomDevelopers = [graemerocher: 'Graeme Rocher']
     sbomProjectType = org.cyclonedx.model.Component.Type.LIBRARY.name()
 }
 

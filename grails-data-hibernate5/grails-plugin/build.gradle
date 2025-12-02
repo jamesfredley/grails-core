@@ -32,12 +32,6 @@ ext {
     gormApiDocs = true
     pomTitle = 'Grails GORM'
     pomDescription = 'GORM - Grails Data Access Framework'
-    pomDevelopers =  [
-            'graemerocher': 'Graeme Rocher',
-            'jeffscottbrown': 'Jeff Brown',
-            'burtbeckwith': 'Burt Beckwith',
-            'puneetbehl': 'Puneet Behl',
-    ]
 }
 
 dependencies {
