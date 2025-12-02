@@ -19,7 +19,6 @@
 
 plugins {
     id 'groovy'
-    id 'java-library'
     id 'project-report'
     id 'org.apache.grails.buildsrc.properties'
     id 'org.apache.grails.buildsrc.compile'

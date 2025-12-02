@@ -17,9 +17,9 @@
  *  under the License.
  */
 plugins {
+    id 'groovy'
     id 'org.apache.grails.buildsrc.properties'
     id 'org.apache.grails.buildsrc.compile'
-    id 'java-library'
 }
 
 version = '0.1-SNAPSHOT'
