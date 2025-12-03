@@ -16,23 +16,12 @@
  *  specific language governing permissions and limitations
  *  under the License.
  */
-plugins {
-    id 'org.apache.grails.buildsrc.properties'
-    id 'org.apache.grails.buildsrc.compile'
+pluginManagement {
+    includeBuild('../../build-logic') {
+        name = 'build-logic-root'
+    }
 }
 
-version = '0.1-SNAPSHOT'
-group = 'issue11767.plugin'
-
-apply plugin: 'org.apache.grails.gradle.grails-plugin'
-
-dependencies {
-    implementation platform(project(':grails-bom'))
-    implementation 'org.apache.grails:grails-micronaut'
-    implementation 'org.apache.grails:grails-core'
-}
-
-apply {
-    from rootProject.layout.projectDirectory.file('gradle/functional-test-config.gradle')
-    from rootProject.layout.projectDirectory.file('gradle/grails-extension-gradle-config.gradle')
+includeBuild('../../build-logic') {
+    name = 'build-logic-root'
 }

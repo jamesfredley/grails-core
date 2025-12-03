@@ -19,15 +19,10 @@
 
 plugins {
     id 'groovy-gradle-plugin'
+    id 'org.apache.grails.buildsrc.properties'
 }
 
-file('../gradle.properties').withInputStream {
-    Properties props = new Properties()
-    props.load(it)
-    project.ext.gradleProperties = props
-}
-
-compileJava.options.release = gradleProperties.javaVersion.toString().toInteger()
+compileJava.options.release = javaVersion.toString().toInteger()
 
 repositories {
     // mavenLocal()
@@ -61,14 +56,13 @@ repositories {
 }
 
 dependencies {
-    implementation platform("org.apache.grails:grails-gradle-bom:${gradleProperties.projectVersion}")
+    implementation platform("org.apache.grails:grails-gradle-bom:$projectVersion")
     implementation 'org.apache.grails.gradle:grails-publish'
     implementation 'cloud.wondrify:asset-pipeline-gradle'
     implementation 'org.apache.grails:grails-docs-core'
     implementation 'org.apache.grails:grails-gradle-plugins'
     implementation 'org.asciidoctor:asciidoctor-gradle-jvm'
     implementation 'org.springframework.boot:spring-boot-gradle-plugin'
-    implementation "org.nosphere.apache.rat:org.nosphere.apache.rat.gradle.plugin:${gradleProperties.apacheRatVersion}"
-    implementation "org.cyclonedx.bom:org.cyclonedx.bom.gradle.plugin:${gradleProperties.gradleCycloneDxPluginVersion}"
-    implementation "org.gradle.crypto.checksum:org.gradle.crypto.checksum.gradle.plugin:${gradleProperties.gradleChecksumPluginVersion}"
+    implementation "org.nosphere.apache.rat:org.nosphere.apache.rat.gradle.plugin:$apacheRatVersion"
+    implementation "org.cyclonedx.bom:org.cyclonedx.bom.gradle.plugin:$gradleCycloneDxPluginVersion"
 }
