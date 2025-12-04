@@ -246,7 +246,7 @@ class PublishPlugin implements Plugin<Project> {
             emeritus('k4zuki', 'Kazuki Yamamoto', project),
             emeritus('leebutts','Lee Butts', project),
             emeritus('longwa','Aaron Long', project),
-            emeritus('lopez.ivan@gmail.com', 'Iván López', project),
+            emeritus('ilopmar', 'Iván López', project),
             emeritus('marceloverdijk','Marcel Overdijk', project),
             emeritus('marcpalmer', 'Marc Palmer', project),
             emeritus('mpccolorado','Martín Caballero', project),
