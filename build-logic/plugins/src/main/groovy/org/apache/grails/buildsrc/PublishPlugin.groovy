@@ -196,10 +196,10 @@ class PublishPlugin implements Plugin<Project> {
         // Note: these lists are sorted alphabetically by section
         [
             // Founders
+            founder('devijvers', 'Steven Devijver', project),
             founder('dierk', 'Dierk König', project),
             founder('glaforge', 'Guillaume LaForge', project),
             founder('graemerocher', 'Graeme Rocher', project),
-            founder('devijvers', 'Steven Devijver', project),
             // Developers
             // - `active` contributors (should have an ASF account)
             // - supports the current framework
