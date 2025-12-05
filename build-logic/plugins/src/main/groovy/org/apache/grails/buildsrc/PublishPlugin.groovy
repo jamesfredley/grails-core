@@ -182,7 +182,7 @@ class PublishPlugin implements Plugin<Project> {
                 it.name.set('Apache Software Foundation')
                 it.url.set('https://apache.org/')
             }
-            it.developers.set(getProjectDevelopers(project))
+            it.developers.set(createDeveloperList(project))
             it.pomCustomization.set(project.provider { lookupProperty(project, 'pomCustomization') as Closure })
             it.publishTestSources.set(project.provider { lookupProperty(project, 'pomPublishTestSources', false)})
             it.testRepositoryPath.set(project.provider { shouldSkipJavaComponent(project) ? null : findRootGrailsCoreDir(project).dir('build/local-maven')})
@@ -191,7 +191,7 @@ class PublishPlugin implements Plugin<Project> {
         }
     }
 
-    private static List<MavenPomDeveloper> getProjectDevelopers(Project project) {
+    private static List<MavenPomDeveloper> createDeveloperList(Project project) {
         // Note: id is typically the github user id if the user has a github account
         // Note: these lists are sorted alphabetically by section
         [
