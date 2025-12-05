@@ -29,7 +29,6 @@ group = 'org.apache.grails'
 ext {
     pomTitle = 'GSP Spring Boot Plugin'
     pomDescription = 'Provides GSP for Spring Boot Applications'
-    pomDevelopers = ['graemerocher': 'Graeme Rocher', lhotari: 'Lari Hotari', codeconsole: 'Scott Murphy Heiberg']
 }
 
 dependencies {

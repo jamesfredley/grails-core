@@ -33,11 +33,6 @@ ext {
     gormApiDocs = true
     pomTitle = 'GORM for MongoDB'
     pomDescription = 'Provides a GORM Object Mapping implementations for the MongoDB Document Database'
-    pomDevelopers =  [
-            'graemerocher': 'Graeme Rocher',
-            'jeffscottbrown': 'Jeff Brown',
-            'burtbeckwith': 'Burt Beckwith'
-    ]
 }
 
 dependencies {

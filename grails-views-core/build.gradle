@@ -31,7 +31,6 @@ group = 'org.apache.grails.views'
 
 ext {
     pomDescription = 'Grails Views Core'
-    pomDevelopers = [ 'graemerocher': 'Graeme Rocher', 'puneetbehl': 'Puneet Behl' ]
 }
 
 dependencies {

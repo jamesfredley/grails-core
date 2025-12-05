@@ -32,14 +32,6 @@ group = 'org.apache.grails.data'
 ext {
     pomTitle = 'Grails GORM'
     pomDescription = 'GORM - Grails Data Access Framework'
-    pomDevelopers = [
-            'graemerocher': 'Graeme Rocher',
-            'jeffscottbrown': 'Jeff Brown',
-            'burtbeckwith': 'Burt Beckwith',
-            'jameskleeh': 'James Kleeh',
-            'puneetbehl': 'Puneet Behl',
-            'jamesfredley': 'James Fredley'
-    ]
 }
 
 dependencies {

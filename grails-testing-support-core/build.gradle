@@ -32,10 +32,6 @@ group = 'org.apache.grails.testing'
 
 ext {
     pomDescription = 'Support for writing concise expressive tests for Grails artifacts'
-    pomDevelopers = [
-            jeffscottbrown: 'Jeff Brown',
-            jameskleeh: 'James Kleeh'
-    ]
 }
 
 dependencies {

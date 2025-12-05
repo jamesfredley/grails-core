@@ -23,36 +23,6 @@ plugins {
     id 'org.apache.grails.buildsrc.properties'
 }
 
-repositories {
-    mavenCentral()
-    maven { url = 'https://repo.grails.org/grails/restricted' }
-    maven {
-        url = 'https://repository.apache.org/content/groups/snapshots'
-        content {
-            includeVersionByRegex('org[.]apache[.]grails.*', '.*', '.*-SNAPSHOT')
-            includeVersionByRegex('org[.]apache[.]groovy.*', '.*', '.*-SNAPSHOT')
-        }
-    }
-    maven {
-        url = 'https://repository.apache.org/content/groups/staging'
-        content {
-            includeGroupByRegex('org[.]apache[.]grails.*')
-        }
-        mavenContent {
-            releasesOnly()
-        }
-    }
-    maven {
-        url = 'https://central.sonatype.com/repository/maven-snapshots'
-        content {
-            includeVersionByRegex('cloud[.]wondrify.*', '.*', '.*-SNAPSHOT')
-        }
-        mavenContent {
-            snapshotsOnly()
-        }
-    }
-}
-
 configurations.configureEach {
     exclude group: 'io.github.groovylang.groovydoc', module: 'io.github.groovylang.groovydoc.gradle.plugin'
 }

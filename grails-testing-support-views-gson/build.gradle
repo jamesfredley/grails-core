@@ -31,7 +31,6 @@ group = 'org.apache.grails'
 
 ext {
     pomDescription = 'JSON Views Testing Support'
-    pomDevelopers = [ 'graemerocher': 'Graeme Rocher', 'puneetbehl': 'Puneet Behl' ]
     testForked = true
 }
 
