@@ -317,22 +317,22 @@ class PublishPlugin implements Plugin<Project> {
     }
 
     private static MavenPomDeveloper founder(String id, String name, Project project) {
-        pomDeveloper('Founder', id, name, project)
+        createPomEntry('Founder', id, name, project)
     }
 
     private static MavenPomDeveloper developer(String id, String name, Project project) {
-        pomDeveloper('Developer', id, name, project)
+        createPomEntry('Developer', id, name, project)
     }
 
     private static MavenPomDeveloper emeritus(String id, String name, Project project) {
-        pomDeveloper('Developer Emeritus', id, name, project)
+        createPomEntry('Developer Emeritus', id, name, project)
     }
 
     private static MavenPomDeveloper contributor(String id, String name, Project project) {
-        pomDeveloper('Contributor', id, name, project)
+        createPomEntry('Contributor', id, name, project)
     }
 
-    private static MavenPomDeveloper pomDeveloper(String role, String id, String name, Project project) {
+    private static MavenPomDeveloper createPomEntry(String role, String id, String name, Project project) {
         project.objects.newInstance(MavenPomDeveloper).tap {
             it.roles.add(role)
             it.id.set(id)
