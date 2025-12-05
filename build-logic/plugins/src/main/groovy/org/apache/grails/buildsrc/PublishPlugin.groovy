@@ -217,7 +217,6 @@ class PublishPlugin implements Plugin<Project> {
             developer('sdelamo', 'Sergio del Amo', project),
             developer('tbrasmussen', 'Thomas Rasmussen', project),
             // Past Developers
-            // - non-apache members go here until their ASF account is created
             // - non-active, no contributions across mailing lists, commits, or grails processes in the last 12 months
             // - contributors in the pom previously
             // - significant contributors (i.e. they were involved in Grails Development or a member of a company that was)
