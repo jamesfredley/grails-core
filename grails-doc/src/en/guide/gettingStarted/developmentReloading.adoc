@@ -49,7 +49,7 @@ IntelliJ IDEA Enhanced HotSwap is a feature available in the IntelliJ IDEA IDE t
 
 Please see the IntelliJ IDEA documentation for more details: https://www.jetbrains.com/help/idea/altering-the-program-s-execution-flow.html#reload_classes[IntelliJ IDEA Enhanced HotSwap].
 
-Using https://github.com/JetBrains/JetBrainsRuntime[Jetbrains' Runtime] and jvmArgs `-XX:+AllowEnhancedClassRedefinition` on the `bootRun` task overcomes some of these limitations.
+Using https://github.com/JetBrains/JetBrainsRuntime[JetBrains' Runtime] and jvmArgs `-XX:+AllowEnhancedClassRedefinition` on the `bootRun` task overcomes some of these limitations.
 
 === Hotswap Agent
 
