@@ -38,7 +38,7 @@ JRebel is a commercial tool that provides advanced hot swapping capabilities, al
 
 Please see the JRebel documentation for more details: https://manuals.jrebel.com/jrebel/standalone/springboot.html[JRebel].
 
-JRebel plugin for IntelliJ IDEA: https://plugins.jetbrains.com/plugin/4441-jrebel-and-xrebel[JRebel IntelliJ Plugin].
+Alternatively, use the JRebel plugin for IntelliJ IDEA: https://plugins.jetbrains.com/plugin/4441-jrebel-and-xrebel[JRebel IntelliJ Plugin].
 
 *Reloading Mechanism:* True hot swapping via bytecode instrumentation; reloads classes, configurations, and resources without restarting the JVM, preserving application state.
 
