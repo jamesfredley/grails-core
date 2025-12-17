@@ -859,8 +859,8 @@ class GrailsGradlePlugin extends GroovyPlugin {
         buildClasspath(
                 project,
                 configurationNames.collect {
-                    project.configurations.named(it).get()
-                } as Configuration[]
+                    project.configurations.named(it).getOrNull()
+                }.findAll(/* remove nulls */) as Configuration[]
         )
     }
 
