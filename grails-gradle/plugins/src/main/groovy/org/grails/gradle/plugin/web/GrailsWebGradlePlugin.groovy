@@ -39,6 +39,8 @@ import org.grails.gradle.plugin.core.GrailsGradlePlugin
 @CompileStatic
 class GrailsWebGradlePlugin extends GrailsGradlePlugin {
 
+    private static final String URL_MAPPINGS_REPORT = 'urlMappingsReport'
+
     @Inject
     GrailsWebGradlePlugin(ToolingModelBuilderRegistry registry) {
         super(registry)
@@ -47,7 +49,17 @@ class GrailsWebGradlePlugin extends GrailsGradlePlugin {
     @Override
     void apply(Project project) {
         super.apply(project)
-        project.tasks.register('urlMappingsReport', ApplicationContextCommandTask) { task ->
+
+        // The task could theoretically already be registered by
+        // GrailsGradlePlugin in configureApplicationCommands()
+        // if grails-web-urlmappings is on the build classpath
+        if (!project.tasks.names.contains(URL_MAPPINGS_REPORT))  {
+            registerUrlMappingsTask(project)
+        }
+    }
+
+    private static void registerUrlMappingsTask(Project project) {
+        project.tasks.register(URL_MAPPINGS_REPORT, ApplicationContextCommandTask) { task ->
             task.classpath = buildClasspath(
                     project,
                     'runtimeClasspath', 'console'
