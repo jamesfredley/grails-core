@@ -58,7 +58,7 @@ class GrailsWebGradlePlugin extends GrailsGradlePlugin {
         }
     }
 
-    private static void registerUrlMappingsTask(Project project) {
+    private void registerUrlMappingsTask(Project project) {
         project.tasks.register(URL_MAPPINGS_REPORT, ApplicationContextCommandTask) { task ->
             task.classpath = buildClasspath(
                     project,
