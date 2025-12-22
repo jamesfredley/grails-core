@@ -121,7 +121,9 @@ class DomainFieldModifier {
 
             return false
         } catch (Exception e) {
-            return domainFile.text.contains("${fieldName}")
+            throw new IllegalStateException(
+                "Failed to parse domain class '${domainFile.name}'. Please fix any syntax errors and try again.", e
+            )
         }
     }
 

@@ -467,6 +467,25 @@ class Book {
         found.path.contains('com/bar/Book.groovy')
     }
 
+    def "should throw exception when domain class has syntax errors"() {
+        given:
+        def domainFile = createDomainFile('example', 'Book', '''
+            package example
+            class Book {
+                String title
+                // missing closing brace - syntax error
+        ''')
+
+        when:
+        modifier.fieldExists(domainFile, 'title')
+
+        then:
+        def e = thrown(IllegalStateException)
+        e.message.contains('Failed to parse domain class')
+        e.message.contains('Book.groovy')
+        e.cause != null
+    }
+
     // Helper methods
 
     private void createDomainDir() {
