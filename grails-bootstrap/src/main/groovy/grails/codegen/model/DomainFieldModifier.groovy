@@ -58,15 +58,23 @@ class DomainFieldModifier {
         }
 
         String simpleClassName = className.contains('.') ? className.substring(className.lastIndexOf('.') + 1) : className
-        File found = null
+        List<File> matches = []
 
         domainDir.eachFileRecurse { File file ->
             if (file.name == "${simpleClassName}.groovy") {
-                found = file
+                matches.add(file)
             }
         }
 
-        found
+        if (matches.size() > 1) {
+            String paths = matches.collect { it.path }.join(', ')
+            throw new IllegalStateException(
+                "Multiple domain classes found with name '${simpleClassName}': ${paths}. " +
+                'Please specify the fully qualified class name.'
+            )
+        }
+
+        matches.empty ? null : matches[0]
     }
 
     /**

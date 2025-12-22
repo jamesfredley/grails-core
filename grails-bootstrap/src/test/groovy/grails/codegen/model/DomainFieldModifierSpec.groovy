@@ -423,6 +423,50 @@ class Book {
         !content.contains('import jakarta.validation.constraints')
     }
 
+    def "should throw exception when multiple domain classes have same simple name"() {
+        given:
+        createDomainFile('com/foo', 'Book', '''
+            package com.foo
+            class Book {
+            }
+        ''')
+        createDomainFile('com/bar', 'Book', '''
+            package com.bar
+            class Book {
+            }
+        ''')
+
+        when:
+        modifier.findDomainFile(tempDir.toFile(), 'Book')
+
+        then:
+        def e = thrown(IllegalStateException)
+        e.message.contains('Multiple domain classes found')
+        e.message.contains('Book')
+        e.message.contains('fully qualified class name')
+    }
+
+    def "should find correct domain class when FQN is used with duplicates"() {
+        given:
+        createDomainFile('com/foo', 'Book', '''
+            package com.foo
+            class Book {
+            }
+        ''')
+        createDomainFile('com/bar', 'Book', '''
+            package com.bar
+            class Book {
+            }
+        ''')
+
+        when:
+        def found = modifier.findDomainFile(tempDir.toFile(), 'com.bar.Book')
+
+        then:
+        found != null
+        found.path.contains('com/bar/Book.groovy')
+    }
+
     // Helper methods
 
     private void createDomainDir() {
