@@ -40,7 +40,10 @@ class FieldDefinition {
         BOTH
     }
 
-    static final Set<String> SUPPORTED_TYPES = [
+    /**
+     * Built-in types that don't require imports.
+     */
+    static final Set<String> BUILTIN_TYPES = [
         'String', 'Integer', 'Long', 'Boolean', 'Date', 'BigDecimal',
         'Double', 'Float', 'Short', 'Byte', 'Character'
     ] as Set
@@ -89,8 +92,8 @@ class FieldDefinition {
             throw new IllegalArgumentException("Field name '${name}' must start with a lowercase letter and contain only alphanumeric characters")
         }
 
-        if (!SUPPORTED_TYPES.contains(type)) {
-            throw new IllegalArgumentException("Unsupported field type '${type}'. Supported types: ${SUPPORTED_TYPES.join(', ')}")
+        if (!isValidTypeName(type)) {
+            throw new IllegalArgumentException("Invalid field type '${type}'. Type must start with an uppercase letter (e.g., String, Author, Status)")
         }
 
         if (blank != null && type != 'String') {
@@ -213,6 +216,29 @@ class FieldDefinition {
      */
     boolean usesJakartaAnnotations() {
         constraintStyle == ConstraintStyle.JAKARTA || constraintStyle == ConstraintStyle.BOTH
+    }
+
+    /**
+     * Checks if the field type is a built-in type that doesn't require imports.
+     */
+    boolean isBuiltinType() {
+        BUILTIN_TYPES.contains(type)
+    }
+
+    /**
+     * Validates that a type name looks like a valid class/type name.
+     * Allows simple names (String), qualified names (java.util.Date), and generics ({@code List<Book>}).
+     */
+    private static boolean isValidTypeName(String typeName) {
+        if (!typeName || typeName.isAllWhitespace()) {
+            return false
+        }
+        // Extract simple name (last segment after dots, before any generics)
+        String simpleName = typeName.contains('.') ?
+            typeName.substring(typeName.lastIndexOf('.') + 1).replaceAll(/<.*/, '') :
+            typeName.replaceAll(/<.*/, '')
+        // Simple name must start with uppercase letter
+        simpleName.matches(/^[A-Z][a-zA-Z0-9]*$/)
     }
 
     /**

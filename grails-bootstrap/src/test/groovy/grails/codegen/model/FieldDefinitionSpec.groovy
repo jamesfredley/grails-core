@@ -86,7 +86,37 @@ class FieldDefinitionSpec extends Specification {
         name << ['Title', '1count', 'first_name', '', null]
     }
 
-    def "should validate supported field types"() {
+    def "should validate built-in types"() {
+        given:
+        def field = new FieldDefinition(name: 'test', type: type)
+
+        when:
+        field.validate()
+
+        then:
+        noExceptionThrown()
+        field.isBuiltinType()
+
+        where:
+        type << ['String', 'Integer', 'Long', 'Boolean', 'Date', 'BigDecimal', 'Double', 'Float']
+    }
+
+    def "should accept custom types like enums and domain classes"() {
+        given:
+        def field = new FieldDefinition(name: 'test', type: type)
+
+        when:
+        field.validate()
+
+        then:
+        noExceptionThrown()
+        !field.isBuiltinType()
+
+        where:
+        type << ['Status', 'Author', 'BookCategory', 'UUID', 'LocalDate', 'LocalDateTime']
+    }
+
+    def "should accept fully qualified type names"() {
         given:
         def field = new FieldDefinition(name: 'test', type: type)
 
@@ -97,11 +127,11 @@ class FieldDefinitionSpec extends Specification {
         noExceptionThrown()
 
         where:
-        type << ['String', 'Integer', 'Long', 'Boolean', 'Date', 'BigDecimal', 'Double', 'Float']
+        type << ['java.util.Date', 'java.time.LocalDate', 'com.example.Status']
     }
 
     @Unroll
-    def "should reject unsupported field type '#type'"() {
+    def "should reject invalid type name '#type'"() {
         given:
         def field = new FieldDefinition(name: 'test', type: type)
 
@@ -112,7 +142,7 @@ class FieldDefinitionSpec extends Specification {
         thrown(IllegalArgumentException)
 
         where:
-        type << ['CustomType', 'List']
+        type << ['string', 'integer', '123Type', '', null]
     }
 
     def "should reject blank constraint for non-String type"() {
