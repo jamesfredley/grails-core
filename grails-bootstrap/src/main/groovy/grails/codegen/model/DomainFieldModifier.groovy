@@ -39,6 +39,18 @@ import java.nio.file.Files
 class DomainFieldModifier {
 
     /**
+     * Prefix for Groovy synthetic fields (e.g., closure fields, metaclass references).
+     * See also: org.grails.datastore.mapping.reflect.NameUtils.DOLLAR_SEPARATOR
+     */
+    private static final String SYNTHETIC_FIELD_PREFIX = '$'
+
+    /**
+     * Prefix for Groovy trait fields (format: traitClassName__fieldName).
+     * See: org.grails.datastore.mapping.reflect.FieldEntityAccess.getTraitFieldName()
+     */
+    private static final String TRAIT_FIELD_PREFIX = '__'
+
+    /**
      * Finds the domain class file for the given class name.
      *
      * @param projectDir the project root directory
@@ -102,7 +114,7 @@ class DomainFieldModifier {
             }
 
             for (FieldNode field : classNode.fields) {
-                if (field.name == fieldName && !field.name.startsWith('$') && !field.name.startsWith('__')) {
+                if (field.name == fieldName && !field.name.startsWith(SYNTHETIC_FIELD_PREFIX) && !field.name.startsWith(TRAIT_FIELD_PREFIX)) {
                     return true
                 }
             }
