@@ -33,15 +33,19 @@ The link:{servletApiRefFromRef}request.html[request] object is an instance of th
 
 [source,groovy]
 ----
-class BookController {
-    def list() {
-        log.info "User agent: ${request.getHeader("User-Agent")}"
+class ExamplesTagLib {
 
-        render(view: actionName)
+    def showRequest = { attrs, body ->
+        out << "Request ${request.getHeader('User-Agent')}"
     }
+
 }
 ----
 
+[source,xml]
+----
+<g:showRequest />
+----
 
 === Description
 

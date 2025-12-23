@@ -33,11 +33,12 @@ The link:{servletApiRefFromRef}response.html[response] object is an instance of 
 
 [source,groovy]
 ----
-class BookController {
-    def downloadFile() {
-        byte[] bytes = // read bytes
-        response.outputStream << bytes
+class ExamplesTagLib {
+
+    def setHeader = {
+        response.setHeader('Content-Type', 'text/html; charset=utf-8')
     }
+
 }
 ----
 
