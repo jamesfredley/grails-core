@@ -80,7 +80,10 @@ dependencies {
     annotationProcessor 'io.micronaut:micronaut-inject-java'
 
     implementation project(':grails-forge-core')
-    implementation "org.apache.grails.bootstrap:grails-bootstrap:$projectVersion"
+    implementation("org.apache.grails.bootstrap:grails-bootstrap:$projectVersion") {
+        exclude group: 'org.apache.grails', module: 'grails-bom'
+        exclude group: 'org.apache.groovy'
+    }
     compileOnly 'org.codehaus.groovy:groovy'
     implementation "com.fizzed:rocker-runtime:$rockerVersion"
     implementation "info.picocli:picocli:$picocliVersion"
