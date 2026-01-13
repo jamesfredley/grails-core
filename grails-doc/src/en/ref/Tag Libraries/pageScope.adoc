@@ -50,7 +50,7 @@ class ExamplesTagLib {
 [source,xml]
 ----
 <g:parent>
-    <g:child /> // Outputs "My parent is John"
+    <g:child /> <!-- Outputs "My parent is John" -->
 </g:parent>
 ----
 
