@@ -45,7 +45,7 @@ class ExamplesTagLib {
 
 [source,xml]
 ----
-<g:showRequest /> // Outputs "Flash: [message:Welcome!]"
+<g:showRequest /> <!-- Outputs "Flash: [message:Welcome!]" -->
 ----
 
 === Description
