@@ -35,12 +35,21 @@ The link:{servletApiRefFromRef}session.html[session] object is an instance of th
 ----
 class ExampleTagLib {
 
-    def logout = {
-        log.info "User agent: " + request.getHeader("User-Agent")
-        session.invalidate()
+    // List all attributes and their values for the current session
+    def listSessionAttributes = { Map params ->
+        out << params.get("name") << ' : ' << session.getAttribute(params.get("name"))
     }
 
 }
+----
+
+[source,xml]
+----
+<ul>
+    <g:each var="elm" in="${session.getAttributeNames()}">
+        <li><g:listSessionAttributes name="${elm}" /></li>
+    </g:each>
+</ul>
 ----
 
 
