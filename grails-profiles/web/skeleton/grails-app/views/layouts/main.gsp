@@ -60,15 +60,15 @@
             </div>
             <div class="col-12 col-md-4">
                 <a class="card h-100 text-decoration-none shadow-sm border-1"
-                   href="https://slack.grails.org" target="_blank" rel="noopener">
+                   href="https://grails.apache.org/community.html" target="_blank" rel="noopener">
                     <div class="card-body p-4">
                         <div class="d-flex align-items-center justify-content-between mb-2">
                             <h6 class="card-title mb-0 fw-semibold">Join the Community</h6>
-                            <asset:image src="slack.svg" alt="Grails Slack" width="34" height="34"/>
+                            <asset:image src="community.svg" alt="Grails Community" width="34" height="34"/>
                         </div>
                         <p class="card-text text-body-secondary mb-0">
                             Get feedback and share your experience with other Grails developers
-                            in the community Slack channel.
+                            on the Grails mailing lists or the community Slack channel.
                         </p>
                     </div>
                 </a>
