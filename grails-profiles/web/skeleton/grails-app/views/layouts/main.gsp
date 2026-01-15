@@ -68,7 +68,7 @@
                         </div>
                         <p class="card-text text-body-secondary mb-0">
                             Get feedback and share your experience with other Grails developers
-                            on the Grails mailing lists or the community Slack channel.
+                            on the Grails mailing lists, GitHub discussions, or the community Slack channel.
                         </p>
                     </div>
                 </a>
