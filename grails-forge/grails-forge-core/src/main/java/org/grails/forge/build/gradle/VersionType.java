@@ -16,16 +16,9 @@
  *  specific language governing permissions and limitations
  *  under the License.
  */
-pluginManagement {
-    includeBuild('../build-logic') {
-        name = 'build-logic-root'
-    }
-}
+package org.grails.forge.build.gradle;
 
-plugins {
-    id 'org.apache.grails.buildsrc.repo'
-}
-
-includeBuild('../build-logic') {
-    name = 'build-logic-root'
+public enum VersionType {
+    SNAPSHOT,
+    RELEASE
 }
