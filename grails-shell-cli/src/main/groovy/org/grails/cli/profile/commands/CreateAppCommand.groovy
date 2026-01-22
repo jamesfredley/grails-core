@@ -811,6 +811,20 @@ class CreateAppCommand extends ArgumentCompletingCommand implements ProfileRepos
             if (releaseOnly && snapshotsOnly) {
                 throw new IllegalArgumentException('Repository cannot be both releaseOnly and snapshotsOnly')
             }
+
+            if (!url.startsWith('http')) {
+                if (releaseOnly) {
+                    throw new IllegalArgumentException('special repositories cannot be releaseOnly')
+                }
+
+                if (snapshotsOnly) {
+                    throw new IllegalArgumentException('special repositories cannot be snapshotsOnly')
+                }
+
+                if (includeRestriction) {
+                    throw new IllegalArgumentException('special repositories cannot have include restrictions')
+                }
+            }
         }
 
         void includeOnly(String groupRegex, String artifactRegex, String versionRegex) {
@@ -824,14 +838,15 @@ class CreateAppCommand extends ArgumentCompletingCommand implements ProfileRepos
         String generate(int spaces, String lineSeparator) {
             validate()
 
-            List<String> lines = ["${' ' * spaces}maven {" as String]
-            if (url.startsWith('http')) {
-                lines.add("${' ' * (spaces + 4)}url = '${url}'" as String)
-            } else {
+            if (!url.startsWith('http')) {
                 // mavenLocal(), mavenCentral(), etc
-                lines.add("${' ' * (spaces + 4)}${url}" as String)
+                return "${' ' * (spaces + 4)}${url}" as String
             }
 
+            List<String> lines = [
+                    "${' ' * spaces}maven {" as String,
+                    "${' ' * (spaces + 4)}url = '${url}'" as String
+            ]
             if (includeRestriction) {
                 lines.add(includeRestriction.generate(spaces + 4, lineSeparator))
             }
