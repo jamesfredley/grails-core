@@ -423,8 +423,7 @@ class CreateAppCommand extends ArgumentCompletingCommand implements ProfileRepos
             repo.startsWith('http') ? "${' ' * spaces}maven { url \"${repo}\" }" : "${' ' * spaces}${repo}"
         }
 
-        String configuredRepositories = createRepositoryList(profile.repositories)
-
+        List<String> configuredRepositories = createRepositoryList(profile.repositories)
         def repositories = configuredRepositories.collect(repositoryUrl.curry(4)).unique().join(ln)
 
         List<Dependency> profileDependencies = profile.dependencies
@@ -452,12 +451,12 @@ class CreateAppCommand extends ArgumentCompletingCommand implements ProfileRepos
                 .unique()
                 .join(ln)
 
-        def profileBuildRepositories = profile.buildRepositories
+        List<String> configuredBuildRepositories = createRepositoryList(profile.buildRepositories)
         for (Feature f in features) {
-            profileBuildRepositories.addAll(f.getBuildRepositories())
+            configuredBuildRepositories.addAll(f.getBuildRepositories())
         }
 
-        List<String> buildRepositories = createRepositoryList(profileBuildRepositories).collect(repositoryUrl.curry(8)).unique().join(ln)
+        String buildRepositories = createRepositoryList(configuredBuildRepositories).collect(repositoryUrl.curry(8)).unique().join(ln)
 
         buildDependencies = buildDependencies.collect() { Dependency dep ->
             String artifactStr = resolveArtifactString(dep)
@@ -506,7 +505,7 @@ class CreateAppCommand extends ArgumentCompletingCommand implements ProfileRepos
         }
     }
 
-    private String createRepositoryList(List<String> profileRepositories) {
+    private List<String> createRepositoryList(List<String> profileRepositories) {
         List<String> configuredRepositories = []
         String overrideRepo = System.getProperty('grails.repo.url') ?: System.getenv('GRAILS_REPO_URL')
         if (overrideRepo) {
