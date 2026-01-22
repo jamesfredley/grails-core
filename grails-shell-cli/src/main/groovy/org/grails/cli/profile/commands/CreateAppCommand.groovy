@@ -840,7 +840,7 @@ class CreateAppCommand extends ArgumentCompletingCommand implements ProfileRepos
 
             if (!url.startsWith('http')) {
                 // mavenLocal(), mavenCentral(), etc
-                return "${' ' * (spaces + 4)}${url}" as String
+                return "${' ' * spaces}${url}" as String
             }
 
             List<String> lines = [
