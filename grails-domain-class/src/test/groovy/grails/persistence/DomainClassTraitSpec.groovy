@@ -37,7 +37,9 @@ import java.lang.reflect.Method
  */
 class DomainClassTraitSpec extends Specification {
 
-    void cleanup() {
+    void cleanupSpec() {
+        // Use cleanupSpec() instead of cleanup() to clear Holders only after all tests
+        // in this class complete, avoiding interference with parallel tests in other classes
         Holders.clear()
     }
 
