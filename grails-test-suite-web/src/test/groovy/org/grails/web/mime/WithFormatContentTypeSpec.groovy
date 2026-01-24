@@ -45,6 +45,13 @@ class WithFormatContentTypeSpec extends Specification implements ControllerUnitT
         Holders.grailsApplication = grailsApplication
     }
 
+    def cleanup() {
+        // Clear the static mimeTypes cache to ensure proper test isolation in parallel test runs
+        HttpServletResponseExtension.@mimeTypes = null
+        // Clear Holders to prevent ThreadLocal pollution to other tests
+        Holders.clear()
+    }
+
     @Issue('GRAILS-11093')
     void 'Test specifying form contentType'() {
         when: 'content type is specified'

@@ -42,6 +42,14 @@ class MultiTenantServiceTransformSpec extends Specification {
         gcl = new GroovyClassLoader()
     }
 
+    def setup() {
+        System.setProperty(SystemPropertyTenantResolver.PROPERTY_NAME, "")
+    }
+
+    def cleanup() {
+        System.setProperty(SystemPropertyTenantResolver.PROPERTY_NAME, "")
+    }
+
     void "test service transform applied with @WithoutTenant"() {
         when: "The service transform is applied to an interface it can't implement"
         Class service = gcl.parseClass('''

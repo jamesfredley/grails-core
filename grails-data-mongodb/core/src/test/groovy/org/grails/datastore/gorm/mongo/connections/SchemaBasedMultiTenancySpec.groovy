@@ -53,6 +53,10 @@ class SchemaBasedMultiTenancySpec extends AutoStartedMongoSpec {
         System.setProperty(SystemPropertyTenantResolver.PROPERTY_NAME, "")
     }
 
+    void cleanup() {
+        System.setProperty(SystemPropertyTenantResolver.PROPERTY_NAME, "")
+    }
+
     void "Test no tenant id"() {
         when:
         CompanyB.DB

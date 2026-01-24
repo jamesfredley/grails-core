@@ -44,10 +44,17 @@ class PartitionMultiTenancySpec extends Specification {
     )
     @Shared IBookService bookDataService = datastore.getService(IBookService)
 
+    def setup() {
+        System.setProperty(SystemPropertyTenantResolver.PROPERTY_NAME, "")
+    }
+
+    def cleanup() {
+        System.setProperty(SystemPropertyTenantResolver.PROPERTY_NAME, "")
+    }
+
     void 'Test partitioned multi-tenancy with GORM services'() {
         setup:
         BookService bookService = new BookService()
-        System.setProperty(SystemPropertyTenantResolver.PROPERTY_NAME, "")
 
         when: "When there is no tenant"
         Book.count()

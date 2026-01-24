@@ -66,6 +66,10 @@ class StreamCharBufferSpec extends Specification {
         codecOut=new GrailsPrintWriter(out.getWriterForEncoder(htmlCodecClass.encoder, EncodingStateRegistryLookupHolder.getEncodingStateRegistryLookup().lookup()))
     }
 
+    def cleanup() {
+        org.springframework.web.context.request.RequestContextHolder.resetRequestAttributes()
+    }
+
     def "stream char buffer should support encoding"() {
         when:
         def hello="Hello world & hi".encodeAsHTML()

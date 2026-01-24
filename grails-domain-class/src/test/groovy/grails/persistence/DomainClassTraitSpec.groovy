@@ -37,6 +37,10 @@ import java.lang.reflect.Method
  */
 class DomainClassTraitSpec extends Specification {
 
+    void cleanup() {
+        Holders.clear()
+    }
+
     @Issue("GRAILS-9245")
     void "test getConstrainedProperties"() {
         given:

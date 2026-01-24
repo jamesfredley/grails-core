@@ -48,7 +48,11 @@ class TenantServiceSpec extends Specification {
     def setup() {
         System.setProperty(SystemPropertyTenantResolver.PROPERTY_NAME, "")
     }
-    
+
+    def cleanup() {
+        System.setProperty(SystemPropertyTenantResolver.PROPERTY_NAME, "")
+    }
+
     void "test multi tenancy with in-memory datastore"() {
         when:
         Team.count()

@@ -64,6 +64,10 @@ class MultiTenancyBidirectionalManyToManySpec extends Specification {
         userService = datastore.getService(UserService)
     }
 
+    void cleanup() {
+        System.setProperty(SystemPropertyTenantResolver.PROPERTY_NAME, "")
+    }
+
     @Rollback
     @Issue("https://github.com/grails/grails-data-hibernate5/issues/58")
     void "test hasMany and 'in' query with multi-tenancy" () {

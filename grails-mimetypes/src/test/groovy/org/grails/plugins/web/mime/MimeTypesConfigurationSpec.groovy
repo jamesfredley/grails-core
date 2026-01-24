@@ -21,10 +21,16 @@ package org.grails.plugins.web.mime
 import grails.core.DefaultGrailsApplication
 import grails.spring.BeanBuilder
 import grails.web.mime.MimeType
+import org.grails.web.mime.HttpServletResponseExtension
 import org.springframework.context.ApplicationContext
 import spock.lang.Specification
 
 class MimeTypesConfigurationSpec extends Specification {
+
+    void setup() {
+        // Clear the static mimeTypes cache to ensure proper test isolation in parallel test runs
+        HttpServletResponseExtension.@mimeTypes = null
+    }
 
     void "test when no mimeTypes configured then default should be used"() {
         setup:

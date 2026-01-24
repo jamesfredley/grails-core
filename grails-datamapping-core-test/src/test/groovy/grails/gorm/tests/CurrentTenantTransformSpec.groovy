@@ -55,6 +55,10 @@ class CurrentTenantTransformSpec  extends Specification {
         System.setProperty(SystemPropertyTenantResolver.PROPERTY_NAME, "")
     }
 
+    void cleanup() {
+        System.setProperty(SystemPropertyTenantResolver.PROPERTY_NAME, "")
+    }
+
     void "Test parsing of @WithoutTenant"() {
         Class testServiceClass = new GroovyShell().evaluate('''
 import grails.gorm.multitenancy.WithoutTenant

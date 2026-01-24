@@ -53,6 +53,10 @@ class MongoStaticApiMultiTenancySpec extends AutoStartedMongoSpec {
         System.setProperty(SystemPropertyTenantResolver.PROPERTY_NAME, "")
     }
 
+    void cleanup() {
+        System.setProperty(SystemPropertyTenantResolver.PROPERTY_NAME, "")
+    }
+
 
     void "test search"() {
         setup: "drop existing database"

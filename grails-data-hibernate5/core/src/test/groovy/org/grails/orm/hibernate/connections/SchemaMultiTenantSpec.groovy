@@ -39,6 +39,16 @@ import java.sql.Connection
  * Created by graemerocher on 20/07/2016.
  */
 class SchemaMultiTenantSpec extends Specification {
+
+    def setup() {
+        // Ensure other specs don't leak a tenant id and skip the expected TenantNotFoundException.
+        System.setProperty(SystemPropertyTenantResolver.PROPERTY_NAME, "")
+    }
+
+    def cleanup() {
+        System.setProperty(SystemPropertyTenantResolver.PROPERTY_NAME, "")
+    }
+
     void "Test a database per tenant multi tenancy"() {
         given:"A configuration for multiple data sources"
         System.setProperty(SystemPropertyTenantResolver.PROPERTY_NAME, "")

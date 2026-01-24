@@ -47,6 +47,10 @@ class SchemaPerTenantSpec extends Specification {
         System.setProperty(SystemPropertyTenantResolver.PROPERTY_NAME, "")
     }
 
+    def cleanup() {
+        System.setProperty(SystemPropertyTenantResolver.PROPERTY_NAME, "")
+    }
+
     void 'Test schema per tenant'() {
         when:"When there is no tenant"
         Book.count()

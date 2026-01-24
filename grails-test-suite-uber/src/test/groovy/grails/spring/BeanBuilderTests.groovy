@@ -19,6 +19,7 @@
 package grails.spring
 
 import grails.util.Holders
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.aop.SpringProxy
@@ -43,6 +44,11 @@ class BeanBuilderTests {
     @BeforeEach
     protected void setUp() {
         Holders.setPluginManager null
+    }
+
+    @AfterEach
+    protected void tearDown() {
+        Holders.clear()
     }
 
     @Test

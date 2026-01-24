@@ -62,6 +62,8 @@ import org.springframework.mock.web.MockServletContext
 import org.springframework.web.context.WebApplicationContext
 import org.springframework.web.context.support.GenericWebApplicationContext
 import org.springframework.web.util.WebUtils
+import org.grails.web.mime.HttpServletResponseExtension
+import org.springframework.web.context.request.RequestContextHolder
 import spock.lang.Ignore
 import spock.lang.Issue
 import spock.lang.Shared
@@ -84,7 +86,13 @@ class HalJsonRendererSpec extends Specification {
         ShutdownOperations.runOperations()
     }
 
+    void setup() {
+        // Clear the static mimeTypes cache to ensure proper test isolation in parallel test runs
+        HttpServletResponseExtension.@mimeTypes = null
+    }
+
     void cleanup() {
+        RequestContextHolder.resetRequestAttributes()
         ShutdownOperations.runOperations()
     }
 

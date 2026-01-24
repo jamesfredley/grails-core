@@ -22,6 +22,7 @@ import grails.core.DefaultGrailsApplication
 import grails.spring.BeanBuilder
 import org.grails.plugins.web.mime.MimeTypesConfiguration
 import org.grails.web.mime.DefaultMimeUtility
+import org.grails.web.mime.HttpServletResponseExtension
 import org.springframework.context.ApplicationContext
 import spock.lang.Specification
 
@@ -29,6 +30,11 @@ import spock.lang.Specification
  * @author Graeme Rocher
  */
 class MimeUtilitySpec extends Specification {
+
+    void setup() {
+        // Clear the static mimeTypes cache to ensure proper test isolation in parallel test runs
+        HttpServletResponseExtension.@mimeTypes = null
+    }
 
     MimeUtility getMimeUtility() {
         def ga = new DefaultGrailsApplication()

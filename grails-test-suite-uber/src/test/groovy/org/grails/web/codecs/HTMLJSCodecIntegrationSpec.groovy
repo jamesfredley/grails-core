@@ -57,6 +57,10 @@ public class HTMLJSCodecIntegrationSpec extends Specification {
         GrailsWebMockUtil.bindMockWebRequest()
         registry = GrailsWebRequest.lookup().getEncodingStateRegistry()
     }
+
+    def cleanup() {
+        org.springframework.web.context.request.RequestContextHolder.resetRequestAttributes()
+    }
     
     @Unroll
     def "do streaming html and js encoding - prevent double encoding - preEncoded:#preEncoded"(boolean preEncoded) {

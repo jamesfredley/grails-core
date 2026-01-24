@@ -59,6 +59,10 @@ class MultiTenancySpec extends AutoStartedMongoSpec {
         System.setProperty(SystemPropertyTenantResolver.PROPERTY_NAME, "")
     }
 
+    void cleanup() {
+        System.setProperty(SystemPropertyTenantResolver.PROPERTY_NAME, "")
+    }
+
 
     void "Test persist and retrieve entities with multi tenancy"() {
         setup:

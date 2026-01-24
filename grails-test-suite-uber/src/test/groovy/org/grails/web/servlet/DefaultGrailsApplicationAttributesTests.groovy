@@ -50,6 +50,11 @@ class DefaultGrailsApplicationAttributesTests {
         request.setAttribute(GrailsApplicationAttributes.CONTROLLER, controller)
     }
 
+    @org.junit.jupiter.api.AfterEach
+    void tearDown() {
+        RequestContextHolder.resetRequestAttributes()
+    }
+
     @Test
     void testGetTemplateUriWithNestedRelativePath() {
         def templateUri = grailsApplicationAttributes.getTemplateUri('one/two/three', request)
