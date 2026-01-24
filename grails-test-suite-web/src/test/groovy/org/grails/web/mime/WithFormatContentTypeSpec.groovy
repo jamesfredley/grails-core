@@ -20,6 +20,7 @@ package org.grails.web.mime
 
 import grails.artefact.Artefact
 import grails.testing.web.controllers.ControllerUnitTest
+import grails.util.Holders
 import grails.web.mime.MimeType
 import spock.lang.Issue
 import spock.lang.Specification
@@ -34,6 +35,13 @@ class WithFormatContentTypeSpec extends Specification implements ControllerUnitT
                                     (MimeType.MULTIPART_FORM.extension): MimeType.MULTIPART_FORM.name,
                                     (MimeType.JSON.extension): MimeType.JSON.name]
     }}
+
+    def setup() {
+        // Ensure Holders has the correct application context set up for this test.
+        // This is necessary because MimeType.configuredMimeTypes uses Holders to find
+        // the application context, and parallel test execution can cause ThreadLocal pollution.
+        Holders.grailsApplication = grailsApplication
+    }
 
     @Issue('GRAILS-11093')
     void 'Test specifying form contentType'() {
