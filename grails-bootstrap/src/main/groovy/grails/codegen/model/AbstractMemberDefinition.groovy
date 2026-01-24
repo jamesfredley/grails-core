@@ -24,7 +24,7 @@ import groovy.transform.CompileStatic
  * Abstract base class for domain class member definitions (properties and fields).
  * Contains shared logic for validation, constraints, and annotation generation.
  *
- * @since 7.0
+ * @since 7.1
  */
 @CompileStatic
 abstract class AbstractMemberDefinition {

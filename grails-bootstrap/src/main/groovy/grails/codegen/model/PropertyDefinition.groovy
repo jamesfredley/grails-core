@@ -24,7 +24,7 @@ import groovy.transform.CompileStatic
  * Represents a property definition for domain class code generation.
  * Properties in Groovy have no access modifier and auto-generate getter/setter methods.
  *
- * @since 7.0
+ * @since 7.1
  */
 @CompileStatic
 class PropertyDefinition extends AbstractMemberDefinition {

@@ -39,7 +39,7 @@ import java.io.IOException;
 /**
  * CLI command to add a field (with access modifier) to an existing domain class.
  *
- * @since 7.0
+ * @since 7.1
  */
 @Command(name = AddFieldCommand.NAME, description = "Adds a field with access modifier to an existing domain class")
 public class AddFieldCommand extends CodeGenCommand {

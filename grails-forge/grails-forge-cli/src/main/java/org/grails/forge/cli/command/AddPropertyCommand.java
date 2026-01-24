@@ -39,7 +39,7 @@ import java.io.IOException;
 /**
  * CLI command to add a property to an existing domain class.
  *
- * @since 7.0
+ * @since 7.1
  */
 @Command(name = AddPropertyCommand.NAME, description = "Adds a property to an existing domain class")
 public class AddPropertyCommand extends CodeGenCommand {

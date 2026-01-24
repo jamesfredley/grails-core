@@ -24,7 +24,7 @@ import groovy.transform.CompileStatic
  * Represents a field definition for domain class code generation.
  * Fields in Groovy have an explicit access modifier and do not auto-generate getter/setter methods.
  *
- * @since 7.0
+ * @since 7.1
  */
 @CompileStatic
 class FieldDefinition extends AbstractMemberDefinition {

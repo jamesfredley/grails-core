@@ -33,7 +33,7 @@ import java.nio.file.Files
 /**
  * Utility class for modifying domain class source files to add properties and fields.
  *
- * @since 7.0
+ * @since 7.1
  */
 @CompileStatic
 class DomainFieldModifier {
