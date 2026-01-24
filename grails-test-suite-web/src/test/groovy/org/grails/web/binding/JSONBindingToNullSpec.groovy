@@ -25,9 +25,15 @@ import grails.persistence.Entity
 import grails.testing.gorm.DomainUnitTest
 import grails.testing.web.controllers.ControllerUnitTest
 import grails.web.JSONBuilder
+import org.grails.web.mime.HttpServletResponseExtension
 import spock.lang.Specification
 
 class JSONBindingToNullTests extends Specification implements ControllerUnitTest<UserController>, DomainUnitTest<User> {
+
+    def setup() {
+        // Clear the static mimeTypes cache to ensure proper test isolation in parallel test runs
+        HttpServletResponseExtension.@mimeTypes = null
+    }
 
     Closure doWithConfig() {{ config ->
         config['grails.mime.types'] = [ html: ['text/html','application/xhtml+xml'],

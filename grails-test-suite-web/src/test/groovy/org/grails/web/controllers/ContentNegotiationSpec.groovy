@@ -25,6 +25,7 @@ import grails.converters.XML
 import grails.testing.web.controllers.ControllerUnitTest
 import org.grails.plugins.testing.GrailsMockHttpServletRequest
 import org.grails.plugins.testing.GrailsMockHttpServletResponse
+import org.grails.web.mime.HttpServletResponseExtension
 import spock.lang.Issue
 import spock.lang.Specification
 import spock.lang.Unroll
@@ -49,6 +50,11 @@ class ContentNegotiationSpec extends Specification implements ControllerUnitTest
                                      xml:           ['text/xml', 'application/xml']
         ]
     }}
+
+    def setup() {
+        // Clear the static mimeTypes cache to ensure proper test isolation in parallel test runs
+        HttpServletResponseExtension.@mimeTypes = null
+    }
 
     void setupSpec() {
         removeAllMetaClasses(GrailsMockHttpServletRequest)

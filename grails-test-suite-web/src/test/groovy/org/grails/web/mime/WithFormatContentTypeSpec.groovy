@@ -37,6 +37,8 @@ class WithFormatContentTypeSpec extends Specification implements ControllerUnitT
     }}
 
     def setup() {
+        // Clear the static mimeTypes cache to ensure proper test isolation in parallel test runs
+        HttpServletResponseExtension.@mimeTypes = null
         // Ensure Holders has the correct application context set up for this test.
         // This is necessary because MimeType.configuredMimeTypes uses Holders to find
         // the application context, and parallel test execution can cause ThreadLocal pollution.
