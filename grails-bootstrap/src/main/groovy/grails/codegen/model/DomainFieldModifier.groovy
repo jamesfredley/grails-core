@@ -31,7 +31,7 @@ import java.nio.charset.StandardCharsets
 import java.nio.file.Files
 
 /**
- * Utility class for modifying domain class source files to add fields.
+ * Utility class for modifying domain class source files to add properties and fields.
  *
  * @since 7.0
  */
@@ -90,13 +90,13 @@ class DomainFieldModifier {
     }
 
     /**
-     * Checks if a field with the given name already exists in the domain class.
+     * Checks if a member (property or field) with the given name already exists in the domain class.
      *
      * @param domainFile the domain class file
-     * @param fieldName the field name to check
-     * @return true if the field exists, false otherwise
+     * @param memberName the member name to check
+     * @return true if the member exists, false otherwise
      */
-    boolean fieldExists(File domainFile, String fieldName) {
+    boolean memberExists(File domainFile, String memberName) {
         if (!domainFile?.exists()) {
             return false
         }
@@ -108,13 +108,13 @@ class DomainFieldModifier {
             }
 
             for (PropertyNode prop : classNode.properties) {
-                if (prop.name == fieldName) {
+                if (prop.name == memberName) {
                     return true
                 }
             }
 
             for (FieldNode field : classNode.fields) {
-                if (field.name == fieldName && !field.name.startsWith(SYNTHETIC_FIELD_PREFIX) && !field.name.startsWith(TRAIT_FIELD_PREFIX)) {
+                if (field.name == memberName && !field.name.startsWith(SYNTHETIC_FIELD_PREFIX) && !field.name.startsWith(TRAIT_FIELD_PREFIX)) {
                     return true
                 }
             }
@@ -128,26 +128,26 @@ class DomainFieldModifier {
     }
 
     /**
-     * Adds a field to the domain class file.
+     * Adds a member (property or field) to the domain class file.
      *
      * @param domainFile the domain class file
-     * @param field the field definition to add
+     * @param member the member definition to add
      * @throws IllegalStateException if the file cannot be modified
      */
-    void addField(File domainFile, FieldDefinition field) {
+    void addMember(File domainFile, AbstractMemberDefinition member) {
         if (!domainFile?.exists()) {
             throw new IllegalStateException("Domain file does not exist: ${domainFile}")
         }
 
-        field.validate()
+        member.validate()
 
         List<String> lines = Files.readAllLines(domainFile.toPath(), StandardCharsets.UTF_8)
         InsertionPoints points = findInsertionPoints(lines)
 
         int linesAdded = 0
 
-        if (field.usesJakartaAnnotations()) {
-            Set<String> requiredImports = field.getRequiredImports()
+        if (member.usesJakartaAnnotations()) {
+            Set<String> requiredImports = member.getRequiredImports()
             Set<String> existingImports = findExistingImports(lines)
 
             int importsAddedCount = 0
@@ -172,29 +172,29 @@ class DomainFieldModifier {
             }
         }
 
-        int fieldInsertIndex = points.fieldInsertLine + linesAdded
+        int memberInsertIndex = points.fieldInsertLine + linesAdded
 
-        if (field.usesJakartaAnnotations()) {
-            List<String> annotations = field.toAnnotations()
+        if (member.usesJakartaAnnotations()) {
+            List<String> annotations = member.toAnnotations()
             for (String annotation : annotations) {
-                lines.add(fieldInsertIndex, '    ' + annotation)
-                fieldInsertIndex++
+                lines.add(memberInsertIndex, '    ' + annotation)
+                memberInsertIndex++
                 linesAdded++
             }
         }
 
-        String fieldDeclaration = "    ${field.toFieldDeclaration()}"
-        lines.add(fieldInsertIndex, fieldDeclaration)
+        String memberDeclaration = "    ${member.toDeclaration()}"
+        lines.add(memberInsertIndex, memberDeclaration)
         linesAdded++
 
-        if (field.usesGrailsConstraints()) {
-            String constraintLine = field.toConstraintLine()
+        if (member.usesGrailsConstraints()) {
+            String constraintLine = member.toConstraintLine()
             if (constraintLine) {
                 if (points.hasConstraintsBlock) {
                     int constraintInsertIndex = points.constraintInsertLine + linesAdded
                     lines.add(constraintInsertIndex, '        ' + constraintLine)
                 } else {
-                    int constraintBlockIndex = fieldInsertIndex + 1
+                    int constraintBlockIndex = memberInsertIndex + 1
                     lines.add(constraintBlockIndex, '')
                     lines.add(constraintBlockIndex + 1, '    static constraints = {')
                     lines.add(constraintBlockIndex + 2, '        ' + constraintLine)
@@ -204,6 +204,28 @@ class DomainFieldModifier {
         }
 
         Files.write(domainFile.toPath(), lines, StandardCharsets.UTF_8)
+    }
+
+    /**
+     * Adds a property to the domain class file.
+     *
+     * @param domainFile the domain class file
+     * @param property the property definition to add
+     * @throws IllegalStateException if the file cannot be modified
+     */
+    void addProperty(File domainFile, PropertyDefinition property) {
+        addMember(domainFile, property)
+    }
+
+    /**
+     * Adds a field to the domain class file.
+     *
+     * @param domainFile the domain class file
+     * @param field the field definition to add
+     * @throws IllegalStateException if the file cannot be modified
+     */
+    void addField(File domainFile, FieldDefinition field) {
+        addMember(domainFile, field)
     }
 
     /**

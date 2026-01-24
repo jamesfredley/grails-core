@@ -71,7 +71,7 @@ class DomainFieldModifierSpec extends Specification {
         modifier.findDomainFile(tempDir.toFile(), 'NonExistent') == null
     }
 
-    def "should detect existing field"() {
+    def "should detect existing property"() {
         given:
         def domainFile = createDomainFile('example', 'Book', '''
             package example
@@ -81,11 +81,11 @@ class DomainFieldModifierSpec extends Specification {
         ''')
 
         expect:
-        modifier.fieldExists(domainFile, 'title') == true
-        modifier.fieldExists(domainFile, 'author') == false
+        modifier.memberExists(domainFile, 'title') == true
+        modifier.memberExists(domainFile, 'author') == false
     }
 
-    def "should add field to empty domain class"() {
+    def "should add property to empty domain class"() {
         given:
         def domainFile = createDomainFile('example', 'Book', '''
 package example
@@ -96,7 +96,7 @@ class Book {
     }
 }
 ''')
-        def field = FieldDefinition.builder()
+        def property = PropertyDefinition.builder()
             .name('title')
             .type('String')
             .blank(false)
@@ -104,7 +104,7 @@ class Book {
             .build()
 
         when:
-        modifier.addField(domainFile, field)
+        modifier.addProperty(domainFile, property)
         def content = domainFile.text
 
         then:
@@ -112,7 +112,7 @@ class Book {
         content.contains('title blank: false, maxSize: 255')
     }
 
-    def "should add field to domain class with existing fields"() {
+    def "should add property to domain class with existing properties"() {
         given:
         def domainFile = createDomainFile('example', 'Book', '''
 package example
@@ -125,14 +125,14 @@ class Book {
     }
 }
 ''')
-        def field = FieldDefinition.builder()
+        def property = PropertyDefinition.builder()
             .name('author')
             .type('String')
             .nullable(true)
             .build()
 
         when:
-        modifier.addField(domainFile, field)
+        modifier.addProperty(domainFile, property)
         def content = domainFile.text
 
         then:
@@ -148,14 +148,14 @@ package example
 class Book {
 }
 ''')
-        def field = FieldDefinition.builder()
+        def property = PropertyDefinition.builder()
             .name('title')
             .type('String')
             .nullable(false)
             .build()
 
         when:
-        modifier.addField(domainFile, field)
+        modifier.addProperty(domainFile, property)
         def content = domainFile.text
 
         then:
@@ -172,10 +172,10 @@ package example
 class Book {
 }
 ''')
-        def field = new FieldDefinition(name: 'title', type: 'String')
+        def property = new PropertyDefinition(name: 'title', type: 'String')
 
         when:
-        modifier.addField(domainFile, field)
+        modifier.addProperty(domainFile, property)
         def content = domainFile.text
 
         then:
@@ -183,7 +183,7 @@ class Book {
         !content.contains('static constraints = {')
     }
 
-    def "should handle domain class with multiple fields"() {
+    def "should handle domain class with multiple properties"() {
         given:
         def domainFile = createDomainFile('example', 'Book', '''
 package example
@@ -199,14 +199,14 @@ class Book {
     }
 }
 ''')
-        def field = FieldDefinition.builder()
+        def property = PropertyDefinition.builder()
             .name('author')
             .type('String')
             .maxSize(100)
             .build()
 
         when:
-        modifier.addField(domainFile, field)
+        modifier.addProperty(domainFile, property)
         def content = domainFile.text
 
         then:
@@ -220,16 +220,16 @@ class Book {
     def "should throw exception when domain file does not exist"() {
         given:
         def nonExistentFile = new File(tempDir.toFile(), 'NonExistent.groovy')
-        def field = new FieldDefinition(name: 'title', type: 'String')
+        def property = new PropertyDefinition(name: 'title', type: 'String')
 
         when:
-        modifier.addField(nonExistentFile, field)
+        modifier.addProperty(nonExistentFile, property)
 
         then:
         thrown(IllegalStateException)
     }
 
-    def "should add multiple fields sequentially"() {
+    def "should add multiple properties sequentially"() {
         given:
         def domainFile = createDomainFile('example', 'Book', '''
 package example
@@ -242,17 +242,17 @@ class Book {
 ''')
 
         when:
-        modifier.addField(domainFile, FieldDefinition.builder()
+        modifier.addProperty(domainFile, PropertyDefinition.builder()
             .name('title')
             .type('String')
             .blank(false)
             .build())
-        modifier.addField(domainFile, FieldDefinition.builder()
+        modifier.addProperty(domainFile, PropertyDefinition.builder()
             .name('author')
             .type('String')
             .nullable(true)
             .build())
-        modifier.addField(domainFile, FieldDefinition.builder()
+        modifier.addProperty(domainFile, PropertyDefinition.builder()
             .name('pages')
             .type('Integer')
             .nullable(true)
@@ -270,7 +270,7 @@ class Book {
 
     // Jakarta Validation annotation tests
 
-    def "should add field with Jakarta annotations only"() {
+    def "should add property with Jakarta annotations only"() {
         given:
         def domainFile = createDomainFile('example', 'Book', '''
 package example
@@ -278,17 +278,17 @@ package example
 class Book {
 }
 ''')
-        def field = FieldDefinition.builder()
+        def property = PropertyDefinition.builder()
             .name('title')
             .type('String')
             .nullable(false)
             .blank(false)
             .maxSize(255)
-            .constraintStyle(FieldDefinition.ConstraintStyle.JAKARTA)
+            .constraintStyle(AbstractMemberDefinition.ConstraintStyle.JAKARTA)
             .build()
 
         when:
-        modifier.addField(domainFile, field)
+        modifier.addProperty(domainFile, property)
         def content = domainFile.text
 
         then:
@@ -302,7 +302,7 @@ class Book {
         !content.contains('static constraints = {')
     }
 
-    def "should add field with both Grails constraints and Jakarta annotations"() {
+    def "should add property with both Grails constraints and Jakarta annotations"() {
         given:
         def domainFile = createDomainFile('example', 'Book', '''
 package example
@@ -313,16 +313,16 @@ class Book {
     }
 }
 ''')
-        def field = FieldDefinition.builder()
+        def property = PropertyDefinition.builder()
             .name('title')
             .type('String')
             .nullable(false)
             .maxSize(255)
-            .constraintStyle(FieldDefinition.ConstraintStyle.BOTH)
+            .constraintStyle(AbstractMemberDefinition.ConstraintStyle.BOTH)
             .build()
 
         when:
-        modifier.addField(domainFile, field)
+        modifier.addProperty(domainFile, property)
         def content = domainFile.text
 
         then:
@@ -336,7 +336,7 @@ class Book {
         content.contains('String title')
     }
 
-    def "should not duplicate imports when adding multiple fields"() {
+    def "should not duplicate imports when adding multiple properties"() {
         given:
         def domainFile = createDomainFile('example', 'Book', '''
 package example
@@ -346,17 +346,17 @@ class Book {
 ''')
 
         when:
-        modifier.addField(domainFile, FieldDefinition.builder()
+        modifier.addProperty(domainFile, PropertyDefinition.builder()
             .name('title')
             .type('String')
             .nullable(false)
-            .constraintStyle(FieldDefinition.ConstraintStyle.JAKARTA)
+            .constraintStyle(AbstractMemberDefinition.ConstraintStyle.JAKARTA)
             .build())
-        modifier.addField(domainFile, FieldDefinition.builder()
+        modifier.addProperty(domainFile, PropertyDefinition.builder()
             .name('author')
             .type('String')
             .nullable(false)
-            .constraintStyle(FieldDefinition.ConstraintStyle.JAKARTA)
+            .constraintStyle(AbstractMemberDefinition.ConstraintStyle.JAKARTA)
             .build())
         def content = domainFile.text
 
@@ -378,15 +378,15 @@ class Book {
     Date publishedDate
 }
 ''')
-        def field = FieldDefinition.builder()
+        def property = PropertyDefinition.builder()
             .name('title')
             .type('String')
             .nullable(false)
-            .constraintStyle(FieldDefinition.ConstraintStyle.JAKARTA)
+            .constraintStyle(AbstractMemberDefinition.ConstraintStyle.JAKARTA)
             .build()
 
         when:
-        modifier.addField(domainFile, field)
+        modifier.addProperty(domainFile, property)
         def content = domainFile.text
         def lines = content.readLines()
         def dateImportIndex = lines.findIndexOf { it.contains('import java.util.Date') }
@@ -407,14 +407,14 @@ class Book {
     }
 }
 ''')
-        def field = FieldDefinition.builder()
+        def property = PropertyDefinition.builder()
             .name('title')
             .type('String')
             .nullable(false)
             .build()
 
         when:
-        modifier.addField(domainFile, field)
+        modifier.addProperty(domainFile, property)
         def content = domainFile.text
 
         then:
@@ -477,7 +477,7 @@ class Book {
         ''')
 
         when:
-        modifier.fieldExists(domainFile, 'title')
+        modifier.memberExists(domainFile, 'title')
 
         then:
         def e = thrown(IllegalStateException)

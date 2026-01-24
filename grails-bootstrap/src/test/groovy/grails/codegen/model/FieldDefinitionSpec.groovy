@@ -30,6 +30,7 @@ class FieldDefinitionSpec extends Specification {
         then:
         field.name == "title"
         field.type == "String"  // default type
+        field.accessModifier == null  // must be set separately
     }
 
     def "should parse field specification with type"() {
@@ -57,129 +58,77 @@ class FieldDefinitionSpec extends Specification {
         thrown(IllegalArgumentException)
     }
 
-    def "should validate valid field names"() {
-        given:
-        def field = new FieldDefinition(name: name, type: 'String')
-
-        when:
-        field.validate()
-
-        then:
-        noExceptionThrown()
-
-        where:
-        name << ['title', 'firstName', 'count1']
-    }
-
-    @Unroll
-    def "should reject invalid field name '#name'"() {
-        given:
-        def field = new FieldDefinition(name: name, type: 'String')
-
-        when:
-        field.validate()
-
-        then:
-        thrown(IllegalArgumentException)
-
-        where:
-        name << ['Title', '1count', 'first_name', '', null]
-    }
-
-    def "should validate built-in types"() {
-        given:
-        def field = new FieldDefinition(name: 'test', type: type)
-
-        when:
-        field.validate()
-
-        then:
-        noExceptionThrown()
-        field.isBuiltinType()
-
-        where:
-        type << ['String', 'Integer', 'Long', 'Boolean', 'Date', 'BigDecimal', 'Double', 'Float']
-    }
-
-    def "should accept custom types like enums and domain classes"() {
-        given:
-        def field = new FieldDefinition(name: 'test', type: type)
-
-        when:
-        field.validate()
-
-        then:
-        noExceptionThrown()
-        !field.isBuiltinType()
-
-        where:
-        type << ['Status', 'Author', 'BookCategory', 'UUID', 'LocalDate', 'LocalDateTime']
-    }
-
-    def "should accept fully qualified type names"() {
-        given:
-        def field = new FieldDefinition(name: 'test', type: type)
-
-        when:
-        field.validate()
-
-        then:
-        noExceptionThrown()
-
-        where:
-        type << ['java.util.Date', 'java.time.LocalDate', 'com.example.Status']
-    }
-
-    @Unroll
-    def "should reject invalid type name '#type'"() {
-        given:
-        def field = new FieldDefinition(name: 'test', type: type)
-
-        when:
-        field.validate()
-
-        then:
-        thrown(IllegalArgumentException)
-
-        where:
-        type << ['string', 'integer', '123Type', '', null]
-    }
-
-    def "should reject blank constraint for non-String type"() {
-        given:
-        def field = new FieldDefinition(name: 'count', type: 'Integer', blank: false)
-
-        when:
-        field.validate()
-
-        then:
-        thrown(IllegalArgumentException)
-    }
-
-    def "should reject maxSize constraint for non-String type"() {
-        given:
-        def field = new FieldDefinition(name: 'count', type: 'Integer', maxSize: 255)
-
-        when:
-        field.validate()
-
-        then:
-        thrown(IllegalArgumentException)
-    }
-
-    def "should generate field declaration"() {
+    def "should require access modifier"() {
         given:
         def field = new FieldDefinition(name: 'title', type: 'String')
 
-        expect:
-        field.toFieldDeclaration() == 'String title'
+        when:
+        field.validate()
+
+        then:
+        def e = thrown(IllegalArgumentException)
+        e.message.contains('Access modifier is required')
     }
 
-    def "should generate constraint line with all constraints"() {
+    def "should validate with access modifier"() {
         given:
         def field = new FieldDefinition(
             name: 'title',
             type: 'String',
+            accessModifier: FieldDefinition.AccessModifier.PRIVATE
+        )
+
+        when:
+        field.validate()
+
+        then:
+        noExceptionThrown()
+    }
+
+    @Unroll
+    def "should generate declaration with #modifier access"() {
+        given:
+        def field = new FieldDefinition(
+            name: 'title',
+            type: 'String',
+            accessModifier: modifier
+        )
+
+        expect:
+        field.toDeclaration() == expected
+
+        where:
+        modifier                                  | expected
+        FieldDefinition.AccessModifier.PRIVATE   | 'private String title'
+        FieldDefinition.AccessModifier.PROTECTED | 'protected String title'
+        FieldDefinition.AccessModifier.PUBLIC    | 'public String title'
+    }
+
+    def "should use builder pattern with access modifier"() {
+        when:
+        def field = FieldDefinition.builder()
+            .name('title')
+            .type('String')
+            .accessModifier(FieldDefinition.AccessModifier.PRIVATE)
+            .nullable(false)
+            .maxSize(255)
+            .build()
+
+        then:
+        field.name == 'title'
+        field.type == 'String'
+        field.accessModifier == FieldDefinition.AccessModifier.PRIVATE
+        field.nullable == false
+        field.maxSize == 255
+        field.toDeclaration() == 'private String title'
+    }
+
+    def "should generate constraint line"() {
+        given:
+        def field = new FieldDefinition(
+            name: 'title',
+            type: 'String',
+            accessModifier: FieldDefinition.AccessModifier.PRIVATE,
             nullable: false,
             blank: false,
             maxSize: 255
@@ -189,79 +138,12 @@ class FieldDefinitionSpec extends Specification {
         field.toConstraintLine() == 'title nullable: false, blank: false, maxSize: 255'
     }
 
-    def "should return null constraint line when no constraints"() {
-        given:
-        def field = new FieldDefinition(name: 'title', type: 'String')
-
-        expect:
-        field.toConstraintLine() == null
-    }
-
-    def "should generate constraint line with nullable only"() {
-        given:
-        def field = new FieldDefinition(name: 'description', type: 'String', nullable: true)
-
-        expect:
-        field.toConstraintLine() == 'description nullable: true'
-    }
-
-    def "should use builder pattern"() {
-        when:
-        def field = FieldDefinition.builder()
-            .name('title')
-            .type('String')
-            .nullable(false)
-            .blank(false)
-            .maxSize(255)
-            .build()
-
-        then:
-        field.name == 'title'
-        field.type == 'String'
-        field.nullable == false
-        field.blank == false
-        field.maxSize == 255
-    }
-
-    // Jakarta Validation annotation tests
-
-    def "should generate NotNull annotation for nullable false"() {
-        given:
-        def field = new FieldDefinition(name: 'title', type: 'String', nullable: false)
-
-        expect:
-        field.toAnnotations() == ['@NotNull']
-    }
-
-    def "should generate NotBlank annotation for blank false on String"() {
-        given:
-        def field = new FieldDefinition(name: 'title', type: 'String', blank: false)
-
-        expect:
-        field.toAnnotations() == ['@NotBlank']
-    }
-
-    def "should generate Size annotation for maxSize"() {
-        given:
-        def field = new FieldDefinition(name: 'title', type: 'String', maxSize: 255)
-
-        expect:
-        field.toAnnotations() == ['@Size(max = 255)']
-    }
-
-    def "should generate Size annotation with min and max"() {
-        given:
-        def field = new FieldDefinition(name: 'title', type: 'String', minSize: 5, maxSize: 255)
-
-        expect:
-        field.toAnnotations() == ['@Size(min = 5, max = 255)']
-    }
-
-    def "should generate multiple annotations"() {
+    def "should generate Jakarta annotations"() {
         given:
         def field = new FieldDefinition(
             name: 'title',
             type: 'String',
+            accessModifier: FieldDefinition.AccessModifier.PRIVATE,
             nullable: false,
             blank: false,
             maxSize: 255
@@ -271,94 +153,10 @@ class FieldDefinitionSpec extends Specification {
         field.toAnnotations() == ['@NotNull', '@NotBlank', '@Size(max = 255)']
     }
 
-    def "should return empty annotations when no constraints"() {
-        given:
-        def field = new FieldDefinition(name: 'title', type: 'String')
-
+    def "AccessModifier toString should return keyword"() {
         expect:
-        field.toAnnotations() == []
-    }
-
-    def "should return empty annotations when nullable is true"() {
-        given:
-        def field = new FieldDefinition(name: 'title', type: 'String', nullable: true)
-
-        expect:
-        field.toAnnotations() == []
-    }
-
-    def "should get required imports for NotNull"() {
-        given:
-        def field = new FieldDefinition(name: 'title', type: 'String', nullable: false)
-
-        expect:
-        field.getRequiredImports() == ['jakarta.validation.constraints.NotNull'] as Set
-    }
-
-    def "should get required imports for multiple annotations"() {
-        given:
-        def field = new FieldDefinition(
-            name: 'title',
-            type: 'String',
-            nullable: false,
-            blank: false,
-            maxSize: 255
-        )
-
-        expect:
-        field.getRequiredImports() == [
-            'jakarta.validation.constraints.NotNull',
-            'jakarta.validation.constraints.NotBlank',
-            'jakarta.validation.constraints.Size'
-        ] as Set
-    }
-
-    def "should default to GRAILS constraint style"() {
-        given:
-        def field = new FieldDefinition(name: 'title', type: 'String')
-
-        expect:
-        field.constraintStyle == FieldDefinition.ConstraintStyle.GRAILS
-        field.usesGrailsConstraints()
-        !field.usesJakartaAnnotations()
-    }
-
-    def "should support JAKARTA constraint style"() {
-        given:
-        def field = new FieldDefinition(
-            name: 'title',
-            type: 'String',
-            constraintStyle: FieldDefinition.ConstraintStyle.JAKARTA
-        )
-
-        expect:
-        !field.usesGrailsConstraints()
-        field.usesJakartaAnnotations()
-    }
-
-    def "should support BOTH constraint style"() {
-        given:
-        def field = new FieldDefinition(
-            name: 'title',
-            type: 'String',
-            constraintStyle: FieldDefinition.ConstraintStyle.BOTH
-        )
-
-        expect:
-        field.usesGrailsConstraints()
-        field.usesJakartaAnnotations()
-    }
-
-    def "should use builder with constraint style"() {
-        when:
-        def field = FieldDefinition.builder()
-            .name('title')
-            .type('String')
-            .nullable(false)
-            .constraintStyle(FieldDefinition.ConstraintStyle.JAKARTA)
-            .build()
-
-        then:
-        field.constraintStyle == FieldDefinition.ConstraintStyle.JAKARTA
+        FieldDefinition.AccessModifier.PRIVATE.toString() == 'private'
+        FieldDefinition.AccessModifier.PROTECTED.toString() == 'protected'
+        FieldDefinition.AccessModifier.PUBLIC.toString() == 'public'
     }
 }

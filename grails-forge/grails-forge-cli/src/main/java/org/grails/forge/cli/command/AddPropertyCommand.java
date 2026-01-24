@@ -20,7 +20,7 @@ package org.grails.forge.cli.command;
 
 import grails.codegen.model.AbstractMemberDefinition;
 import grails.codegen.model.DomainFieldModifier;
-import grails.codegen.model.FieldDefinition;
+import grails.codegen.model.PropertyDefinition;
 import io.micronaut.context.annotation.Parameter;
 import io.micronaut.core.annotation.ReflectiveAccess;
 import io.micronaut.core.util.functional.ThrowingSupplier;
@@ -37,14 +37,14 @@ import java.io.File;
 import java.io.IOException;
 
 /**
- * CLI command to add a field (with access modifier) to an existing domain class.
+ * CLI command to add a property to an existing domain class.
  *
  * @since 7.0
  */
-@Command(name = AddFieldCommand.NAME, description = "Adds a field with access modifier to an existing domain class")
-public class AddFieldCommand extends CodeGenCommand {
+@Command(name = AddPropertyCommand.NAME, description = "Adds a property to an existing domain class")
+public class AddPropertyCommand extends CodeGenCommand {
 
-    public static final String NAME = "add-field";
+    public static final String NAME = "add-property";
 
     @ReflectiveAccess
     @Parameters(index = "0", paramLabel = "DOMAIN-CLASS",
@@ -52,32 +52,20 @@ public class AddFieldCommand extends CodeGenCommand {
     String domainClassName;
 
     @ReflectiveAccess
-    @Parameters(index = "1", paramLabel = "FIELD:TYPE",
-            description = "The field specification in name:Type format (e.g., title:String)")
-    String fieldSpec;
+    @Parameters(index = "1", paramLabel = "PROPERTY:TYPE",
+            description = "The property specification in name:Type format (e.g., title:String)")
+    String propertySpec;
 
     @ReflectiveAccess
-    @Option(names = {"--private"}, description = "Make the field private (default)")
-    boolean privateFlag;
-
-    @ReflectiveAccess
-    @Option(names = {"--protected"}, description = "Make the field protected")
-    boolean protectedFlag;
-
-    @ReflectiveAccess
-    @Option(names = {"--public"}, description = "Make the field public")
-    boolean publicFlag;
-
-    @ReflectiveAccess
-    @Option(names = {"--nullable"}, description = "Mark the field as nullable")
+    @Option(names = {"--nullable"}, description = "Mark the property as nullable")
     boolean nullableFlag;
 
     @ReflectiveAccess
-    @Option(names = {"--not-nullable"}, description = "Mark the field as NOT nullable (generates @NotNull)")
+    @Option(names = {"--not-nullable"}, description = "Mark the property as NOT nullable (generates @NotNull)")
     boolean notNullableFlag;
 
     @ReflectiveAccess
-    @Option(names = {"--blank"}, description = "Allow blank values (String fields only)")
+    @Option(names = {"--blank"}, description = "Allow blank values (String properties only)")
     boolean blankFlag;
 
     @ReflectiveAccess
@@ -85,11 +73,11 @@ public class AddFieldCommand extends CodeGenCommand {
     boolean notBlankFlag;
 
     @ReflectiveAccess
-    @Option(names = {"--max-size"}, description = "Maximum size constraint (String fields only)")
+    @Option(names = {"--max-size"}, description = "Maximum size constraint (String properties only)")
     Integer maxSize;
 
     @ReflectiveAccess
-    @Option(names = {"--min-size"}, description = "Minimum size constraint (String fields only)")
+    @Option(names = {"--min-size"}, description = "Minimum size constraint (String properties only)")
     Integer minSize;
 
     @ReflectiveAccess
@@ -99,14 +87,14 @@ public class AddFieldCommand extends CodeGenCommand {
     private final DomainFieldModifier domainFieldModifier;
 
     @Inject
-    public AddFieldCommand(@Parameter CodeGenConfig config) {
+    public AddPropertyCommand(@Parameter CodeGenConfig config) {
         super(config);
         this.domainFieldModifier = new DomainFieldModifier();
     }
 
-    public AddFieldCommand(CodeGenConfig config,
-                           ThrowingSupplier<OutputHandler, IOException> outputHandlerSupplier,
-                           ConsoleOutput consoleOutput) {
+    public AddPropertyCommand(CodeGenConfig config,
+                              ThrowingSupplier<OutputHandler, IOException> outputHandlerSupplier,
+                              ConsoleOutput consoleOutput) {
         super(config, outputHandlerSupplier, consoleOutput);
         this.domainFieldModifier = new DomainFieldModifier();
     }
@@ -118,43 +106,33 @@ public class AddFieldCommand extends CodeGenCommand {
 
     @Override
     public Integer call() throws Exception {
-        FieldDefinition field;
+        PropertyDefinition property;
         try {
-            field = FieldDefinition.parse(fieldSpec);
+            property = PropertyDefinition.parse(propertySpec);
         } catch (IllegalArgumentException e) {
-            err("Invalid field specification: " + e.getMessage());
+            err("Invalid property specification: " + e.getMessage());
             return 1;
         }
 
-        // Determine access modifier (default to private if none specified)
-        if (publicFlag) {
-            field.setAccessModifier(FieldDefinition.AccessModifier.PUBLIC);
-        } else if (protectedFlag) {
-            field.setAccessModifier(FieldDefinition.AccessModifier.PROTECTED);
-        } else {
-            // Default to private
-            field.setAccessModifier(FieldDefinition.AccessModifier.PRIVATE);
-        }
-
         if (nullableFlag) {
-            field.setNullable(true);
+            property.setNullable(true);
         } else if (notNullableFlag) {
-            field.setNullable(false);
+            property.setNullable(false);
         }
         if (blankFlag) {
-            field.setBlank(true);
+            property.setBlank(true);
         } else if (notBlankFlag) {
-            field.setBlank(false);
+            property.setBlank(false);
         }
         if (maxSize != null) {
-            field.setMaxSize(maxSize);
+            property.setMaxSize(maxSize);
         }
         if (minSize != null) {
-            field.setMinSize(minSize);
+            property.setMinSize(minSize);
         }
         if (constraintStyle != null) {
             try {
-                field.setConstraintStyle(AbstractMemberDefinition.ConstraintStyle.valueOf(constraintStyle.toUpperCase()));
+                property.setConstraintStyle(AbstractMemberDefinition.ConstraintStyle.valueOf(constraintStyle.toUpperCase()));
             } catch (IllegalArgumentException e) {
                 err("Invalid constraint style: " + constraintStyle + ". Use: grails, jakarta, or both");
                 return 1;
@@ -162,9 +140,9 @@ public class AddFieldCommand extends CodeGenCommand {
         }
 
         try {
-            field.validate();
+            property.validate();
         } catch (IllegalArgumentException e) {
-            err("Invalid field definition: " + e.getMessage());
+            err("Invalid property definition: " + e.getMessage());
             return 1;
         }
 
@@ -177,16 +155,16 @@ public class AddFieldCommand extends CodeGenCommand {
             return 1;
         }
 
-        if (domainFieldModifier.memberExists(domainFile, field.getName())) {
-            err("Field '" + field.getName() + "' already exists in " + domainClassName);
+        if (domainFieldModifier.memberExists(domainFile, property.getName())) {
+            err("Property '" + property.getName() + "' already exists in " + domainClassName);
             return 1;
         }
 
         try {
-            domainFieldModifier.addField(domainFile, field);
-            out("@|blue ||@ Added field '" + field.getAccessModifier() + " " + field.getName() + "' to " + getRelativePath(projectDir, domainFile));
+            domainFieldModifier.addProperty(domainFile, property);
+            out("@|blue ||@ Added property '" + property.getName() + "' to " + getRelativePath(projectDir, domainFile));
         } catch (Exception e) {
-            err("Failed to add field: " + e.getMessage());
+            err("Failed to add property: " + e.getMessage());
             return 1;
         }
 

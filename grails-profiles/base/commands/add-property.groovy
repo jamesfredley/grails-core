@@ -19,77 +19,60 @@
 
 import grails.codegen.model.AbstractMemberDefinition
 import grails.codegen.model.DomainFieldModifier
-import grails.codegen.model.FieldDefinition
+import grails.codegen.model.PropertyDefinition
 import org.grails.cli.interactive.completers.DomainClassCompleter
 
-description("Adds a field with access modifier to an existing domain class") {
-    usage "grails add-field [DOMAIN CLASS] [FIELD:TYPE] --private|--protected|--public"
+description("Adds a property to an existing domain class") {
+    usage "grails add-property [DOMAIN CLASS] [PROPERTY:TYPE]"
     argument name: 'Domain Class', description: "The name of the domain class", required: true
-    argument name: 'Field Spec', description: "Field specification in name:Type format (e.g., title:String)", required: true
+    argument name: 'Property Spec', description: "Property specification in name:Type format (e.g., title:String)", required: true
     completer DomainClassCompleter
-    flag name: 'private', description: "Make the field private (default)"
-    flag name: 'protected', description: "Make the field protected"
-    flag name: 'public', description: "Make the field public"
-    flag name: 'nullable', description: "Mark the field as nullable"
-    flag name: 'not-nullable', description: "Mark the field as NOT nullable (generates @NotNull)"
-    flag name: 'blank', description: "Allow blank values (String fields only)"
+    flag name: 'nullable', description: "Mark the property as nullable"
+    flag name: 'not-nullable', description: "Mark the property as NOT nullable (generates @NotNull)"
+    flag name: 'blank', description: "Allow blank values (String properties only)"
     flag name: 'not-blank', description: "Disallow blank values (generates @NotBlank)"
-    flag name: 'max-size', description: "Maximum size constraint (String fields only)"
-    flag name: 'min-size', description: "Minimum size constraint (String fields only)"
+    flag name: 'max-size', description: "Maximum size constraint (String properties only)"
+    flag name: 'min-size', description: "Minimum size constraint (String properties only)"
     flag name: 'constraint-style', description: "Constraint style: grails (default), jakarta, or both"
 }
 
 if (args.size() < 2) {
-    error "Usage: grails add-field [DOMAIN CLASS] [FIELD:TYPE] --private|--protected|--public"
-    error "Example: grails add-field Book title:String --private --not-nullable"
+    error "Usage: grails add-property [DOMAIN CLASS] [PROPERTY:TYPE]"
+    error "Example: grails add-property Book title:String --nullable"
     return false
 }
 
 String domainClassName = args[0]
-String fieldSpec = args[1]
+String propertySpec = args[1]
 
-FieldDefinition field
+PropertyDefinition property
 try {
-    field = FieldDefinition.parse(fieldSpec)
+    property = PropertyDefinition.parse(propertySpec)
 } catch (IllegalArgumentException e) {
-    error "Invalid field specification: ${e.message}"
+    error "Invalid property specification: ${e.message}"
     return false
-}
-
-// Determine access modifier (default to private if none specified)
-def privateFlag = flag('private')
-def protectedFlag = flag('protected')
-def publicFlag = flag('public')
-
-if (publicFlag != null) {
-    field.accessModifier = FieldDefinition.AccessModifier.PUBLIC
-} else if (protectedFlag != null) {
-    field.accessModifier = FieldDefinition.AccessModifier.PROTECTED
-} else {
-    // Default to private
-    field.accessModifier = FieldDefinition.AccessModifier.PRIVATE
 }
 
 def nullableFlag = flag('nullable')
 def notNullableFlag = flag('not-nullable')
 if (nullableFlag != null) {
-    field.nullable = true
+    property.nullable = true
 } else if (notNullableFlag != null) {
-    field.nullable = false
+    property.nullable = false
 }
 
 def blankFlag = flag('blank')
 def notBlankFlag = flag('not-blank')
 if (blankFlag != null) {
-    field.blank = true
+    property.blank = true
 } else if (notBlankFlag != null) {
-    field.blank = false
+    property.blank = false
 }
 
 def maxSizeFlag = flag('max-size')
 if (maxSizeFlag != null) {
     try {
-        field.maxSize = maxSizeFlag instanceof Integer ? maxSizeFlag : Integer.parseInt(maxSizeFlag.toString())
+        property.maxSize = maxSizeFlag instanceof Integer ? maxSizeFlag : Integer.parseInt(maxSizeFlag.toString())
     } catch (NumberFormatException e) {
         error "Invalid max-size value: ${maxSizeFlag}"
         return false
@@ -99,7 +82,7 @@ if (maxSizeFlag != null) {
 def minSizeFlag = flag('min-size')
 if (minSizeFlag != null) {
     try {
-        field.minSize = minSizeFlag instanceof Integer ? minSizeFlag : Integer.parseInt(minSizeFlag.toString())
+        property.minSize = minSizeFlag instanceof Integer ? minSizeFlag : Integer.parseInt(minSizeFlag.toString())
     } catch (NumberFormatException e) {
         error "Invalid min-size value: ${minSizeFlag}"
         return false
@@ -109,7 +92,7 @@ if (minSizeFlag != null) {
 def constraintStyleFlag = flag('constraint-style')
 if (constraintStyleFlag != null) {
     try {
-        field.constraintStyle = AbstractMemberDefinition.ConstraintStyle.valueOf(constraintStyleFlag.toString().toUpperCase())
+        property.constraintStyle = AbstractMemberDefinition.ConstraintStyle.valueOf(constraintStyleFlag.toString().toUpperCase())
     } catch (IllegalArgumentException e) {
         error "Invalid constraint-style value: ${constraintStyleFlag}. Use: grails, jakarta, or both"
         return false
@@ -117,9 +100,9 @@ if (constraintStyleFlag != null) {
 }
 
 try {
-    field.validate()
+    property.validate()
 } catch (IllegalArgumentException e) {
-    error "Invalid field definition: ${e.message}"
+    error "Invalid property definition: ${e.message}"
     return false
 }
 
@@ -133,16 +116,16 @@ if (!sourceClass) {
 def domainFile = sourceClass.file
 def modifier = new DomainFieldModifier()
 
-if (modifier.memberExists(domainFile, field.name)) {
-    error "Field '${field.name}' already exists in ${domainClassName}"
+if (modifier.memberExists(domainFile, property.name)) {
+    error "Property '${property.name}' already exists in ${domainClassName}"
     return false
 }
 
 try {
-    modifier.addField(domainFile, field)
-    addStatus "Added field '${field.accessModifier} ${field.name}' to ${projectPath(sourceClass)}"
+    modifier.addProperty(domainFile, property)
+    addStatus "Added property '${property.name}' to ${projectPath(sourceClass)}"
 } catch (Exception e) {
-    error "Failed to add field: ${e.message}"
+    error "Failed to add property: ${e.message}"
     return false
 }
 

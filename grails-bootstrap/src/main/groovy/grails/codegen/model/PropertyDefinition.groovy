@@ -21,74 +21,42 @@ package grails.codegen.model
 import groovy.transform.CompileStatic
 
 /**
- * Represents a field definition for domain class code generation.
- * Fields in Groovy have an explicit access modifier and do not auto-generate getter/setter methods.
+ * Represents a property definition for domain class code generation.
+ * Properties in Groovy have no access modifier and auto-generate getter/setter methods.
  *
  * @since 7.0
  */
 @CompileStatic
-class FieldDefinition extends AbstractMemberDefinition {
-
-    /**
-     * Access modifier options for fields.
-     */
-    enum AccessModifier {
-        PRIVATE('private'),
-        PROTECTED('protected'),
-        PUBLIC('public')
-
-        final String keyword
-
-        AccessModifier(String keyword) {
-            this.keyword = keyword
-        }
-
-        @Override
-        String toString() {
-            keyword
-        }
-    }
-
-    AccessModifier accessModifier
+class PropertyDefinition extends AbstractMemberDefinition {
 
     @Override
     protected String getMemberType() {
-        'Field'
-    }
-
-    @Override
-    void validate() {
-        super.validate()
-
-        if (accessModifier == null) {
-            throw new IllegalArgumentException('Access modifier is required for fields. Use --private, --protected, or --public')
-        }
+        'Property'
     }
 
     /**
-     * Generates the field declaration line for the domain class.
+     * Generates the property declaration line for the domain class.
      *
-     * @return the field declaration (e.g., "private String title")
+     * @return the property declaration (e.g., "String title")
      */
     @Override
     String toDeclaration() {
-        "${accessModifier.keyword} ${type} ${name}"
+        "${type} ${name}"
     }
 
     /**
-     * Parses a field specification string like "title:String" into a FieldDefinition.
-     * Note: The access modifier must be set separately.
+     * Parses a property specification string like "title:String" into a PropertyDefinition.
      *
-     * @param fieldSpec the field specification (e.g., "title:String" or just "title")
-     * @return a new FieldDefinition instance
+     * @param propertySpec the property specification (e.g., "title:String" or just "title")
+     * @return a new PropertyDefinition instance
      */
-    static FieldDefinition parse(String fieldSpec) {
-        if (!fieldSpec) {
-            throw new IllegalArgumentException('Field specification cannot be null or empty')
+    static PropertyDefinition parse(String propertySpec) {
+        if (!propertySpec) {
+            throw new IllegalArgumentException('Property specification cannot be null or empty')
         }
 
-        def parts = fieldSpec.split(':', 2)
-        def definition = new FieldDefinition()
+        def parts = propertySpec.split(':', 2)
+        def definition = new PropertyDefinition()
         definition.name = parts[0].trim()
 
         if (parts.length > 1 && parts[1]?.trim()) {
@@ -99,10 +67,10 @@ class FieldDefinition extends AbstractMemberDefinition {
     }
 
     /**
-     * Builder pattern for creating FieldDefinition instances.
+     * Builder pattern for creating PropertyDefinition instances.
      */
     static class Builder {
-        private FieldDefinition definition = new FieldDefinition()
+        private PropertyDefinition definition = new PropertyDefinition()
 
         Builder name(String name) {
             definition.name = name
@@ -111,11 +79,6 @@ class FieldDefinition extends AbstractMemberDefinition {
 
         Builder type(String type) {
             definition.type = type
-            this
-        }
-
-        Builder accessModifier(AccessModifier accessModifier) {
-            definition.accessModifier = accessModifier
             this
         }
 
@@ -144,7 +107,7 @@ class FieldDefinition extends AbstractMemberDefinition {
             this
         }
 
-        FieldDefinition build() {
+        PropertyDefinition build() {
             definition.validate()
             definition
         }
