@@ -38,6 +38,17 @@ class CommandObjectsSpec extends Specification implements ControllerUnitTest<Tes
         }
     }}
 
+    /**
+     * Clear the static constraints cache for classes that use shared constraints.
+     * This is necessary because the Validateable trait caches constraints in a static field,
+     * and in parallel test execution, the constraints may be evaluated before doWithConfig()
+     * has registered the shared constraint 'isProg'.
+     */
+    def setup() {
+        Artist.clearConstraintsMap()
+        ArtistSubclass.clearConstraintsMap()
+    }
+
     void "Test command object with date binding"() {
         setup:
         def expectedCalendar = Calendar.instance
