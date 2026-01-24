@@ -47,6 +47,11 @@ class DatabasePerTenantSpec extends Specification {
     )
     @Shared IBookService bookDataService = datastore.getService(IBookService)
 
+    def setup() {
+        // Ensure other specs don't leak a tenant id and skip the expected TenantNotFoundException.
+        System.setProperty(SystemPropertyTenantResolver.PROPERTY_NAME, "")
+    }
+
     void 'Test database per tenant'() {
         when:"When there is no tenant"
         Book.count()
