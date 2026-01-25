@@ -51,6 +51,11 @@ class MongoStaticApiMultiTenancySpec extends AutoStartedMongoSpec {
         this.datastore = new MongoDatastore(config, getDomainClasses() as Class[])
     }
 
+    void setup() {
+        // Ensure tenant property is cleared before each test for isolation with parallel test execution
+        System.clearProperty(SystemPropertyTenantResolver.PROPERTY_NAME)
+    }
+
 
     void "test search"() {
         setup: "drop existing database"
