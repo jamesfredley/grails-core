@@ -37,6 +37,10 @@ class ValidateableTraitAdHocSpec extends Specification {
         PersonAdHocSharedConstraintsValidateable.clearConstraintsMap()
     }
 
+    void cleanup() {
+        PersonAdHocSharedConstraintsValidateable.clearConstraintsMap()
+    }
+
     void 'Test that pre-declared constraints can be used'() {
         given:
         def person = new PersonAdHocValidateable(name: nameValue, age: ageValue)
