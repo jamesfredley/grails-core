@@ -56,6 +56,11 @@ class ContentNegotiationSpec extends Specification implements ControllerUnitTest
         HttpServletResponseExtension.@mimeTypes = null
     }
 
+    def cleanup() {
+        // Clear the static mimeTypes cache after each test for parallel test isolation
+        HttpServletResponseExtension.@mimeTypes = null
+    }
+
     void setupSpec() {
         removeAllMetaClasses(GrailsMockHttpServletRequest)
         removeAllMetaClasses(GrailsMockHttpServletResponse)

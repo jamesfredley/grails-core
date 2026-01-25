@@ -35,6 +35,11 @@ class JSONBindingToNullTests extends Specification implements ControllerUnitTest
         HttpServletResponseExtension.@mimeTypes = null
     }
 
+    def cleanup() {
+        // Clear the static mimeTypes cache after each test for parallel test isolation
+        HttpServletResponseExtension.@mimeTypes = null
+    }
+
     Closure doWithConfig() {{ config ->
         config['grails.mime.types'] = [ html: ['text/html','application/xhtml+xml'],
                                      xml: ['text/xml', 'application/xml'],

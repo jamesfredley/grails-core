@@ -26,6 +26,9 @@ import spock.lang.Specification
 
 class UrlMappingMatcherSpec extends Specification {
 
+    // Store original environment to restore in cleanup for parallel test isolation
+    private String originalEnvironment
+
     @Issue('https://github.com/apache/grails-core/issues/9179')
     void 'test a matcher with a uri does not match all requests'() {
         given:
@@ -42,6 +45,7 @@ class UrlMappingMatcherSpec extends Specification {
     @Issue("https://github.com/apache/grails-core/issues/9208")
     void "test caching of results in production"() {
         given:
+        originalEnvironment = System.getProperty(Environment.KEY)
         System.setProperty(Environment.KEY, "prod")
         String controller = "foo"
         String url = "/foo/test"
@@ -65,6 +69,11 @@ class UrlMappingMatcherSpec extends Specification {
         !matcher.doesMatch(url, info)
 
         cleanup:
-        System.setProperty(Environment.KEY, "test")
+        // Restore original environment value for parallel test isolation
+        if (originalEnvironment != null) {
+            System.setProperty(Environment.KEY, originalEnvironment)
+        } else {
+            System.clearProperty(Environment.KEY)
+        }
     }
 }
