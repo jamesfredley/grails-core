@@ -104,6 +104,19 @@ trait Validateable {
     }
 
     /**
+     * Clears the cached constraints map, forcing re-evaluation on next access.
+     * This is useful in testing scenarios where shared constraints may need
+     * to be re-evaluated after configuration changes, particularly during
+     * parallel test execution.
+     *
+     * @since 7.1
+     */
+    @Generated
+    static void clearConstraintsMapCache() {
+        constraintsMapInternal = null
+    }
+
+    /**
      * Validate the object
      *
      * @return True if it is valid
