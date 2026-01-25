@@ -21,8 +21,16 @@ package org.grails.web.commandobjects
 
 import grails.testing.web.GrailsWebUnitTest
 import org.grails.validation.ConstraintEvalUtils
+import spock.lang.Isolated
 import spock.lang.Specification
 
+/**
+ * Tests for command object validation without DataTest trait.
+ * This spec is marked @Isolated because it modifies global shared constraints
+ * via doWithConfig() which affects ConstraintEvalUtils.defaultConstraintsMap - a static
+ * cache shared across all tests in the same JVM fork.
+ */
+@Isolated
 class CommandObjectNoDataSpec extends Specification implements GrailsWebUnitTest {
 
     // Cache the static field helper interface for performance

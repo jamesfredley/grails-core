@@ -24,9 +24,17 @@ import grails.testing.gorm.DataTest
 import grails.testing.web.controllers.ControllerUnitTest
 import grails.validation.Validateable
 import org.grails.validation.ConstraintEvalUtils
+import spock.lang.Isolated
 import spock.lang.Issue
 import spock.lang.Specification
 
+/**
+ * Tests for command object binding and validation.
+ * This spec is marked @Isolated because it modifies global shared constraints
+ * via doWithConfig() which affects ConstraintEvalUtils.defaultConstraintsMap - a static
+ * cache shared across all tests in the same JVM fork.
+ */
+@Isolated
 class CommandObjectsSpec extends Specification implements ControllerUnitTest<TestController>, DataTest {
 
     // Cache the static field helper interface for performance
@@ -43,23 +51,17 @@ class CommandObjectsSpec extends Specification implements ControllerUnitTest<Tes
     }}
 
     /**
-     * Clear the static constraints cache for classes that use shared constraints.
+     * Clear the static constraints cache for classes that use constraints.
      * This is necessary because the Validateable trait caches constraints in a static field,
-     * and in parallel test execution, the constraints may be evaluated before doWithConfig()
-     * has registered the shared constraint 'isProg'.
-     *
-     * Also clear ConstraintEvalUtils.defaultConstraintsMap which caches shared constraints
-     * globally. In parallel test execution, another test's config may have been cached,
-     * causing the 'isProg' shared constraint to not be found.
+     * and in parallel test execution, the constraints may be evaluated with a different
+     * ApplicationContext, causing stale cached data.
      */
     def setup() {
-        ConstraintEvalUtils.clearDefaultConstraints()
         clearConstraintsMapCache(Artist)
         clearConstraintsMapCache(ArtistSubclass)
     }
 
     def cleanup() {
-        ConstraintEvalUtils.clearDefaultConstraints()
         clearConstraintsMapCache(Artist)
         clearConstraintsMapCache(ArtistSubclass)
     }
