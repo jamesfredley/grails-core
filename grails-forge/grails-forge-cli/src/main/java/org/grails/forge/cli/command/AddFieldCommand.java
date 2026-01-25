@@ -57,16 +57,8 @@ public class AddFieldCommand extends CodeGenCommand {
     String fieldSpec;
 
     @ReflectiveAccess
-    @Option(names = {"--private"}, description = "Make the field private (default)")
-    boolean privateFlag;
-
-    @ReflectiveAccess
-    @Option(names = {"--protected"}, description = "Make the field protected")
-    boolean protectedFlag;
-
-    @ReflectiveAccess
-    @Option(names = {"--public"}, description = "Make the field public")
-    boolean publicFlag;
+    @Option(names = {"--access"}, description = "Access modifier: private (default), protected, or public")
+    String accessModifier;
 
     @ReflectiveAccess
     @Option(names = {"--nullable"}, description = "Mark the field as nullable")
@@ -127,10 +119,13 @@ public class AddFieldCommand extends CodeGenCommand {
         }
 
         // Determine access modifier (default to private if none specified)
-        if (publicFlag) {
-            field.setAccessModifier(FieldDefinition.AccessModifier.PUBLIC);
-        } else if (protectedFlag) {
-            field.setAccessModifier(FieldDefinition.AccessModifier.PROTECTED);
+        if (accessModifier != null) {
+            try {
+                field.setAccessModifier(FieldDefinition.AccessModifier.valueOf(accessModifier.toUpperCase()));
+            } catch (IllegalArgumentException e) {
+                err("Invalid access modifier: " + accessModifier + ". Use: private, protected, or public");
+                return 1;
+            }
         } else {
             // Default to private
             field.setAccessModifier(FieldDefinition.AccessModifier.PRIVATE);

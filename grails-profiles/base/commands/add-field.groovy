@@ -23,13 +23,11 @@ import grails.codegen.model.FieldDefinition
 import org.grails.cli.interactive.completers.DomainClassCompleter
 
 description("Adds a field with access modifier to an existing domain class") {
-    usage "grails add-field [DOMAIN CLASS] [FIELD:TYPE] --private|--protected|--public"
+    usage "grails add-field [DOMAIN CLASS] [FIELD:TYPE] --access=private|protected|public"
     argument name: 'Domain Class', description: "The name of the domain class", required: true
     argument name: 'Field Spec', description: "Field specification in name:Type format (e.g., title:String)", required: true
     completer DomainClassCompleter
-    flag name: 'private', description: "Make the field private (default)"
-    flag name: 'protected', description: "Make the field protected"
-    flag name: 'public', description: "Make the field public"
+    flag name: 'access', description: "Access modifier: private (default), protected, or public"
     flag name: 'nullable', description: "Mark the field as nullable"
     flag name: 'not-nullable', description: "Mark the field as NOT nullable (generates @NotNull)"
     flag name: 'blank', description: "Allow blank values (String fields only)"
@@ -40,8 +38,8 @@ description("Adds a field with access modifier to an existing domain class") {
 }
 
 if (args.size() < 2) {
-    error "Usage: grails add-field [DOMAIN CLASS] [FIELD:TYPE] --private|--protected|--public"
-    error "Example: grails add-field Book title:String --private --not-nullable"
+    error "Usage: grails add-field [DOMAIN CLASS] [FIELD:TYPE] --access=private|protected|public"
+    error "Example: grails add-field Book title:String --access=private --not-nullable"
     return false
 }
 
@@ -57,14 +55,14 @@ try {
 }
 
 // Determine access modifier (default to private if none specified)
-def privateFlag = flag('private')
-def protectedFlag = flag('protected')
-def publicFlag = flag('public')
-
-if (publicFlag != null) {
-    field.accessModifier = FieldDefinition.AccessModifier.PUBLIC
-} else if (protectedFlag != null) {
-    field.accessModifier = FieldDefinition.AccessModifier.PROTECTED
+def accessFlag = flag('access')
+if (accessFlag != null) {
+    try {
+        field.accessModifier = FieldDefinition.AccessModifier.valueOf(accessFlag.toString().toUpperCase())
+    } catch (IllegalArgumentException e) {
+        error "Invalid access modifier: ${accessFlag}. Use: private, protected, or public"
+        return false
+    }
 } else {
     // Default to private
     field.accessModifier = FieldDefinition.AccessModifier.PRIVATE
