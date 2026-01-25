@@ -31,6 +31,7 @@ import org.grails.orm.hibernate.HibernateDatastore
 import org.hibernate.Session
 import org.hibernate.dialect.H2Dialect
 import org.hibernate.resource.jdbc.spi.JdbcSessionOwner
+import spock.util.environment.RestoreSystemProperties
 import spock.lang.Specification
 
 import java.sql.Connection
@@ -38,16 +39,8 @@ import java.sql.Connection
 /**
  * Created by graemerocher on 07/07/2016.
  */
+@RestoreSystemProperties
 class SingleTenantSpec extends Specification {
-
-    def setup() {
-        // Ensure other specs don't leak a tenant id and skip the expected TenantNotFoundException.
-        System.setProperty(SystemPropertyTenantResolver.PROPERTY_NAME, "")
-    }
-
-    def cleanup() {
-        System.setProperty(SystemPropertyTenantResolver.PROPERTY_NAME, "")
-    }
 
     void "Test a database per tenant multi tenancy"() {
         given:"A configuration for multiple data sources"

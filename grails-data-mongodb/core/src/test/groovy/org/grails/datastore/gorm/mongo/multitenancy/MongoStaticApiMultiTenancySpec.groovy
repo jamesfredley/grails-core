@@ -29,8 +29,10 @@ import org.grails.datastore.mapping.mongo.config.MongoSettings
 import org.grails.datastore.mapping.multitenancy.exceptions.TenantNotFoundException
 import org.grails.datastore.mapping.multitenancy.resolvers.SystemPropertyTenantResolver
 import spock.lang.AutoCleanup
+import spock.util.environment.RestoreSystemProperties
 import spock.lang.Shared
 
+@RestoreSystemProperties
 class MongoStaticApiMultiTenancySpec extends AutoStartedMongoSpec {
 
     @Shared  @AutoCleanup MongoDatastore datastore
@@ -47,14 +49,6 @@ class MongoStaticApiMultiTenancySpec extends AutoStartedMongoSpec {
                 (MongoSettings.SETTING_URL)                   : "mongodb://${mongoHost}:${mongoPort}/defaultDb" as String,
         ]
         this.datastore = new MongoDatastore(config, getDomainClasses() as Class[])
-    }
-
-    void setup() {
-        System.setProperty(SystemPropertyTenantResolver.PROPERTY_NAME, "")
-    }
-
-    void cleanup() {
-        System.setProperty(SystemPropertyTenantResolver.PROPERTY_NAME, "")
     }
 
 

@@ -23,9 +23,11 @@ import org.grails.datastore.mapping.multitenancy.MultiTenancySettings
 import org.grails.datastore.mapping.multitenancy.resolvers.SystemPropertyTenantResolver
 import org.grails.datastore.mapping.simple.SimpleMapDatastore
 import spock.lang.AutoCleanup
+import spock.util.environment.RestoreSystemProperties
 import spock.lang.Shared
 import spock.lang.Specification
 
+@RestoreSystemProperties
 class MultiTenantServiceTransformSpec extends Specification {
 
     @Shared @AutoCleanup SimpleMapDatastore datastore = new SimpleMapDatastore(
@@ -40,14 +42,6 @@ class MultiTenantServiceTransformSpec extends Specification {
 
     void setupSpec() {
         gcl = new GroovyClassLoader()
-    }
-
-    def setup() {
-        System.setProperty(SystemPropertyTenantResolver.PROPERTY_NAME, "")
-    }
-
-    def cleanup() {
-        System.setProperty(SystemPropertyTenantResolver.PROPERTY_NAME, "")
     }
 
     void "test service transform applied with @WithoutTenant"() {

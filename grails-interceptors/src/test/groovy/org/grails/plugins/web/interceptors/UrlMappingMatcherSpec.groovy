@@ -22,12 +22,10 @@ import grails.artefact.Interceptor
 import grails.util.Environment
 import grails.web.mapping.UrlMappingInfo
 import spock.lang.Issue
+import spock.util.environment.RestoreSystemProperties
 import spock.lang.Specification
 
 class UrlMappingMatcherSpec extends Specification {
-
-    // Store original environment to restore in cleanup for parallel test isolation
-    private String originalEnvironment
 
     @Issue('https://github.com/apache/grails-core/issues/9179')
     void 'test a matcher with a uri does not match all requests'() {
@@ -42,10 +40,10 @@ class UrlMappingMatcherSpec extends Specification {
         !matcher.doesMatch('/demo/index', mappingInfo)
     }
 
+    @RestoreSystemProperties
     @Issue("https://github.com/apache/grails-core/issues/9208")
     void "test caching of results in production"() {
         given:
-        originalEnvironment = System.getProperty(Environment.KEY)
         System.setProperty(Environment.KEY, "prod")
         String controller = "foo"
         String url = "/foo/test"
@@ -56,10 +54,8 @@ class UrlMappingMatcherSpec extends Specification {
         def matcher = new UrlMappingMatcher(Mock(Interceptor))
         matcher.matches(controller: controller)
 
-
         then:
         matcher.doesMatch(url, info)
-
 
         when:
         matcher = new UrlMappingMatcher(Mock(Interceptor))
@@ -67,13 +63,5 @@ class UrlMappingMatcherSpec extends Specification {
 
         then:
         !matcher.doesMatch(url, info)
-
-        cleanup:
-        // Restore original environment value for parallel test isolation
-        if (originalEnvironment != null) {
-            System.setProperty(Environment.KEY, originalEnvironment)
-        } else {
-            System.clearProperty(Environment.KEY)
-        }
     }
 }

@@ -30,6 +30,7 @@ import org.grails.datastore.mapping.mongo.config.MongoSettings
 import org.grails.datastore.mapping.multitenancy.AllTenantsResolver
 import org.grails.datastore.mapping.multitenancy.resolvers.SystemPropertyTenantResolver
 import spock.lang.AutoCleanup
+import spock.util.environment.RestoreSystemProperties
 import spock.lang.Shared
 
 import static com.mongodb.client.model.Filters.*
@@ -37,6 +38,7 @@ import static com.mongodb.client.model.Filters.*
 /**
  * Created by graemerocher on 13/07/2016.
  */
+@RestoreSystemProperties
 class MultiTenancySpec extends AutoStartedMongoSpec {
 
     @Shared @AutoCleanup MongoDatastore datastore
@@ -53,14 +55,6 @@ class MultiTenancySpec extends AutoStartedMongoSpec {
                 (MongoSettings.SETTING_URL)                   : "mongodb://${mongoHost}:${mongoPort}/defaultDb" as String,
         ]
         this.datastore = new MongoDatastore(config, getDomainClasses() as Class[])
-    }
-
-    void setup() {
-        System.setProperty(SystemPropertyTenantResolver.PROPERTY_NAME, "")
-    }
-
-    void cleanup() {
-        System.setProperty(SystemPropertyTenantResolver.PROPERTY_NAME, "")
     }
 
 
