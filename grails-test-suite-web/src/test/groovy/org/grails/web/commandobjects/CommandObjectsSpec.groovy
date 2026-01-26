@@ -53,13 +53,19 @@ class CommandObjectsSpec extends Specification implements ControllerUnitTest<Tes
      * This is necessary because the Validateable trait caches constraints in a static field,
      * and when tests run sequentially within a fork, the constraints may be evaluated with
      * a different ApplicationContext, causing stale cached data.
+     *
+     * Also clear ConstraintEvalUtils.defaultConstraintsMap which caches shared constraints
+     * globally. When tests run sequentially, another test's config may have been cached,
+     * causing the 'isProg' shared constraint to not be found.
      */
     def setup() {
+        ConstraintEvalUtils.clearDefaultConstraints()
         clearConstraintsMapCache(Artist)
         clearConstraintsMapCache(ArtistSubclass)
     }
 
     def cleanup() {
+        ConstraintEvalUtils.clearDefaultConstraints()
         clearConstraintsMapCache(Artist)
         clearConstraintsMapCache(ArtistSubclass)
     }
