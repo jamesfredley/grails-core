@@ -61,6 +61,20 @@ class FormTagLibTests extends Specification implements TagLibUnitTest<FormTagLib
                 delegate.grailsApplication = grailsApplication
             }
         }
+
+        // Update the linkGenerator's urlMappingsHolder reference to point to the new holder bean.
+        // This is necessary because linkGenerator was @Autowired with the previous holder instance
+        // and won't automatically update when we redefine the grailsUrlMappingsHolder bean.
+        refreshLinkGeneratorUrlMappingsHolder()
+    }
+
+    private void refreshLinkGeneratorUrlMappingsHolder() {
+        if (applicationContext.containsBean('grailsLinkGenerator') && applicationContext.containsBean('grailsUrlMappingsHolder')) {
+            def linkGenerator = applicationContext.getBean('grailsLinkGenerator')
+            if (linkGenerator.hasProperty('urlMappingsHolder')) {
+                linkGenerator.urlMappingsHolder = applicationContext.getBean('grailsUrlMappingsHolder')
+            }
+        }
     }
 
     def cleanup() {
