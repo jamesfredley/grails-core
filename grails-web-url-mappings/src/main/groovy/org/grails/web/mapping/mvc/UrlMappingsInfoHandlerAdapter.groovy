@@ -158,6 +158,10 @@ class UrlMappingsInfoHandlerAdapter implements HandlerAdapter, ApplicationContex
         return null
     }
 
-    @Override
+    /**
+     * @deprecated This method is no longer part of the HandlerAdapter interface in Spring Framework 7,
+     * but is kept for backward compatibility with existing code that may call it directly.
+     */
+    @Deprecated
     long getLastModified(HttpServletRequest request, Object handler) { -1 }
 }

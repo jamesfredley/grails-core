@@ -18,8 +18,6 @@
  */
 package org.grails.web.config.http;
 
-import org.springframework.boot.security.autoconfigure.SecurityProperties;
-
 /**
  * Stores the default order numbers of all Grails filters for use in configuration.
  * These filters are run prior to the Spring Security Filter Chain which is at DEFAULT_FILTER_ORDER
@@ -33,13 +31,21 @@ public enum GrailsFilters {
     HIDDEN_HTTP_METHOD_FILTER,
     SITEMESH_FILTER,
     GRAILS_WEB_REQUEST_FILTER,
-    LAST(SecurityProperties.DEFAULT_FILTER_ORDER - 10);
+    LAST(-110);  // DEFAULT_FILTER_ORDER (-100) minus 10
+
+    /**
+     * The default order of the Spring Security filter chain.
+     * This value was previously available as {@code SecurityProperties.DEFAULT_FILTER_ORDER}
+     * but was removed in Spring Boot 4.0. The value -100 ensures Grails filters run
+     * before the security filter chain.
+     */
+    public static final int DEFAULT_FILTER_ORDER = -100;
 
     private static final int INTERVAL = 10;
     private final int order;
 
     GrailsFilters() {
-        this.order = SecurityProperties.DEFAULT_FILTER_ORDER - 100 + ordinal() * INTERVAL;
+        this.order = DEFAULT_FILTER_ORDER - 100 + ordinal() * INTERVAL;
     }
 
     GrailsFilters(int order) {

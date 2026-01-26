@@ -47,7 +47,9 @@ class DefaultUrlCreatorTests {
     @Test
     void testCreateUrlNoCharacterEncoding() {
         def webRequest = GrailsWebMockUtil.bindMockWebRequest()
-        webRequest.currentRequest.characterEncoding = null
+        // Explicitly cast to String to avoid ambiguous method overloading in Spring Framework 7
+        // MockHttpServletRequest.setCharacterEncoding now has overloads for both String and Charset
+        webRequest.currentRequest.setCharacterEncoding((String) null)
 
         def creator = new DefaultUrlCreator("foo", "index")
 

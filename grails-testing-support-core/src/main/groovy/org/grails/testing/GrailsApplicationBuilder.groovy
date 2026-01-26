@@ -35,7 +35,7 @@ import org.springframework.beans.factory.support.RootBeanDefinition
 import org.springframework.boot.autoconfigure.AutoConfiguration
 import org.springframework.boot.context.annotation.ImportCandidates
 import org.springframework.boot.test.context.ConfigDataApplicationContextInitializer
-import org.springframework.boot.web.servlet.context.AnnotationConfigServletWebApplicationContext
+import org.springframework.web.context.support.GenericWebApplicationContext
 import org.springframework.context.ConfigurableApplicationContext
 import org.springframework.context.annotation.AnnotationConfigRegistry
 import org.springframework.context.annotation.AnnotationConfigUtils
@@ -125,25 +125,42 @@ class GrailsApplicationBuilder {
     protected ConfigurableApplicationContext createMainContext(Object servletContext) {
         ConfigurableApplicationContext context
         if (isServletApiPresent && servletContext != null) {
-            context = (AnnotationConfigServletWebApplicationContext) ClassUtils.forName('org.springframework.boot.web.servlet.context.AnnotationConfigServletWebApplicationContext').getDeclaredConstructor().newInstance()
-            ((AnnotationConfigServletWebApplicationContext) context).setServletContext((ServletContext) servletContext)
+            // Spring Boot 4 removed AnnotationConfigServletWebApplicationContext
+            // Use GenericWebApplicationContext with a DefaultListableBeanFactory for testing with MockServletContext
+            def beanFactory = new DefaultListableBeanFactory()
+            beanFactory.setAllowBeanDefinitionOverriding(true)
+            beanFactory.setAllowCircularReferences(true)
+            context = (GenericWebApplicationContext) ClassUtils.forName('org.springframework.web.context.support.GenericWebApplicationContext').getDeclaredConstructor(DefaultListableBeanFactory).newInstance(beanFactory)
+            ((GenericWebApplicationContext) context).setServletContext((ServletContext) servletContext)
         } else {
             context = (ConfigurableApplicationContext) ClassUtils.forName('org.springframework.context.annotation.AnnotationConfigApplicationContext').getDeclaredConstructor().newInstance()
         }
 
         def classLoader = this.class.classLoader
+        def beanFactory = context.getBeanFactory()
+        if (!(context instanceof GenericWebApplicationContext)) {
+            // Only set these for non-GenericWebApplicationContext (already set above for web context)
+            (beanFactory as DefaultListableBeanFactory).with {
+                setAllowBeanDefinitionOverriding(true)
+                setAllowCircularReferences(true)
+            }
+        }
+        
+        // Register auto-configuration classes as bean definitions
         ImportCandidates.load(AutoConfiguration, classLoader).asList().findAll {
             it.startsWith('org.grails')
             && !it.contains('UrlMappingsAutoConfiguration') // this currently is causing an issue with tests
-        }.each {
-            ((AnnotationConfigRegistry) context).register(ClassUtils.forName(it, classLoader))
+        }.each { className ->
+            def clazz = ClassUtils.forName(className, classLoader)
+            if (context instanceof AnnotationConfigRegistry) {
+                ((AnnotationConfigRegistry) context).register(clazz)
+            } else {
+                // For GenericWebApplicationContext, register as bean definition
+                def beanDef = new RootBeanDefinition(clazz)
+                ((BeanDefinitionRegistry) beanFactory).registerBeanDefinition(className, beanDef)
+            }
         }
 
-        def beanFactory = context.getBeanFactory()
-        (beanFactory as DefaultListableBeanFactory).with {
-            setAllowBeanDefinitionOverriding(true)
-            setAllowCircularReferences(true)
-        }
         prepareContext(context, beanFactory)
         context.refresh()
         context.registerShutdownHook()

@@ -54,6 +54,8 @@ dependencies {
     }
     testImplementation "org.spockframework:spock-core"
 
+    testRuntimeOnly "org.springframework.boot:spring-boot-jdbc"
+    testRuntimeOnly "org.springframework.boot:spring-boot-hibernate"
     testRuntimeOnly "org.apache.tomcat:tomcat-jdbc"
     testRuntimeOnly "com.h2database:h2"
 }
