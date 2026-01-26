@@ -49,8 +49,18 @@ class CommandObjectNoDataSpec extends Specification implements GrailsWebUnitTest
      * Also clear ConstraintEvalUtils.defaultConstraintsMap which caches shared constraints
      * globally. When tests run sequentially, another test's config may have been cached,
      * causing the 'isProg' shared constraint to not be found.
+     *
+     * IMPORTANT: We access 'config' first to ensure GrailsApplication is initialized
+     * and Holders.grailsApplication is set. This triggers doWithConfig() which registers
+     * the 'isProg' shared constraint. We then clear the caches so they will be repopulated
+     * from the freshly-configured application when validate() is called.
      */
     def setup() {
+        // Access config to ensure grailsApplication is initialized and Holders is populated
+        // This triggers doWithConfig() which registers the 'isProg' shared constraint
+        assert config != null
+        
+        // Now clear the caches so they will be repopulated from the fresh config
         ConstraintEvalUtils.clearDefaultConstraints()
         clearConstraintsMapCache(Artist)
     }
