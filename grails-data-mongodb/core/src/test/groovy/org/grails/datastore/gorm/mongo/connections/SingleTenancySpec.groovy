@@ -67,7 +67,7 @@ class SingleTenancySpec extends AutoStartedMongoSpec {
     }
 
     void setup() {
-        // Ensure tenant property is cleared before each test for isolation with parallel test execution
+        // Ensure tenant property is cleared before each test for test isolation
         System.clearProperty(SystemPropertyTenantResolver.PROPERTY_NAME)
     }
 

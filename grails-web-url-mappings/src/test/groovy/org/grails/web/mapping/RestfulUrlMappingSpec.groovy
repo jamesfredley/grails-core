@@ -39,7 +39,7 @@ class RestfulUrlMappingSpec extends Specification {
     }
 
     def cleanup() {
-        // Reset request context for parallel test isolation
+        // Reset request context for test isolation
         RequestContextHolder.resetRequestAttributes()
     }
 

@@ -36,7 +36,7 @@ class WithFormatContentTypeSpec extends Specification implements ControllerUnitT
     }}
 
     def setup() {
-        // Clear the static mimeTypes cache to ensure proper test isolation in parallel test runs.
+        // Clear the static mimeTypes cache to ensure proper test isolation.
         // HttpServletResponseExtension caches mime types in a static field.
         HttpServletResponseExtension.@mimeTypes = null
     }

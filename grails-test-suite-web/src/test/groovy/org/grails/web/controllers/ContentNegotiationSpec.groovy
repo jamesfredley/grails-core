@@ -52,12 +52,12 @@ class ContentNegotiationSpec extends Specification implements ControllerUnitTest
     }}
 
     def setup() {
-        // Clear the static mimeTypes cache to ensure proper test isolation in parallel test runs
+        // Clear the static mimeTypes cache to ensure proper test isolation
         HttpServletResponseExtension.@mimeTypes = null
     }
 
     def cleanup() {
-        // Clear the static mimeTypes cache after each test for parallel test isolation
+        // Clear the static mimeTypes cache after each test for test isolation
         HttpServletResponseExtension.@mimeTypes = null
     }
 

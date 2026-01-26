@@ -50,7 +50,7 @@ class BeanBuilderTests {
     protected void tearDown() {
         // Only reset what we set in setUp() - don't call Holders.clear() as it
         // clears ALL Holders state (including grailsApplication) which can cause
-        // flaky failures in parallel test execution when other tests depend on Holders
+        // flaky failures when other tests depend on Holders
         Holders.setPluginManager null
     }
 

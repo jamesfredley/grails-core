@@ -33,8 +33,8 @@ class ValidateableTraitAdHocSpec extends Specification {
     /**
      * Clear the static constraints cache for classes that use shared constraints.
      * This is necessary because the Validateable trait caches constraints in a static field,
-     * and in parallel test execution, the constraints may be evaluated before configuration
-     * has registered the shared constraints.
+     * and when tests run sequentially within a fork, the constraints may be evaluated before
+     * configuration has registered the shared constraints.
      */
     void setup() {
         clearConstraintsMapCache(PersonAdHocSharedConstraintsValidateable)

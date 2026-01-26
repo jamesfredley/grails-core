@@ -31,12 +31,12 @@ import spock.lang.Specification
 class RestfulReverseUrlRenderingTests extends Specification implements UrlMappingsUnitTest<RestfulReverseUrlMappings> {
 
     def setup() {
-        // Clear any existing URL mappings artefacts to prevent pollution from parallel test execution
+        // Clear any existing URL mappings artefacts to ensure test isolation
         clearUrlMappingsArtefacts()
     }
 
     def cleanup() {
-        // Clear URL mappings artefacts added by this test to prevent pollution of other tests
+        // Clear URL mappings artefacts added by this test to ensure test isolation
         clearUrlMappingsArtefacts()
     }
 

@@ -55,7 +55,7 @@ class RequestAndResponseMimeTypesApiSpec extends Specification{
     }
 
     void setup() {
-        // Clear the static mimeTypes cache to ensure proper test isolation in parallel test runs
+        // Clear the static mimeTypes cache to ensure proper test isolation
         HttpServletResponseExtension.@mimeTypes = null
         application = new DefaultGrailsApplication()
         application.config = testConfig
@@ -64,7 +64,7 @@ class RequestAndResponseMimeTypesApiSpec extends Specification{
     void cleanup() {
         RequestContextHolder.resetRequestAttributes()
         ShutdownOperations.runOperations()
-        // Clear the static mimeTypes cache after each test for parallel test isolation
+        // Clear the static mimeTypes cache after each test for test isolation
         HttpServletResponseExtension.@mimeTypes = null
     }
 

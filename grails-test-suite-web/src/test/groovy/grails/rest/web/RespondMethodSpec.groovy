@@ -33,12 +33,12 @@ import spock.lang.Specification
 class RespondMethodSpec extends Specification implements ControllerUnitTest<BookController>, DomainUnitTest<Book> {
 
     def setup() {
-        // Clear the static mimeTypes cache to ensure proper test isolation in parallel test runs
+        // Clear the static mimeTypes cache to ensure proper test isolation
         HttpServletResponseExtension.@mimeTypes = null
     }
 
     def cleanup() {
-        // Clear the static mimeTypes cache to ensure proper test isolation in parallel test runs
+        // Clear the static mimeTypes cache to ensure proper test isolation
         HttpServletResponseExtension.@mimeTypes = null
     }
 

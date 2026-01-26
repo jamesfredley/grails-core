@@ -21,16 +21,14 @@ package org.grails.web.commandobjects
 
 import grails.testing.web.GrailsWebUnitTest
 import org.grails.validation.ConstraintEvalUtils
-import spock.lang.Isolated
 import spock.lang.Specification
 
 /**
  * Tests for command object validation without DataTest trait.
- * This spec is marked @Isolated because it modifies global shared constraints
- * via doWithConfig() which affects ConstraintEvalUtils.defaultConstraintsMap - a static
- * cache shared across all tests in the same JVM fork.
+ * This spec modifies global shared constraints via doWithConfig() which affects
+ * ConstraintEvalUtils.defaultConstraintsMap - a static cache shared across all tests
+ * in the same JVM fork. The setup/cleanup methods clear this cache to ensure test isolation.
  */
-@Isolated
 class CommandObjectNoDataSpec extends Specification implements GrailsWebUnitTest {
 
     // Cache the static field helper interface for performance
@@ -45,11 +43,11 @@ class CommandObjectNoDataSpec extends Specification implements GrailsWebUnitTest
     /**
      * Clear the static constraints cache for Artist class.
      * This is necessary because the Validateable trait caches constraints in a static field,
-     * and in parallel test execution, the constraints may be evaluated before doWithConfig()
-     * has registered the shared constraint 'isProg'.
+     * and when tests run sequentially within a fork, the constraints may be evaluated before
+     * doWithConfig() has registered the shared constraint 'isProg'.
      *
      * Also clear ConstraintEvalUtils.defaultConstraintsMap which caches shared constraints
-     * globally. In parallel test execution, another test's config may have been cached,
+     * globally. When tests run sequentially, another test's config may have been cached,
      * causing the 'isProg' shared constraint to not be found.
      */
     def setup() {

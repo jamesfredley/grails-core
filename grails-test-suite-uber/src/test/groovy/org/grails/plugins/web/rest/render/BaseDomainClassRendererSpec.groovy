@@ -58,13 +58,13 @@ import spock.lang.Specification
 abstract class BaseDomainClassRendererSpec extends Specification {
 
     void setup() {
-        // Clear the static mimeTypes cache to ensure proper test isolation in parallel test runs
+        // Clear the static mimeTypes cache to ensure proper test isolation
         HttpServletResponseExtension.@mimeTypes = null
     }
 
     void cleanup() {
         RequestContextHolder.resetRequestAttributes()
-        // Clear the static mimeTypes cache after each test for parallel test isolation
+        // Clear the static mimeTypes cache after each test for test isolation
         HttpServletResponseExtension.@mimeTypes = null
     }
 

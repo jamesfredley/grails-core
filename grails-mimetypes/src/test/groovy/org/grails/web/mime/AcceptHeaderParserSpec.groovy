@@ -42,7 +42,7 @@ class AcceptHeaderParserSpec extends Specification {
     def config
 
     void setup() {
-        // Clear the static mimeTypes cache to ensure proper test isolation in parallel test runs
+        // Clear the static mimeTypes cache to ensure proper test isolation
         HttpServletResponseExtension.@mimeTypes = null
         def configObject = new ConfigSlurper()
                 .parse("""
@@ -68,7 +68,7 @@ grails.mime.types = [ xml: ['text/xml', 'application/xml'],
     void cleanup() {
         config = null
         Holders.setConfig null
-        // Clear the static mimeTypes cache after each test for parallel test isolation
+        // Clear the static mimeTypes cache after each test for test isolation
         HttpServletResponseExtension.@mimeTypes = null
     }
 

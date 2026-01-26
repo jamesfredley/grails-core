@@ -39,7 +39,7 @@ class DomainClassTraitSpec extends Specification {
 
     void cleanupSpec() {
         // Use cleanupSpec() instead of cleanup() to clear Holders only after all tests
-        // in this class complete, avoiding interference with parallel tests in other classes
+        // in this class complete, ensuring proper test isolation
         Holders.clear()
     }
 

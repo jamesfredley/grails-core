@@ -50,7 +50,7 @@ class WebUtilsTests {
     @BeforeEach
     void setUp() {
         RequestContextHolder.resetRequestAttributes()
-        // Clear the static mimeTypes cache to ensure proper test isolation in parallel test runs
+        // Clear the static mimeTypes cache to ensure proper test isolation
         HttpServletResponseExtension.@mimeTypes = null
         config = new ConfigSlurper().parse("""
 grails.mime.file.extensions=false
@@ -72,7 +72,7 @@ grails.mime.types = [ html: ['text/html','application/xhtml+xml'],
     @AfterEach
     void tearDown() {
         RequestContextHolder.resetRequestAttributes()
-        // Clear the static mimeTypes cache after each test for parallel test isolation
+        // Clear the static mimeTypes cache after each test for test isolation
         HttpServletResponseExtension.@mimeTypes = null
     }
 

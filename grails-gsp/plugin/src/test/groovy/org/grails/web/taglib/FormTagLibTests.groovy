@@ -52,7 +52,7 @@ class FormTagLibTests extends Specification implements TagLibUnitTest<FormTagLib
     def setup() {
         tagLib.requestDataValueProcessor = new MockRequestDataValueProcessor()
 
-        // Clear any existing URL mappings artefacts to prevent pollution from parallel test execution
+        // Clear any existing URL mappings artefacts to ensure test isolation
         clearUrlMappingsArtefacts()
         grailsApplication.addArtefact(UrlMappingsArtefactHandler.TYPE, FormTagLibUrlMappings)
 
