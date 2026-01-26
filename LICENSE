@@ -242,3 +242,45 @@ licensed under the OpenSymphony Software License, Version 1.1.
 See licenses/LICENSE-opensymphony.txt for the full license terms.
 
 --------------------------------------------------------------------------
+
+This product includes software from the Spring Framework project (https://spring.io/projects/spring-framework),
+licensed under the Apache License, Version 2.0.
+
+Copyright 2002-present the original author or authors.
+
+The following files are derived from Spring Framework:
+
+    grails-spring/src/main/java/org/springframework/ui/context/HierarchicalThemeSource.java
+    grails-spring/src/main/java/org/springframework/ui/context/Theme.java
+    grails-spring/src/main/java/org/springframework/ui/context/ThemeSource.java
+    grails-spring/src/main/java/org/springframework/ui/context/support/DelegatingThemeSource.java
+    grails-spring/src/main/java/org/springframework/ui/context/support/ResourceBundleThemeSource.java
+    grails-spring/src/main/java/org/springframework/ui/context/support/SimpleTheme.java
+    grails-spring/src/main/java/org/springframework/ui/context/support/UiApplicationContextUtils.java
+    grails-spring/src/main/java/org/springframework/web/servlet/ThemeResolver.java
+    grails-spring/src/main/java/org/springframework/web/servlet/theme/AbstractThemeResolver.java
+    grails-spring/src/main/java/org/springframework/web/servlet/theme/SessionThemeResolver.java
+    grails-data-hibernate5/core/src/main/java/org/grails/orm/hibernate/support/hibernate5/ConfigurableJtaPlatform.java
+    grails-data-hibernate5/core/src/main/java/org/grails/orm/hibernate/support/hibernate5/HibernateCallback.java
+    grails-data-hibernate5/core/src/main/java/org/grails/orm/hibernate/support/hibernate5/HibernateExceptionTranslator.java
+    grails-data-hibernate5/core/src/main/java/org/grails/orm/hibernate/support/hibernate5/HibernateJdbcException.java
+    grails-data-hibernate5/core/src/main/java/org/grails/orm/hibernate/support/hibernate5/HibernateObjectRetrievalFailureException.java
+    grails-data-hibernate5/core/src/main/java/org/grails/orm/hibernate/support/hibernate5/HibernateOperations.java
+    grails-data-hibernate5/core/src/main/java/org/grails/orm/hibernate/support/hibernate5/HibernateOptimisticLockingFailureException.java
+    grails-data-hibernate5/core/src/main/java/org/grails/orm/hibernate/support/hibernate5/HibernateQueryException.java
+    grails-data-hibernate5/core/src/main/java/org/grails/orm/hibernate/support/hibernate5/HibernateSystemException.java
+    grails-data-hibernate5/core/src/main/java/org/grails/orm/hibernate/support/hibernate5/HibernateTemplate.java
+    grails-data-hibernate5/core/src/main/java/org/grails/orm/hibernate/support/hibernate5/HibernateTransactionManager.java
+    grails-data-hibernate5/core/src/main/java/org/grails/orm/hibernate/support/hibernate5/LocalSessionFactoryBean.java
+    grails-data-hibernate5/core/src/main/java/org/grails/orm/hibernate/support/hibernate5/LocalSessionFactoryBuilder.java
+    grails-data-hibernate5/core/src/main/java/org/grails/orm/hibernate/support/hibernate5/SessionFactoryUtils.java
+    grails-data-hibernate5/core/src/main/java/org/grails/orm/hibernate/support/hibernate5/SessionHolder.java
+    grails-data-hibernate5/core/src/main/java/org/grails/orm/hibernate/support/hibernate5/SpringBeanContainer.java
+    grails-data-hibernate5/core/src/main/java/org/grails/orm/hibernate/support/hibernate5/SpringFlushSynchronization.java
+    grails-data-hibernate5/core/src/main/java/org/grails/orm/hibernate/support/hibernate5/SpringJtaSessionContext.java
+    grails-data-hibernate5/core/src/main/java/org/grails/orm/hibernate/support/hibernate5/SpringSessionContext.java
+    grails-data-hibernate5/core/src/main/java/org/grails/orm/hibernate/support/hibernate5/SpringSessionSynchronization.java
+    grails-data-hibernate5/core/src/main/java/org/grails/orm/hibernate/support/hibernate5/support/AsyncRequestInterceptor.java
+    grails-data-hibernate5/core/src/main/java/org/grails/orm/hibernate/support/hibernate5/support/OpenSessionInViewInterceptor.java
+
+--------------------------------------------------------------------------

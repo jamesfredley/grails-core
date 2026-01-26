@@ -8,6 +8,16 @@ The Apache Software Foundation (http://www.apache.org/).
 Additional Licenses
 ------------------
 
+This product includes software from the Spring Framework project, licensed under the Apache License, Version 2.0.
+Copyright 2002-present the original author or authors.
+https://spring.io/projects/spring-framework
+
+The following files are derived from Spring Framework:
+- grails-spring/src/main/java/org/springframework/ui/context/* (Theme support)
+- grails-spring/src/main/java/org/springframework/web/servlet/ThemeResolver.java
+- grails-spring/src/main/java/org/springframework/web/servlet/theme/* (Theme resolvers)
+- grails-data-hibernate5/core/src/main/java/org/grails/orm/hibernate/support/hibernate5/* (Hibernate ORM support)
+
 This product uses the Jakarta Annotations™ API which is a trademark of the Eclipse Foundation. It is licensed under
 the Eclipse Public License v. 2.0 which is available at https://www.eclipse.org/legal/epl-2.0.
 
