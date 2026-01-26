@@ -18,7 +18,7 @@
  */
 package org.grails.web.config.http;
 
-import org.springframework.boot.autoconfigure.security.SecurityProperties;
+import org.springframework.boot.security.autoconfigure.SecurityProperties;
 
 /**
  * Stores the default order numbers of all Grails filters for use in configuration.
