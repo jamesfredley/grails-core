@@ -59,7 +59,7 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory
 import org.springframework.beans.factory.support.RootBeanDefinition
-import org.springframework.boot.web.servlet.context.AnnotationConfigServletWebServerApplicationContext
+import org.springframework.boot.web.server.servlet.context.AnnotationConfigServletWebServerApplicationContext
 import org.springframework.context.ApplicationContext
 import org.springframework.context.MessageSource
 import org.springframework.context.support.StaticMessageSource
@@ -91,6 +91,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue
 import static org.junit.jupiter.api.Assertions.fail
 
 abstract class AbstractGrailsTagTests {
+
+    // Theme support was removed in Spring Framework 7.0 - define the attribute names directly
+    private static final String THEME_SOURCE_ATTRIBUTE = DispatcherServlet.class.getName() + ".THEME_SOURCE"
+    private static final String THEME_RESOLVER_ATTRIBUTE = DispatcherServlet.class.getName() + ".THEME_RESOLVER"
 
     ServletContext servletContext
     GrailsWebRequest webRequest
@@ -360,8 +364,9 @@ abstract class AbstractGrailsTagTests {
     }
 
     private void initThemeSource(request, MessageSource messageSource) {
-        request.setAttribute(DispatcherServlet.THEME_SOURCE_ATTRIBUTE, new MockThemeSource(messageSource))
-        request.setAttribute(DispatcherServlet.THEME_RESOLVER_ATTRIBUTE, new SessionThemeResolver())
+        // Theme support was removed in Spring Framework 7.0 - using copied theme classes
+        request.setAttribute(THEME_SOURCE_ATTRIBUTE, new MockThemeSource(messageSource))
+        request.setAttribute(THEME_RESOLVER_ATTRIBUTE, new SessionThemeResolver())
     }
 
     @AfterEach
