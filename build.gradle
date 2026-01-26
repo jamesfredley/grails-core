@@ -20,6 +20,8 @@ import java.time.LocalDate
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 
+apply from: rootProject.layout.projectDirectory.file('dependencies.gradle')
+
 ext {
     isReproducibleBuild = System.getenv("SOURCE_DATE_EPOCH") != null
     buildInstant = java.util.Optional.ofNullable(System.getenv("SOURCE_DATE_EPOCH"))
@@ -70,6 +72,15 @@ subprojects {
             def cacheHours = isCiBuild || isReproducibleBuild ? 0 : 24
             cacheDynamicVersionsFor(cacheHours, 'hours')
             cacheChangingModulesFor(cacheHours, 'hours')
+            
+            // TODO: Remove these Groovy version overrides once Grails 8 is ready to run on Groovy 5
+            // Force Groovy version to override Spring Boot 4.0.1's default of Groovy 5.0.3
+            // This ensures all grails-core modules are compiled with the correct Groovy version
+            force "org.apache.groovy:groovy:${bomDependencyVersions['groovy.version']}"
+            force "org.apache.groovy:groovy-templates:${bomDependencyVersions['groovy.version']}"
+            force "org.apache.groovy:groovy-xml:${bomDependencyVersions['groovy.version']}"
+            force "org.apache.groovy:groovy-json:${bomDependencyVersions['groovy.version']}"
+            force "org.apache.groovy:groovy-sql:${bomDependencyVersions['groovy.version']}"
         }
     }
 }
