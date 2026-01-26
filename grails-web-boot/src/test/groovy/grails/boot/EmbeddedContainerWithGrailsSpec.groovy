@@ -22,9 +22,9 @@ import grails.artefact.Artefact
 import grails.boot.config.GrailsAutoConfiguration
 import grails.web.Controller
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration
-import org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactory
-import org.springframework.boot.web.servlet.context.AnnotationConfigServletWebServerApplicationContext
-import org.springframework.boot.web.servlet.server.ConfigurableServletWebServerFactory
+import org.springframework.boot.tomcat.servlet.TomcatServletWebServerFactory
+import org.springframework.boot.web.server.servlet.ConfigurableServletWebServerFactory
+import org.springframework.boot.web.server.servlet.context.AnnotationConfigServletWebServerApplicationContext
 import org.springframework.context.annotation.Bean
 import spock.lang.Specification
 
