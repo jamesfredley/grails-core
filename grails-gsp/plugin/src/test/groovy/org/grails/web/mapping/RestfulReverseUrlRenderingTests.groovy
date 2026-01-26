@@ -20,6 +20,7 @@ package org.grails.web.mapping
 
 import grails.artefact.Artefact
 import grails.testing.web.UrlMappingsUnitTest
+import org.grails.core.artefact.UrlMappingsArtefactHandler
 import spock.lang.Specification
 
 /**
@@ -29,6 +30,22 @@ import spock.lang.Specification
  */
 class RestfulReverseUrlRenderingTests extends Specification implements UrlMappingsUnitTest<RestfulReverseUrlMappings> {
 
+    def setup() {
+        // Clear any existing URL mappings artefacts to prevent pollution from parallel test execution
+        clearUrlMappingsArtefacts()
+    }
+
+    def cleanup() {
+        // Clear URL mappings artefacts added by this test to prevent pollution of other tests
+        clearUrlMappingsArtefacts()
+    }
+
+    private void clearUrlMappingsArtefacts() {
+        // Access the protected artefactInfo map and remove URL mappings to ensure test isolation
+        if (grailsApplication instanceof grails.core.DefaultGrailsApplication) {
+            grailsApplication.@artefactInfo.remove(UrlMappingsArtefactHandler.TYPE)
+        }
+    }
 
     def testLinkTagRendering() {
         when:
