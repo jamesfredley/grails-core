@@ -23,6 +23,7 @@ import jakarta.transaction.Transaction;
 import jakarta.transaction.TransactionManager;
 import jakarta.transaction.TransactionSynchronizationRegistry;
 import jakarta.transaction.UserTransaction;
+
 import org.hibernate.TransactionException;
 import org.hibernate.engine.transaction.jta.platform.spi.JtaPlatform;
 
@@ -47,7 +48,6 @@ class ConfigurableJtaPlatform implements JtaPlatform {
     @Nullable
     private final TransactionSynchronizationRegistry transactionSynchronizationRegistry;
 
-
     /**
      * Create a new ConfigurableJtaPlatform instance with the given
      * JTA TransactionManager and optionally a given UserTransaction.
@@ -63,7 +63,6 @@ class ConfigurableJtaPlatform implements JtaPlatform {
         this.userTransaction = (ut != null ? ut : new UserTransactionAdapter(tm));
         this.transactionSynchronizationRegistry = tsr;
     }
-
 
     @Override
     public TransactionManager retrieveTransactionManager() {

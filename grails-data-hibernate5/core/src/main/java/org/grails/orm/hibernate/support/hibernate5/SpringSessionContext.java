@@ -19,6 +19,7 @@ package org.grails.orm.hibernate.support.hibernate5;
 import jakarta.transaction.Status;
 import jakarta.transaction.SystemException;
 import jakarta.transaction.TransactionManager;
+
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.FlushMode;
 import org.hibernate.HibernateException;
@@ -54,7 +55,6 @@ public class SpringSessionContext implements CurrentSessionContext {
     @Nullable
     private CurrentSessionContext jtaSessionContext;
 
-
     /**
      * Create a new SpringSessionContext for the given Hibernate SessionFactory.
      * @param sessionFactory the SessionFactory to provide current Sessions for
@@ -73,7 +73,6 @@ public class SpringSessionContext implements CurrentSessionContext {
                     "Could not introspect Hibernate JtaPlatform for SpringJtaSessionContext", ex);
         }
     }
-
 
     /**
      * Retrieve the Spring-managed Session for the current thread, if any.

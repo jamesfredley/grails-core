@@ -91,7 +91,6 @@ public interface HibernateOperations {
     @Nullable
     <T> T execute(HibernateCallback<T> action) throws DataAccessException;
 
-
     //-------------------------------------------------------------------------
     // Convenience methods for loading individual objects
     //-------------------------------------------------------------------------
@@ -311,7 +310,6 @@ public interface HibernateOperations {
      * transactional Session (in which case this operation does not make sense)
      */
     Filter enableFilter(String filterName) throws IllegalStateException;
-
 
     //-------------------------------------------------------------------------
     // Convenience methods for storing individual objects
@@ -582,7 +580,6 @@ public interface HibernateOperations {
      */
     void clear() throws DataAccessException;
 
-
     //-------------------------------------------------------------------------
     // Convenience finder methods for detached criteria
     //-------------------------------------------------------------------------
@@ -670,7 +667,6 @@ public interface HibernateOperations {
     <T> List<T> findByExample(String entityName, T exampleEntity, int firstResult, int maxResults)
             throws DataAccessException;
 
-
     //-------------------------------------------------------------------------
     // Convenience finder methods for HQL strings
     //-------------------------------------------------------------------------
@@ -733,7 +729,6 @@ public interface HibernateOperations {
      */
     @Deprecated
     List<?> findByValueBean(String queryString, Object valueBean) throws DataAccessException;
-
 
     //-------------------------------------------------------------------------
     // Convenience finder methods for named queries
@@ -803,7 +798,6 @@ public interface HibernateOperations {
      */
     @Deprecated
     List<?> findByNamedQueryAndValueBean(String queryName, Object valueBean) throws DataAccessException;
-
 
     //-------------------------------------------------------------------------
     // Convenience query methods for iteration and bulk updates/deletes

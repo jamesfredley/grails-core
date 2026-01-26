@@ -26,6 +26,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import jakarta.persistence.PersistenceException;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.Criteria;
@@ -110,7 +111,6 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
 
     private int maxResults = 0;
 
-
     /**
      * Create a new HibernateTemplate instance.
      */
@@ -125,7 +125,6 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
         setSessionFactory(sessionFactory);
         afterPropertiesSet();
     }
-
 
     /**
      * Set the Hibernate SessionFactory that should be used to create
@@ -312,7 +311,6 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
         }
     }
 
-
     @Override
     @Nullable
     public <T> T execute(HibernateCallback<T> action) throws DataAccessException {
@@ -432,7 +430,6 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
             }
         }
     }
-
 
     //-------------------------------------------------------------------------
     // Convenience methods for loading individual objects
@@ -583,7 +580,6 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
         }
         return filter;
     }
-
 
     //-------------------------------------------------------------------------
     // Convenience methods for storing individual objects
@@ -796,7 +792,6 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
         });
     }
 
-
     //-------------------------------------------------------------------------
     // Convenience finder methods for detached criteria
     //-------------------------------------------------------------------------
@@ -860,7 +855,6 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
         }));
     }
 
-
     //-------------------------------------------------------------------------
     // Convenience finder methods for HQL strings
     //-------------------------------------------------------------------------
@@ -916,7 +910,6 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
             return queryObject.list();
         }));
     }
-
 
     //-------------------------------------------------------------------------
     // Convenience finder methods for named queries
@@ -978,7 +971,6 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
         }));
     }
 
-
     //-------------------------------------------------------------------------
     // Convenience query methods for iteration and bulk updates/deletes
     //-------------------------------------------------------------------------
@@ -1027,7 +1019,6 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
         return result;
     }
 
-
     //-------------------------------------------------------------------------
     // Helper methods used by the operations above
     //-------------------------------------------------------------------------
@@ -1045,7 +1036,7 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
     protected void checkWriteOperationAllowed(Session session) throws InvalidDataAccessApiUsageException {
         if (isCheckWriteOperations() && session.getHibernateFlushMode().lessThan(FlushMode.COMMIT)) {
             throw new InvalidDataAccessApiUsageException(
-                    "Write operations are not allowed in read-only mode (FlushMode.MANUAL): "+
+                    "Write operations are not allowed in read-only mode (FlushMode.MANUAL): " +
                     "Turn your Session into FlushMode.COMMIT/AUTO or remove 'readOnly' marker from transaction definition.");
         }
     }
@@ -1131,7 +1122,6 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
         Assert.state(result != null, "No result");
         return result;
     }
-
 
     /**
      * Invocation handler that suppresses close calls on Hibernate Sessions.

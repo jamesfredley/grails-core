@@ -23,6 +23,7 @@ import java.util.function.Consumer;
 import javax.sql.DataSource;
 
 import jakarta.persistence.PersistenceException;
+
 import org.hibernate.ConnectionReleaseMode;
 import org.hibernate.FlushMode;
 import org.hibernate.HibernateException;
@@ -137,7 +138,6 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
     @Nullable
     private BeanFactory beanFactory;
 
-
     /**
      * Create a new HibernateTransactionManager instance.
      * A SessionFactory has to be set to be able to use it.
@@ -154,7 +154,6 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
         this.sessionFactory = sessionFactory;
         afterPropertiesSet();
     }
-
 
     /**
      * Set the SessionFactory that this instance should manage transactions for.
@@ -406,7 +405,6 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
             }
         }
     }
-
 
     @Override
     public Object getResourceFactory() {
@@ -788,7 +786,6 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
         return SessionFactoryUtils.convertHibernateAccessException(ex);
     }
 
-
     /**
      * Hibernate transaction object, representing a SessionHolder.
      * Used as transaction object by HibernateTransactionManager.
@@ -897,7 +894,6 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
             }
         }
     }
-
 
     /**
      * Holder for suspended resources.
