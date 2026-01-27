@@ -31,6 +31,10 @@ import spock.lang.Specification
 class RestfulReverseUrlRenderingTests extends Specification implements UrlMappingsUnitTest<RestfulReverseUrlMappings> {
 
     def setup() {
+        // Access config to ensure grailsApplication is initialized and Holders is populated.
+        // This is necessary before accessing grailsApplication properties.
+        assert config != null
+        
         // Reset URL mappings to ensure test isolation - clear any mappings from previous tests
         // and re-register this test's URL mappings with a fresh holder bean
         if (grailsApplication instanceof grails.core.DefaultGrailsApplication) {
