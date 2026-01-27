@@ -28,6 +28,11 @@ import spock.util.environment.RestoreSystemProperties
 @RestoreSystemProperties
 class YamlPropertySourceLoaderSpec extends Specification {
 
+    def setup() {
+        System.setProperty(Environment.KEY, Environment.DEVELOPMENT.name)
+        Environment.reset()
+    }
+
     def "ensure the config for environment is merged with single environment block"() {
         given: "A PropertySourcesConfig instance"
         def propertySource = new YamlPropertySourceLoader()
