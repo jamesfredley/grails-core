@@ -33,12 +33,12 @@ class CommandObjectNoDataSpec extends Specification implements GrailsWebUnitTest
 
     /**
      * Clear the static constraints cache for Artist class.
-     * This is necessary because the Validateable trait caches constraints in a static field,
-     * and in parallel test execution, the constraints may be evaluated before doWithConfig()
+     * This prevents test environment pollution because the Validateable trait caches
+     * constraints in a static field, and constraints may be evaluated before doWithConfig()
      * has registered the shared constraint 'isProg'.
      *
      * Also clear ConstraintEvalUtils.defaultConstraintsMap which caches shared constraints
-     * globally. In parallel test execution, another test's config may have been cached,
+     * globally. Without this cleanup, another test's config may have been cached,
      * causing the 'isProg' shared constraint to not be found.
      */
     def setup() {
