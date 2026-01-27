@@ -27,7 +27,7 @@ import spock.lang.Specification
  * Tests for command object validation without DataTest trait.
  * This spec modifies global shared constraints via doWithConfig() which affects
  * ConstraintEvalUtils.defaultConstraintsMap - a static cache shared across all tests
- * in the same JVM fork. The setup/cleanup methods clear this cache to ensure test isolation.
+ * in the same JVM fork. The setup/cleanup methods clear this cache to prevent test environment pollution.
  */
 class CommandObjectNoDataSpec extends Specification implements GrailsWebUnitTest {
 

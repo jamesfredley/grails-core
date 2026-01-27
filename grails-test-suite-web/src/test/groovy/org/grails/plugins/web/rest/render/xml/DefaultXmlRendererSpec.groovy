@@ -44,7 +44,7 @@ import spock.lang.Specification
 class DefaultXmlRendererSpec extends Specification implements DomainUnitTest<XmlBook> {
 
     void setup() {
-        // Clear the static mimeTypes cache to ensure proper test isolation
+        // Clear the static mimeTypes cache to prevent test environment pollution
         HttpServletResponseExtension.@mimeTypes = null
         final initializer = new ConvertersConfigurationInitializer()
         initializer.grailsApplication = new DefaultGrailsApplication()

@@ -26,7 +26,7 @@ import spock.lang.Specification
 class WithFormatSpec extends Specification implements ControllerUnitTest<MimeTypesCompiledController> {
 
     def setup() {
-        // Clear the static mimeTypes cache to ensure proper test isolation
+        // Clear the static mimeTypes cache to prevent test environment pollution
         HttpServletResponseExtension.@mimeTypes = null
     }
 

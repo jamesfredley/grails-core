@@ -376,7 +376,7 @@ abstract class AbstractGrailsTagTests {
 
         onDestroy()
         
-        // Clear URL mappings artefacts to ensure test isolation
+        // Clear URL mappings artefacts to prevent test environment pollution
         if (ga instanceof DefaultGrailsApplication) {
             ((DefaultGrailsApplication) ga).@artefactInfo.remove(UrlMappingsArtefactHandler.TYPE)
         }

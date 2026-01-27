@@ -37,13 +37,13 @@ class RespondMethodSpec extends Specification implements ControllerUnitTest<Book
         // This triggers doWithConfig() which registers the custom MIME types.
         assert config != null
         
-        // Clear the static mimeTypes cache to ensure proper test isolation.
+        // Clear the static mimeTypes cache to prevent test environment pollution.
         // This must be done AFTER accessing config to ensure the new config is applied.
         HttpServletResponseExtension.@mimeTypes = null
     }
 
     def cleanup() {
-        // Clear the static mimeTypes cache to ensure proper test isolation
+        // Clear the static mimeTypes cache to prevent test environment pollution
         HttpServletResponseExtension.@mimeTypes = null
     }
 

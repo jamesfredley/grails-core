@@ -50,7 +50,7 @@ class WebUtilsTests {
     @BeforeEach
     void setUp() {
         RequestContextHolder.resetRequestAttributes()
-        // Clear the static mimeTypes cache to ensure proper test isolation
+        // Clear the static mimeTypes cache to prevent test environment pollution
         HttpServletResponseExtension.@mimeTypes = null
         config = new ConfigSlurper().parse("""
 grails.mime.file.extensions=false

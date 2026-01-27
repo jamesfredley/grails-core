@@ -35,7 +35,7 @@ class JSONBindingToNullTests extends Specification implements ControllerUnitTest
         // This triggers doWithConfig() which registers the custom MIME types.
         assert config != null
         
-        // Clear the static mimeTypes cache to ensure proper test isolation.
+        // Clear the static mimeTypes cache to prevent test environment pollution.
         // This must be done AFTER accessing config to ensure the new config is applied.
         HttpServletResponseExtension.@mimeTypes = null
     }

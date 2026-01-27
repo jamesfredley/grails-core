@@ -35,7 +35,7 @@ class RestfulReverseUrlRenderingTests extends Specification implements UrlMappin
         // This is necessary before accessing grailsApplication properties.
         assert config != null
         
-        // Reset URL mappings to ensure test isolation - clear any mappings from previous tests
+        // Reset URL mappings to prevent test environment pollution - clear any mappings from previous tests
         // and re-register this test's URL mappings with a fresh holder bean
         if (grailsApplication instanceof grails.core.DefaultGrailsApplication) {
             grailsApplication.@artefactInfo.remove(UrlMappingsArtefactHandler.TYPE)
@@ -45,7 +45,7 @@ class RestfulReverseUrlRenderingTests extends Specification implements UrlMappin
     }
 
     def cleanup() {
-        // Clear URL mappings artefacts added by this test to ensure test isolation
+        // Clear URL mappings artefacts added by this test to prevent test environment pollution
         if (grailsApplication instanceof grails.core.DefaultGrailsApplication) {
             grailsApplication.@artefactInfo.remove(UrlMappingsArtefactHandler.TYPE)
         }

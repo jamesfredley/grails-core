@@ -42,7 +42,7 @@ class AcceptHeaderParserSpec extends Specification {
     def config
 
     void setup() {
-        // Clear the static mimeTypes cache to ensure proper test isolation
+        // Clear the static mimeTypes cache to prevent test environment pollution
         HttpServletResponseExtension.@mimeTypes = null
         def configObject = new ConfigSlurper()
                 .parse("""

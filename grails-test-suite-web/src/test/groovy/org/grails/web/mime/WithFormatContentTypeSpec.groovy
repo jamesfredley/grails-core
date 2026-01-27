@@ -40,7 +40,7 @@ class WithFormatContentTypeSpec extends Specification implements ControllerUnitT
         // This triggers doWithConfig() which registers the custom MIME types.
         assert config != null
         
-        // Clear the static mimeTypes cache to ensure proper test isolation.
+        // Clear the static mimeTypes cache to prevent test environment pollution.
         // HttpServletResponseExtension caches mime types in a static field.
         // This must be done AFTER accessing config to ensure the new config is applied.
         HttpServletResponseExtension.@mimeTypes = null
