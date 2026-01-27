@@ -76,8 +76,7 @@ class HttpServletRequestExtension {
     static MimeType[] getMimeTypes(HttpServletRequest request) {
         MimeType[] result = (MimeType[]) request.getAttribute(GrailsApplicationAttributes.REQUEST_FORMATS)
         if (!result) {
-            // First try to get context from GrailsWebRequest (more reliable for test isolation)
-            // This avoids issues where the servlet context attributes may be polluted by other tests
+            // First try to get context from GrailsWebRequest
             ApplicationContext context = null
             GrailsWebRequest webRequest = GrailsWebRequest.lookup()
             if (webRequest != null) {
