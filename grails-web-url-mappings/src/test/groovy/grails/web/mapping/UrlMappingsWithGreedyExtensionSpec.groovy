@@ -290,7 +290,6 @@ class UrlMappingsWithGreedyExtensionSpec extends AbstractUrlMappingsSpec {
 
         then: "The URL /test.test.json should NOT apply greedy to controller"
             info != null
-            println "DEBUG: controller=${info.parameters.controller}, action=${info.parameters.action}, id=${info.parameters.id}, format=${info.parameters.format}"
             // The greedy + modifier only applies to $id, not $controller
             // So /test.test.json should be parsed using non-greedy behavior:
             // controller=test, format=test.json
@@ -309,9 +308,8 @@ class UrlMappingsWithGreedyExtensionSpec extends AbstractUrlMappingsSpec {
         when: "Matching a URL where the id contains a dot but there's no real format"
             def info = urlMappingsHolder.match('/user/show/bob.smith')
 
-        then: "Check what actually happens - does .smith become the format?"
+        then: "With greedy matching, the last dot is treated as format separator"
             info != null
-            println "DEBUG bob.smith: controller=${info.parameters.controller}, action=${info.parameters.action}, id=${info.parameters.id}, format=${info.parameters.format}"
             // With greedy matching, the last dot is treated as format separator
             // So bob.smith becomes id=bob, format=smith
             // This is the expected (though perhaps surprising) behavior of greedy matching
@@ -335,9 +333,6 @@ class UrlMappingsWithGreedyExtensionSpec extends AbstractUrlMappingsSpec {
             def nonGreedyInfo = nonGreedyHolder.match('/user/show/bob.smith')
 
         then: "Greedy splits at last dot, non-greedy at first dot"
-            println "GREEDY:     id=${greedyInfo.parameters.id}, format=${greedyInfo.parameters.format}"
-            println "NON-GREEDY: id=${nonGreedyInfo.parameters.id}, format=${nonGreedyInfo.parameters.format}"
-
             // Greedy: splits at LAST dot
             greedyInfo.parameters.id == 'bob'
             greedyInfo.parameters.format == 'smith'
@@ -362,9 +357,6 @@ class UrlMappingsWithGreedyExtensionSpec extends AbstractUrlMappingsSpec {
             def nonGreedyInfo = nonGreedyHolder.match('/user/show/bob.smith.jones')
 
         then: "Greedy splits at last dot, non-greedy at first dot"
-            println "GREEDY (bob.smith.jones):     id=${greedyInfo.parameters.id}, format=${greedyInfo.parameters.format}"
-            println "NON-GREEDY (bob.smith.jones): id=${nonGreedyInfo.parameters.id}, format=${nonGreedyInfo.parameters.format}"
-
             // Greedy: splits at LAST dot - id gets bob.smith, format gets jones
             greedyInfo.parameters.id == 'bob.smith'
             greedyInfo.parameters.format == 'jones'
@@ -389,9 +381,6 @@ class UrlMappingsWithGreedyExtensionSpec extends AbstractUrlMappingsSpec {
             def infoWithValidFormat = holder.match('/user/show/bob.smith.json')
 
         then: "Invalid format should not match, valid format should work"
-            println "bob.smith (invalid format): ${infoWithInvalidFormat}"
-            println "bob.smith.json (valid format): id=${infoWithValidFormat?.parameters?.id}, format=${infoWithValidFormat?.parameters?.format}"
-
             // With constraint, 'smith' is not a valid format so it should fail to match
             infoWithInvalidFormat == null
 
@@ -421,11 +410,6 @@ class UrlMappingsWithGreedyExtensionSpec extends AbstractUrlMappingsSpec {
             def bobSmithJonesXml = holder.match('/user/show/bob.smith.jones.xml')
 
         then: "URLs with valid formats use greedy, others use fallback"
-            println "bob.smith:           id=${bobSmith?.parameters?.id}, format=${bobSmith?.parameters?.format}"
-            println "bob.smith.json:      id=${bobSmithJson?.parameters?.id}, format=${bobSmithJson?.parameters?.format}"
-            println "bob.smith.jones:     id=${bobSmithJones?.parameters?.id}, format=${bobSmithJones?.parameters?.format}"
-            println "bob.smith.jones.xml: id=${bobSmithJonesXml?.parameters?.id}, format=${bobSmithJonesXml?.parameters?.format}"
-
             // bob.smith - 'smith' is not valid format, fallback captures whole id
             bobSmith != null
             bobSmith.parameters.id == 'bob.smith'
