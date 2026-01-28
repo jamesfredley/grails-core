@@ -16,346 +16,205 @@ limitations under the License.
 
 # Agent Guide for grails-core
 
-This file summarizes how to build/test the repo and the coding conventions
-observed in this codebase. It is intended for automated coding agents.
+> **IMPORTANT**: This is the Grails Framework source repository (60+ modules), NOT a Grails application.
+> For building Grails apps, see `.agents/skills/grails-developer/SKILL.md`.
 
-Note: Do not commit this file to the repository; keep it local-only for agent use.
+## Quick Reference
 
-## Repository Overview
-- Multi-module Gradle build; root Gradle wrapper at `./gradlew`.
-- Primary languages: Groovy and Java (Spock for tests).
-- JDK 17+ required (up to 21 supported); container runtime needed for full test suite.
-- Root style settings live in `.editorconfig`.
-
-## Technology Stack (Grails 7)
-- **Spring Boot**: 3.5.x
-- **Spring Framework**: 6.2.x
-- **Groovy**: 4.0.x
-- **Gradle**: 8.14.x
-- **Spock**: 2.3-groovy-4.0 (main modules via BOM)
-- **Jakarta EE**: 10 (migrated from javax.*)
-- **Micronaut**: Optional via `grails-micronaut` plugin
-
-### Spock Version Notes
-- Main grails-core modules use **Spock 2.3-groovy-4.0** via the `grails-bom`
-- Some standalone subprojects have older versions:
-  - `grails-data-neo4j`: Spock 2.1-groovy-3.0 (defined in `gradle.properties`)
-  - `grails-data-graphql`: Spock 2.1-groovy-3.0 (defined in `gradle.properties`)
-- Always check the module's `build.gradle` or `gradle.properties` for actual Spock version
-
-## Environment Setup
-
-### Prerequisites
-- A git client
-- An IDE (IntelliJ IDEA recommended)
-- JDK 17 or higher (use SDKMAN for easy setup: `sdk env .`)
-- A container runtime (Docker/Podman) for running full test suite
-
-### Initial Setup
 ```bash
-# Clone the repository
-git clone https://github.com/apache/grails-core.git
-cd grails-core
-
-# Set up JDK via SDKMAN (reads .sdkmanrc)
-sdk env .
-
-# Build without tests (faster initial build)
+# Build (no tests)
 ./gradlew build -PskipTests
-```
 
-### Memory Settings
-If you encounter out-of-memory errors:
-```bash
+# Build single module
+./gradlew :grails-core:build
+
+# Run tests
+./gradlew :<module>:test
+./gradlew :<module>:test --tests "com.example.SomeSpec"
+
+# Style check
+./gradlew codeStyle
+
+# Out of memory? Set:
 export GRADLE_OPTS="-Xms2G -Xmx5G"
 ```
 
-## Build, Lint, and Test Commands
-Use the Gradle wrapper from the repo root unless a module has its own wrapper.
+## Critical Rules
 
-### Build
-- Build without tests: `./gradlew build -PskipTests`
-- Full build with tests: `./gradlew build --rerun-tasks`
-- Build a single module: `./gradlew :<module>:build`
-- Run a single task with stacktrace: `./gradlew <task> --stacktrace`
+1. **Use `jakarta.*` NOT `javax.*`** - All packages migrated to Jakarta EE 10
+2. **Use `@GrailsCompileStatic`** - Not plain `@CompileStatic` in Grails classes
+3. **Use `GrailsWebRequest.lookup()`** - For thread-safe request context in tests
+4. **No wildcard imports** - Use explicit imports
+5. **4 spaces, no tabs** - See `.editorconfig`
+6. **Apache license header** - Required on all new source files
 
-### Test
-- Run all tests for a module: `./gradlew :<module>:test`
-- Run a single test class:
-  `./gradlew :<module>:test --tests "com.example.SomeSpec"`
-- Run a single test method/feature:
-  `./gradlew :<module>:test --tests "com.example.SomeSpec.some feature"`
-- Re-run tests even if up-to-date: `./gradlew :<module>:test --rerun-tasks`
+## Available Skills
 
-Test reports are typically under:
-- `build/reports/tests/test/index.html`
-- `build/test-results/test` (XML)
+| Skill | Path | Use For |
+|-------|------|---------|
+| **grails-developer** | `.agents/skills/grails-developer/SKILL.md` | Grails 7 apps, GORM, controllers, views |
+| **groovy-developer** | `.agents/skills/groovy-developer/SKILL.md` | Groovy 4 syntax, closures, DSLs, Spock |
+| **java-developer** | `.agents/skills/java-developer/SKILL.md` | Java 17 features, Groovy interop |
 
-### Code Style / Lint
-- Run style checks: `./gradlew codeStyle`
-- Java style is enforced by Checkstyle; Groovy by CodeNarc.
+## Technology Stack
 
-### Docs
-- Build the user guide (skip groovydoc):
-  `./gradlew :grails-doc:publishGuide -x aggregateGroovydoc`
+| Component | Version |
+|-----------|---------|
+| JDK | 17+ (baseline 17) |
+| Groovy | 4.0.x |
+| Spring Boot | 3.5.x |
+| Spring Framework | 6.2.x |
+| Spock | 2.3-groovy-4.0 |
+| Gradle | 8.14.x |
+| Jakarta EE | 10 |
 
-### Runtime
-- Run a Grails app in this repo (when applicable): `./gradlew bootRun`
+## Key Modules
 
-## Code Style Guidelines
-Follow the existing file patterns and the `.editorconfig` rules.
+**Core**: `grails-core`, `grails-bootstrap`, `grails-spring`, `grails-common`
 
-### Formatting
-- Indentation: 4 spaces, no tabs.
-- Insert a final newline at the end of files.
-- Use spaces around operators.
-- Keep line length reasonable; match surrounding file style.
+**Web**: `grails-web-core`, `grails-web-mvc`, `grails-controllers`, `grails-url-mappings`, `grails-interceptors`
 
-### Imports
-- Avoid wildcard imports (limit set to 999; explicit imports preferred).
-- Group imports consistently within each file (typically by package groups).
-- Keep static imports separate from regular imports.
+**GORM**: `grails-datastore-core`, `grails-datamapping-core`, `grails-domain-class`, `grails-validation`, `grails-databinding`
 
-### Naming
-- Classes/interfaces/traits: UpperCamelCase.
-- Methods/fields/locals: lowerCamelCase.
-- Constants: UPPER_SNAKE_CASE (often `static final`).
-- Spock specs: class name ends with `Spec` and feature names are descriptive.
+**Views**: `grails-views-core`, `grails-views-gson`, `grails-views-markup`
 
-### Types and Declarations
-- Prefer explicit types for public APIs and fields used across modules.
-- Use `def` in Groovy only where dynamic typing is intentional.
-- Use `@CompileStatic` when adding performance-sensitive Groovy code and
-  when matching existing patterns in the module.
+**Testing**: `grails-testing-support-core`, `grails-testing-support-web`, `grails-geb`
 
-### Groovy 4 Best Practices
-- **Safe Navigation**: Use `?.` for null-safe property access: `book?.author?.name`
-- **Elvis Operator**: Use `?:` for default values: `name ?: 'Unknown'`
-- **Spread Operator**: Use `*.` for collection property access: `books*.title`
-- **GStrings**: Use `"Hello ${user.name}"` for string interpolation
-- **Closures**: Prefer closures for callbacks and DSLs; use `@DelegatesTo` for IDE support
-- **Static Compilation**: Use `@CompileStatic` or `@GrailsCompileStatic` in production code
-- **Traits**: Prefer traits over mixins (mixins are deprecated)
-- **Type Checking**: Apply `@TypeChecked` when full static compilation isn't possible
-- **Equality**: Remember `==` calls `equals()` in Groovy; use `is` for identity comparison
-- **Records**: Use Groovy records (incubating) for immutable DTOs:
-  ```groovy
-  record Point(int x, int y) {}
-  ```
+**Other**: `grails-bom` (dependency management), `grails-doc`, `grails-shell-cli`, `grails-forge`
 
-### Groovy / Spock Conventions
-- Use `given/when/then` or `setup/when/then` blocks in Spock tests.
-- Use `thrown(SomeException)` in `then` blocks for exception assertions.
-- Keep test data setup minimal and reuse shared fixtures with `@Shared`.
+## Artefact Types
 
-### Spock 2.3 Testing Patterns
+| Type | Pattern | Handler |
+|------|---------|---------|
+| Domain | `**/domain/**/*.groovy` | `DomainClassArtefactHandler` |
+| Controller | `**/*Controller.groovy` | `ControllerArtefactHandler` |
+| Service | `**/*Service.groovy` | `ServiceArtefactHandler` |
+| TagLib | `**/*TagLib.groovy` | `TagLibArtefactHandler` |
+| Interceptor | `**/*Interceptor.groovy` | `InterceptorArtefactHandler` |
 
-**Basic test structure:**
+## Code Patterns
+
+### Spock Test Structure
 ```groovy
-class BookServiceSpec extends Specification {
-    def service = new BookService()
+class MyServiceSpec extends Specification implements ServiceUnitTest<MyService> {
+    def "feature description"() {
+        given: "preconditions"
+        def input = "test"
 
-    def "find book by title"() {
-        given: "a book title to search for"
-        def title = "Grails Guide"
+        when: "action"
+        def result = service.process(input)
 
-        when: "searching for the book"
-        def book = service.findByTitle(title)
-
-        then: "the book is found"
-        book != null
-        book.title == title
+        then: "assertions"
+        result != null
+        result.status == "OK"
     }
 }
 ```
 
-**Data-driven tests with `@Unroll`:**
+### Mocking
+```groovy
+def repo = Mock(BookRepository)
+1 * repo.save(_) >> savedBook  // expect 1 call, return savedBook
+```
+
+### Data-Driven Tests
 ```groovy
 @Unroll
-def "addition #a + #b == #c"() {
-    expect:
-    a + b == c
-
+def "#a + #b == #c"() {
+    expect: a + b == c
     where:
     a | b || c
-    1 | 3 || 4
-    7 | 4 || 11
+    1 | 2 || 3
+    4 | 5 || 9
 }
 ```
 
-**Mocking and interaction testing:**
+### Framework Access
 ```groovy
-def "save book calls repository"() {
-    given:
-    def repo = Mock(BookRepository)
-    def service = new BookService(repo)
+// Thread-safe request context
+GrailsWebRequest webRequest = GrailsWebRequest.lookup()
 
-    when:
-    service.save(new Book(title: "Test"))
-
-    then:
-    1 * repo.save(_)
-}
+// Artefact registry
+grailsApplication.getArtefacts(DomainClassArtefactHandler.TYPE)
 ```
 
-**Spock 2.3 features:**
-- Parallel execution: Enable with `runner.parallel.enabled=true` in config
-- Static mocking: Use `SpyStatic()` for static methods
-- Utilities: `MutableClock`, `verifyEach` for enhanced testing
-- Use `@ResourceLock` to prevent parallel conflicts on shared resources
+## Groovy Style
 
-**Grails test mixins:**
-- `ServiceUnitTest<T>` for service unit tests
-- `ControllerUnitTest<T>` for controller unit tests
-- `@Integration` and `@Rollback` for integration tests
+```groovy
+// DO: Safe navigation
+book?.author?.name
 
-### Error Handling
-- Throw specific exceptions with clear messages when possible.
-- Avoid swallowing exceptions; if caught, log or rethrow with context.
-- Preserve existing exception types and messages used by public APIs.
+// DO: Elvis operator
+name ?: 'Unknown'
 
-### Logging
-- Use existing logging mechanisms in each module (e.g., SLF4J in Java,
-  `log` in Groovy classes) rather than `System.out`.
+// DO: GStrings
+"Hello ${user.name}"
 
-### Documentation and Headers
-- New source files should include the Apache license header used elsewhere.
-- Add comments only when behavior is non-obvious or subtle.
+// DO: Spread operator
+books*.title
 
-## Gradle and Module Guidance
-- Prefer the root `./gradlew` unless a subproject explicitly requires its
-  own wrapper.
-- Keep module-specific changes inside their module unless a shared API or
-  dependency is involved.
-- Avoid changing build logic without understanding the multi-module layout.
+// DO: Static compilation
+@GrailsCompileStatic
+class MyService { }
 
-## Practical Examples
-- Single spec (as used in CI debugging):
-  `./gradlew :grails-datamapping-core-test:test --tests "grails.gorm.services.multitenancy.database.DatabasePerTenantSpec"`
-- Build only the core framework module:
-  `./gradlew :grails-core:build`
+// DON'T: Wildcard imports
+// import java.util.*  ❌
 
-## Environment Notes
-- If tests fail due to missing container runtime, re-run with `-PskipTests`
-  or set up a supported container runtime as described in CONTRIBUTING.md.
-- Use `--warning-mode all` for Gradle deprecation details when needed.
-
-## Parallel Test Execution and Test Isolation
-
-Tests in this repo run with `maxParallelForks > 1` in CI, meaning multiple test
-classes execute concurrently. This can cause flaky tests when static state leaks
-between tests.
-
-### Key Architecture Notes
-
-- **`GrailsUnitTest` uses static fields** (`_grailsApplication`, `_servletContext`)
-  which are shared across parallel tests. The `GrailsWebRequest.lookup()` method
-  provides thread-local access to the current test's context.
-  
-- **MIME type lookups should use `GrailsWebRequest.lookup()`** before falling back
-  to servlet context attributes to prevent test environment pollution.
-
-- **URL mapping artefacts** can pollute parallel tests. Clear with:
-  ```groovy
-  grailsApplication.artefactInfo.clear()
-  ```
-
-## Debugging and Troubleshooting
-
-### Debug Mode
-Run applications with debugger attached:
-```bash
-./gradlew bootRun --debug-jvm
-```
-Then attach your IDE debugger to the forked JVM process.
-
-### Common Issues
-- **Container runtime missing**: Tests requiring containers will fail. Use `-PskipTests` or install Docker/Podman.
-- **Out of memory**: Set `GRADLE_OPTS="-Xms2G -Xmx5G"`.
-- **Flaky tests**: Check for static state pollution (see Test Isolation Patterns above).
-- **Gradle cache issues**: Use `--rerun-tasks` to force re-execution.
-
-### Deprecation Warnings
-For detailed Gradle deprecation information:
-```bash
-./gradlew <task> --warning-mode all
+// DON'T: javax packages
+// import javax.servlet.*  ❌ → use jakarta.servlet.*
 ```
 
-## Commit Messages and Pull Requests
+## Test Isolation
 
-### Commit Message Guidelines
-- Grails uses [Release Drafter](https://github.com/release-drafter/release-drafter) for release notes.
-- Write clear, meaningful commit messages.
-- Pull requests should be squashed into a single, meaningful commit.
+> **WARNING**: Tests run in parallel (`maxParallelForks > 1`). Static state causes flaky tests.
 
-### Branch Naming Conventions
-Use these branch name prefixes to auto-label PRs for release notes:
+- Use `GrailsWebRequest.lookup()` for thread-local context
+- Clear artefacts: `grailsApplication.artefactInfo.clear()`
+- Use `@ResourceLock` for shared resources
 
-| Prefix | Label | Description |
-|--------|-------|-------------|
-| `fix/` | bug | Bug fixes |
-| `feat/` or `feature/` | feature | New features |
-| `docs/` | documentation | Documentation changes |
-| `chore/` | maintenance | Maintenance tasks |
-| `refactor/` | maintenance | Code refactoring |
-| `test/` | maintenance | Test improvements |
-| `ci/` | maintenance | CI/CD changes |
-| `perf/` | maintenance | Performance improvements |
-| `build/` | maintenance | Build system changes |
-| `deps/` | deps | Dependency updates |
-| `revert/` | revert | Reverted changes |
+## Build Commands
 
-### PR Title Conventions
-PR titles containing these keywords will also trigger auto-labeling:
-- Contains "fix" → bug label
-- Contains "feat" → feature label
-- Contains "docs" → documentation label
-- Contains "chore", "refactor", "test", "ci", "perf", "build" → maintenance label
+| Task | Command |
+|------|---------|
+| Build (no tests) | `./gradlew build -PskipTests` |
+| Build module | `./gradlew :grails-core:build` |
+| Test module | `./gradlew :grails-core:test` |
+| Single test | `./gradlew :module:test --tests "pkg.MySpec"` |
+| Single feature | `./gradlew :module:test --tests "pkg.MySpec.feature name"` |
+| Force rerun | `./gradlew :module:test --rerun-tasks` |
+| Style check | `./gradlew codeStyle` |
+| Build docs | `./gradlew :grails-doc:publishGuide -x aggregateGroovydoc` |
+| Debug | `./gradlew bootRun --debug-jvm` |
 
-### Change Review Process
-Different review policies apply based on the change type:
+## Branch Naming (Auto-Labels PRs)
 
-| Change Type | Policy | Reviewers | Wait Period |
-|-------------|--------|-----------|-------------|
-| Build-related | Commit then Review | - | - |
-| Documentation (obvious fixes) | No review needed | - | - |
-| Documentation (significant) | Commit then Review | 1 | - |
-| Groovy/Spring dependency changes | Review then Commit | 2-3 | 3 days (weekend) / 1 day (weekday) |
-| Other code changes | Review then Commit | 1 | - |
+| Prefix | Label |
+|--------|-------|
+| `fix/` | bug |
+| `feat/`, `feature/` | feature |
+| `docs/` | documentation |
+| `chore/`, `refactor/`, `test/`, `ci/`, `perf/`, `build/` | maintenance |
+| `deps/` | deps |
 
-### Security Issues
-Never report security vulnerabilities publicly. Send sensitive bugs to: `security@grails.org`
+## Common Issues
 
-## Documentation
+| Problem | Solution |
+|---------|----------|
+| Out of memory | `export GRADLE_OPTS="-Xms2G -Xmx5G"` |
+| Container missing | Use `-PskipTests` or install Docker/Podman |
+| Flaky tests | Check static state pollution, use `@ResourceLock` |
+| Cache issues | `./gradlew --rerun-tasks` |
+| Deprecation details | `./gradlew <task> --warning-mode all` |
 
-### User Guide Structure
-- Source files: `grails-doc/src/en/guide/`
-- Table of Contents: `grails-doc/src/en/guide/toc.yml`
-- Format: Asciidoctor (`.adoc` files)
+## Security
 
-### Building Documentation
-```bash
-# Build user guide (skip groovydoc for speed)
-./gradlew :grails-doc:publishGuide -x aggregateGroovydoc
-
-# View the built guide
-# Open: grails-doc/build/original-guide/index.html
-```
-
-### Documentation Types
-- **API docs**: Javadoc/Groovydoc in source code
-- **User Guide**: `grails-doc` module
-- **How-to Guides**: [grails-guides](https://github.com/grails-guides) organization
+Report vulnerabilities to: `security@grails.org` (NOT public issues)
 
 ## Resources
 
-### Key Documentation Links
-- **Grails 7 User Guide**: https://docs.grails.org/latest/guide/single.html
-- **Groovy 4 Documentation**: https://docs.groovy-lang.org/docs/groovy-4.0.30/html/documentation/
-- **Spock 2.3 Documentation**: https://spockframework.org/spock/docs/2.3/all_in_one.html
-- **GORM Documentation**: https://gorm.grails.org/latest/
-
-### Getting Help
-- **Stack Overflow**: https://stackoverflow.com/questions/tagged/grails
+- **Grails 7 Guide**: https://docs.grails.org/latest/guide/single.html
+- **Groovy 4 Docs**: https://docs.groovy-lang.org/docs/groovy-4.0.30/html/documentation/
+- **Spock 2.3 Docs**: https://spockframework.org/spock/docs/2.3/all_in_one.html
+- **GORM Docs**: https://gorm.grails.org/latest/
+- **Issues**: https://github.com/apache/grails-core/issues
 - **Slack**: https://grails.slack.com
-- **GitHub Issues**: https://github.com/apache/grails-core/issues
