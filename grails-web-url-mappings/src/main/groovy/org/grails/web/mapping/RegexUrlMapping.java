@@ -245,8 +245,8 @@ public class RegexUrlMapping extends AbstractUrlMapping {
                 // happen any time a URL mapping ends with a pattern like
                 // /$someVariable(.$someExtension)
                 pattern += "/([^/]+)\\.([^/.]+)?";
-            } else if (urlData.hasGreedyExtensionParam() && urlData.hasOptionalExtension()
-                       && shouldApplyGreedyForUrl(url, urlData.getGreedyTokenIndex())) {
+            } else if (urlData.hasGreedyExtensionParam() && urlData.hasOptionalExtension() &&
+                       shouldApplyGreedyForUrl(url, urlData.getGreedyTokenIndex())) {
                 // Handle greedy extension param (+ marker): match everything up to the last dot
                 // The key is to make the entire dot+extension group optional using (?: )?
                 // For /(*)+(\.(*))?  we want regex: /(.+?)(?:\.([^/.]+))?  (required, greedy)
