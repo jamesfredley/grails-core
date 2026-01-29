@@ -40,7 +40,9 @@ dependencies {
     api 'com.h2database:h2'
     api 'jakarta.servlet:jakarta.servlet-api'
 
-    implementation "org.apache.grails:grails-spring-security:$grailsSpringSecurityVersion"
+    // TODO: spring-security-core plugin is not compatible with Spring Boot 4 / Spring Framework 7
+    // ReflectionUtils.getApplication() method no longer exists - needs plugin update
+    // implementation "org.apache.grails:grails-spring-security:$grailsSpringSecurityVersion"
 
     console 'org.apache.grails:grails-console'
 }
