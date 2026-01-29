@@ -24,6 +24,7 @@ import org.springframework.boot.mongodb.autoconfigure.MongoAutoConfiguration
 import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Import
+import spock.util.environment.RestoreSystemProperties
 
 import grails.gorm.annotation.Entity
 import org.apache.grails.testing.mongo.AbstractMongoGrailsExtension
@@ -32,6 +33,7 @@ import org.apache.grails.testing.mongo.AutoStartedMongoSpec
 /**
  * Tests for MongoDB autoconfigure
  */
+@RestoreSystemProperties
 class MongoDbGormAutoConfigurationSpec extends AutoStartedMongoSpec {
 
     protected AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
