@@ -47,8 +47,8 @@ class MongoDbGormAutoConfigureWithGeoSpacialSpec extends AutoStartedMongoSpec {
     }
 
     void setupSpec() {
-        System.setProperty('spring.data.mongodb.host', dbContainer.getHost())
-        System.setProperty('spring.data.mongodb.port', dbContainer.getMappedPort(AbstractMongoGrailsExtension.DEFAULT_MONGO_PORT) as String)
+        System.setProperty('spring.mongodb.host', dbContainer.getHost())
+        System.setProperty('spring.mongodb.port', dbContainer.getMappedPort(AbstractMongoGrailsExtension.DEFAULT_MONGO_PORT) as String)
     }
 
     void cleanup() {

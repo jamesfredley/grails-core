@@ -26,7 +26,7 @@ grails:
   gorm:
     failOnError: true
   mongodb:
-    url: mongodb://${spring.data.mongodb.host:localhost}:${spring.data.mongodb.port:27017}/mydb
+    url: mongodb://${spring.mongodb.host:localhost}:${spring.mongodb.port:27017}/mydb
     options:
       maxWaitTime: 10000
 ---

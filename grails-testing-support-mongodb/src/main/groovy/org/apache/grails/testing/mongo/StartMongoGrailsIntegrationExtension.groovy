@@ -59,7 +59,7 @@ class StartMongoGrailsIntegrationExtension extends AbstractMongoGrailsExtension 
             System.setProperty('grails.mongodb.host', 'localhost')
             System.setProperty('grails.mongodb.port', DEFAULT_MONGO_PORT as String)
             connectionString = "mongodb://localhost:${DEFAULT_MONGO_PORT as String}/myDb" as String
-            System.setProperty('spring.data.mongodb.uri', connectionString)
+            System.setProperty('spring.mongodb.uri', connectionString)
         }
     }
 
