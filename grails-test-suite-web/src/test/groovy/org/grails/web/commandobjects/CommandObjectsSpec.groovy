@@ -27,6 +27,12 @@ import org.grails.validation.ConstraintEvalUtils
 import spock.lang.Issue
 import spock.lang.Specification
 
+/**
+ * Tests for command object binding and validation.
+ * This spec modifies global shared constraints via doWithConfig() which affects
+ * ConstraintEvalUtils.defaultConstraintsMap - a static cache shared across all tests
+ * in the same JVM fork. The setup/cleanup methods clear this cache to prevent test environment pollution.
+ */
 class CommandObjectsSpec extends Specification implements ControllerUnitTest<TestController>, DataTest {
 
     Closure doWithSpring() {{ ->
