@@ -18,7 +18,6 @@
  */
 
 plugins {
-    id 'com.gradleup.shadow'
     id 'org.apache.grails.buildsrc.properties'
     id 'io.micronaut.application' version "$micronautApplicationPluginVersion"
 }
@@ -32,6 +31,7 @@ dependencies {
     implementation 'io.micronaut.gcp:micronaut-gcp-http-client'
 
     runtimeOnly 'ch.qos.logback:logback-classic'
+    runtimeOnly 'io.micronaut:micronaut-jackson-databind'
 
     testImplementation 'io.micronaut:micronaut-http-client'
     testImplementation 'io.micronaut.test:micronaut-test-spock'
