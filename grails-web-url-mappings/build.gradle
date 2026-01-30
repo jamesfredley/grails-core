@@ -46,7 +46,7 @@ dependencies {
 
     compileOnly 'org.fusesource.jansi:jansi'
     testRuntimeOnly 'org.fusesource.jansi:jansi'
-    compileOnly 'jline:jline'
+    compileOnly 'org.jline:jline'
 
     implementation 'com.github.ben-manes.caffeine:caffeine'
 

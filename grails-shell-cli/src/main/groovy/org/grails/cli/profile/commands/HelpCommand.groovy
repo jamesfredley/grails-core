@@ -16,7 +16,10 @@
  */
 package org.grails.cli.profile.commands
 
-import jline.console.completer.Completer
+import org.jline.reader.Candidate
+import org.jline.reader.Completer
+import org.jline.reader.LineReader
+import org.jline.reader.ParsedLine
 
 import org.grails.build.parsing.CommandLine
 import org.grails.build.parsing.CommandLineParser
@@ -113,20 +116,20 @@ grails [environment]* [target] [arguments]*'
     }
 
     @Override
-    int complete(String buffer, int cursor, List<CharSequence> candidates) {
+    void complete(LineReader reader, ParsedLine line, List<Candidate> candidates) {
         def allCommands = findAllCommands().collect() { CommandDescription desc -> desc.name }
+        String buffer = line.word()
 
         for (cmd in allCommands) {
             if (buffer) {
                 if (cmd.startsWith(buffer)) {
-                    candidates << cmd.substring(buffer.size())
+                    candidates.add(new Candidate(cmd))
                 }
             }
             else {
-                candidates << cmd
+                candidates.add(new Candidate(cmd))
             }
         }
-        return cursor
     }
 
     protected Collection<CommandDescription> findAllCommands() {

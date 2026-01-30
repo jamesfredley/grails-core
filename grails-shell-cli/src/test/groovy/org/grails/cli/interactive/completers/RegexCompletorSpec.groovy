@@ -18,39 +18,47 @@
  */
 package org.grails.cli.interactive.completers
 
+import org.jline.reader.Candidate
+import org.jline.reader.LineReader
+import org.jline.reader.ParsedLine
 import spock.lang.*
 
 class RegexCompletorSpec extends Specification {
-    @Unroll("String '#source' is not matching")
+
+    @Unroll("String '#source' is matching")
     def "Simple pattern matches"() {
         given: "a regex completor and an empty candidate list"
         def completor = new RegexCompletor(/!\w+/)
         def candidateList = []
+        def parsedLine = Stub(ParsedLine) {
+            word() >> source
+        }
 
         when: "the completor is invoked for a given string"
-        def retval = completor.complete(source, 0, candidateList)
+        completor.complete(null, parsedLine, candidateList)
 
-        then: "that string is the sole candidate and the return value is 0"
+        then: "that string is the sole candidate"
         candidateList.size() == 1
-        candidateList[0] == source
-        retval == 0
+        candidateList[0].value() == source
 
         where:
         source << [ "!ls", "!test_stuff" ]
     }
 
-    @Unroll("String '#source' is incorrectly matching")
+    @Unroll("String '#source' is not matching")
     def "Non matching strings"() {
         given: "a regex completor and an empty candidate list"
         def completor = new RegexCompletor(/!\w+/)
         def candidateList = []
+        def parsedLine = Stub(ParsedLine) {
+            word() >> source
+        }
 
         when: "the completor is invoked for a given (non-matching) string"
-        def retval = completor.complete(source, 0, candidateList)
+        completor.complete(null, parsedLine, candidateList)
 
-        then: "the candidate list is empty and the return value is -1"
+        then: "the candidate list is empty"
         candidateList.size() == 0
-        retval == -1
 
         where:
         source << [ "!ls ls", "!", "test", "" ]

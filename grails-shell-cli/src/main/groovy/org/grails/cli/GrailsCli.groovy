@@ -25,11 +25,10 @@ import java.util.concurrent.Future
 import groovy.transform.Canonical
 import groovy.transform.CompileStatic
 
-import jline.UnixTerminal
-import jline.console.UserInterruptException
-import jline.console.completer.ArgumentCompleter
-import jline.console.completer.Completer
-import jline.internal.NonBlockingInputStream
+import org.jline.reader.Completer
+import org.jline.reader.EndOfFileException
+import org.jline.reader.UserInterruptException
+import org.jline.reader.impl.completer.ArgumentCompleter
 import org.gradle.tooling.BuildActionExecuter
 import org.gradle.tooling.BuildCancelledException
 import org.gradle.tooling.ProjectConnection
@@ -246,8 +245,8 @@ class GrailsCli {
                 // force resolve of all profiles
                 profileRepository.getAllProfiles()
                 def commandNames = CommandRegistry.instance.findCommands(profileRepository).collect() { Command cmd -> cmd.name }
-                console.reader.addCompleter(new StringsCompleter(commandNames))
-                console.reader.addCompleter(new CommandCompleter(CommandRegistry.instance.findCommands(profileRepository)))
+                console.addCompleter(new StringsCompleter(commandNames))
+                console.addCompleter(new CommandCompleter(CommandRegistry.instance.findCommands(profileRepository)))
                 profile = [handleCommand: { ExecutionContext context ->
 
                     def cl = context.commandLine
@@ -394,8 +393,6 @@ class GrailsCli {
         System.setProperty(Environment.INTERACTIVE_MODE_ENABLED, 'true')
         GrailsConsole console = projectContext.console
 
-        def consoleReader = console.reader
-        consoleReader.setHandleUserInterrupt(true)
         def completers = aggregateCompleter.getCompleters()
 
         console.resetCompleters()
@@ -405,7 +402,7 @@ class GrailsCli {
         )
 
         completers.addAll((profile.getCompleters(projectContext) ?: []) as Collection<Completer>)
-        consoleReader.addCompleter(aggregateCompleter)
+        console.addCompleter(aggregateCompleter)
         return console
     }
 
@@ -420,7 +417,6 @@ class GrailsCli {
     }
 
     private void interactiveModeLoop(GrailsConsole console, ExecutorService commandExecutor) {
-        NonBlockingInputStream nonBlockingInput = (NonBlockingInputStream) console.reader.getInput()
         interactiveModeActive = true
         boolean firstRun = true
         while (keepRunning) {
@@ -434,15 +430,13 @@ class GrailsCli {
                     // CTRL-D was pressed, exit interactive mode
                     exitInteractiveMode()
                 } else if (commandLine.trim()) {
-                    if (nonBlockingInput.isNonBlockingEnabled()) {
-                        handleCommandWithCancellationSupport(console, commandLine, commandExecutor, nonBlockingInput)
-                    } else {
-                        handleCommand(cliParser.parseString(commandLine))
-                    }
+                    handleCommandWithCancellationSupport(console, commandLine, commandExecutor)
                 }
             } catch (BuildCancelledException cancelledException) {
                 console.updateStatus('Build stopped.')
             } catch (UserInterruptException e) {
+                exitInteractiveMode()
+            } catch (EndOfFileException e) {
                 exitInteractiveMode()
             } catch (Throwable e) {
                 console.error("Caught exception ${e.message}", e)
@@ -450,32 +444,20 @@ class GrailsCli {
         }
     }
 
-    private Boolean handleCommandWithCancellationSupport(GrailsConsole console, String commandLine, ExecutorService commandExecutor, NonBlockingInputStream nonBlockingInput) {
+    private Boolean handleCommandWithCancellationSupport(GrailsConsole console, String commandLine, ExecutorService commandExecutor) {
         ExecutionContext executionContext = createExecutionContext(cliParser.parseString(commandLine))
         Future<?> commandFuture = commandExecutor.submit({ handleCommand(executionContext) } as Callable<Boolean>)
-        def terminal = console.reader.terminal
-        if (terminal instanceof UnixTerminal) {
-            ((UnixTerminal) terminal).disableInterruptCharacter()
-        }
+        def terminal = console.terminal
         try {
             while (!commandFuture.done) {
-                if (nonBlockingInput.nonBlockingEnabled) {
-                    int peeked = nonBlockingInput.peek(100L)
-                    if (peeked > 0) {
-                        // read peeked character from buffer
-                        nonBlockingInput.read(1L)
-                        if (peeked == KEYPRESS_CTRL_C || peeked == KEYPRESS_ESC) {
-                            executionContext.console.log('  ')
-                            executionContext.console.updateStatus('Stopping build. Please wait...')
-                            executionContext.cancel()
-                        }
-                    }
-                }
+                // In JLine 3, we handle interrupts differently
+                // The terminal handles CTRL+C via signal handling
+                Thread.sleep(100)
             }
-        } finally {
-            if (terminal instanceof UnixTerminal) {
-                ((UnixTerminal) terminal).enableInterruptCharacter()
-            }
+        } catch (InterruptedException e) {
+            executionContext.console.log('  ')
+            executionContext.console.updateStatus('Stopping build. Please wait...')
+            executionContext.cancel()
         }
         if (!commandFuture.isCancelled()) {
             try {
@@ -625,17 +607,29 @@ class GrailsCli {
 
     protected Boolean bang(ExecutionContext context) {
         def console = context.console
-        def history = console.reader.history
+        def history = console.history
 
-        //move one step back to !
-        history.previous()
-
-        if (!history.previous()) {
+        if (history == null || history.size() == 0) {
             console.error('! not valid. Can not repeat without history')
+            return false
         }
 
-        //another step to previous command
-        String historicalCommand = history.current()
+        // Get previous command from history
+        def historyIterator = history.reverseIterator()
+        if (!historyIterator.hasNext()) {
+            console.error('! not valid. Can not repeat without history')
+            return false
+        }
+
+        // Skip the current '!' command
+        historyIterator.next()
+        
+        if (!historyIterator.hasNext()) {
+            console.error('! not valid. Can not repeat without history')
+            return false
+        }
+
+        String historicalCommand = historyIterator.next().line()
         if (historicalCommand.startsWith('!')) {
             console.error("Can not repeat command: $historicalCommand")
         } else {
