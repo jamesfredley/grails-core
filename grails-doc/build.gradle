@@ -318,8 +318,9 @@ tasks.register('dist', Zip).configure { Zip it ->
     it.from(outputDir)
 }
 
-artifacts {
-    archives dist
+// Make dist a direct dependency of assemble instead of using deprecated archives configuration
+tasks.named('assemble').configure {
+    dependsOn(tasks.named('dist'))
 }
 
 // the groovy plugin is applied to this project, but we do not build a jar file since
