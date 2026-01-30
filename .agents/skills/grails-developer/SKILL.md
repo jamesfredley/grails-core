@@ -61,8 +61,8 @@ myapp/
 ├── grails-app/
 │   ├── conf/                 # Configuration
 │   │   ├── application.yml   # Main config
-│   │   ├── logback.xml       # Logging config
-│   │   └── spring/           # Spring bean definitions
+│   │   ├── logback-spring.xml # Logging config
+│   │   └── spring/resources.groovy # Spring bean definitions
 │   ├── controllers/          # Request handlers
 │   ├── domain/               # GORM domain classes
 │   ├── i18n/                 # Message bundles
@@ -74,7 +74,8 @@ myapp/
 ├── src/
 │   ├── main/groovy/          # Additional Groovy classes
 │   ├── main/java/            # Java classes
-│   └── test/groovy/          # Test specifications
+│   ├── test/groovy/          # Test specifications
+│   └── integration-test/groovy/ # Integration test specifications
 ├── build.gradle              # Build configuration
 └── gradle.properties         # Project properties
 ```
@@ -750,11 +751,11 @@ class BookServiceIntegrationSpec extends Specification {
 
 ### Functional Test with Geb
 ```groovy
-import geb.spock.GebSpec
+import geb.spock.ContainerGebSpec
 import grails.testing.mixin.integration.Integration
 
 @Integration
-class BookFunctionalSpec extends GebSpec {
+class BookFunctionalSpec extends ContainerGebSpec {
 
     void "can view book list"() {
         when:
@@ -785,22 +786,22 @@ class BookFunctionalSpec extends GebSpec {
 // build.gradle
 
 // Spring Security
-implementation 'org.grails.plugins:spring-security-core:6.0.0'
+implementation 'org.apache.grails.plugins:grails-spring-security-core:7.0.1'
 
 // Database Migration (Liquibase)
-implementation 'org.grails.plugins:database-migration:4.2.0'
+implementation 'org.apache.grails.plugins:grails-database-migration:5.0.1'
 
 // Caching
-implementation 'org.grails.plugins:cache:6.0.0'
+implementation 'org.apache.grails.plugins:grails-cache:7.0.0'
 
 // Async support
-implementation 'org.grails.plugins:async:5.0.0'
+implementation 'org.apache.grails.plugins:grails-async:7.0.0'
 
 // Fields plugin for form rendering
-implementation 'org.grails.plugins:fields:5.0.0'
+implementation 'org.apache.grails.plugins:grails-fields:7.0.0'
 
 // Asset Pipeline
-runtimeOnly 'org.grails.plugins:asset-pipeline:5.0.0'
+runtimeOnly 'com.bertramlabs.plugins:asset-pipeline-grails:5.0.8'
 ```
 
 ### Spring Security Configuration
@@ -832,12 +833,12 @@ grails.plugin.springsecurity.controllerAnnotations.staticRules = [
 ./gradlew integrationTest                         # Integration tests
 
 # Build
-./gradlew build -PskipTests                       # Build without tests
+./gradlew build                                   # Build with tests
 ./gradlew bootJar                                 # Executable JAR
 ./gradlew bootWar                                 # WAR file
 
 # Code quality
-./gradlew codeStyle                               # Check style
+./gradlew check                                   # Run all verification tasks
 
 # Clean
 ./gradlew clean
@@ -851,7 +852,7 @@ grails.plugin.springsecurity.controllerAnnotations.staticRules = [
 - Let Grails infer configurations where possible.
 
 ### Performance
-- Use `@GrailsCompileStatic` on controllers and services.
+- Use `@GrailsCompileStatic` on controllers, services, and domain classes.
 - Enable query caching for read-heavy operations.
 - Use pagination for large result sets.
 - Avoid N+1 queries with eager fetching or batch size.
@@ -869,15 +870,16 @@ grails.plugin.springsecurity.controllerAnnotations.staticRules = [
 - Use Geb for critical user workflows.
 
 ### Code Style
-- Use `@GrailsCompileStatic` for type safety and performance.
+- Use `@GrailsCompileStatic` or `@CompileStatic` for type safety and performance.
 - Prefer services for business logic over controllers.
 - Use command objects for complex form handling.
 - Keep controllers thin, services fat.
 
 ## Resources
 
-- **Grails 7 User Guide**: https://docs.grails.org/latest/guide/single.html
-- **GORM Documentation**: https://gorm.grails.org/latest/
-- **Grails Plugins**: https://plugins.grails.org/
+- **Grails 7 User Guide**: https://grails.apache.org/docs/latest/guide/single.html
+- **GORM Documentation**: https://grails.apache.org/docs/latest/grails-data/
+- **Grails Plugins**: https://grails.apache.org/plugins.html
+- **Groovy 4 Documentation**: https://docs.groovy-lang.org/docs/groovy-4.0.30/html/documentation/
 - **Spock Framework**: https://spockframework.org/spock/docs/2.3/all_in_one.html
-- **Geb Manual**: https://gebish.org/manual/current/
+- **Geb Manual**: https://groovy.apache.org/geb/manual/current/

@@ -42,7 +42,7 @@ export GRADLE_OPTS="-Xms2G -Xmx5G"
 ## Critical Rules
 
 1. **Use `jakarta.*` NOT `javax.*`** - All packages migrated to Jakarta EE 10
-2. **Use `@GrailsCompileStatic`** - Not plain `@CompileStatic` in Grails classes
+2. **Use `@GrailsCompileStatic`** - Not plain `@CompileStatic` in Grails artefact classes
 3. **Use `GrailsWebRequest.lookup()`** - For thread-safe request context in tests
 4. **No wildcard imports** - Use explicit imports
 5. **4 spaces, no tabs** - See `.editorconfig`
@@ -174,7 +174,7 @@ name ?: 'Unknown'
 books*.title
 
 // DO: Static compilation
-@GrailsCompileStatic
+@GrailsCompileStatic  // or @CompileStatic for non-artefact classes
 class MyService { }
 
 // DON'T: Wildcard imports
@@ -186,11 +186,11 @@ class MyService { }
 
 ## Test Isolation
 
-> **WARNING**: Tests run in parallel (`maxParallelForks > 1`). Static state causes flaky tests.
+> **WARNING**: Tests run in parallel (`maxParallelForks > 1`). Static state that is not properly reset in test cleanup can cause flaky tests in subsequent tests within the same fork.
 
 - Use `GrailsWebRequest.lookup()` for thread-local context
 - Clear artefacts: `grailsApplication.artefactInfo.clear()`
-- Use `@ResourceLock` for shared resources
+- Use `@Shared` for fields that should be reused by multiple feature methods in a Spec
 
 ## Build Commands
 
@@ -241,7 +241,7 @@ See `CONTRIBUTING.md` for full details.
 |---------|----------|
 | Out of memory | `export GRADLE_OPTS="-Xms2G -Xmx5G"` |
 | Container missing | Use `-PskipTests` or install Docker/Podman |
-| Flaky tests | Check static state pollution, use `@ResourceLock` |
+| Flaky tests | Check static state pollution, ensure proper cleanup in tests |
 | Cache issues | `./gradlew --rerun-tasks` |
 | Deprecation details | `./gradlew <task> --warning-mode all` |
 
@@ -252,9 +252,9 @@ Please see the page of the [ASF Security Team](https://www.apache.org/security/)
 
 ## Resources
 
-- **Grails 7 Guide**: https://docs.grails.org/latest/guide/single.html
+- **Grails 7 Guide**: https://grails.apache.org/docs/latest/guide/single.html
 - **Groovy 4 Docs**: https://docs.groovy-lang.org/docs/groovy-4.0.30/html/documentation/
 - **Spock 2.3 Docs**: https://spockframework.org/spock/docs/2.3/all_in_one.html
-- **GORM Docs**: https://gorm.grails.org/latest/
+- **GORM Docs**: https://grails.apache.org/docs/latest/grails-data/
 - **Issues**: https://github.com/apache/grails-core/issues
 - **Slack**: https://grails.slack.com

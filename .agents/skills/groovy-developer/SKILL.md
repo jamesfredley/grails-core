@@ -52,15 +52,15 @@ Activate this skill for any Groovy-related task, including:
 ### Concise Syntax
 ```groovy
 // No semicolons required
-def name = "Grails"
+def name = 'Grails'
 
 // Optional parentheses for method calls
-println "Hello World"
+println 'Hello World'
 list.each { println it }
 
 // Optional return keyword
 String greet(String name) {
-    "Hello, $name"  // Last expression is returned
+    "Hello, $name"  // Last expression is returned (GString needs double quotes)
 }
 ```
 
