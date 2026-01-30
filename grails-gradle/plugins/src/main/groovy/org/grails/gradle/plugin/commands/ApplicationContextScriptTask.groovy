@@ -22,9 +22,12 @@ import groovy.transform.CompileStatic
 
 import org.gradle.api.tasks.JavaExec
 
-@CompileStatic
-class ApplicationContextScriptTask extends JavaExec {
+import javax.inject.Inject
 
+@CompileStatic
+abstract class ApplicationContextScriptTask extends JavaExec {
+
+    @Inject
     ApplicationContextScriptTask() {
         mainClass.set('grails.ui.script.GrailsApplicationScriptRunner')
         dependsOn('classes', 'findMainClass')

@@ -29,7 +29,7 @@ ext {
             'byte-buddy.version'            : '1.17.7',
             'commons-text.version'          : '1.13.1',
             'directory-watcher.version'     : '0.19.1',
-            'gradle-spock.version'          : '2.3-groovy-3.0',
+            'gradle-spock.version'          : '2.3-groovy-4.0',
             'grails-publish-plugin.version' : '0.0.4',
             'jansi.version'                 : '1.18',
             'javaparser-core.version'       : '3.27.0',
