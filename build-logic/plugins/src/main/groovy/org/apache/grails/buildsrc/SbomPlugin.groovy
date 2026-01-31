@@ -206,13 +206,17 @@ class SbomPlugin implements Plugin<Project> {
 
                 // cyclonedx does not support "choosing" the license placed in the sbom
                 // see: https://github.com/CycloneDX/cyclonedx-gradle-plugin/issues/16
+                // Capture project name at configuration time to avoid deprecated Task.project access at execution time
+                // See: https://docs.gradle.org/current/userguide/configuration_cache.html#config_cache:requirements:use_project_during_execution
+                def projectName = project.name
+                def projectPath = project.path
+                ZonedDateTime buildDate = lookupProperty(project, 'buildDate')
                 doLast {
                     // json schema is documented here: https://cyclonedx.org/docs/1.6/json/
                     def rewriteSbom = { File f ->
                         def bom = new JsonSlurper().parse(f)
 
                         // timestamp is not reproducible: https://github.com/CycloneDX/cyclonedx-gradle-plugin/issues/292
-                        ZonedDateTime buildDate = lookupProperty(project, 'buildDate')
                         bom['metadata']['timestamp'] = DateTimeFormatter.ISO_INSTANT.format(buildDate.truncatedTo(ChronoUnit.SECONDS))
 
                         // components[*]
@@ -220,7 +224,7 @@ class SbomPlugin implements Plugin<Project> {
                         comps.each { c ->
                             // .licenses => choose a license that is compatible with ASF policy if multiple licensed
                             if (c instanceof Map && c.licenses instanceof List && !(c.licenses as List).empty) {
-                                def chosen = pickLicense(task, c['bom-ref'] as String, c.licenses as List)
+                                def chosen = pickLicense(logger, projectName, c['bom-ref'] as String, c.licenses as List)
                                 if (chosen != null) {
                                     c.licenses = [chosen]
                                 }
@@ -253,7 +257,7 @@ class SbomPlugin implements Plugin<Project> {
 
                         f.setText(JsonOutput.prettyPrint(JsonOutput.toJson(bom)), StandardCharsets.UTF_8.name())
 
-                        logger.info('Rewrote JSON SBOM ({}) to pick preferred license', project.relativePath(f))
+                        logger.info('Rewrote JSON SBOM ({}) to pick preferred license', projectPath)
                     }
 
                     sbomOutputLocation.get().with { rewriteSbom(it.asFile) }
@@ -263,29 +267,39 @@ class SbomPlugin implements Plugin<Project> {
         }
     }
 
+    /**
+     * Picks the most appropriate license for a dependency from a list of license choices.
+     * This method is called at execution time and should not access Task.project.
+     *
+     * @param logger the logger to use for logging
+     * @param projectName the name of the project (captured at configuration time)
+     * @param bomRef the bom reference for the dependency
+     * @param licenseChoices the list of license choices
+     * @return the chosen license
+     */
     @CompileDynamic
-    private static Object pickLicense(CycloneDxTask task, String bomRef, List licenseChoices) {
+    private static Object pickLicense(org.gradle.api.logging.Logger logger, String projectName, String bomRef, List licenseChoices) {
         if (!bomRef) {
-            throw new GradleException("No bomRef found for a dependency of ${task.project.name}, cannot pick license")
+            throw new GradleException("No bomRef found for a dependency of ${projectName}, cannot pick license")
         }
 
-        task.logger.info('Picking license for {} from {} choices', bomRef, licenseChoices.size())
+        logger.info('Picking license for {} from {} choices', bomRef, licenseChoices.size())
         if (LICENSE_MAPPING.containsKey(bomRef)) {
             // There are several reasons that cyclone will get the license wrong, usually due to upstream not publishing information or publishing it incorrectly
             // see the licenseMapping map above for details
             def licenseId = LICENSE_MAPPING[bomRef]
-            task.logger.lifecycle('Forcing license for {} to {}', bomRef, licenseId)
+            logger.lifecycle('Forcing license for {} to {}', bomRef, licenseId)
 
             def licenseBlock = LICENSES[licenseId]
             if (!licenseBlock) {
-                throw new GradleException("Cannot find license information for id ${licenseId} to use for bomRef ${bomRef} in project ${task.project.name}")
+                throw new GradleException("Cannot find license information for id ${licenseId} to use for bomRef ${bomRef} in project ${projectName}")
             }
 
             return licenseBlock
         }
 
         if (!(licenseChoices instanceof List) || licenseChoices.isEmpty()) {
-            throw new GradleException("No License was found for dependency: ${bomRef} in project ${task.project.name}")
+            throw new GradleException("No License was found for dependency: ${bomRef} in project ${projectName}")
         }
 
         def licenseIds = licenseChoices.findAll { it instanceof Map && it.license instanceof Map && it.license.id }
@@ -297,13 +311,13 @@ class SbomPlugin implements Plugin<Project> {
         def defaultLicense = licenseChoices[0] // pick the first one found
         def defaultLicenseId = defaultLicense.license.id as String
         if (defaultLicenseId == null) {
-            throw new GradleException("Could not determine License id for dependency: ${bomRef} in project ${task.project.name} for value ${defaultLicense}")
+            throw new GradleException("Could not determine License id for dependency: ${bomRef} in project ${projectName} for value ${defaultLicense}")
         }
         if (!(defaultLicenseId in PREFERRED_LICENSES)) {
-            def projectLicenseExemptions = LICENSE_EXCEPTIONS[task.project.name] ?: [:]
+            def projectLicenseExemptions = LICENSE_EXCEPTIONS[projectName] ?: [:]
             def permittedLicense = projectLicenseExemptions.get(bomRef) == defaultLicenseId
             if (!permittedLicense) {
-                throw new GradleException("Unpermitted License found for bom dependency: ${bomRef} in project ${task.project.name} : ${defaultLicenseId}")
+                throw new GradleException("Unpermitted License found for bom dependency: ${bomRef} in project ${projectName} : ${defaultLicenseId}")
             }
         }
 
