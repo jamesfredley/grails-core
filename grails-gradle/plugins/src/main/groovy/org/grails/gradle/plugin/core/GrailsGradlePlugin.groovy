@@ -18,6 +18,8 @@
  */
 package org.grails.gradle.plugin.core
 
+import java.util.zip.ZipFile
+
 import grails.util.BuildSettings
 import grails.util.Environment
 import grails.util.GrailsNameUtils
@@ -270,28 +272,23 @@ ${importStatements}
      * @param className The fully qualified class name to look for (e.g., 'grails.gorm.annotation.CreatedDate')
      * @return true if the class is found on the classpath
      */
-    protected boolean isClassOnClasspath(FileCollection classpath, String className) {
-        String classPath = className.replace('.', '/') + '.class'
-        for (File file : classpath.files) {
+    private static boolean isClassOnClasspath(FileCollection classpath, String className) {
+        def classEntry = className.replace('.', '/') + '.class'
+        classpath.files.any { f ->
             try {
-                if (file.isFile() && file.name.endsWith('.jar')) {
-                    def zip = new java.util.zip.ZipFile(file)
-                    try {
-                        if (zip.getEntry(classPath) != null) {
-                            return true
-                        }
-                    } finally {
-                        zip.close()
+                if (f.file && f.name.endsWith('.jar')) {
+                    new ZipFile(f).withCloseable { zip ->
+                        zip.getEntry(classEntry) != null
                     }
-                } else if (file.isDirectory()) {
-                    if (new File(file, classPath).exists()) {
-                        return true
-                    }
+                } else if (f.directory) {
+                    new File(f, classEntry).exists()
+                } else {
+                    false
                 }
             } catch (Exception ignored) {
+                false
             }
         }
-        return false
     }
 
     protected void excludeDependencies(Project project) {
