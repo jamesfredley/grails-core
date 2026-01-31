@@ -87,7 +87,8 @@ class AdvancedDataBindingController {
      * Test collection binding to List.
      */
     def bindTeamWithMembers() {
-        def team = new Team(params.subMap(teamBindParams))
+        def team = new Team()
+        bindData(team, params, [include: teamBindParams])
         render([
             name: team.name,
             members: team.members?.findAll { it != null }?.collect { [name: it.name, role: it.role] } ?: []
@@ -98,7 +99,11 @@ class AdvancedDataBindingController {
      * Test Map-based collection binding.
      */
     def bindProjectWithContributors() {
-        def project = new Project(params.subMap(projectBindParams))
+        def project = new Project()
+        bindData(project, params, [include: projectBindParams])
+        def contributorsMap = project.contributors?.collectEntries { k, v ->
+            [k, [name: v?.name, expertise: v?.expertise]]
+        } ?: [:]
         render([
             name: project.name,
             contributors: contributorsMap
