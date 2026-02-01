@@ -36,16 +36,6 @@ jobs:
     steps:
       - name: "📝 Store release version"
         run: echo "VERSION=${VERSION}" >> "$GITHUB_ENV"
-      - name: "⚙️ Maximize build space"
-        uses: easimon/maximize-build-space@c28619d8999a147d5e09c1199f84ff6af6ad5794
-        with:
-          root-reserve-mb: 6144  # Leave ~6 GB on root FS (default)
-          swap-size-mb: 2048     # Allocate 2 GB swap (default: 4 GB; reduce if not needed)
-          remove-dotnet: 'true'  # Remove .NET SDK (~3-4 GB savings)
-          remove-android: 'true' # Remove Android tools (~2 GB savings)
-          remove-haskell: 'true' # Remove Haskell (~1 GB savings)
-          remove-codeql: 'true'  # Remove CodeQL (~500 MB savings)
-          remove-docker-images: 'false'  # Prune Docker if used (~1-2 GB savings)
       - name: "📥 Checkout repository"
         uses: actions/checkout@v5
         with:
