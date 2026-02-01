@@ -18,6 +18,8 @@
  */
 package org.grails.gradle.plugin.core
 
+import java.util.zip.ZipFile
+
 import grails.util.BuildSettings
 import grails.util.Environment
 import grails.util.GrailsNameUtils
@@ -234,13 +236,13 @@ class GrailsGradlePlugin extends GroovyPlugin {
             // Always add jakarta.validation.constraints
             starImports.add('jakarta.validation.constraints')
 
-            // Check for grails-datamapping-core (grails.gorm.annotation.*)
-            if (hasDependency(project, 'compileClasspath', 'org.apache.grails.data', 'grails-datamapping-core')) {
+            // Check for grails.gorm.annotation.* classes on classpath
+            if (isClassOnClasspath(compile.classpath, 'grails.gorm.annotation.CreatedDate')) {
                 starImports.add('grails.gorm.annotation')
             }
 
-            // Check for grails-scaffolding (grails.plugin.scaffolding.annotation.*)
-            if (hasDependency(project, 'compileClasspath', 'org.apache.grails', 'grails-scaffolding')) {
+            // Check for grails.plugin.scaffolding.annotation.* classes on classpath
+            if (isClassOnClasspath(compile.classpath, 'grails.plugin.scaffolding.annotation.Scaffold')) {
                 starImports.add('grails.plugin.scaffolding.annotation')
             }
         }
@@ -263,28 +265,29 @@ ${importStatements}
     }
 
     /**
-     * Check if a dependency is present in the configuration hierarchy.
-     * This checks all dependencies including those from parent configurations via extendsFrom.
+     * Check if a class exists on the given classpath.
+     * This detects classes from any source: direct dependencies, transitive dependencies, or local jars.
      *
-     * @param project The Gradle project
-     * @param configurationName The configuration to check (e.g., 'compileClasspath')
-     * @param group The dependency group (e.g., 'org.apache.grails.data')
-     * @param name The dependency name (e.g., 'grails-datamapping-core')
-     * @return true if the dependency is present in the configuration hierarchy
+     * @param classpath The FileCollection representing the classpath to search
+     * @param className The fully qualified class name to look for (e.g., 'grails.gorm.annotation.CreatedDate')
+     * @return true if the class is found on the classpath
      */
-    protected boolean hasDependency(Project project, String configurationName, String group, String name) {
-        try {
-            def configuration = project.configurations.findByName(configurationName)
-            if (configuration == null) {
-                return false
+    private static boolean isClassOnClasspath(FileCollection classpath, String className) {
+        def classEntry = className.replace('.', '/') + '.class'
+        classpath.files.any { f ->
+            try {
+                if (f.file && f.name.endsWith('.jar')) {
+                    new ZipFile(f).withCloseable { zip ->
+                        zip.getEntry(classEntry) != null
+                    }
+                } else if (f.directory) {
+                    new File(f, classEntry).exists()
+                } else {
+                    false
+                }
+            } catch (Exception ignored) {
+                false
             }
-
-            return configuration.allDependencies.any { d ->
-                d.group == group && d.name == name
-            }
-        } catch (Exception e) {
-            project.logger.debug("Failed to check for dependency ${group}:${name} in ${configurationName}: ${e.message}")
-            return false
         }
     }
 
