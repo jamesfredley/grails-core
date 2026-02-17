@@ -62,6 +62,8 @@ class BookService {
 }
 ----
 
+TIP: When using GORM Data Services (`@Service` annotation), use `@Transactional(connection = 'books')` on the abstract class instead of per-method annotations. This routes all auto-implemented methods to the correct datasource automatically. See the <<multipleDatasources,Data Services and Multiple Datasources>> section for details.
+
 [source, groovy]
 ----
 @CompileStatic
