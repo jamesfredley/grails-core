@@ -1,0 +1,191 @@
+////
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+https://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+////
+
+When using Data Services with <<multipleDataSources,multiple datasources>>, the service must declare which connection to use via the `connection` parameter of `@Transactional`.
+
+==== Routing to a Secondary Datasource
+
+Given a domain class mapped to a secondary datasource:
+
+[source,groovy]
+----
+class Book {
+
+    String title
+    String author
+
+    static mapping = {
+        datasource 'books'
+    }
+}
+----
+
+Define an interface for your data access methods and an abstract class that declares the connection:
+
+[source,groovy]
+----
+import grails.gorm.services.Service
+
+interface BookDataService {
+
+    Book get(Serializable id)
+
+    Book save(Book book)
+
+    void delete(Serializable id)
+
+    List<Book> findAllByAuthor(String author)
+
+    Long count()
+}
+----
+
+[source,groovy]
+----
+import grails.gorm.services.Service
+import grails.gorm.transactions.Transactional
+import groovy.transform.CompileStatic
+
+@CompileStatic
+@Service(Book)
+@Transactional(connection = 'books')
+abstract class BookService implements BookDataService {
+    // All interface methods are auto-implemented by GORM
+    // and route to the 'books' datasource automatically.
+}
+----
+
+The `@Transactional(connection = 'books')` annotation on the abstract class ensures that all auto-implemented methods (`get`, `save`, `delete`, `findBy*`, `countBy*`, etc.) route to the `books` datasource. Without this annotation, queries silently route to the default datasource.
+
+IMPORTANT: The `connection` parameter is required when using Data Services with secondary datasources. The `@Service(Book)` annotation alone does not determine which datasource to use, even if the `Book` domain class declares `datasource 'books'` in its mapping block.
+
+==== How Connection Routing Works
+
+When GORM compiles a `@Service` abstract class, the `ServiceTransformation` AST transform:
+
+1. Copies the `@Transactional(connection = 'books')` annotation from the abstract class to the generated implementation class
+2. For each auto-implemented method, resolves the connection identifier via `findConnectionId()`
+3. Generates method bodies that use the appropriate connection - `GormEnhancer.findStaticApi(Book, 'books')` for CRUD operations and `DetachedCriteria.withConnection('books')` for finder queries
+
+This means auto-implemented methods like `get()`, `save()`, `delete()`, `findBy*()`, and `countBy*()` all respect the connection parameter without requiring manual implementations.
+
+==== Complex Queries with GormEnhancer
+
+Auto-implemented Data Service methods cover most query patterns, including dynamic finders with comparators, pagination, and property projections. For queries that require HQL, criteria builders, or aggregate functions, use `GormEnhancer.findStaticApi()` to obtain a statically compiled API handle for the target datasource:
+
+[source,groovy]
+----
+import groovy.transform.CompileStatic
+import grails.gorm.services.Service
+import grails.gorm.transactions.Transactional
+import org.grails.datastore.gorm.GormEnhancer
+import org.grails.datastore.gorm.GormStaticApi
+
+@CompileStatic
+@Service(Book)
+@Transactional(connection = 'books')
+abstract class BookService implements BookDataService {
+
+    // Auto-implemented methods from interface are inherited
+    // and route to 'books' datasource automatically.
+
+    private GormStaticApi<Book> getBooksApi() {
+        GormEnhancer.findStaticApi(Book, 'books')
+    }
+
+    List getTopAuthors(int limit) {
+        booksApi.executeQuery('''
+            SELECT b.author, COUNT(b) as bookCount
+            FROM Book b
+            GROUP BY b.author
+            ORDER BY bookCount DESC
+        ''', Collections.emptyMap(), [max: limit])
+    }
+
+    List<Book> searchWithCriteria(String titlePattern, String author) {
+        booksApi.createCriteria().list {
+            like('title', "%${titlePattern}%")
+            eq('author', author)
+            order('title', 'asc')
+        } as List<Book>
+    }
+}
+----
+
+The `GormStaticApi` returned by `findStaticApi()` provides these methods, all routed to the specified datasource:
+
+[cols="1,2"]
+|===
+| Method | Description
+
+| `executeQuery(String hql, Map params)`
+| HQL/JPQL queries
+
+| `executeUpdate(String hql, Map params)`
+| Bulk UPDATE/DELETE statements
+
+| `withCriteria(Closure criteria)`
+| Criteria query
+
+| `createCriteria()`
+| Criteria builder for complex queries
+
+| `where(Closure query)`
+| Where query
+
+| `withTransaction(Closure action)`
+| Manual transaction management
+
+| `count()`
+| Total record count
+
+| `get(Serializable id)`
+| Find by primary key
+
+| `list(Map params)`
+| Paginated list
+
+| `save(Object instance)`
+| Persist an instance
+|===
+
+NOTE: `GormEnhancer.findStaticApi()` is the statically compiled equivalent of the <<dataSourceNamespaces,namespace syntax>> (e.g., `Book.books.get(42)`). Unlike the namespace syntax, it works under `@CompileStatic` without requiring `@CompileDynamic` on individual methods.
+
+==== Consuming Multi-Datasource Data Services
+
+Other services inject the Data Service interface type. Spring resolves the abstract class bean automatically:
+
+[source,groovy]
+----
+import groovy.transform.CompileStatic
+
+@CompileStatic
+class LibraryService {
+
+    BookDataService bookDataService  // injected automatically
+
+    Map getLibraryStats() {
+        Long totalBooks = bookDataService.count()
+        List<Book> recentBooks = bookDataService.findAllByAuthor('Tolkien')
+        [total: totalBooks, tolkienBooks: recentBooks.size()]
+    }
+}
+----
+
+The consuming service does not need `@Transactional(connection = 'books')`. The Data Service handles datasource routing internally.

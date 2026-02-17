@@ -61,3 +61,5 @@ def results = c.list {
     like('code','995%')
 }
 ----
+
+TIP: The namespace syntax (e.g., `ZipCode.auditing.get(42)`) uses dynamic dispatch and is not compatible with `@CompileStatic`. For statically compiled code, use `GormEnhancer.findStaticApi(ZipCode, 'auditing')` instead, which returns a `GormStaticApi` handle with the same methods routed to the specified datasource. See the <<dataServicesMultipleDataSources,Data Services and Multiple Datasources>> section for examples.

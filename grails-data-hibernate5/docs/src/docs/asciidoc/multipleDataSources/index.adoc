@@ -31,6 +31,10 @@ include::mappingDomainsToDataSources.adoc[]
 
 include::dataSourceNamespaces.adoc[]
 
+=== Using Data Services with Multiple Datasources
+
+When using GORM Data Services (`@Service` annotation) with secondary datasources, you must annotate the abstract class with `@Transactional(connection = 'connectionName')` to route all auto-implemented methods to the correct datasource. See the <<dataServicesMultipleDataSources,Data Services and Multiple Datasources>> section for the full pattern, including `GormEnhancer.findStaticApi()` for complex queries.
+
 [[connectionSources]]
 === The ConnectionSources API
 
