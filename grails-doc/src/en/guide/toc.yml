@@ -304,6 +304,7 @@ testing:
     usefulProperties: Useful Properties
   integrationTesting: Integration Testing
   functionalTesting: Functional Testing
+  codeQuality: Code Quality with CodeNarc
 i18n:
   title: Internationalization
   understandingMessageBundles: Understanding Message Bundles
