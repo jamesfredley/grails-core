@@ -51,7 +51,7 @@ import spock.lang.Specification
  * - Tenant isolation: same-named data under different tenants stays separate
  *
  * @see PartitionedMultiTenancySpec for basic DISCRIMINATOR multi-tenancy
- * @see DataServiceMultiDataSourceSpec for Data Services on secondary datasource without multi-tenancy
+ * @see MultipleDataSourceConnectionsSpec for Data Services on secondary datasource without multi-tenancy
  */
 class DataServiceMultiTenantMultiDataSourceSpec extends Specification {
 
@@ -115,6 +115,11 @@ class DataServiceMultiTenantMultiDataSourceSpec extends Specification {
         saved.id != null
         saved.name == "page_views"
         saved.amount == 100
+
+        and: "The metric is retrievable via the analytics datasource qualifier"
+        Metric.analytics.withNewSession {
+            Metric.analytics.get(saved.id) != null
+        }
     }
 
     void "get retrieves from analytics datasource"() {
@@ -187,6 +192,20 @@ class DataServiceMultiTenantMultiDataSourceSpec extends Specification {
 
         found2 != null
         found2.amount == 200
+    }
+
+    void "GormEnhancer resolves analytics qualifier for MultiTenant entity with explicit datasource"() {
+        when: "Looking up the static API without specifying a connection"
+        GormStaticApi<Metric> api = GormEnhancer.findStaticApi(Metric)
+
+        then: "The API is registered and functional (schema exists on correct datasource)"
+        api != null
+
+        when: "Using the explicit analytics qualifier"
+        GormStaticApi<Metric> analyticsApi = GormEnhancer.findStaticApi(Metric, 'analytics')
+
+        then: "The analytics API is also registered"
+        analyticsApi != null
     }
 
     void "GormEnhancer aggregate HQL routes to analytics datasource"() {

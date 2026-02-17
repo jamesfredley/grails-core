@@ -265,6 +265,8 @@ project(':grails-test-examples-hibernate5-grails-schema-per-tenant').projectDir 
 
 include 'grails-test-examples-hibernate5-grails-partitioned-multi-tenancy'
 project(':grails-test-examples-hibernate5-grails-partitioned-multi-tenancy').projectDir = new File(settingsDir, 'grails-test-examples/hibernate5/grails-partitioned-multi-tenancy')
+include 'grails-test-examples-hibernate5-grails-multitenant-multi-datasource'
+project(':grails-test-examples-hibernate5-grails-multitenant-multi-datasource').projectDir = new File(settingsDir, 'grails-test-examples/hibernate5/grails-multitenant-multi-datasource')
 
 include 'grails-test-examples-hibernate5-standalone-hibernate'
 project(':grails-test-examples-hibernate5-standalone-hibernate').projectDir = new File(settingsDir, 'grails-test-examples/hibernate5/standalone-hibernate')
