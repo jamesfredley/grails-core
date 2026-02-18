@@ -40,6 +40,12 @@ class GormDataServicesSpec extends Specification {
     @Autowired
     BookDataService bookDataService
 
+    @Autowired
+    AuthorDataService authorDataService
+
+    @Autowired
+    CompileStaticBookService compileStaticBookService
+
     def setup() {
         // Clean up and create fresh test data
         Book.executeUpdate('delete from Book')
@@ -334,5 +340,82 @@ class GormDataServicesSpec extends Specification {
         'It'            | true
         ''              | false
         'NONEXISTENT'   | false
+    }
+
+    // ============================================
+    // @CompileStatic Service Injection Tests
+    // ============================================
+
+    void "test @CompileStatic service is autowired"() {
+        expect: "the @CompileStatic service is available"
+        compileStaticBookService != null
+    }
+
+    void "test @CompileStatic service basic CRUD operations"() {
+        when: "saving a book through the @CompileStatic service"
+        def book = compileStaticBookService.save(new Book(title: 'Static Book', pageCount: 100, price: 9.99, inStock: true))
+
+        then: "the book is persisted"
+        book != null
+        book.id != null
+        book.title == 'Static Book'
+
+        and: "it can be retrieved"
+        compileStaticBookService.get(book.id) != null
+        compileStaticBookService.findByTitle('Static Book') != null
+    }
+
+    void "test @CompileStatic service injected AuthorDataService works"() {
+        expect: "the injected authorDataService is available"
+        compileStaticBookService.authorDataService != null
+    }
+
+    void "test @CompileStatic service cross-service method returns book with author details"() {
+        given: "an author and a book"
+        def author = new Author(name: 'CS Author', email: 'csauthor@test.com').save(flush: true)
+        def book = new Book(title: 'CS Book', pageCount: 200, price: 14.99, inStock: true, author: author).save(flush: true)
+
+        when: "calling the custom cross-service method"
+        def result = compileStaticBookService.getBookWithAuthorDetails(book.id)
+
+        then: "the result contains book and author details"
+        result != null
+        result['bookTitle'] == 'CS Book'
+        result['bookId'] == book.id
+        result['authorName'] == 'CS Author'
+        result['authorId'] == author.id
+    }
+
+    void "test @CompileStatic service cross-service method with no author"() {
+        given: "a book without an author"
+        def book = new Book(title: 'Orphan CS Book', pageCount: 50, price: 5.99, inStock: true).save(flush: true)
+
+        when: "calling the custom cross-service method"
+        def result = compileStaticBookService.getBookWithAuthorDetails(book.id)
+
+        then: "the result contains book details but no author"
+        result != null
+        result['bookTitle'] == 'Orphan CS Book'
+        result['bookId'] == book.id
+        !result.containsKey('authorName')
+        !result.containsKey('authorId')
+    }
+
+    void "test @CompileStatic service cross-service method with non-existent book"() {
+        when: "calling with a non-existent book ID"
+        def result = compileStaticBookService.getBookWithAuthorDetails(999999L)
+
+        then: "null is returned"
+        result == null
+    }
+
+    void "test @CompileStatic service getCounts returns both book and author counts"() {
+        when: "calling getCounts"
+        def counts = compileStaticBookService.getCounts()
+
+        then: "both counts are present and correct"
+        counts != null
+        counts['books'] == compileStaticBookService.count()
+        counts['authors'] == authorDataService.count()
     }
 }
