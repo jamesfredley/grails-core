@@ -104,6 +104,18 @@ class GrailsApplicationContextCommandRunnerSpec extends Specification {
         filtered == ['dbm-gorm-diff'] as String[]
     }
 
+    def "filterCommandOptions handles null elements in args"() {
+        given:
+        String[] input = ['dbm-status', null, '--dataSource=analytics'] as String[]
+
+        when:
+        String[] result = GrailsApplicationContextCommandRunner.filterCommandOptions(input)
+
+        then:
+        noExceptionThrown()
+        result == ['dbm-status'] as String[]
+    }
+
     def "filterCommandOptions protects all known Grails ecosystem command options"() {
         expect: 'every known --option from Grails plugins is filtered'
         GrailsApplicationContextCommandRunner.filterCommandOptions(input as String[]) == expected as String[]
