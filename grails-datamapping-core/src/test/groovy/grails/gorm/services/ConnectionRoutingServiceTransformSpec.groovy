@@ -60,6 +60,10 @@ abstract class FooService {
 @Entity
 class Foo {
     String title
+
+    static mapping = {
+        datasource 'secondary'
+    }
 }
 ''')
 
@@ -102,6 +106,10 @@ abstract class BarService {
 @Entity
 class Bar {
     String title
+
+    static mapping = {
+        datasource 'secondary'
+    }
 }
 ''')
 
@@ -147,6 +155,10 @@ abstract class BazService {
 @Entity
 class Baz {
     String title
+
+    static mapping = {
+        datasource 'secondary'
+    }
 }
 ''')
 
@@ -199,6 +211,10 @@ interface WidgetService {
 @Entity
 class Widget {
     String name
+
+    static mapping = {
+        datasource 'secondary'
+    }
 }
 ''')
 
@@ -298,6 +314,10 @@ interface GadgetService {
 @Entity
 class Gadget {
     String label
+
+    static mapping = {
+        datasource 'secondary'
+    }
 }
 ''')
         Class impl = service.classLoader.loadClass('$GadgetServiceImplementation')
@@ -324,4 +344,5 @@ class Gadget {
         then:
         thrown(IllegalStateException)
     }
+
 }

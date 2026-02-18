@@ -81,7 +81,7 @@ class DeleteImplementer extends AbstractDetachedCriteriaServiceImplementor imple
     void implementById(ClassNode domainClassNode, MethodNode abstractMethodNode, MethodNode newMethodNode, ClassNode targetClassNode, BlockStatement body, Expression byIdLookup) {
         boolean isVoidReturnType = ClassHelper.VOID_TYPE.equals(newMethodNode.returnType)
         VariableExpression obj = varX('$obj')
-        Expression connectionId = findConnectionId(abstractMethodNode)
+        Expression connectionId = findConnectionId(newMethodNode)
         Statement deleteStatement
         if (connectionId != null) {
             // Route delete through the instance API for the specified connection

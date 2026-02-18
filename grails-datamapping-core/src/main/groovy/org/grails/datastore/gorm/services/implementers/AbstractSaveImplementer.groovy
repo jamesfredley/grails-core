@@ -51,7 +51,7 @@ import static org.grails.datastore.gorm.transform.AstMethodDispatchUtils.namedAr
 @CompileStatic
 abstract class AbstractSaveImplementer extends AbstractWriteOperationImplementer {
 
-    protected Statement bindParametersAndSave(ClassNode domainClassNode, MethodNode abstractMethodNode, Parameter[] parameters, BlockStatement body, VariableExpression entityVar) {
+    protected Statement bindParametersAndSave(ClassNode domainClassNode, MethodNode newMethodNode, Parameter[] parameters, BlockStatement body, VariableExpression entityVar) {
         Expression argsExpression = null
 
         for (Parameter parameter in parameters) {
@@ -64,8 +64,8 @@ abstract class AbstractSaveImplementer extends AbstractWriteOperationImplementer
                 argsExpression = varX(parameter)
             } else {
                 AstUtils.error(
-                        abstractMethodNode.declaringClass.module.context,
-                        abstractMethodNode,
+                        newMethodNode.declaringClass.module.context,
+                        newMethodNode,
                         "Cannot implement method for argument [${parameterName}]. No property exists on domain class [$domainClassNode.name]"
                 )
             }
@@ -83,7 +83,7 @@ abstract class AbstractSaveImplementer extends AbstractWriteOperationImplementer
             saveArgs = namedArgs(failOnError: ConstantExpression.TRUE)
         }
 
-        Expression connectionId = findConnectionId(abstractMethodNode)
+        Expression connectionId = findConnectionId(newMethodNode)
         if (connectionId != null) {
             returnS(callX(buildInstanceApiLookup(domainClassNode, connectionId), 'save', args(entityVar, saveArgs)))
         }

@@ -66,9 +66,11 @@ class DataServiceMultiDataSourceSpec extends Specification {
     )
 
     @Shared ProductService productService
+    @Shared ProductDataService productDataService
 
     void setupSpec() {
         productService = datastore.getDatastoreForConnection("books").getService(ProductService)
+        productDataService = datastore.getDatastoreForConnection("books").getService(ProductDataService)
     }
 
     void setup() {
@@ -224,6 +226,75 @@ class DataServiceMultiDataSourceSpec extends Specification {
         and: "retrievable"
         productService.get(saved.id) != null
     }
+
+    // ---- Interface-pattern Data Service tests ----
+
+    void "interface service: save routes to books datasource"() {
+        when: "a product is saved through the interface Data Service"
+        Product saved = productDataService.save(new Product(name: 'InterfaceWidget', amount: 42))
+
+        then: "it is persisted with an ID"
+        saved != null
+        saved.id != null
+        saved.name == 'InterfaceWidget'
+        saved.amount == 42
+
+        and: "it exists on the books datasource"
+        GormEnhancer.findStaticApi(Product, 'books').withNewTransaction {
+            GormEnhancer.findStaticApi(Product, 'books').count()
+        } == 1
+    }
+
+    void "interface service: get by ID routes to books datasource"() {
+        given: "a product saved on books via abstract service"
+        Product saved = productService.save(new Product(name: 'InterfaceGet', amount: 99))
+
+        when: "we retrieve it through the interface Data Service"
+        Product found = productDataService.get(saved.id)
+
+        then: "the correct entity is returned"
+        found != null
+        found.id == saved.id
+        found.name == 'InterfaceGet'
+    }
+
+    void "interface service: delete routes to books datasource"() {
+        given: "a product saved on books"
+        Product saved = productService.save(new Product(name: 'InterfaceDelete', amount: 1))
+
+        when: "we delete through the interface Data Service (FindAndDeleteImplementer)"
+        Product deleted = productDataService.delete(saved.id)
+
+        then: "the entity is deleted"
+        deleted != null
+        deleted.name == 'InterfaceDelete'
+        productDataService.get(saved.id) == null
+    }
+
+    void "interface service: void delete routes to books datasource"() {
+        given: "a product saved on books"
+        Product saved = productService.save(new Product(name: 'InterfaceVoidDel', amount: 2))
+
+        when: "we delete through the interface Data Service (DeleteImplementer)"
+        productDataService.deleteProduct(saved.id)
+
+        then: "the entity is deleted"
+        productDataService.get(saved.id) == null
+    }
+
+    void "interface and abstract services share the same datasource"() {
+        given: "a product saved through the abstract service"
+        Product saved = productService.save(new Product(name: 'CrossService', amount: 77))
+
+        expect: "the interface service can find it and vice versa"
+        productDataService.findByName('CrossService') != null
+        productDataService.findByName('CrossService').id == saved.id
+
+        and: "counts match across both service patterns"
+        productService.count() == productDataService.count()
+    }
+
+
 }
 
 @Entity
@@ -264,4 +335,28 @@ abstract class ProductService {
      * Tests that SaveImplementer routes multi-arg saves through connection-aware API.
      */
     abstract Product saveProduct(String name, Integer amount)
+}
+
+/**
+ * Interface-only Data Service pattern.
+ * Verifies that connection routing works identically whether the service
+ * is declared as an interface or an abstract class.
+ */
+@Service(Product)
+@Transactional(connection = 'books')
+interface ProductDataService {
+
+    Product get(Serializable id)
+
+    Product save(Product product)
+
+    Product delete(Serializable id)
+
+    void deleteProduct(Serializable id)
+
+    Number count()
+
+    Product findByName(String name)
+
+    List<Product> findAllByName(String name)
 }
