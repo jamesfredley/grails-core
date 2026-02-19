@@ -74,7 +74,7 @@ class FindAndDeleteImplementer extends FindOneImplementer implements SingleResul
     @Override
     protected Statement buildReturnStatement(ClassNode targetDomainClass, MethodNode abstractMethodNode, Expression queryMethodCall, Expression args, MethodNode newMethodNode) {
         VariableExpression var = varX('$obj', targetDomainClass)
-        Expression connectionId = findConnectionId(newMethodNode)
+        Expression connectionId = findConnectionId(abstractMethodNode)
         if (connectionId != null) {
             // Route delete through the instance API for the specified connection
             block(

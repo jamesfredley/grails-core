@@ -65,7 +65,7 @@ class SaveImplementer extends AbstractSaveImplementer implements SingleResultSer
         Parameter[] parameters = newMethodNode.parameters
         int parameterCount = parameters.length
         if (parameterCount == 1 && AstUtils.isDomainClass(parameters[0].type)) {
-            Expression connectionId = findConnectionId(newMethodNode)
+            Expression connectionId = findConnectionId(abstractMethodNode)
             if (connectionId != null) {
                 // Route save through the instance API for the specified connection
                 body.addStatement(
@@ -84,7 +84,7 @@ class SaveImplementer extends AbstractSaveImplementer implements SingleResultSer
                 declS(entityVar, ctorX(domainClassNode))
             )
             body.addStatement(
-                bindParametersAndSave(domainClassNode, newMethodNode, parameters, body, entityVar)
+                bindParametersAndSave(domainClassNode, abstractMethodNode, newMethodNode, parameters, body, entityVar)
             )
 
         }
