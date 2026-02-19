@@ -16,15 +16,23 @@
  *  specific language governing permissions and limitations
  *  under the License.
  */
-
-package app2.pages
+package namespaces.admin.pages
 
 import geb.Page
 
-class FooListPage extends Page {
+class AdminReportPage extends Page {
 
-    static String pageTitle = 'Foo List'
+    static String pageTitle = 'Admin Report'
 
-    static url = '/foo/index?user=admin'
+    static url = '/myAppTest/admin/report/index'
     static at = { title == pageTitle }
 }
+
+class ReportPage extends Page {
+
+    static String pageTitle = 'Admin Report'
+
+    static url = '/myAppTest/report/index'
+    static at = { title == pageTitle }
+}
+

@@ -16,18 +16,22 @@
  *  specific language governing permissions and limitations
  *  under the License.
  */
-package functionaltests.pages
+package context.pages
 
 import geb.Page
 
-class BookCreatePage extends Page {
+class TestEnvironmentHomePage extends Page {
 
-    static String pageTitle = 'Create Book'
+    static String pageTitle = 'Welcome to Grails'
 
-    static url = '/book/create'
+    static url = '/myAppTest'
     static at = { title == pageTitle }
-    static content = {
-        titleField { $('#title') }
-        createButton { $('#create') }
-    }
+}
+
+class DefaultEnvironmentHomePage extends Page {
+
+    static String pageTitle = 'HTTP Status 404 – Not Found'
+
+    static url = '/myApp'
+    static at = { title == pageTitle }
 }

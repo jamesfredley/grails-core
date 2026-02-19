@@ -19,11 +19,41 @@
 package functional.tests.pages
 
 import geb.Page
+import geb.module.TextInput
 
-class BookListPage extends Page {
+class AuthorListPage extends Page {
 
-    static String pageTitle = 'Book List'
+    static String pageTitle = 'Author List'
 
-    static url = '/book/index'
+    static url = '/author/index'
     static at = { title == pageTitle }
 }
+
+class AuthorShowPage extends Page {
+
+    static String pageTitle = 'Show Author'
+
+    static url = '/author/show'
+    static at = { title == pageTitle }
+    static content = {
+        authorName { $('li.fieldcontain div').text() }
+    }
+}
+
+class AuthorCreatePage extends Page {
+
+    static String pageTitle = 'Create Author'
+
+    static url = '/author/create'
+    static at = { title == pageTitle }
+    static content = {
+        nameInput { $('input#name').module(TextInput) }
+        createButton { $('input#create') }
+    }
+
+    void createAuthor(String title) {
+        nameInput.value(title)
+        createButton.click()
+    }
+}
+
