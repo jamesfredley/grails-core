@@ -19,12 +19,14 @@
 package micronaut
 
 import grails.testing.mixin.integration.Integration
+import io.github.cjstehno.ersatz.ErsatzServer
+import io.github.cjstehno.ersatz.cfg.ContentType
 import io.micronaut.context.ApplicationContext as MicronautApplicationContext
-import io.micronaut.http.HttpResponse
 import io.micronaut.http.client.HttpClient
 import micronaut.client.MicronautTestClient
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
+import spock.lang.AutoCleanup
 import spock.lang.Specification
 
 @Integration
@@ -36,6 +38,11 @@ class MicronautDeclarativeClientSpec extends Specification {
     @Value('${local.server.port}')
     Integer serverPort
 
+    @AutoCleanup
+    ErsatzServer ersatz = new ErsatzServer({ cfg ->
+        cfg.httpPort(19876)
+    })
+
     void "declarative @Client interface is registered as a bean in Micronaut context"() {
         when: "looking up the declarative client bean"
         def client = micronautContext.getBean(MicronautTestClient)
@@ -43,6 +50,33 @@ class MicronautDeclarativeClientSpec extends Specification {
         then: "the bean is found and implements the interface"
         client != null
         client instanceof MicronautTestClient
+    }
+
+    void "declarative @Client invokes endpoint through load balancing path"() {
+        given: "an ersatz server mocking the expected endpoint response"
+        ersatz.expectations({ expect ->
+            expect.GET("/micronaut-test", { req ->
+                req.called(1)
+                req.responder({ res ->
+                    res.code(200)
+                    res.body('{"javaMessage":"hello","factoryName":"test-factory"}', ContentType.APPLICATION_JSON)
+                })
+            })
+        })
+
+        and: "the declarative client from the Micronaut context"
+        def client = micronautContext.getBean(MicronautTestClient)
+
+        when: "invoking the client method which goes through service discovery and load balancing"
+        def response = client.index()
+
+        then: "the response contains the expected JSON from the ersatz mock"
+        response != null
+        response.contains('javaMessage')
+        response.contains('factoryName')
+
+        and: "the ersatz server received exactly one request"
+        ersatz.verify()
     }
 
     void "Micronaut HttpClient can reach the running Grails application"() {

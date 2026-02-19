@@ -56,6 +56,7 @@ dependencies {
     testImplementation "io.micronaut:micronaut-http-client:$micronautHttpClientVersion"
 
     integrationTestImplementation testFixtures('org.apache.grails:grails-geb')
+    integrationTestImplementation "io.github.cjstehno.ersatz:ersatz:$ersatzVersion"
 }
 
 apply {
