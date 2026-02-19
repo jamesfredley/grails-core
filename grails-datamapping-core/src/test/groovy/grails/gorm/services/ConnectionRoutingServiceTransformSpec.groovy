@@ -43,7 +43,7 @@ class ConnectionRoutingServiceTransformSpec extends Specification {
 
     void "test save with @Transactional(connection) routes through connection-aware API"() {
         when: "an abstract data service with @Transactional(connection='secondary') declares save(Foo)"
-        Class service = new GroovyClassLoader().parseClass('''
+        def service = new GroovyClassLoader().parseClass('''
 import grails.gorm.services.Service
 import grails.gorm.annotation.Entity
 import grails.gorm.transactions.Transactional
@@ -67,27 +67,31 @@ class Foo {
 }
 ''')
 
-        then: "the class compiles without errors"
+        then: 'the class compiles without errors'
         !service.isInterface()
 
-        when: "the implementation is loaded"
-        Class impl = service.classLoader.loadClass('$FooServiceImplementation')
+        when: 'the implementation is loaded'
+        def impl = service.classLoader.loadClass('$FooServiceImplementation')
 
-        then: "the implementation exists and inherits the connection-aware @Transactional"
+        then: 'the implementation exists and inherits the connection-aware @Transactional'
         impl != null
         impl.getAnnotation(Transactional) != null
         impl.getAnnotation(Transactional).connection() == 'secondary'
 
-        and: "save(Foo) is implemented by SaveImplementer"
-        impl.getMethod("save", impl.classLoader.loadClass("Foo")).getAnnotation(Implemented).by() == SaveImplementer
+        and: 'save(Foo) is implemented by SaveImplementer'
+        impl.getMethod('save', impl.classLoader.loadClass('Foo'))
+                .getAnnotation(Implemented)
+                .by() == SaveImplementer
 
-        and: "saveFoo(String) is also implemented by SaveImplementer"
-        impl.getMethod("saveFoo", String).getAnnotation(Implemented).by() == SaveImplementer
+        and: 'saveFoo(String) is also implemented by SaveImplementer'
+        impl.getMethod('saveFoo', String)
+                .getAnnotation(Implemented)
+                .by() == SaveImplementer
     }
 
-    void "test delete by id with @Transactional(connection) routes through connection-aware API"() {
+    void 'test delete by id with @Transactional(connection) routes through connection-aware API'() {
         when: "an abstract data service with @Transactional(connection='secondary') declares delete(Serializable)"
-        Class service = new GroovyClassLoader().parseClass('''
+        def service = new GroovyClassLoader().parseClass('''
 import grails.gorm.services.Service
 import grails.gorm.annotation.Entity
 import grails.gorm.transactions.Transactional
@@ -113,30 +117,36 @@ class Bar {
 }
 ''')
 
-        then: "the class compiles without errors"
+        then: 'the class compiles without errors'
         !service.isInterface()
 
-        when: "the implementation is loaded"
-        Class impl = service.classLoader.loadClass('$BarServiceImplementation')
+        when: 'the implementation is loaded'
+        def impl = service.classLoader.loadClass('$BarServiceImplementation')
 
-        then: "the implementation exists and inherits the connection-aware @Transactional"
+        then: 'the implementation exists and inherits the connection-aware @Transactional'
         impl != null
         impl.getAnnotation(Transactional) != null
         impl.getAnnotation(Transactional).connection() == 'secondary'
 
-        and: "delete(Serializable) returning domain type is implemented by FindAndDeleteImplementer"
-        impl.getMethod("delete", Serializable).getAnnotation(Implemented).by() == FindAndDeleteImplementer
+        and: 'delete(Serializable) returning domain type is implemented by FindAndDeleteImplementer'
+        impl.getMethod('delete', Serializable)
+                .getAnnotation(Implemented)
+                .by() == FindAndDeleteImplementer
 
-        and: "void deleteBar(Serializable) is implemented by DeleteImplementer"
-        impl.getMethod("deleteBar", Serializable).getAnnotation(Implemented).by() == DeleteImplementer
+        and: 'void deleteBar(Serializable) is implemented by DeleteImplementer'
+        impl.getMethod('deleteBar', Serializable)
+                .getAnnotation(Implemented)
+                .by() == DeleteImplementer
 
-        and: "deleteMoreBars(String) returning Number is implemented by DeleteImplementer"
-        impl.getMethod("deleteMoreBars", String).getAnnotation(Implemented).by() == DeleteImplementer
+        and: 'deleteMoreBars(String) returning Number is implemented by DeleteImplementer'
+        impl.getMethod('deleteMoreBars', String)
+                .getAnnotation(Implemented)
+                .by() == DeleteImplementer
     }
 
     void "test find by id with @Transactional(connection) routes through connection-aware API"() {
         when: "an abstract data service with @Transactional(connection='secondary') declares find(Serializable)"
-        Class service = new GroovyClassLoader().parseClass('''
+        def service = new GroovyClassLoader().parseClass('''
 import grails.gorm.services.Service
 import grails.gorm.annotation.Entity
 import grails.gorm.transactions.Transactional
@@ -162,27 +172,31 @@ class Baz {
 }
 ''')
 
-        then: "the class compiles without errors"
+        then: 'the class compiles without errors'
         !service.isInterface()
 
-        when: "the implementation is loaded"
-        Class impl = service.classLoader.loadClass('$BazServiceImplementation')
+        when: 'the implementation is loaded'
+        def impl = service.classLoader.loadClass('$BazServiceImplementation')
 
-        then: "the implementation exists and inherits the connection-aware @Transactional"
+        then: 'the implementation exists and inherits the connection-aware @Transactional'
         impl != null
         impl.getAnnotation(Transactional) != null
         impl.getAnnotation(Transactional).connection() == 'secondary'
 
-        and: "find(Serializable) is implemented by FindOneImplementer"
-        impl.getMethod("find", Serializable).getAnnotation(Implemented).by() == FindOneImplementer
+        and: 'find(Serializable) is implemented by FindOneImplementer'
+        impl.getMethod('find', Serializable)
+                .getAnnotation(Implemented)
+                .by() == FindOneImplementer
 
-        and: "get(Serializable) is implemented by FindOneImplementer"
-        impl.getMethod("get", Serializable).getAnnotation(Implemented).by() == FindOneImplementer
+        and: 'get(Serializable) is implemented by FindOneImplementer'
+        impl.getMethod('get', Serializable)
+                .getAnnotation(Implemented)
+                .by() == FindOneImplementer
     }
 
     void "test interface service with @Transactional(connection) compiles all CRUD methods"() {
         when: "an interface data service with @Transactional(connection='secondary') declares CRUD methods"
-        Class service = new GroovyClassLoader().parseClass('''
+        def service = new GroovyClassLoader().parseClass('''
 import grails.gorm.services.Service
 import grails.gorm.annotation.Entity
 import grails.gorm.transactions.Transactional
@@ -218,36 +232,46 @@ class Widget {
 }
 ''')
 
-        then: "the interface compiles without errors"
+        then: 'the interface compiles without errors'
         service.isInterface()
 
-        when: "the implementation is loaded"
-        Class impl = service.classLoader.loadClass('$WidgetServiceImplementation')
+        when: 'the implementation is loaded'
+        def impl = service.classLoader.loadClass('$WidgetServiceImplementation')
 
-        then: "the implementation exists and inherits the connection-aware @Transactional"
+        then: 'the implementation exists and inherits the connection-aware @Transactional'
         impl != null
         impl.getAnnotation(Transactional) != null
         impl.getAnnotation(Transactional).connection() == 'secondary'
 
-        and: "save(Widget) is implemented"
-        impl.getMethod("save", impl.classLoader.loadClass("Widget")).getAnnotation(Implemented).by() == SaveImplementer
+        and: 'save(Widget) is implemented'
+        impl.getMethod('save', impl.classLoader.loadClass('Widget'))
+                .getAnnotation(Implemented)
+                .by() == SaveImplementer
 
-        and: "find(Serializable) is implemented"
-        impl.getMethod("find", Serializable).getAnnotation(Implemented).by() == FindOneImplementer
+        and: 'find(Serializable) is implemented'
+        impl.getMethod('find', Serializable)
+                .getAnnotation(Implemented)
+                .by() == FindOneImplementer
 
-        and: "delete(Serializable) returning domain type is implemented by FindAndDeleteImplementer"
-        impl.getMethod("delete", Serializable).getAnnotation(Implemented).by() == FindAndDeleteImplementer
+        and: 'delete(Serializable) returning domain type is implemented by FindAndDeleteImplementer'
+        impl.getMethod('delete', Serializable)
+                .getAnnotation(Implemented)
+                .by() == FindAndDeleteImplementer
 
-        and: "void deleteWidget(Serializable) is implemented by DeleteImplementer"
-        impl.getMethod("deleteWidget", Serializable).getAnnotation(Implemented).by() == DeleteImplementer
+        and: 'void deleteWidget(Serializable) is implemented by DeleteImplementer'
+        impl.getMethod('deleteWidget', Serializable)
+                .getAnnotation(Implemented)
+                .by() == DeleteImplementer
 
-        and: "deleteMoreWidgets(String) returning Number is implemented by DeleteImplementer"
-        impl.getMethod("deleteMoreWidgets", String).getAnnotation(Implemented).by() == DeleteImplementer
+        and: 'deleteMoreWidgets(String) returning Number is implemented by DeleteImplementer'
+        impl.getMethod('deleteMoreWidgets', String)
+                .getAnnotation(Implemented)
+                .by() == DeleteImplementer
     }
 
     void "test service without @Transactional(connection) still compiles CRUD correctly"() {
-        when: "a data service WITHOUT connection annotation declares CRUD methods"
-        Class service = new GroovyClassLoader().parseClass('''
+        when: 'a data service WITHOUT connection annotation declares CRUD methods'
+        def service = new GroovyClassLoader().parseClass('''
 import grails.gorm.services.Service
 import grails.gorm.annotation.Entity
 
@@ -271,31 +295,39 @@ class Thing {
 }
 ''')
 
-        then: "the interface compiles without errors"
+        then: 'the interface compiles without errors'
         service.isInterface()
 
-        when: "the implementation is loaded"
-        Class impl = service.classLoader.loadClass('$ThingServiceImplementation')
+        when: 'the implementation is loaded'
+        def impl = service.classLoader.loadClass('$ThingServiceImplementation')
 
-        then: "the implementation exists"
+        then: 'the implementation exists'
         impl != null
 
-        and: "save is implemented by SaveImplementer"
-        impl.getMethod("save", impl.classLoader.loadClass("Thing")).getAnnotation(Implemented).by() == SaveImplementer
+        and: 'save is implemented by SaveImplementer'
+        impl.getMethod('save', impl.classLoader.loadClass('Thing'))
+                .getAnnotation(Implemented)
+                .by() == SaveImplementer
 
-        and: "find is implemented by FindOneImplementer"
-        impl.getMethod("find", Serializable).getAnnotation(Implemented).by() == FindOneImplementer
+        and: 'find is implemented by FindOneImplementer'
+        impl.getMethod('find', Serializable)
+                .getAnnotation(Implemented)
+                .by() == FindOneImplementer
 
-        and: "delete returning domain type is implemented by FindAndDeleteImplementer"
-        impl.getMethod("delete", Serializable).getAnnotation(Implemented).by() == FindAndDeleteImplementer
+        and: 'delete returning domain type is implemented by FindAndDeleteImplementer'
+        impl.getMethod('delete', Serializable)
+                .getAnnotation(Implemented)
+                .by() == FindAndDeleteImplementer
 
-        and: "void deleteThing is implemented by DeleteImplementer"
-        impl.getMethod("deleteThing", Serializable).getAnnotation(Implemented).by() == DeleteImplementer
+        and: 'void deleteThing is implemented by DeleteImplementer'
+        impl.getMethod("deleteThing", Serializable)
+                .getAnnotation(Implemented)
+                .by() == DeleteImplementer
     }
 
-    void "test save/delete/get with connection actually invoke connection-aware API at runtime"() {
-        when: "a service with connection routing is instantiated and methods are called"
-        Class service = new GroovyClassLoader().parseClass('''
+    void 'test save/delete/get with connection actually invoke connection-aware API at runtime'() {
+        when: 'a service with connection routing is instantiated and methods are called'
+        def service = new GroovyClassLoader().parseClass('''
 import grails.gorm.services.Service
 import grails.gorm.annotation.Entity
 import grails.gorm.transactions.Transactional
@@ -320,14 +352,14 @@ class Gadget {
     }
 }
 ''')
-        Class impl = service.classLoader.loadClass('$GadgetServiceImplementation')
-        def instance = impl.newInstance()
+        def impl = service.classLoader.loadClass('$GadgetServiceImplementation')
+        def instance = impl.getDeclaredConstructor().newInstance()
 
-        then: "calling save throws IllegalStateException (no GORM backend) rather than routing to wrong datasource"
+        then: 'calling save throws IllegalStateException (no GORM backend) rather than routing to wrong datasource'
         // This confirms the generated code attempts to use GormEnhancer APIs
         // (which require an initialized datastore), rather than calling entity.save() directly
         when:
-        instance.save(service.classLoader.loadClass("Gadget").newInstance())
+        instance.save(service.classLoader.loadClass('Gadget').getDeclaredConstructor().newInstance())
 
         then:
         thrown(IllegalStateException)

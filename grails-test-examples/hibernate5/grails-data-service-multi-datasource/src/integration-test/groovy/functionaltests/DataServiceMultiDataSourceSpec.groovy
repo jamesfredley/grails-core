@@ -16,12 +16,13 @@
  *  specific language governing permissions and limitations
  *  under the License.
  */
-
 package functionaltests
 
-import example.Application
 import example.Product
 import example.ProductService
+
+import org.springframework.beans.factory.annotation.Autowired
+
 import grails.testing.mixin.integration.Integration
 import org.grails.orm.hibernate.HibernateDatastore
 import spock.lang.Specification
@@ -39,14 +40,17 @@ import spock.lang.Specification
  * The service is obtained from the secondary child datastore
  * (not auto-wired by Spring) to ensure proper session binding.
  */
-@Integration(applicationClass = Application)
+@Integration
 class DataServiceMultiDataSourceSpec extends Specification {
 
+    @Autowired
     HibernateDatastore hibernateDatastore
+
     ProductService productService
 
     void setup() {
-        productService = hibernateDatastore.getDatastoreForConnection("secondary")
+        productService = hibernateDatastore
+                .getDatastoreForConnection('secondary')
                 .getService(ProductService)
     }
 
@@ -58,7 +62,7 @@ class DataServiceMultiDataSourceSpec extends Specification {
 
     void "save routes to secondary datasource"() {
         when:
-        Product saved = productService.save(new Product(name: 'Widget', amount: 42))
+        def saved = productService.save(new Product(name: 'Widget', amount: 42))
 
         then:
         saved != null
@@ -69,10 +73,10 @@ class DataServiceMultiDataSourceSpec extends Specification {
 
     void "get by ID routes to secondary datasource"() {
         given:
-        Product saved = productService.save(new Product(name: 'Gadget', amount: 99))
+        def saved = productService.save(new Product(name: 'Gadget', amount: 99))
 
         when:
-        Product found = productService.get(saved.id)
+        def found = productService.get(saved.id)
 
         then:
         found != null
@@ -92,7 +96,7 @@ class DataServiceMultiDataSourceSpec extends Specification {
 
     void "delete routes to secondary datasource"() {
         given:
-        Product saved = productService.save(new Product(name: 'Ephemeral', amount: 1))
+        def saved = productService.save(new Product(name: 'Ephemeral', amount: 1))
 
         when:
         productService.delete(saved.id)
@@ -106,7 +110,7 @@ class DataServiceMultiDataSourceSpec extends Specification {
         productService.save(new Product(name: 'Unique', amount: 77))
 
         when:
-        Product found = productService.findByName('Unique')
+        def found = productService.findByName('Unique')
 
         then:
         found != null
@@ -121,7 +125,7 @@ class DataServiceMultiDataSourceSpec extends Specification {
         productService.save(new Product(name: 'Other', amount: 30))
 
         when:
-        List<Product> found = productService.findAllByName('Duplicate')
+        def found = productService.findAllByName('Duplicate')
 
         then:
         found.size() == 2

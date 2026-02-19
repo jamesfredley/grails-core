@@ -18,17 +18,17 @@
  */
 package org.grails.orm.hibernate.connections
 
-import grails.gorm.services.Service
-import grails.gorm.annotation.Entity
-import grails.gorm.transactions.Transactional
-import org.grails.datastore.gorm.GormEnhancer
-import org.grails.datastore.gorm.GormStaticApi
-import org.grails.datastore.mapping.core.DatastoreUtils
-import org.grails.orm.hibernate.HibernateDatastore
 import org.hibernate.dialect.H2Dialect
 import spock.lang.AutoCleanup
 import spock.lang.Shared
 import spock.lang.Specification
+
+import grails.gorm.annotation.Entity
+import grails.gorm.services.Service
+import grails.gorm.transactions.Transactional
+import org.grails.datastore.gorm.GormEnhancer
+import org.grails.datastore.mapping.core.DatastoreUtils
+import org.grails.orm.hibernate.HibernateDatastore
 
 /**
  * Integration tests for GORM Data Service auto-implemented CRUD methods
@@ -69,53 +69,57 @@ class DataServiceMultiDataSourceSpec extends Specification {
     @Shared ProductDataService productDataService
 
     void setupSpec() {
-        productService = datastore.getDatastoreForConnection("books").getService(ProductService)
-        productDataService = datastore.getDatastoreForConnection("books").getService(ProductDataService)
+        productService = datastore
+                .getDatastoreForConnection('books')
+                .getService(ProductService)
+        productDataService = datastore
+                .getDatastoreForConnection('books')
+                .getService(ProductDataService)
     }
 
     void setup() {
-        GormStaticApi<Product> api = GormEnhancer.findStaticApi(Product, 'books')
+        def api = GormEnhancer.findStaticApi(Product, 'books')
         api.withNewTransaction {
             api.executeUpdate('delete from Product')
         }
     }
 
     void "schema is created on the books datasource"() {
-        when: "we query the books datasource for the product table"
-        GormStaticApi<Product> api = GormEnhancer.findStaticApi(Product, 'books')
-        List result = api.withNewTransaction {
-            api.executeQuery("SELECT 1 FROM Product p WHERE 1=0")
+        when: 'we query the books datasource for the product table'
+        def api = GormEnhancer.findStaticApi(Product, 'books')
+        def result = api.withNewTransaction {
+            api.executeQuery('SELECT 1 FROM Product p WHERE 1=0')
         }
 
-        then: "no exception - table exists on books"
+        then: 'no exception - table exists on books'
         noExceptionThrown()
         result != null
     }
 
     void "save routes to books datasource"() {
-        when: "a product is saved through the Data Service"
-        Product saved = productService.save(new Product(name: 'Widget', amount: 42))
+        when: 'a product is saved through the Data Service'
+        def saved = productService.save(new Product(name: 'Widget', amount: 42))
 
-        then: "it is persisted with an ID"
+        then: 'it is persisted with an ID'
         saved != null
         saved.id != null
         saved.name == 'Widget'
         saved.amount == 42
 
-        and: "it exists on the books datasource"
+        and: 'it exists on the books datasource'
         GormEnhancer.findStaticApi(Product, 'books').withNewTransaction {
             GormEnhancer.findStaticApi(Product, 'books').count()
         } == 1
     }
 
     void "get by ID routes to books datasource"() {
-        given: "a product saved on books"
-        Product saved = productService.save(new Product(name: 'Gadget', amount: 99))
+        given: 'a product saved on books'
+        def saved = productService.save(new Product(name: 'Gadget', amount: 99))
 
-        when: "we retrieve it by ID"
-        Product found = productService.get(saved.id)
+        when: 'we retrieve it by ID'
+        def found = productService.get(saved.id)
 
-        then: "the correct entity is returned"
+        then: 'the correct entity is returned'
         found != null
         found.id == saved.id
         found.name == 'Gadget'
@@ -123,22 +127,22 @@ class DataServiceMultiDataSourceSpec extends Specification {
     }
 
     void "count routes to books datasource"() {
-        given: "two products saved on books"
+        given: 'two products saved on books'
         productService.save(new Product(name: 'Alpha', amount: 10))
         productService.save(new Product(name: 'Beta', amount: 20))
 
-        expect: "count returns 2"
+        expect: 'count returns 2'
         productService.count() == 2
     }
 
     void "delete by ID routes to books datasource - FindAndDeleteImplementer"() {
-        given: "a product saved on books"
-        Product saved = productService.save(new Product(name: 'Ephemeral', amount: 1))
+        given: 'a product saved on books'
+        def saved = productService.save(new Product(name: 'Ephemeral', amount: 1))
 
-        when: "we delete it using delete(id) which returns the domain object"
-        Product deleted = productService.delete(saved.id)
+        when: 'we delete it using delete(id) which returns the domain object'
+        def deleted = productService.delete(saved.id)
 
-        then: "the deleted entity is returned and no longer exists"
+        then: 'the deleted entity is returned and no longer exists'
         deleted != null
         deleted.name == 'Ephemeral'
         productService.get(saved.id) == null
@@ -146,13 +150,13 @@ class DataServiceMultiDataSourceSpec extends Specification {
     }
 
     void "delete by ID routes to books datasource - DeleteImplementer"() {
-        given: "a product saved on books"
-        Product saved = productService.save(new Product(name: 'AlsoEphemeral', amount: 2))
+        given: 'a product saved on books'
+        def saved = productService.save(new Product(name: 'AlsoEphemeral', amount: 2))
 
-        when: "we delete it using void deleteProduct(id)"
+        when: 'we delete it using void deleteProduct(id)'
         productService.deleteProduct(saved.id)
 
-        then: "it no longer exists"
+        then: 'it no longer exists'
         productService.get(saved.id) == null
         productService.count() == 0
     }
@@ -163,7 +167,7 @@ class DataServiceMultiDataSourceSpec extends Specification {
         productService.save(new Product(name: 'Other', amount: 88))
 
         when: "we find by name"
-        Product found = productService.findByName('Unique')
+        def found = productService.findByName('Unique')
 
         then: "the correct entity is returned"
         found != null
@@ -172,41 +176,41 @@ class DataServiceMultiDataSourceSpec extends Specification {
     }
 
     void "findAllByName routes to books datasource"() {
-        given: "products with duplicate names on books"
+        given: 'products with duplicate names on books'
         productService.save(new Product(name: 'Duplicate', amount: 10))
         productService.save(new Product(name: 'Duplicate', amount: 20))
         productService.save(new Product(name: 'Singleton', amount: 30))
 
-        when: "we find all by name"
-        List<Product> found = productService.findAllByName('Duplicate')
+        when: 'we find all by name'
+        def found = productService.findAllByName('Duplicate')
 
-        then: "both matching entities are returned"
+        then: 'both matching entities are returned'
         found.size() == 2
         found.every { it.name == 'Duplicate' }
     }
 
     void "GormEnhancer escape-hatch HQL works on books datasource"() {
-        given: "products saved on books"
+        given: 'products saved on books'
         productService.save(new Product(name: 'Foo', amount: 100))
         productService.save(new Product(name: 'Bar', amount: 200))
 
-        when: "we run aggregate HQL through GormEnhancer"
-        GormStaticApi<Product> api = GormEnhancer.findStaticApi(Product, 'books')
-        List result = api.withNewTransaction {
-            api.executeQuery("SELECT SUM(p.amount) FROM Product p")
+        when: 'we run aggregate HQL through GormEnhancer'
+        def api = GormEnhancer.findStaticApi(Product, 'books')
+        def result = api.withNewTransaction {
+            api.executeQuery('SELECT SUM(p.amount) FROM Product p')
         }
 
-        then: "the aggregation reflects books data"
+        then: 'the aggregation reflects books data'
         result[0] == 300
     }
 
     void "save, get, and find round-trip through Data Service"() {
-        when: "a product is saved, retrieved by ID, and found by name"
-        Product saved = productService.save(new Product(name: 'RoundTrip', amount: 33))
-        Product byId = productService.get(saved.id)
-        Product byName = productService.findByName('RoundTrip')
+        when: 'a product is saved, retrieved by ID, and found by name'
+        def saved = productService.save(new Product(name: 'RoundTrip', amount: 33))
+        def byId = productService.get(saved.id)
+        def byName = productService.findByName('RoundTrip')
 
-        then: "all three references point to the same entity"
+        then: 'all three references point to the same entity'
         saved.id == byId.id
         saved.id == byName.id
         byId.name == 'RoundTrip'
@@ -214,86 +218,85 @@ class DataServiceMultiDataSourceSpec extends Specification {
     }
 
     void "save with constructor-style arguments routes to books datasource"() {
-        when: "a product is saved using property arguments"
-        Product saved = productService.saveProduct('Constructed', 55)
+        when: 'a product is saved using property arguments'
+        def saved = productService.saveProduct('Constructed', 55)
 
-        then: "it is persisted on books"
+        then: 'it is persisted on books'
         saved != null
         saved.id != null
         saved.name == 'Constructed'
         saved.amount == 55
 
-        and: "retrievable"
+        and: 'retrievable'
         productService.get(saved.id) != null
     }
 
     // ---- Interface-pattern Data Service tests ----
 
     void "interface service: save routes to books datasource"() {
-        when: "a product is saved through the interface Data Service"
-        Product saved = productDataService.save(new Product(name: 'InterfaceWidget', amount: 42))
+        when: 'a product is saved through the interface Data Service'
+        def saved = productDataService.save(new Product(name: 'InterfaceWidget', amount: 42))
 
-        then: "it is persisted with an ID"
+        then: 'it is persisted with an ID'
         saved != null
         saved.id != null
         saved.name == 'InterfaceWidget'
         saved.amount == 42
 
-        and: "it exists on the books datasource"
+        and: 'it exists on the books datasource'
         GormEnhancer.findStaticApi(Product, 'books').withNewTransaction {
             GormEnhancer.findStaticApi(Product, 'books').count()
         } == 1
     }
 
     void "interface service: get by ID routes to books datasource"() {
-        given: "a product saved on books via abstract service"
-        Product saved = productService.save(new Product(name: 'InterfaceGet', amount: 99))
+        given: 'a product saved on books via abstract service'
+        def saved = productService.save(new Product(name: 'InterfaceGet', amount: 99))
 
-        when: "we retrieve it through the interface Data Service"
-        Product found = productDataService.get(saved.id)
+        when: 'we retrieve it through the interface Data Service'
+        def found = productDataService.get(saved.id)
 
-        then: "the correct entity is returned"
+        then: 'the correct entity is returned'
         found != null
         found.id == saved.id
         found.name == 'InterfaceGet'
     }
 
     void "interface service: delete routes to books datasource"() {
-        given: "a product saved on books"
-        Product saved = productService.save(new Product(name: 'InterfaceDelete', amount: 1))
+        given: 'a product saved on books'
+        def saved = productService.save(new Product(name: 'InterfaceDelete', amount: 1))
 
-        when: "we delete through the interface Data Service (FindAndDeleteImplementer)"
-        Product deleted = productDataService.delete(saved.id)
+        when: 'we delete through the interface Data Service (FindAndDeleteImplementer)'
+        def deleted = productDataService.delete(saved.id)
 
-        then: "the entity is deleted"
+        then: 'the entity is deleted'
         deleted != null
         deleted.name == 'InterfaceDelete'
         productDataService.get(saved.id) == null
     }
 
     void "interface service: void delete routes to books datasource"() {
-        given: "a product saved on books"
-        Product saved = productService.save(new Product(name: 'InterfaceVoidDel', amount: 2))
+        given: 'a product saved on books'
+        def saved = productService.save(new Product(name: 'InterfaceVoidDel', amount: 2))
 
-        when: "we delete through the interface Data Service (DeleteImplementer)"
+        when: 'we delete through the interface Data Service (DeleteImplementer)'
         productDataService.deleteProduct(saved.id)
 
-        then: "the entity is deleted"
+        then: 'the entity is deleted'
         productDataService.get(saved.id) == null
     }
 
     void "interface and abstract services share the same datasource"() {
-        given: "a product saved through the abstract service"
-        Product saved = productService.save(new Product(name: 'CrossService', amount: 77))
+        given: 'a product saved through the abstract service'
+        def saved = productService.save(new Product(name: 'CrossService', amount: 77))
 
-        expect: "the interface service can find it and vice versa"
+        expect: 'the interface service can find it and vice versa'
         productDataService.findByName('CrossService') != null
         productDataService.findByName('CrossService').id == saved.id
 
-        and: "counts match across both service patterns"
+        and: 'counts match across both service patterns'
         productService.count() == productDataService.count()
     }
-
 
 }
 
