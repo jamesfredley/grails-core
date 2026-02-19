@@ -379,11 +379,6 @@ class GrailsGradlePlugin extends GroovyPlugin {
                 }
             }
 
-            project.logger.info('Adding Micronaut annotationProcessor dependencies to project {}', project.name)
-            project.getDependencies().add('annotationProcessor', project.dependencies.platform("io.micronaut.platform:micronaut-platform:$micronautPlatformVersion"))
-            project.getDependencies().add('annotationProcessor', 'io.micronaut:micronaut-inject-java')
-            project.getDependencies().add('annotationProcessor', 'jakarta.annotation:jakarta.annotation-api')
-
             project.logger.info('Configuring CLASSIC boot loader for Micronaut compatibility in {}', project.name)
             project.tasks.withType(BootJar).configureEach { BootJar bootJar ->
                 bootJar.loaderImplementation.convention(LoaderImplementation.CLASSIC)
