@@ -16,26 +16,15 @@
  *  specific language governing permissions and limitations
  *  under the License.
  */
-package com.example.pages
 
-import geb.Page
+package example
 
-class LoginPage extends Page {
+import grails.boot.GrailsApp
+import grails.boot.config.GrailsAutoConfiguration
 
-    static String pageTitle = 'Please sign in'
+class Application extends GrailsAutoConfiguration {
 
-    static url = 'login'
-    static at = { title == pageTitle }
-    static content = {
-        username { $('input', name: 'username') }
-        password { $('input', name: 'password') }
-        loginButton { $('button.primary') }
-    }
-
-    void login(String username = 'test@grails.org', String password = 'letmein') {
-        this.username = username
-        this.password = password
-        loginButton.click()
-        waitFor { title != pageTitle }
+    static void main(String[] args) {
+        GrailsApp.run(Application)
     }
 }

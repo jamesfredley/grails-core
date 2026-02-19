@@ -16,26 +16,30 @@
  *  specific language governing permissions and limitations
  *  under the License.
  */
-package com.example.pages
 
-import geb.Page
+package example
 
-class LoginPage extends Page {
+import grails.gorm.MultiTenant
+import org.grails.datastore.gorm.GormEntity
 
-    static String pageTitle = 'Please sign in'
+/**
+ * Domain class that combines DISCRIMINATOR multi-tenancy with a non-default
+ * datasource. This combination triggers the allQualifiers() bug where
+ * MultiTenant causes qualifier expansion that overrides the explicit
+ * datasource declaration, silently routing data to the wrong database.
+ */
+class Metric implements GormEntity<Metric>, MultiTenant<Metric> {
 
-    static url = 'login'
-    static at = { title == pageTitle }
-    static content = {
-        username { $('input', name: 'username') }
-        password { $('input', name: 'password') }
-        loginButton { $('button.primary') }
+    String tenantId
+    String name
+    Integer amount
+
+    static mapping = {
+        datasource 'secondary'
     }
 
-    void login(String username = 'test@grails.org', String password = 'letmein') {
-        this.username = username
-        this.password = password
-        loginButton.click()
-        waitFor { title != pageTitle }
+    static constraints = {
+        name blank: false
+        amount min: 0
     }
 }
