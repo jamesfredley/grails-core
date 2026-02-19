@@ -24,7 +24,7 @@ class BookCreatePage extends Page {
 
     static String pageTitle = 'Create Book'
 
-    static url = 'book/create'
+    static url = '/book/create'
     static at = { title == pageTitle }
     static content = {
         titleField { $('#title') }

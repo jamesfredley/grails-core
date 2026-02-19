@@ -21,23 +21,23 @@ package namespaces
 
 import grails.plugin.geb.ContainerGebSpec
 import grails.testing.mixin.integration.Integration
-import namespaces.pages.AdminPagePage
-import namespaces.pages.FrontendPagePage
+import namespaces.pages.AdminPage
+import namespaces.pages.FrontendPage
 
 @Integration
 class PageControllerSpec extends ContainerGebSpec {
 
     void "test that the page renders correctly"() {
         when: "The admin page is visited"
-        to(AdminPagePage)
+        to(AdminPage)
 
         then: "The title is correct"
-        at(AdminPagePage)
+        at(AdminPage)
 
         when: "The page is visited without namespace"
-        to(FrontendPagePage)
+        to(FrontendPage)
 
         then: "The title is correct"
-        at(FrontendPagePage)
+        at(FrontendPage)
     }
 }

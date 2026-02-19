@@ -24,6 +24,6 @@ class HomePage extends Page {
 
     static String pageTitle = 'Welcome to Grails'
 
-    static url = ''
+    static url = '/'
     static at = { title == pageTitle }
 }

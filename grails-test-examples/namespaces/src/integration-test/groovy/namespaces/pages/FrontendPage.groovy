@@ -20,10 +20,10 @@ package namespaces.pages
 
 import geb.Page
 
-class AdminPagePage extends Page {
+class FrontendPage extends Page {
 
-    static String pageTitle = 'Admin Page'
+    static String pageTitle = 'Frontend Page'
 
-    static url = 'myAppTest/admin/page/index'
+    static url = '/myAppTest/page/index'
     static at = { title == pageTitle }
 }

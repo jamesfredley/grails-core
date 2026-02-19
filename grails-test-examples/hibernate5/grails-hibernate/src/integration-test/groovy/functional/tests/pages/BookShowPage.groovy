@@ -24,6 +24,6 @@ class BookShowPage extends Page {
 
     static String pageTitle = 'Show Book'
 
-    static url = 'book/show'
+    static url = '/book/show'
     static at = { title == pageTitle }
 }

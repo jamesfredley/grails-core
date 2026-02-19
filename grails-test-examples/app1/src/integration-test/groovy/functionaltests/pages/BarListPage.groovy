@@ -24,6 +24,6 @@ class BarListPage extends Page {
 
     static String pageTitle = 'Bar List'
 
-    static url = 'bar/index'
+    static url = '/bar/index'
     static at = { title == pageTitle }
 }

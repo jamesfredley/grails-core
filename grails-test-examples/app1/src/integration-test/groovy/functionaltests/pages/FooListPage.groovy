@@ -24,6 +24,6 @@ class FooListPage extends Page {
 
     static String pageTitle = 'Foo List'
 
-    static url = 'foo/index'
+    static url = '/foo/index'
     static at = { title == pageTitle }
 }

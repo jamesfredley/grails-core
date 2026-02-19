@@ -25,6 +25,6 @@ class PageNotFoundPage extends Page {
 
     static String pageTitle = 'Page Not Found'
 
-    static url = 'foo/index'
+    static url = '/foo/index'
     static at = { title == pageTitle }
 }

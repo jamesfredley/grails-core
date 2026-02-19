@@ -24,6 +24,6 @@ class ActionReturnsNullPage extends Page {
 
     static String pageTitle = 'Action Which Returns Null GSP'
 
-    static url = 'misc/actionWhichReturnsNull'
+    static url = '/misc/actionWhichReturnsNull'
     static at = { title == pageTitle }
 }

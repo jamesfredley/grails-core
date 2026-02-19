@@ -24,6 +24,6 @@ class ConventionLayoutPage extends Page {
 
     static String pageTitle = 'Convention Layout'
 
-    static url = 'layoutByConvention'
+    static url = '/layoutByConvention'
     static at = { title == pageTitle }
 }

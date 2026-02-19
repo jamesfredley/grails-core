@@ -24,6 +24,6 @@ class FooLayoutPage extends Page {
 
     static String pageTitle = 'Foo Layout'
 
-    static url = 'layoutSpecifiedByProperty'
+    static url = '/layoutSpecifiedByProperty'
     static at = { title == pageTitle }
 }

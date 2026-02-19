@@ -24,6 +24,6 @@ class AuthorListPage extends Page {
 
     static String pageTitle = 'Author List'
 
-    static url = 'author/index'
+    static url = '/author/index'
     static at = { title == pageTitle }
 }

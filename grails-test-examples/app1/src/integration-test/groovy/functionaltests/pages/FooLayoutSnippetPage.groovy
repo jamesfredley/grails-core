@@ -24,6 +24,6 @@ class FooLayoutSnippetPage extends Page {
 
     static String pageTitle = 'Foo Layout'
 
-    static url = 'layoutSpecifiedByProperty/snippetView'
+    static url = '/layoutSpecifiedByProperty/snippetView'
     static at = { title == pageTitle }
 }

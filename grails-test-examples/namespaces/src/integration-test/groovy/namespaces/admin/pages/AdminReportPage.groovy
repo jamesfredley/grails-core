@@ -24,6 +24,6 @@ class AdminReportPage extends Page {
 
     static String pageTitle = 'Admin Report'
 
-    static url = 'myAppTest/admin/report/index'
+    static url = '/myAppTest/admin/report/index'
     static at = { title == pageTitle }
 }

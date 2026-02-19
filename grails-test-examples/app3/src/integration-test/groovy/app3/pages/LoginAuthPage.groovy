@@ -25,6 +25,6 @@ class LoginAuthPage extends Page {
 
     static String pageTitle = 'My Plugin Login Auth'
 
-    static url = 'login/auth'
+    static url = '/login/auth'
     static at = { title == pageTitle }
 }

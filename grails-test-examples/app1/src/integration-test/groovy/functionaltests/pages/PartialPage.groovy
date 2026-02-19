@@ -24,6 +24,6 @@ class PartialPage extends Page {
 
     static String pageTitle = 'Welcome to My Partial'
 
-    static url = 'layoutTemplate/index'
+    static url = '/layoutTemplate/index'
     static at = { title == pageTitle }
 }
