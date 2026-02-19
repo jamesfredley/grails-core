@@ -67,6 +67,27 @@ class ApplicationClassInjector implements GrailsArtefactClassInjector {
             'org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration'
     ]
 
+    /**
+     * Auto-configuration classes that are conditionally excluded when
+     * a specific plugin is detected on the classpath. Each entry maps a
+     * plugin class (checked via {@link ClassUtils#isPresent}) to the
+     * auto-configuration class name to exclude, with an optional system
+     * property that can disable the exclusion.
+     *
+     * <p>The system property defaults to {@code "true"} (exclusion enabled).
+     * Set it to {@code "false"} in {@code gradle.properties} to opt out:</p>
+     * <pre>
+     * systemProp.grails.dbmigration.excludeLiquibaseAutoConfiguration=false
+     * </pre>
+     */
+    static final List<Map<String, String>> CONDITIONAL_EXCLUSIONS = [
+            [
+                    pluginClass: 'org.grails.plugins.databasemigration.DatabaseMigrationGrailsPlugin',
+                    excludeClass: 'org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration',
+                    systemProperty: 'grails.dbmigration.excludeLiquibaseAutoConfiguration'
+            ]
+    ]
+
     ApplicationArtefactHandler applicationArtefactHandler = new ApplicationArtefactHandler()
 
     private static final List<Integer> transformedInstances = []
@@ -123,9 +144,16 @@ class ApplicationClassInjector implements GrailsArtefactClassInjector {
                     GrailsASTUtils.addExpressionToAnnotationMember(it, 'proxyBeanMethods', constX(false))
                 }
                 addAnnotation('org.springframework.web.servlet.config.annotation.EnableWebMvc', classNode, 'jakarta.servlet.ServletContext')
-                addAnnotation('org.springframework.boot.autoconfigure.EnableAutoConfiguration', classNode)?.with {
+                addAnnotation('org.springframework.boot.autoconfigure.EnableAutoConfiguration', classNode)?.with { AnnotationNode enableAutoConfigAnnotation ->
                     for (excludeClassName in EXCLUDED_AUTO_CONFIGURE_CLASSES) {
-                        GrailsASTUtils.addExpressionToAnnotationMember(it, 'excludeName', constX(excludeClassName))
+                        GrailsASTUtils.addExpressionToAnnotationMember(enableAutoConfigAnnotation, 'excludeName', constX(excludeClassName))
+                    }
+                    def classLoader = getClass().classLoader
+                    for (Map<String, String> exclusion in CONDITIONAL_EXCLUSIONS) {
+                        if (ClassUtils.isPresent(exclusion.pluginClass, classLoader)
+                                && Boolean.parseBoolean(System.getProperty(exclusion.systemProperty, 'true'))) {
+                            GrailsASTUtils.addExpressionToAnnotationMember(enableAutoConfigAnnotation, 'excludeName', constX(exclusion.excludeClass))
+                        }
                     }
                 }
             }
