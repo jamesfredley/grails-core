@@ -48,6 +48,8 @@ spring:
 management:
     endpoints:
         enabled-by-default: false
+app:
+    name: test-micronaut-app
 
 ---
 grails:

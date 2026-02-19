@@ -16,22 +16,22 @@
  *  specific language governing permissions and limitations
  *  under the License.
  */
+package bean.injection
 
-package micronaut
+import groovy.transform.CompileStatic
 
-class UrlMappings {
+import io.micronaut.context.annotation.Bean
+import io.micronaut.context.annotation.Factory
 
-    static mappings = {
-        "/$controller/$action?/$id?(.$format)?"{
-            constraints {
-                // apply constraints here
-            }
-        }
+import jakarta.inject.Singleton
 
-        "/micronaut-test"(controller: 'micronautTest', action: 'index')
+@Factory
+@CompileStatic
+class ServiceFactory {
 
-        "/"(view:"/index")
-        "500"(view:'/error')
-        "404"(view:'/notFound')
+    @Bean
+    @Singleton
+    FactoryCreatedService factoryCreatedService() {
+        new FactoryCreatedService(name: 'factory-created')
     }
 }

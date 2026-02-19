@@ -16,22 +16,37 @@
  *  specific language governing permissions and limitations
  *  under the License.
  */
-
 package micronaut
 
-class UrlMappings {
+import bean.injection.AppConfig
+import bean.injection.FactoryCreatedService
+import bean.injection.JavaSingletonService
+import bean.injection.NamedService
+import groovy.transform.CompileStatic
 
-    static mappings = {
-        "/$controller/$action?/$id?(.$format)?"{
-            constraints {
-                // apply constraints here
-            }
-        }
+import org.springframework.beans.factory.annotation.Autowired
 
-        "/micronaut-test"(controller: 'micronautTest', action: 'index')
+@CompileStatic
+class MicronautTestController {
 
-        "/"(view:"/index")
-        "500"(view:'/error')
-        "404"(view:'/notFound')
+    @Autowired
+    JavaSingletonService javaSingletonService
+
+    @Autowired
+    FactoryCreatedService factoryCreatedService
+
+    @Autowired
+    AppConfig appConfig
+
+    @Autowired
+    NamedService namedService
+
+    def index() {
+        render(contentType: 'application/json', text: [
+            javaMessage: javaSingletonService.message,
+            factoryName: factoryCreatedService.name,
+            appName: appConfig.name,
+            namedService: namedService.name
+        ])
     }
 }

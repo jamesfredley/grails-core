@@ -16,22 +16,15 @@
  *  specific language governing permissions and limitations
  *  under the License.
  */
+package bean.injection
 
-package micronaut
+import groovy.transform.CompileStatic
 
-class UrlMappings {
+import io.micronaut.context.annotation.ConfigurationProperties
 
-    static mappings = {
-        "/$controller/$action?/$id?(.$format)?"{
-            constraints {
-                // apply constraints here
-            }
-        }
+@ConfigurationProperties('app')
+@CompileStatic
+class AppConfig {
 
-        "/micronaut-test"(controller: 'micronautTest', action: 'index')
-
-        "/"(view:"/index")
-        "500"(view:'/error')
-        "404"(view:'/notFound')
-    }
+    String name
 }
