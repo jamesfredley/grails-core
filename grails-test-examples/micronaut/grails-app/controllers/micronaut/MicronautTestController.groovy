@@ -22,6 +22,7 @@ import bean.injection.AppConfig
 import bean.injection.FactoryCreatedService
 import bean.injection.JavaSingletonService
 import bean.injection.NamedService
+import grails.converters.JSON
 import groovy.transform.CompileStatic
 
 import org.springframework.beans.factory.annotation.Autowired
@@ -42,11 +43,11 @@ class MicronautTestController {
     NamedService namedService
 
     def index() {
-        render(contentType: 'application/json', text: [
+        render([
             javaMessage: javaSingletonService.message,
             factoryName: factoryCreatedService.name,
             appName: appConfig.name,
             namedService: namedService.name
-        ])
+        ] as JSON)
     }
 }

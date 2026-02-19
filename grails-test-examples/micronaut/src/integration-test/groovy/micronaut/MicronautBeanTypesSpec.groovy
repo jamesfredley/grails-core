@@ -20,10 +20,12 @@ package micronaut
 
 import bean.injection.AppConfig
 import bean.injection.FactoryCreatedService
+import bean.injection.JavaMessageProvider
 import bean.injection.JavaSingletonService
 
 import grails.testing.mixin.integration.Integration
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.context.ApplicationContext
 import spock.lang.Specification
 
 /**
@@ -33,9 +35,13 @@ import spock.lang.Specification
  * 1. Java @Singleton beans (processed via annotation processor) are available in Spring context
  * 2. Groovy @Factory/@Bean beans (processed via AST transform) are available in Spring context
  * 3. @ConfigurationProperties beans reflect Grails application.yml config into Micronaut
+ * 4. Beans registered by interface type are resolvable via the interface
  */
 @Integration
 class MicronautBeanTypesSpec extends Specification {
+
+    @Autowired
+    ApplicationContext applicationContext
 
     @Autowired
     JavaSingletonService javaSingletonService
@@ -65,20 +71,31 @@ class MicronautBeanTypesSpec extends Specification {
     }
 
     void "Java @Singleton bean is a singleton instance"() {
-        when:
-        def first = javaSingletonService
-        def second = javaSingletonService
+        when: "retrieving the bean twice from the application context"
+        def first = applicationContext.getBean(JavaSingletonService)
+        def second = applicationContext.getBean(JavaSingletonService)
 
         then: "same instance is returned"
         first.is(second)
     }
 
     void "Factory-created bean is a singleton instance"() {
-        when:
-        def first = factoryCreatedService
-        def second = factoryCreatedService
+        when: "retrieving the bean twice from the application context"
+        def first = applicationContext.getBean(FactoryCreatedService)
+        def second = applicationContext.getBean(FactoryCreatedService)
 
         then: "same instance is returned (factory method annotated with @Singleton)"
         first.is(second)
+    }
+
+    void "Java @Singleton bean is resolvable by its interface type"() {
+        when: "looking up the bean by the JavaMessageProvider interface"
+        def provider = applicationContext.getBean(JavaMessageProvider)
+
+        then: "the bean is found and is the same singleton instance"
+        provider != null
+        provider instanceof JavaSingletonService
+        provider.message == 'from-java-singleton'
+        provider.is(javaSingletonService)
     }
 }

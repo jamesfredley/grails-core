@@ -18,7 +18,7 @@ package bean.injection;
 
 import jakarta.inject.Singleton;
 
-interface JavaMessageProvider {
+public interface JavaMessageProvider {
 
     String getMessage();
 

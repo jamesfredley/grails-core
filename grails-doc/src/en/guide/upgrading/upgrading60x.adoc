@@ -371,7 +371,7 @@ Here's an example `gradle.properties` file:
 micronautPlatformVersion=4.9.2
 ----
 
-Please note that due to https://github.com/micronaut-projects/micronaut-spring/issues/769[this issue], Spring Boot Dev tools does not work with the micronaut integration.
+Please note that, due to https://github.com/micronaut-projects/micronaut-spring/issues/769[this issue], Spring Boot DevTools does not work with the Micronaut integration.
 
 IMPORTANT: Do **not** manually add Micronaut annotation processors (such as `micronaut-inject-java`) to your `build.gradle`. The Grails Gradle Plugin automatically configures the correct annotation processor for Java source files and uses Groovy AST transforms (`micronaut-inject-groovy`) for Groovy source files. Manually adding annotation processors may cause duplicate bean definitions or incremental compilation issues (see https://github.com/apache/grails-core/issues/15211[#15211]).
 
