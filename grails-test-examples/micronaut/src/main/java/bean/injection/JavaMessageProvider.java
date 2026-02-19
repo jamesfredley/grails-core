@@ -16,13 +16,8 @@
  */
 package bean.injection;
 
-import jakarta.inject.Singleton;
+public interface JavaMessageProvider {
 
-@Singleton
-public class JavaSingletonService implements JavaMessageProvider {
+    String getMessage();
 
-    @Override
-    public String getMessage() {
-        return "from-java-singleton";
-    }
 }
