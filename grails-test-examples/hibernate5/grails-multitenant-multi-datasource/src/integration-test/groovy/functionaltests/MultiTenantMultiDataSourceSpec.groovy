@@ -16,17 +16,19 @@
  *  specific language governing permissions and limitations
  *  under the License.
  */
-
 package functionaltests
 
-import example.Application
 import example.Metric
 import example.MetricService
+import org.hibernate.Session
+import spock.lang.Specification
+import spock.util.environment.RestoreSystemProperties
+
+import org.springframework.beans.factory.annotation.Autowired
+
 import grails.testing.mixin.integration.Integration
 import org.grails.datastore.mapping.multitenancy.resolvers.SystemPropertyTenantResolver
 import org.grails.orm.hibernate.HibernateDatastore
-import org.hibernate.Session
-import spock.lang.Specification
 
 /**
  * Integration test verifying that GORM Data Service auto-implemented
@@ -43,26 +45,26 @@ import spock.lang.Specification
  * @see example.Metric
  * @see example.MetricService
  */
-@Integration(applicationClass = Application)
+@Integration
+@RestoreSystemProperties
 class MultiTenantMultiDataSourceSpec extends Specification {
 
+    @Autowired
     HibernateDatastore hibernateDatastore
+
     MetricService metricService
 
     void setup() {
-        System.setProperty(SystemPropertyTenantResolver.PROPERTY_NAME, 'tenant1')
-        metricService = hibernateDatastore.getDatastoreForConnection('secondary')
+        tenant = 'tenant1'
+        metricService = hibernateDatastore
+                .getDatastoreForConnection('secondary')
                 .getService(MetricService)
         metricService.deleteAll()
         // Also clean tenant2 data
-        System.setProperty(SystemPropertyTenantResolver.PROPERTY_NAME, 'tenant2')
+        tenant = 'tenant2'
         metricService.deleteAll()
         // Reset to tenant1 for tests
-        System.setProperty(SystemPropertyTenantResolver.PROPERTY_NAME, 'tenant1')
-    }
-
-    void cleanup() {
-        System.setProperty(SystemPropertyTenantResolver.PROPERTY_NAME, '')
+        tenant = 'tenant1'
     }
 
     void "schema is created on secondary datasource not default"() {
@@ -81,7 +83,7 @@ class MultiTenantMultiDataSourceSpec extends Specification {
 
     void "save routes to secondary datasource"() {
         when:
-        Metric saved = metricService.save(new Metric(name: 'page_views', amount: 100))
+        def saved = metricService.save(new Metric(name: 'page_views', amount: 100))
 
         then:
         saved != null
@@ -92,10 +94,10 @@ class MultiTenantMultiDataSourceSpec extends Specification {
 
     void "get by ID routes to secondary datasource"() {
         given:
-        Metric saved = metricService.save(new Metric(name: 'sessions', amount: 42))
+        def saved = metricService.save(new Metric(name: 'sessions', amount: 42))
 
         when:
-        Metric found = metricService.get(saved.id)
+        def found = metricService.get(saved.id)
 
         then:
         found != null
@@ -110,16 +112,16 @@ class MultiTenantMultiDataSourceSpec extends Specification {
         metricService.save(new Metric(name: 'beta', amount: 2))
 
         and: 'Metrics saved under tenant2'
-        System.setProperty(SystemPropertyTenantResolver.PROPERTY_NAME, 'tenant2')
+        tenant = 'tenant2'
         metricService.save(new Metric(name: 'gamma', amount: 3))
 
         when: 'Counting under tenant1'
-        System.setProperty(SystemPropertyTenantResolver.PROPERTY_NAME, 'tenant1')
-        Long count1 = metricService.count() as Long
+        tenant = 'tenant1'
+        def count1 = metricService.count()
 
         and: 'Counting under tenant2'
-        System.setProperty(SystemPropertyTenantResolver.PROPERTY_NAME, 'tenant2')
-        Long count2 = metricService.count() as Long
+        tenant = 'tenant2'
+        def count2 = metricService.count()
 
         then: 'Each tenant sees only its own data'
         count1 == 2
@@ -128,7 +130,7 @@ class MultiTenantMultiDataSourceSpec extends Specification {
 
     void "delete removes from secondary datasource"() {
         given:
-        Metric saved = metricService.save(new Metric(name: 'disposable', amount: 0))
+        def saved = metricService.save(new Metric(name: 'disposable', amount: 0))
 
         when:
         metricService.delete(saved.id)
@@ -146,12 +148,12 @@ class MultiTenantMultiDataSourceSpec extends Specification {
         metricService.save(new Metric(name: 'shared_name', amount: 200))
 
         when: 'Finding by name under tenant1'
-        System.setProperty(SystemPropertyTenantResolver.PROPERTY_NAME, 'tenant1')
-        Metric found1 = metricService.findByName('shared_name')
+        tenant = 'tenant1'
+        def found1 = metricService.findByName('shared_name')
 
         and: 'Finding by name under tenant2'
-        System.setProperty(SystemPropertyTenantResolver.PROPERTY_NAME, 'tenant2')
-        Metric found2 = metricService.findByName('shared_name')
+        tenant = 'tenant2'
+        def found2 = metricService.findByName('shared_name')
 
         then: 'Each tenant gets its own metric'
         found1 != null
@@ -168,10 +170,14 @@ class MultiTenantMultiDataSourceSpec extends Specification {
         metricService.save(new Metric(name: 'other', amount: 30))
 
         when:
-        List<Metric> found = metricService.findAllByName('duplicate')
+        def found = metricService.findAllByName('duplicate')
 
         then:
         found.size() == 2
         found.every { it.name == 'duplicate' }
+    }
+
+    private static void setTenant(String tenantId) {
+        System.setProperty(SystemPropertyTenantResolver.PROPERTY_NAME, tenantId)
     }
 }

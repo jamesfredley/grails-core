@@ -18,6 +18,13 @@
  */
 package org.grails.orm.hibernate.connections
 
+import org.hibernate.Session
+import org.hibernate.dialect.H2Dialect
+import spock.lang.AutoCleanup
+import spock.lang.Shared
+import spock.lang.Specification
+import spock.util.environment.RestoreSystemProperties
+
 import grails.gorm.MultiTenant
 import grails.gorm.annotation.Entity
 import grails.gorm.services.Service
@@ -29,11 +36,6 @@ import org.grails.datastore.mapping.core.DatastoreUtils
 import org.grails.datastore.mapping.multitenancy.MultiTenancySettings
 import org.grails.datastore.mapping.multitenancy.resolvers.SystemPropertyTenantResolver
 import org.grails.orm.hibernate.HibernateDatastore
-import org.hibernate.Session
-import org.hibernate.dialect.H2Dialect
-import spock.lang.AutoCleanup
-import spock.lang.Shared
-import spock.lang.Specification
 
 /**
  * Tests GORM Data Service auto-implemented CRUD methods when both DISCRIMINATOR
@@ -53,6 +55,7 @@ import spock.lang.Specification
  * @see PartitionedMultiTenancySpec for basic DISCRIMINATOR multi-tenancy
  * @see MultipleDataSourceConnectionsSpec for Data Services on secondary datasource without multi-tenancy
  */
+@RestoreSystemProperties
 class DataServiceMultiTenantMultiDataSourceSpec extends Specification {
 
     @Shared @AutoCleanup HibernateDatastore datastore
@@ -78,115 +81,112 @@ class DataServiceMultiTenantMultiDataSourceSpec extends Specification {
     MetricService metricService
 
     void setup() {
-        System.setProperty(SystemPropertyTenantResolver.PROPERTY_NAME, "tenant1")
-        metricService = datastore.getDatastoreForConnection("analytics").getService(MetricService)
+        tenant = 'tenant1'
+        metricService = datastore
+                .getDatastoreForConnection('analytics')
+                .getService(MetricService)
         metricService.deleteAll()
         // Also clean tenant2 data
-        System.setProperty(SystemPropertyTenantResolver.PROPERTY_NAME, "tenant2")
+        tenant = 'tenant2'
         metricService.deleteAll()
         // Reset to tenant1 for tests
-        System.setProperty(SystemPropertyTenantResolver.PROPERTY_NAME, "tenant1")
-    }
-
-    void cleanup() {
-        System.setProperty(SystemPropertyTenantResolver.PROPERTY_NAME, "")
+        tenant = 'tenant1'
     }
 
     void "schema is created on analytics datasource"() {
-        expect: "The analytics datasource connects to the analyticsDB H2 database"
+        expect: 'The analytics datasource connects to the analyticsDB H2 database'
         Metric.analytics.withNewSession { Session s ->
-            assert s.connection().metaData.getURL() == "jdbc:h2:mem:analyticsDB"
+            assert s.connection().metaData.getURL() == 'jdbc:h2:mem:analyticsDB'
             return true
         }
 
-        and: "The default datasource connects to a different database"
+        and: 'The default datasource connects to a different database'
         datastore.withNewSession { Session s ->
-            assert s.connection().metaData.getURL() == "jdbc:h2:mem:grailsDB"
+            assert s.connection().metaData.getURL() == 'jdbc:h2:mem:grailsDB'
             return true
         }
     }
 
     void "save routes to analytics datasource with tenant isolation"() {
-        when: "A metric is saved under tenant1"
-        Metric saved = metricService.save(new Metric(name: "page_views", amount: 100))
+        when: 'A metric is saved under tenant1'
+        def saved = metricService.save(new Metric(name: 'page_views', amount: 100))
 
-        then: "The metric is persisted with an ID"
+        then: 'The metric is persisted with an ID'
         saved != null
         saved.id != null
-        saved.name == "page_views"
+        saved.name == 'page_views'
         saved.amount == 100
 
-        and: "The metric is retrievable via the analytics datasource qualifier"
+        and: 'The metric is retrievable via the analytics datasource qualifier'
         Metric.analytics.withNewSession {
             Metric.analytics.get(saved.id) != null
         }
     }
 
     void "get retrieves from analytics datasource"() {
-        given: "A metric saved to the analytics datasource"
-        Metric saved = metricService.save(new Metric(name: "sessions", amount: 42))
+        given: 'A metric saved to the analytics datasource'
+        def saved = metricService.save(new Metric(name: 'sessions', amount: 42))
 
-        when: "The metric is retrieved by ID"
-        Metric found = metricService.get(saved.id)
+        when: 'The metric is retrieved by ID'
+        def found = metricService.get(saved.id)
 
-        then: "The correct metric is returned"
+        then: 'The correct metric is returned'
         found != null
         found.id == saved.id
-        found.name == "sessions"
+        found.name == 'sessions'
         found.amount == 42
     }
 
     void "count returns count scoped to current tenant"() {
-        given: "Metrics saved under tenant1"
-        metricService.save(new Metric(name: "alpha", amount: 1))
-        metricService.save(new Metric(name: "beta", amount: 2))
+        given: 'Metrics saved under tenant1'
+        metricService.save(new Metric(name: 'alpha', amount: 1))
+        metricService.save(new Metric(name: 'beta', amount: 2))
 
-        and: "Metrics saved under tenant2"
-        System.setProperty(SystemPropertyTenantResolver.PROPERTY_NAME, "tenant2")
-        metricService.save(new Metric(name: "gamma", amount: 3))
+        and: 'Metrics saved under tenant2'
+        tenant = 'tenant2'
+        metricService.save(new Metric(name: 'gamma', amount: 3))
 
-        when: "Counting under tenant1"
-        System.setProperty(SystemPropertyTenantResolver.PROPERTY_NAME, "tenant1")
-        Long count1 = metricService.count()
+        when: 'Counting under tenant1'
+        tenant = 'tenant1'
+        def count1 = metricService.count()
 
-        and: "Counting under tenant2"
-        System.setProperty(SystemPropertyTenantResolver.PROPERTY_NAME, "tenant2")
-        Long count2 = metricService.count()
+        and: 'Counting under tenant2'
+        tenant = 'tenant2'
+        def count2 = metricService.count()
 
-        then: "Each tenant sees only its own data"
+        then: 'Each tenant sees only its own data'
         count1 == 2
         count2 == 1
     }
 
     void "delete removes from analytics datasource"() {
-        given: "A metric saved under tenant1"
-        Metric saved = metricService.save(new Metric(name: "disposable", amount: 0))
-        Long id = saved.id
+        given: 'A metric saved under tenant1'
+        def saved = metricService.save(new Metric(name: 'disposable', amount: 0))
+        def id = saved.id
 
-        when: "The metric is deleted"
+        when: 'The metric is deleted'
         metricService.delete(id)
 
-        then: "The metric is no longer retrievable"
+        then: 'The metric is no longer retrievable'
         metricService.get(id) == null
         metricService.count() == 0
     }
 
     void "findByName routes to analytics datasource with tenant isolation"() {
-        given: "Same-named metrics under different tenants"
-        metricService.save(new Metric(name: "shared_name", amount: 100))
+        given: 'Same-named metrics under different tenants'
+        metricService.save(new Metric(name: 'shared_name', amount: 100))
+        tenant = 'tenant2'
+        metricService.save(new Metric(name: 'shared_name', amount: 200))
 
-        System.setProperty(SystemPropertyTenantResolver.PROPERTY_NAME, "tenant2")
-        metricService.save(new Metric(name: "shared_name", amount: 200))
+        when: 'Finding by name under tenant1'
+        tenant = 'tenant1'
+        def found1 = metricService.findByName('shared_name')
 
-        when: "Finding by name under tenant1"
-        System.setProperty(SystemPropertyTenantResolver.PROPERTY_NAME, "tenant1")
-        Metric found1 = metricService.findByName("shared_name")
+        and: 'Finding by name under tenant2'
+        tenant = 'tenant2'
+        def found2 = metricService.findByName('shared_name')
 
-        and: "Finding by name under tenant2"
-        System.setProperty(SystemPropertyTenantResolver.PROPERTY_NAME, "tenant2")
-        Metric found2 = metricService.findByName("shared_name")
-
-        then: "Each tenant gets its own metric"
+        then: 'Each tenant gets its own metric'
         found1 != null
         found1.amount == 100
 
@@ -195,31 +195,35 @@ class DataServiceMultiTenantMultiDataSourceSpec extends Specification {
     }
 
     void "GormEnhancer resolves analytics qualifier for MultiTenant entity with explicit datasource"() {
-        when: "Looking up the static API without specifying a connection"
-        GormStaticApi<Metric> api = GormEnhancer.findStaticApi(Metric)
+        when: 'Looking up the static API without specifying a connection'
+        def api = GormEnhancer.findStaticApi(Metric)
 
-        then: "The API is registered and functional (schema exists on correct datasource)"
+        then: 'The API is registered and functional (schema exists on correct datasource)'
         api != null
 
-        when: "Using the explicit analytics qualifier"
-        GormStaticApi<Metric> analyticsApi = GormEnhancer.findStaticApi(Metric, 'analytics')
+        when: 'Using the explicit analytics qualifier'
+        def analyticsApi = GormEnhancer.findStaticApi(Metric, 'analytics')
 
-        then: "The analytics API is also registered"
+        then: 'The analytics API is also registered'
         analyticsApi != null
     }
 
     void "GormEnhancer aggregate HQL routes to analytics datasource"() {
-        given: "Multiple metrics saved under tenant1"
-        metricService.save(new Metric(name: "alpha", amount: 10))
-        metricService.save(new Metric(name: "beta", amount: 20))
-        metricService.save(new Metric(name: "gamma", amount: 30))
+        given: 'Multiple metrics saved under tenant1'
+        metricService.save(new Metric(name: 'alpha', amount: 10))
+        metricService.save(new Metric(name: 'beta', amount: 20))
+        metricService.save(new Metric(name: 'gamma', amount: 30))
 
-        when: "Using GormEnhancer for an aggregate query"
-        List results = metricService.getTotalAmountAbove(15)
+        when: 'Using GormEnhancer for an aggregate query'
+        def results = metricService.getTotalAmountAbove(15)
 
-        then: "The HQL executes against the analytics datasource"
+        then: 'The HQL executes against the analytics datasource'
         results.size() == 1
         results[0] == 50  // 20 + 30
+    }
+    
+    private static void setTenant(String tenantId) {
+        System.setProperty(SystemPropertyTenantResolver.PROPERTY_NAME, tenantId)
     }
 }
 
@@ -264,7 +268,7 @@ interface MetricDataService {
  * and custom methods route to the secondary datasource.
  */
 @Service(Metric)
-@Transactional(connection = "analytics")
+@Transactional(connection = 'analytics')
 abstract class MetricService implements MetricDataService {
 
     /**
