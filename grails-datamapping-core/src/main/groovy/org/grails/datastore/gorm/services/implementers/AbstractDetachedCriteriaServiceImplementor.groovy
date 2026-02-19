@@ -75,7 +75,7 @@ abstract class AbstractDetachedCriteriaServiceImplementor extends AbstractReadOp
             body.addStatement(
                 declS(queryVar, ctorX(getDetachedCriteriaType(domainClassNode), args(classX(domainClassNode.plainNodeReference))))
             )
-            Expression connectionId = findConnectionId(newMethodNode)
+            Expression connectionId = findConnectionId(abstractMethodNode)
 
             if (connectionId != null) {
                 body.addStatement(
