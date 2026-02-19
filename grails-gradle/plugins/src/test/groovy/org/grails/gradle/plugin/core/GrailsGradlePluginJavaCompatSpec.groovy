@@ -32,35 +32,39 @@ package org.grails.gradle.plugin.core
 class GrailsGradlePluginJavaCompatSpec extends GradleSpecification {
 
     // ----------------------------------------------------------------
-    // No compat args on current JDK (17) without toolchain
+    // Current JDK without toolchain - args depend on JDK version
     // ----------------------------------------------------------------
 
-    def "no Java compat args added when no toolchain configured on JDK 17"() {
+    def "compat args match current JDK version when no toolchain configured"() {
         given:
         setupTestResourceProject('java-compat-no-toolchain')
+        boolean expectNativeAccess = CURRENT_JDK >= 24
+        boolean expectUnsafeAccess = CURRENT_JDK >= 23
 
         when:
         def result = executeTask('inspectCompatArgs')
 
         then:
-        result.output.contains('HAS_NATIVE_ACCESS=false')
-        result.output.contains('HAS_UNSAFE_ACCESS=false')
+        result.output.contains("HAS_NATIVE_ACCESS=${expectNativeAccess}")
+        result.output.contains("HAS_UNSAFE_ACCESS=${expectUnsafeAccess}")
     }
 
     // ----------------------------------------------------------------
-    // No compat args when toolchain matches current JDK (< 23)
+    // Current JDK with toolchain - args depend on JDK version
     // ----------------------------------------------------------------
 
-    def "no Java compat args added when toolchain is set to current JDK"() {
+    def "compat args match current JDK version when toolchain is set to current JDK"() {
         given:
         setupTestResourceProject('java-compat-toolchain-current')
+        boolean expectNativeAccess = CURRENT_JDK >= 24
+        boolean expectUnsafeAccess = CURRENT_JDK >= 23
 
         when:
         def result = executeTask('inspectCompatArgs')
 
         then:
-        result.output.contains('HAS_NATIVE_ACCESS=false')
-        result.output.contains('HAS_UNSAFE_ACCESS=false')
+        result.output.contains("HAS_NATIVE_ACCESS=${expectNativeAccess}")
+        result.output.contains("HAS_UNSAFE_ACCESS=${expectUnsafeAccess}")
     }
 
     // ----------------------------------------------------------------
