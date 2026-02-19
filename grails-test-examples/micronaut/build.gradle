@@ -38,6 +38,12 @@ dependencies {
     implementation 'org.apache.grails:grails-dependencies-starter-web'
     implementation 'org.apache.grails:grails-micronaut'
     implementation 'org.apache.grails:grails-scaffolding'
+    implementation "io.micronaut:micronaut-http-client:$micronautHttpClientVersion"
+    implementation "io.micronaut.serde:micronaut-serde-jackson:$micronautSerdeJacksonVersion"
+
+    annotationProcessor platform("io.micronaut.platform:micronaut-platform:$micronautPlatformVersion")
+    annotationProcessor 'io.micronaut:micronaut-inject-java'
+    annotationProcessor 'jakarta.annotation:jakarta.annotation-api'
 
     testAndDevelopmentOnly platform(project(':grails-bom'))
     testAndDevelopmentOnly 'org.apache.grails:grails-dependencies-assets'
@@ -47,6 +53,7 @@ dependencies {
     runtimeOnly 'cloud.wondrify:asset-pipeline-grails'
 
     testImplementation 'org.apache.grails:grails-dependencies-test'
+    testImplementation "io.micronaut:micronaut-http-client:$micronautHttpClientVersion"
 
     integrationTestImplementation testFixtures('org.apache.grails:grails-geb')
 }
