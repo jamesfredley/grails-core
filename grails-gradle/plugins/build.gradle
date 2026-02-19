@@ -58,13 +58,14 @@ dependencies {
     implementation 'io.spring.gradle:dependency-management-plugin'
 
     // Testing - Gradle TestKit is auto-added by java-gradle-plugin
-    // NOTE: Cannot use Spock here because grails-gradle-tasks transitively
-    // pulls org.apache.groovy:groovy:4.0.30 which conflicts with
-    // org.codehaus.groovy:groovy:3.0.25 (Gradle's built-in Groovy).
-    // Tests use JUnit Jupiter in Java instead.
-    testImplementation 'org.junit.jupiter:junit-jupiter-api'
+    testImplementation('org.spockframework:spock-core') { transitive = false }
+    testImplementation 'org.codehaus.groovy:groovy-test-junit5'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
-    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+configurations {
+    testCompileClasspath.exclude group: 'org.apache.groovy', module: 'groovy'
+    testRuntimeClasspath.exclude group: 'org.apache.groovy', module: 'groovy'
 }
 
 gradlePlugin {
@@ -136,6 +137,11 @@ tasks.withType(Copy) {
     configure {
         duplicatesStrategy = DuplicatesStrategy.INCLUDE
     }
+}
+
+tasks.withType(Test).configureEach {
+    systemProperty 'projectVersion', projectVersion
+    systemProperty 'currentJdk', JavaVersion.current().majorVersion
 }
 
 apply {
