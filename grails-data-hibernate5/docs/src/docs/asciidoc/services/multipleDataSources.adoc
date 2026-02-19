@@ -73,7 +73,7 @@ abstract class BookService implements BookDataService {
 
 The `@Transactional(connection = 'books')` annotation on the abstract class ensures that all auto-implemented methods (`get`, `save`, `delete`, `findBy*`, `countBy*`, etc.) route to the `books` datasource. Without this annotation, queries silently route to the default datasource.
 
-IMPORTANT: The `connection` parameter is required when using Data Services with secondary datasources. The `@Service(Book)` annotation alone does not determine which datasource to use, even if the `Book` domain class declares `datasource 'books'` in its mapping block.
+NOTE: The `@Service(Book)` annotation identifies the domain class but does not determine which datasource to use. Even if `Book` declares `datasource 'books'` in its mapping block, you must specify `@Transactional(connection = 'books')` on the abstract class to route operations to the correct datasource.
 
 ==== How Connection Routing Works
 
@@ -189,3 +189,80 @@ class LibraryService {
 ----
 
 The consuming service does not need `@Transactional(connection = 'books')`. The Data Service handles datasource routing internally.
+
+Data Services can also inject other Data Services. `@CompileStatic` works on `@Service` abstract classes that declare `@Service`-typed properties:
+
+[source,groovy]
+----
+import grails.gorm.services.Service
+
+interface AuthorDataService {
+
+    Author get(Serializable id)
+
+    Author save(Author author)
+}
+----
+
+[source,groovy]
+----
+import groovy.transform.CompileStatic
+import grails.gorm.services.Service
+import grails.gorm.transactions.Transactional
+
+@CompileStatic
+@Service(Author)
+@Transactional(connection = 'books')
+abstract class AuthorService implements AuthorDataService {
+
+    BookDataService bookDataService  // injected @Service property
+
+    Map getAuthorWithBooks(Serializable authorId) {
+        Author author = get(authorId)
+        List<Book> books = bookDataService.findAllByAuthor(author.name)
+        [author: author, books: books]
+    }
+}
+----
+
+When the Spring context initializes the generated implementation class, it eagerly populates all `@Service`-typed properties via `datastore.getService()`. By the time any user code runs, injected Data Services are fully available.
+
+==== Multi-Tenancy with Multiple Datasources
+
+Domain classes that implement `GormEntity` with the `MultiTenant` trait and declare an explicit non-default datasource (e.g., `datasource 'analytics'`) route correctly through Data Services. GORM's `GormEnhancer` preserves explicit datasource qualifiers for multi-tenant entities, so Data Services using `@Transactional(connection = 'analytics')` work the same way as for non-tenant domain classes:
+
+[source,groovy]
+----
+import grails.gorm.MultiTenant
+
+class Metric implements MultiTenant<Metric> {
+
+    String name
+    BigDecimal value
+
+    static mapping = {
+        datasource 'analytics'
+    }
+}
+----
+
+[source,groovy]
+----
+import grails.gorm.services.Service
+import grails.gorm.transactions.Transactional
+import groovy.transform.CompileStatic
+
+@CompileStatic
+@Service(Metric)
+@Transactional(connection = 'analytics')
+abstract class MetricService {
+
+    abstract Metric get(Serializable id)
+
+    abstract Metric save(Metric metric)
+
+    abstract List<Metric> list()
+}
+----
+
+The `connection` parameter on the abstract class routes all auto-implemented operations - including `save()`, `get()`, and `delete()` - to the `analytics` datasource, regardless of multi-tenancy mode (DATABASE or DISCRIMINATOR).

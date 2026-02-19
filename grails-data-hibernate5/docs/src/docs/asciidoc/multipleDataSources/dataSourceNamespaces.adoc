@@ -62,4 +62,4 @@ def results = c.list {
 }
 ----
 
-TIP: The namespace syntax (e.g., `ZipCode.auditing.get(42)`) uses dynamic dispatch and is not compatible with `@CompileStatic`. For statically compiled code, use `GormEnhancer.findStaticApi(ZipCode, 'auditing')` instead, which returns a `GormStaticApi` handle with the same methods routed to the specified datasource. See the <<dataServicesMultipleDataSources,Data Services and Multiple Datasources>> section for examples.
+TIP: The namespace syntax (e.g., `ZipCode.auditing.get(42)`) uses dynamic dispatch and is not compatible with `@CompileStatic`. For statically compiled code, use `GormEnhancer.findStaticApi(ZipCode, 'auditing')` to obtain a `GormStaticApi` handle with the same methods routed to the specified datasource, or use a Data Service with `@Transactional(connection = 'auditing')` for automatic routing. See the <<dataServicesMultipleDataSources,Data Services and Multiple Datasources>> section for the full pattern.
