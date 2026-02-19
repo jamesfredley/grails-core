@@ -36,10 +36,10 @@ class CrudFunctionalSpec extends ContainerGebSpec {
 
     def "Employee list page displays correctly"() {
         when: "navigating to the employee list page"
-        go '/employee/index'
+        to(EmployeeListPage)
 
         then: "the list page is displayed with correct title"
-        title == 'Employee List'
+        at(EmployeeListPage)
 
         and: "the data table is present"
         $('table').displayed
@@ -47,23 +47,23 @@ class CrudFunctionalSpec extends ContainerGebSpec {
 
     def "Department list page displays correctly"() {
         when: "navigating to the department list page"
-        go '/department/index'
+        to(DepartmentListPage)
 
         then: "the list page is displayed with correct title"
-        title == 'Department List'
+        at(DepartmentListPage)
     }
 
     def "Project list page displays correctly"() {
         when: "navigating to the project list page"
-        go '/project/index'
+        to(ProjectListPage)
 
         then: "the list page is displayed with correct title"
-        title == 'Project List'
+        at(ProjectListPage)
     }
 
     def "List page shows create new button"() {
         when: "navigating to the employee list page"
-        go '/employee/index'
+        to(EmployeeListPage)
 
         then: "the create new button is present"
         $('a', text: contains('New')).displayed
@@ -73,10 +73,10 @@ class CrudFunctionalSpec extends ContainerGebSpec {
 
     def "Create page displays correctly"() {
         when: "navigating to the employee create page"
-        go '/employee/create'
+        to(EmployeeCreatePage)
 
         then: "the create page is displayed with correct title"
-        title == 'Create Employee'
+        at(EmployeeCreatePage)
 
         and: "the form is present"
         $('form').displayed
@@ -89,7 +89,7 @@ class CrudFunctionalSpec extends ContainerGebSpec {
 
     def "Create employee with valid data succeeds"() {
         given: "navigating to the create page"
-        go '/employee/create'
+        to(EmployeeCreatePage)
 
         when: "filling in valid employee data"
         $('input[name="firstName"]').value('Integration')
@@ -100,12 +100,12 @@ class CrudFunctionalSpec extends ContainerGebSpec {
         $('input[type="submit"], button[type="submit"]').click()
 
         then: "redirected to show page or list page"
-        title.contains('Employee') || title.contains('Show') || title.contains('List')
+        waitFor { title.contains('Employee') || title.contains('Show') || title.contains('List') }
     }
 
     def "Create department with valid data succeeds"() {
         given: "navigating to the create page"
-        go '/department/create'
+        to(DepartmentCreatePage)
 
         when: "filling in valid department data"
         $('input[name="name"]').value('Test Department')
@@ -114,14 +114,14 @@ class CrudFunctionalSpec extends ContainerGebSpec {
         $('input[type="submit"], button[type="submit"]').click()
 
         then: "redirected to show page or list page"
-        title.contains('Department') || title.contains('Show') || title.contains('List')
+        waitFor { title.contains('Department') || title.contains('Show') || title.contains('List') }
     }
 
     // ==================== SHOW (READ) TESTS ====================
 
     def "Show page displays employee details"() {
         given: "create an employee to view"
-        go '/employee/create'
+        to(EmployeeCreatePage)
         $('input[name="firstName"]').value('ShowTest')
         $('input[name="lastName"]').value('Employee')
         $('input[name="email"]').value('showtest@example.com')
@@ -131,7 +131,7 @@ class CrudFunctionalSpec extends ContainerGebSpec {
         // Should be redirected to show page after successful create
 
         then: "the show page is displayed"
-        title.contains('Show') || title.contains('Employee')
+        waitFor { title.contains('Show') || title.contains('Employee') }
 
         and: "employee details are shown (at least one property list or table element)"
         $('.property-list, ol.property-list, table').size() > 0
@@ -139,7 +139,7 @@ class CrudFunctionalSpec extends ContainerGebSpec {
 
     def "Show page has edit and delete buttons"() {
         given: "create an employee to view"
-        go '/employee/create'
+        to(EmployeeCreatePage)
         $('input[name="firstName"]').value('EditButtonTest')
         $('input[name="lastName"]').value('Employee')
         $('input[name="email"]').value('editbuttontest@example.com')
@@ -156,7 +156,7 @@ class CrudFunctionalSpec extends ContainerGebSpec {
 
     def "Edit page displays correctly with existing data"() {
         given: "create an employee to edit"
-        go '/employee/create'
+        to(EmployeeCreatePage)
         $('input[name="firstName"]').value('EditTest')
         $('input[name="lastName"]').value('Employee')
         $('input[name="email"]').value('edittest@example.com')
@@ -166,7 +166,7 @@ class CrudFunctionalSpec extends ContainerGebSpec {
         $('a', text: contains('Edit')).click()
 
         then: "the edit page is displayed with correct title"
-        title.contains('Edit') || title.contains('Employee')
+        waitFor { title.contains('Edit') || title.contains('Employee') }
 
         and: "the form is present with existing values"
         $('form').displayed
@@ -175,7 +175,7 @@ class CrudFunctionalSpec extends ContainerGebSpec {
 
     def "Edit employee with valid data succeeds"() {
         given: "create an employee to edit"
-        go '/employee/create'
+        to(EmployeeCreatePage)
         $('input[name="firstName"]').value('UpdateTest')
         $('input[name="lastName"]').value('BeforeUpdate')
         $('input[name="email"]').value('updatetest@example.com')
@@ -193,18 +193,18 @@ class CrudFunctionalSpec extends ContainerGebSpec {
         $('input[type="submit"], button[type="submit"]').click()
 
         then: "redirected to show page with updated data"
-        title.contains('Employee') || title.contains('Show') || title.contains('List')
+        waitFor { title.contains('Employee') || title.contains('Show') || title.contains('List') }
     }
 
     // ==================== DELETE TESTS ====================
 
     def "Delete removes employee from list"() {
         given: "navigate to employee list and count rows"
-        go '/employee/index'
+        to(EmployeeListPage)
         def initialRowCount = $('table tbody tr').size()
 
         and: "create a new employee to delete"
-        go '/employee/create'
+        to(EmployeeCreatePage)
         $('input[name="firstName"]').value('ToDelete')
         $('input[name="lastName"]').value('Employee')
         $('input[name="email"]').value('todelete@example.com')
@@ -228,42 +228,42 @@ class CrudFunctionalSpec extends ContainerGebSpec {
 
     def "Can navigate from list to create to list"() {
         when: "starting on the list page"
-        go '/employee/index'
+        to(EmployeeListPage)
 
         and: "clicking create new"
         $('a', text: contains('New')).click()
 
         then: "on create page"
-        title == 'Create Employee'
+        waitFor { title == 'Create Employee' }
 
         when: "clicking cancel or navigating back"
-        go '/employee/index'
+        to(EmployeeListPage)
 
         then: "back on list page"
-        title == 'Employee List'
+        at(EmployeeListPage)
     }
 
     def "Can navigate from list to show to edit to show"() {
         given: "create an employee to navigate"
-        go '/employee/create'
+        to(EmployeeCreatePage)
         $('input[name="firstName"]').value('NavTest')
         $('input[name="lastName"]').value('Employee')
         $('input[name="email"]').value('navtest@example.com')
         $('input[type="submit"], button[type="submit"]').click()
 
         expect: "on show page after create"
-        title.contains('Show') || title.contains('Employee')
+        waitFor { title.contains('Show') || title.contains('Employee') }
 
         when: "clicking edit"
         $('a', text: contains('Edit')).click()
 
         then: "on edit page"
-        title.contains('Edit') || title.contains('Employee')
+        waitFor { title.contains('Edit') || title.contains('Employee') }
 
         when: "going back to list"
-        go '/employee/index'
+        to(EmployeeListPage)
 
         then: "back on list page"
-        title == 'Employee List'
+        at(EmployeeListPage)
     }
 }

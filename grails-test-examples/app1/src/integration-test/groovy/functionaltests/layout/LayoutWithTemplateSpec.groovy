@@ -20,6 +20,7 @@
 package functionaltests.layout
 
 import functionaltests.Application
+import functionaltests.pages.PartialPage
 import grails.gorm.transactions.Rollback
 import grails.plugin.geb.ContainerGebSpec
 import grails.testing.mixin.integration.Integration
@@ -30,8 +31,8 @@ class LayoutWithTemplateSpec extends ContainerGebSpec {
 
     void "Test that a layout is not applied to a template rendered by a controller by default"() {
         when:"The home page is visited"
-        go('/layoutTemplate/index')
+        to(PartialPage)
         then:"The title is correct"
-            title == "Welcome to My Partial"
+            at(PartialPage)
     }
 }

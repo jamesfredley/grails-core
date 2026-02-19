@@ -19,6 +19,7 @@
 
 package exploded
 
+import exploded.pages.LoginAuthPage
 import grails.plugin.geb.ContainerGebSpec
 import grails.testing.mixin.integration.Integration
 
@@ -27,9 +28,9 @@ class LoadAfterSpec extends ContainerGebSpec {
 
     void "Basic test to prove reloading worked"() {
         when:
-        go('/login/auth')
+        to(LoginAuthPage)
 
         then:
-        title == "My Plugin Login Auth"
+        at(LoginAuthPage)
     }
 }

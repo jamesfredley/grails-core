@@ -19,6 +19,8 @@
 
 package functional.tests
 
+import functional.tests.pages.BookListPage
+import functional.tests.pages.BookShowPage
 import grails.plugin.geb.ContainerGebSpec
 import grails.testing.mixin.integration.Integration
 
@@ -27,10 +29,10 @@ class BookControllerSpec extends ContainerGebSpec {
 
     void "Test list books"() {
         when:"The home page is visited"
-        go('/book/index')
+        to(BookListPage)
 
         then:"The title is correct"
-        	title == "Book List"
+        at(BookListPage)
     }
 
     void "Test save book"() {
@@ -40,7 +42,7 @@ class BookControllerSpec extends ContainerGebSpec {
         $('input.save').click()
 
         then:"The book is correct"
-        title == "Show Book"
+        waitFor { title == BookShowPage.pageTitle }
         $('li.fieldcontain div').text() == 'The Stand'
 
     }

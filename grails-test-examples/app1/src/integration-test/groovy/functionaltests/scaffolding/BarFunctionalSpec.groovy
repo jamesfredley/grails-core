@@ -20,6 +20,7 @@
 package functionaltests.scaffolding
 
 import functionaltests.Application
+import functionaltests.pages.BarListPage
 import grails.gorm.transactions.Rollback
 import grails.plugin.geb.ContainerGebSpec
 import grails.testing.mixin.integration.Integration
@@ -30,9 +31,9 @@ class BarFunctionalSpec extends ContainerGebSpec {
 
     void "Test that a scaffolded view is resolved correctly"() {
         when:
-        go('/bar/index')
+        to(BarListPage)
 
         then:
-        title == "Bar List"
+        at(BarListPage)
     }
 }

@@ -16,21 +16,14 @@
  *  specific language governing permissions and limitations
  *  under the License.
  */
+package functionaltests.pages
 
-package app3
+import geb.Page
 
-import app3.pages.LoginAuthPage
-import grails.plugin.geb.ContainerGebSpec
-import grails.testing.mixin.integration.Integration
+class FooLayoutPage extends Page {
 
-@Integration
-class LoadAfterSpec extends ContainerGebSpec {
+    static String pageTitle = 'Foo Layout'
 
-    void "Test override one plugin view from another plugin"() {
-        when:
-        to(LoginAuthPage)
-
-        then:
-        at(LoginAuthPage)
-    }
+    static url = 'layoutSpecifiedByProperty'
+    static at = { title == pageTitle }
 }

@@ -19,25 +19,25 @@
 
 package namespaces
 
-
 import grails.plugin.geb.ContainerGebSpec
 import grails.testing.mixin.integration.Integration
-import spock.lang.PendingFeature
+import namespaces.pages.AdminPagePage
+import namespaces.pages.FrontendPagePage
 
 @Integration
 class PageControllerSpec extends ContainerGebSpec {
 
     void "test that the page renders correctly"() {
         when: "The admin page is visited"
-        go('/myAppTest/admin/page/index')
+        to(AdminPagePage)
 
         then: "The title is correct"
-        title == 'Admin Page'
+        at(AdminPagePage)
 
         when: "The page is visited without namespace"
-        go('/myAppTest/page/index')
+        to(FrontendPagePage)
 
         then: "The title is correct"
-        title == 'Frontend Page'
+        at(FrontendPagePage)
     }
 }

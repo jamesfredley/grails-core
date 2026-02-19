@@ -19,6 +19,9 @@
 
 package functionaltests
 
+import functionaltests.pages.BookCreatePage
+import functionaltests.pages.BookListPage
+import functionaltests.pages.BookShowPage
 import grails.plugin.geb.ContainerGebSpec
 import grails.testing.mixin.integration.Integration
 import spock.lang.Issue
@@ -28,24 +31,23 @@ class BookFunctionalSpec extends ContainerGebSpec {
 
     void "Test that when the /viewBooks URL is hit it redirects to the book list"() {
         when: "We go to the book URI"
-        go "/book/index"
+        to(BookListPage)
 
         then: "Then thew show book view is rendered"
-        title == "Book List"
+        at(BookListPage)
     }
 
     void "Test that a book was created in the Bootstrap class"() {
         when: "We go to the book URI"
-        go('/book/show/1')
+        to(BookShowPage, 1)
 
         then: "Then thew show book view is rendered"
-        title == "Show Book"
+        at(BookShowPage)
     }
 
     void "Test that switching language results in correct encodings"() {
         when: "the show page is rendered in german"
         go "/book/show/1?lang=de"
-        println pageSource
         then: "The language is correct"
         $('a', class: 'create').text() == 'Book anlegen'
         $('input', class: 'delete').@value == 'Löschen'
@@ -54,12 +56,12 @@ class BookFunctionalSpec extends ContainerGebSpec {
     @Issue('10965')
     void "When creating a book the params are not on the url"() {
         when: 'creating a book'
-        go "/book/create"
+        to(BookCreatePage)
         $('#title').value('The Stand')
         $('#create').click()
 
         then:
-        title == 'Show Book'
+        waitFor { title == BookShowPage.pageTitle }
         !currentUrl.contains('title')
         !currentUrl.contains('create')
     }

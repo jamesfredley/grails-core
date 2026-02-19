@@ -21,22 +21,23 @@ package namespaces.admin
 
 import grails.plugin.geb.ContainerGebSpec
 import grails.testing.mixin.integration.Integration
-import spock.lang.PendingFeature
+import namespaces.admin.pages.AdminReportPage
+import namespaces.admin.pages.ReportPage
 
 @Integration
 class ReportControllerSpec extends ContainerGebSpec {
 
     void "test that admin report page renders correctly"() {
         when: "The admin report page is visited"
-        go('/myAppTest/admin/report/index')
+        to(AdminReportPage)
 
         then: "The title is correct"
-        title == 'Admin Report'
+        at(AdminReportPage)
 
         when: "The admin report page is visited without namespace"
-        go('/myAppTest/report/index')
+        to(ReportPage)
 
         then: "The title is correct"
-        title == 'Admin Report'
+        at(ReportPage)
     }
 }

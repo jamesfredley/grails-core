@@ -20,21 +20,19 @@
 package functionaltests
 
 
+import functionaltests.pages.HomePage
 import grails.plugin.geb.ContainerGebSpec
 import grails.testing.mixin.integration.Integration
-import spock.lang.PendingFeature
 
 @Integration(applicationClass = Application)
 class HomeSpec extends ContainerGebSpec {
 
     void "Test the home page renders correctly"() {
         when: "The home page is visited"
-        go('/')
-        if (title != "Welcome to Grails") {
-            println pageSource
-        }
+        to(HomePage)
+
         then: "The title is correct"
-        title == "Welcome to Grails"
+        at(HomePage)
         $('li.controller', text: 'demo.AlphaController')
         $('li.controller', text: 'functionaltests.BookController')
         $('li.controller', text: 'functionaltests.ErrorsController')

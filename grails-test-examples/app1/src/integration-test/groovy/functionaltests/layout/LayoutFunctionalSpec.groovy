@@ -20,6 +20,9 @@
 package functionaltests.layout
 
 import functionaltests.Application
+import functionaltests.pages.ConventionLayoutPage
+import functionaltests.pages.FooLayoutPage
+import functionaltests.pages.FooLayoutSnippetPage
 import grails.plugin.geb.ContainerGebSpec
 import grails.testing.mixin.integration.Integration
 import spock.lang.Issue
@@ -30,29 +33,29 @@ class LayoutFunctionalSpec extends ContainerGebSpec {
     @Issue('GRAILS-12045')
     void 'test layout by convention'() {
         when:
-        go('/layoutByConvention')
+        to(ConventionLayoutPage)
 
         then:
-        title == 'Convention Layout'
+        at(ConventionLayoutPage)
     }
 
     @Issue('GRAILS-12045')
     void 'test layout specified in controller property'() {
         when:
-        go('/layoutSpecifiedByProperty')
+        to(FooLayoutPage)
 
         then:
-        title == 'Foo Layout'
+        at(FooLayoutPage)
 
     }
 
     @Issue('GRAILS-12045')
     void 'test layout specified in controller property applied to a GSP that does not contain a root html tag'() {
         when:
-        go('/layoutSpecifiedByProperty/snippetView')
+        to(FooLayoutSnippetPage)
 
         then:
-        title  == 'Foo Layout'
+        at(FooLayoutSnippetPage)
         $().text().contains 'this is some content'
     }
 }

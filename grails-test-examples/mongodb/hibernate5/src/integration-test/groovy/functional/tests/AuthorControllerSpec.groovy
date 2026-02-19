@@ -19,6 +19,8 @@
 
 package functional.tests
 
+import functional.tests.pages.AuthorListPage
+import functional.tests.pages.AuthorShowPage
 import grails.plugin.geb.ContainerGebSpec
 import grails.testing.mixin.integration.Integration
 
@@ -27,10 +29,10 @@ class AuthorControllerSpec extends ContainerGebSpec {
 
     void "Test list authors"() {
         when:"The home page is visited"
-        go('/author/index')
+        to(AuthorListPage)
 
         then:"The name is correct"
-        title == "Author List"
+        at(AuthorListPage)
     }
 
     void "Test save author"() {
@@ -40,7 +42,7 @@ class AuthorControllerSpec extends ContainerGebSpec {
         $('input.save').click()
 
         then:"The author is correct"
-        title == "Show Author"
+        waitFor { title == AuthorShowPage.pageTitle }
         $('li.fieldcontain div').text() == 'Stephen King'
 
     }

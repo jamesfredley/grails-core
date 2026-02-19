@@ -22,6 +22,7 @@ package scaffoldingfields
 import grails.gorm.transactions.Rollback
 import grails.plugin.geb.ContainerGebSpec
 import grails.testing.mixin.integration.Integration
+import scaffoldingfields.pages.EmployeeCreatePage
 import spock.lang.Unroll
 
 /**
@@ -33,7 +34,7 @@ import spock.lang.Unroll
 class FieldTypesSpec extends ContainerGebSpec {
 
     def setup() {
-        go '/employee/create'
+        to(EmployeeCreatePage)
     }
 
     // ==================== TEXT INPUT TYPES ====================

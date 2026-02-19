@@ -33,12 +33,12 @@ class ContextPathSpec extends ContainerGebSpec {
         go('/myAppTest')
 
         then:
-        title == "Welcome to Grails"
+        waitFor { title == "Welcome to Grails" }
 
         when:
         go('/myApp')
 
         then:
-        title == "HTTP Status 404 – Not Found"
+        waitFor { title == "HTTP Status 404 – Not Found" }
     }
 }

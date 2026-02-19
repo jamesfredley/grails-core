@@ -17,20 +17,14 @@
  *  under the License.
  */
 
-package app3
+package exploded.pages
 
-import app3.pages.LoginAuthPage
-import grails.plugin.geb.ContainerGebSpec
-import grails.testing.mixin.integration.Integration
+import geb.Page
 
-@Integration
-class LoadAfterSpec extends ContainerGebSpec {
+class LoginAuthPage extends Page {
 
-    void "Test override one plugin view from another plugin"() {
-        when:
-        to(LoginAuthPage)
+    static String pageTitle = 'My Plugin Login Auth'
 
-        then:
-        at(LoginAuthPage)
-    }
+    static url = 'login/auth'
+    static at = { title == pageTitle }
 }

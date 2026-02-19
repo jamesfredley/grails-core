@@ -17,20 +17,14 @@
  *  under the License.
  */
 
-package app3
+package app2.pages
 
-import app3.pages.LoginAuthPage
-import grails.plugin.geb.ContainerGebSpec
-import grails.testing.mixin.integration.Integration
+import geb.Page
 
-@Integration
-class LoadAfterSpec extends ContainerGebSpec {
+class PageNotFoundPage extends Page {
 
-    void "Test override one plugin view from another plugin"() {
-        when:
-        to(LoginAuthPage)
+    static String pageTitle = 'Page Not Found'
 
-        then:
-        at(LoginAuthPage)
-    }
+    static url = 'foo/index'
+    static at = { title == pageTitle }
 }

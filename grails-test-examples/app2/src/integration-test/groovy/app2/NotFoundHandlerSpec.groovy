@@ -19,6 +19,8 @@
 
 package app2
 
+import app2.pages.FooListPage
+import app2.pages.PageNotFoundPage
 import grails.gorm.transactions.Rollback
 import grails.plugin.geb.ContainerGebSpec
 import grails.testing.mixin.integration.Integration
@@ -32,12 +34,12 @@ class NotFoundHandlerSpec extends ContainerGebSpec {
         go('/foo/index')
 
         then:"The 404 handler is rendered"
-        	title == "Page Not Found"
+        waitFor { title == PageNotFoundPage.pageTitle }
 
         when:"No response.sendError(404) method is called"
         go('/foo/index?user=admin')
 
         then:"The 404 handler is not executed"
-            title == "Foo List"            
+        waitFor { title == FooListPage.pageTitle }
     }
 }

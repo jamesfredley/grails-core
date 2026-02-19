@@ -20,6 +20,7 @@
 package functionaltests.scaffolding
 
 import functionaltests.Application
+import functionaltests.pages.FooListPage
 import grails.gorm.transactions.Rollback
 import grails.plugin.geb.ContainerGebSpec
 import grails.testing.mixin.integration.Integration
@@ -30,9 +31,9 @@ class FooFunctionalSpec extends ContainerGebSpec {
 
     void "Test that a scaffolded view is resolved correctly"() {
         when:
-        go('/foo/index')
+        to(FooListPage)
 
         then:
-        title == "Foo List"
+        at(FooListPage)
     }
 }

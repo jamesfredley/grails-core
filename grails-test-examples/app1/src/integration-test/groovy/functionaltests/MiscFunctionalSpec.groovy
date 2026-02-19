@@ -19,6 +19,7 @@
 
 package functionaltests
 
+import functionaltests.pages.ActionReturnsNullPage
 import grails.plugin.geb.ContainerGebSpec
 import grails.testing.mixin.integration.Integration
 import spock.lang.Issue
@@ -38,10 +39,10 @@ class MiscFunctionalSpec extends ContainerGebSpec {
     @Issue('GRAILS-12028')
     void "Test that when an action returns null the view is rendered by convention"() {
         when:
-        go('/misc/actionWhichReturnsNull')
+        to(ActionReturnsNullPage)
 
         then:
-        title == ('Action Which Returns Null GSP')
+        at(ActionReturnsNullPage)
     }
 
     void "Test that placeholder configuration works for the config object"() {
