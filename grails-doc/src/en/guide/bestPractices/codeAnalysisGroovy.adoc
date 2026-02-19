@@ -19,12 +19,14 @@ under the License.
 
 https://codenarc.org/[CodeNarc] is a static analysis tool for Groovy that finds defects, poor coding practices, inconsistencies, style issues, and more. Grails projects can integrate CodeNarc via the Gradle https://docs.gradle.org/current/userguide/codenarc_plugin.html[CodeNarc plugin].
 
-==== Adding CodeNarc to Your Build
+==== Adding Code Analysis to Your Build
 
-Apply the CodeNarc plugin in your `build.gradle`:
+Apply the CodeNarc plugin and configure it using `extensions.configure()`:
 
 [source,groovy]
 ----
+import org.gradle.api.plugins.quality.CodeNarcExtension
+
 plugins {
     id 'codenarc'
 }
@@ -33,11 +35,11 @@ dependencies {
     codenarc 'org.codenarc:CodeNarc:3.6.0-groovy-4.0'
 }
 
-codenarc {
-    configFile = file('config/codenarc/codenarc.groovy')
-    maxPriority1Violations = 0
-    maxPriority2Violations = 0
-    maxPriority3Violations = 0
+extensions.configure(CodeNarcExtension) {
+    it.configFile = file('config/codenarc/codenarc.groovy')
+    it.maxPriority1Violations = 0
+    it.maxPriority2Violations = 0
+    it.maxPriority3Violations = 0
 }
 ----
 
@@ -147,11 +149,11 @@ Spock specifications often use patterns that trigger style rules (method names w
 
 [source,groovy]
 ----
-codenarcTest {
+tasks.named('codenarcTest', CodeNarc) {
     configFile = file('config/codenarc/codenarc-test.groovy')
 }
 ----
 
 ==== Reference
 
-The Grails framework's own CodeNarc configuration can be found in the https://github.com/apache/grails-core[grails-core] repository under `build-logic/plugins/src/main/resources/META-INF/org.apache.grails.buildsrc.codestyle/codenarc/codenarc.groovy`. This is a reliable starting point for any Grails project.
+The https://github.com/grails-plugins/grails-server-timing[grails-server-timing] plugin provides a complete working example of CodeNarc and Checkstyle configuration using Gradle convention plugins in its `build-logic/` directory. The Grails framework's own CodeNarc ruleset can be found in the https://github.com/apache/grails-core[grails-core] repository under `build-logic/plugins/src/main/resources/META-INF/org.apache.grails.buildsrc.codestyle/codenarc/codenarc.groovy`. Both are reliable starting points for any Grails project.

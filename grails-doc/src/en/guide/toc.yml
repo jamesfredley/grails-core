@@ -304,7 +304,9 @@ testing:
     usefulProperties: Useful Properties
   integrationTesting: Integration Testing
   functionalTesting: Functional Testing
-  codeQuality: Code Quality with CodeNarc
+bestPractices:
+  title: Building a Successful Application
+  codeAnalysisGroovy: Code Analysis and Styling for Groovy
 i18n:
   title: Internationalization
   understandingMessageBundles: Understanding Message Bundles
