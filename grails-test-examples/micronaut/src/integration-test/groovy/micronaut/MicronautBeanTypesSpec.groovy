@@ -22,11 +22,12 @@ import bean.injection.AppConfig
 import bean.injection.FactoryCreatedService
 import bean.injection.JavaMessageProvider
 import bean.injection.JavaSingletonService
+import spock.lang.Specification
+
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.context.ApplicationContext as SpringApplicationContext
 
 import grails.testing.mixin.integration.Integration
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.context.ApplicationContext
-import spock.lang.Specification
 
 /**
  * Integration tests for various Micronaut bean registration mechanisms in Grails context.
@@ -41,7 +42,7 @@ import spock.lang.Specification
 class MicronautBeanTypesSpec extends Specification {
 
     @Autowired
-    ApplicationContext applicationContext
+    SpringApplicationContext springContext
 
     @Autowired
     JavaSingletonService javaSingletonService
@@ -53,46 +54,43 @@ class MicronautBeanTypesSpec extends Specification {
     AppConfig appConfig
 
     void "Java @Singleton bean is available via Spring autowiring"() {
-        expect: "bean is injected and functional"
-        javaSingletonService != null
-        javaSingletonService.message == 'from-java-singleton'
+        expect: 'bean is injected and functional'
+        javaSingletonService?.message == 'from-java-singleton'
     }
 
     void "Groovy @Factory/@Bean created bean is available via Spring autowiring"() {
-        expect: "bean is injected with factory-configured values"
-        factoryCreatedService != null
-        factoryCreatedService.name == 'factory-created'
+        expect: 'bean is injected with factory-configured values'
+        factoryCreatedService?.name == 'factory-created'
     }
 
     void "@ConfigurationProperties bean reflects application.yml config"() {
-        expect: "config properties are bound from application.yml"
-        appConfig != null
-        appConfig.name == 'test-micronaut-app'
+        expect: 'config properties are bound from application.yml'
+        appConfig?.name == 'test-micronaut-app'
     }
 
     void "Java @Singleton bean is a singleton instance"() {
-        when: "retrieving the bean twice from the application context"
-        def first = applicationContext.getBean(JavaSingletonService)
-        def second = applicationContext.getBean(JavaSingletonService)
+        when: 'retrieving the bean twice from the application context'
+        def first = springContext.getBean(JavaSingletonService)
+        def second = springContext.getBean(JavaSingletonService)
 
-        then: "same instance is returned"
+        then: 'same instance is returned'
         first.is(second)
     }
 
     void "Factory-created bean is a singleton instance"() {
-        when: "retrieving the bean twice from the application context"
-        def first = applicationContext.getBean(FactoryCreatedService)
-        def second = applicationContext.getBean(FactoryCreatedService)
+        when: 'retrieving the bean twice from the application context'
+        def first = springContext.getBean(FactoryCreatedService)
+        def second = springContext.getBean(FactoryCreatedService)
 
-        then: "same instance is returned (factory method annotated with @Singleton)"
+        then: 'same instance is returned (factory method annotated with @Singleton)'
         first.is(second)
     }
 
     void "Java @Singleton bean is resolvable by its interface type"() {
-        when: "looking up the bean by the JavaMessageProvider interface"
-        def provider = applicationContext.getBean(JavaMessageProvider)
+        when: 'looking up the bean by the JavaMessageProvider interface'
+        def provider = springContext.getBean(JavaMessageProvider)
 
-        then: "the bean is found and is the same singleton instance"
+        then: 'the bean is found and is the same singleton instance'
         provider != null
         provider instanceof JavaSingletonService
         provider.message == 'from-java-singleton'

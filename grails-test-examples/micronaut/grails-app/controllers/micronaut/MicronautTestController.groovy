@@ -18,14 +18,16 @@
  */
 package micronaut
 
+import groovy.transform.CompileStatic
+
 import bean.injection.AppConfig
 import bean.injection.FactoryCreatedService
 import bean.injection.JavaSingletonService
 import bean.injection.NamedService
-import grails.converters.JSON
-import groovy.transform.CompileStatic
 
 import org.springframework.beans.factory.annotation.Autowired
+
+import grails.converters.JSON
 
 @CompileStatic
 class MicronautTestController {

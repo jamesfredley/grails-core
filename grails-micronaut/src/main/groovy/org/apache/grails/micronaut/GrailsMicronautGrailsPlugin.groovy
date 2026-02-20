@@ -16,18 +16,18 @@
  *  specific language governing permissions and limitations
  *  under the License.
  */
-
 package org.apache.grails.micronaut
 
-import grails.plugins.GrailsPlugin
 import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 
-import grails.plugins.GrailsPluginManager
-import grails.plugins.Plugin
-import io.micronaut.context.ApplicationContext
+import io.micronaut.context.ApplicationContext as MicronautApplicationContext
 import io.micronaut.context.env.AbstractPropertySourceLoader
 import io.micronaut.context.env.PropertySource
+
+import grails.plugins.GrailsPlugin
+import grails.plugins.GrailsPluginManager
+import grails.plugins.Plugin
 
 @Slf4j
 @CompileStatic
@@ -49,16 +49,24 @@ class GrailsMicronautGrailsPlugin extends Plugin {
         }
 
         if (!applicationContext.containsBean('micronautApplicationContext')) {
-            throw new IllegalStateException('A Micronaut Application Context should exist prior to the loading of the Grails Micronaut plugin.')
+            throw new IllegalStateException(
+                    'A Micronaut Application Context should exist prior to the loading ' +
+                    'of the Grails Micronaut plugin.'
+            )
         }
 
-        def micronautContext = applicationContext.getBean('micronautApplicationContext', ApplicationContext)
+        def micronautContext = applicationContext.getBean(
+                'micronautApplicationContext',
+                MicronautApplicationContext
+        )
         def micronautEnv = micronautContext.environment
 
         log.debug('Loading configurations from the plugins to the parent Micronaut context')
 
         def plugins = pluginManager.allPlugins
-        def pluginsFromContext = pluginManagerFromContext ? pluginManagerFromContext.allPlugins : new GrailsPlugin[0]
+        def pluginsFromContext = pluginManagerFromContext ?
+                pluginManagerFromContext.allPlugins :
+                new GrailsPlugin[0]
         int priority = AbstractPropertySourceLoader.DEFAULT_POSITION
         [plugins, pluginsFromContext].each { pluginsToProcess ->
             Arrays.stream(pluginsToProcess)

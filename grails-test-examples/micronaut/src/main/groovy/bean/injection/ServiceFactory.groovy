@@ -20,10 +20,10 @@ package bean.injection
 
 import groovy.transform.CompileStatic
 
+import jakarta.inject.Singleton
+
 import io.micronaut.context.annotation.Bean
 import io.micronaut.context.annotation.Factory
-
-import jakarta.inject.Singleton
 
 @Factory
 @CompileStatic
