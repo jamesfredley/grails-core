@@ -36,7 +36,7 @@ jobs:
       - name: "Output Agent IP" # in the event RAO blocks this agent, this can be used to debug it
         run: curl -s https://api.ipify.org
       - name: "📥 Checkout repository"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: "☕️ Setup JDK"
         uses: actions/setup-java@v4
         with:
@@ -86,7 +86,7 @@ jobs:
       - name: "Output Agent IP" # in the event RAO blocks this agent, this can be used to debug it
         run: curl -s https://api.ipify.org
       - name: "📥 Checkout repository"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: "☕️ Setup JDK"
         uses: actions/setup-java@v4
         with:
@@ -117,7 +117,7 @@ jobs:
       - name: "Output Agent IP" # in the event RAO blocks this agent, this can be used to debug it
         run: curl -s https://api.ipify.org
       - name: "📥 Checkout repository"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: "☕️ Setup JDK"
         uses: actions/setup-java@v4
         with:
@@ -136,17 +136,18 @@ jobs:
           -PonlyCoreTests
           -PskipCodeStyle
   buildForge:
-    name: "Build Grails Forge"
+    name: "Build Grails Forge (Java ${{ matrix.java }}, indy=${{ matrix.indy }})"
     strategy:
       fail-fast: false
       matrix:
         java: [ 17, 21 ]
+        indy: [ false, true ]
     runs-on: ubuntu-24.04
     steps:
       - name: "Output Agent IP" # in the event RAO blocks this agent, this can be used to debug it
         run: curl -s https://api.ipify.org
       - name: "📥 Checkout repository"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: "☕️ Setup JDK"
         uses: actions/setup-java@v4
         with:
@@ -163,6 +164,7 @@ jobs:
           ./gradlew build
           --continue
           --stacktrace
+          -PgrailsIndy=${{ matrix.indy }}
           -PskipCodeStyle
           -PskipTests
       - name: "🔨 Build project with tests"
@@ -173,6 +175,7 @@ jobs:
           --continue
           --rerun-tasks
           --stacktrace
+          -PgrailsIndy=${{ matrix.indy }}
           -PskipCodeStyle
       - name: "✅ Verify combined CLI"
         run: |
@@ -183,7 +186,7 @@ jobs:
           ./tmp1/cli/bin/grails --version
           ./tmp1/cli/bin/grails-forge-cli --version
       - name: "📤 Upload CLI Zip to Workflow Summary Page"
-        if: ${{ matrix.java == '17' }}
+        if: ${{ matrix.java == '17' && matrix.indy == false }}
         uses: actions/upload-artifact@v6
         with:
           name: 'apache-grails-SNAPSHOT-bin.zip'
@@ -191,18 +194,19 @@ jobs:
           path: grails-forge/tmp1/cli/**/*
           if-no-files-found: 'error'
   functional:
-    name: "Functional Tests"
+    name: "Functional Tests (Java ${{ matrix.java }}, indy=${{ matrix.indy }})"
     if: ${{ !contains(github.event.head_commit.message, '[skip tests]') }}
     strategy:
       fail-fast: false
       matrix:
         java: [ 17, 21, 25 ]
+        indy: [ false, true ]
     runs-on: ubuntu-24.04
     steps:
       - name: "Output Agent IP" # in the event RAO blocks this agent, this can be used to debug it
         run: curl -s https://api.ipify.org
       - name: "📥 Checkout repository"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: "☕️ Setup JDK"
         uses: actions/setup-java@v4
         with:
@@ -219,24 +223,26 @@ jobs:
           --rerun-tasks
           --stacktrace
           -PgebAtCheckWaiting
+          -PgrailsIndy=${{ matrix.indy }}
           -PonlyFunctionalTests
           -PskipCodeStyle
           -PskipHibernate5Tests
           -PskipMongodbTests
   mongodbFunctional:
     if: ${{ !contains(github.event.head_commit.message, '[skip tests]') }}
-    name: "Mongodb Functional Tests"
+    name: "Mongodb Functional Tests (Java ${{ matrix.java }}, MongoDB ${{ matrix.mongodb-version }}, indy=${{ matrix.indy }})"
     runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
       matrix:
         java: [ 17, 25 ]
         mongodb-version: [ '7.0', '8.0' ] # test with supported versions https://www.mongodb.com/legal/support-policy/lifecycles
+        indy: [ false, true ]
     steps:
       - name: "Output Agent IP" # in the event RAO blocks this agent, this can be used to debug it
         run: curl -s https://api.ipify.org
       - name: "📥 Checkout the repository"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: "☕️ Setup JDK"
         uses: actions/setup-java@v4
         with:
@@ -254,22 +260,24 @@ jobs:
           --continue
           --rerun-tasks
           --stacktrace
+          -PgrailsIndy=${{ matrix.indy }}
           -PonlyMongodbTests
           -PmongodbContainerVersion=${{ matrix.mongodb-version }}
           -PskipCodeStyle
   hibernate5Functional:
     if: ${{ !contains(github.event.head_commit.message, '[skip tests]') }}
-    name: "Hibernate5 Functional Tests"
+    name: "Hibernate5 Functional Tests (Java ${{ matrix.java }}, indy=${{ matrix.indy }})"
     runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
       matrix:
         java: [ 17, 25 ]
+        indy: [ false, true ]
     steps:
       - name: "Output Agent IP" # in the event RAO blocks this agent, this can be used to debug it
         run: curl -s https://api.ipify.org
       - name: "📥 Checkout the repository"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: "☕️ Setup JDK"
         uses: actions/setup-java@v4
         with:
@@ -287,6 +295,7 @@ jobs:
           --continue
           --rerun-tasks
           --stacktrace
+          -PgrailsIndy=${{ matrix.indy }}
           -PonlyHibernate5Tests
           -PskipCodeStyle
   publishGradle:
@@ -297,7 +306,7 @@ jobs:
       - name: "Output Agent IP" # in the event RAO blocks this agent, this can be used to debug it
         run: curl -s https://api.ipify.org
       - name: "📥 Checkout repository"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: "☕️ Setup JDK"
         uses: actions/setup-java@v4
         with:
@@ -345,7 +354,7 @@ jobs:
       - name: "Output Agent IP" # in the event RAO blocks this agent, this can be used to debug it
         run: curl -s https://api.ipify.org
       - name: "📥 Checkout repository"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: "☕️ Setup JDK"
         uses: actions/setup-java@v4
         with:
@@ -402,7 +411,7 @@ jobs:
       - name: "Output Agent IP" # in the event RAO blocks this agent, this can be used to debug it
         run: curl -s https://api.ipify.org
       - name: "📥 Checkout repository"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: "☕️ Setup JDK"
         uses: actions/setup-java@v4
         with:
@@ -453,7 +462,7 @@ jobs:
       - name: "Output Agent IP" # in the event RAO blocks this agent, this can be used to debug it
         run: curl -s https://api.ipify.org
       - name: "📥 Checkout the repository"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-tags: true
       - name: "🔀 Store current branch name"
