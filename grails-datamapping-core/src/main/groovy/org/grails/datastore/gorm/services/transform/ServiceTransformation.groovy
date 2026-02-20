@@ -189,13 +189,17 @@ class ServiceTransformation extends AbstractTraitApplyingGormASTTransformation i
                 if (hasAnnotation(propertyType, Service) && propertyType != classNode && Modifier.isPublic(pn.modifiers) && pn.getterBlock == null && pn.setterBlock == null) {
                     FieldNode field = pn.field
                     propertiesFields.add(field)
-                    // NOTE: We intentionally do NOT set a getter block on the abstract class's
+                    // NOTE:
+                    // We intentionally do NOT set a getter block on the abstract class's
                     // PropertyNode here. The previous approach of setting a lazy getter that
                     // referenced varX('datastore') caused two problems under @CompileStatic:
+                    //
                     // 1. The 'datastore' field only exists on the generated impl class
                     // 2. StaticTypeCheckingVisitor.visitProperty() throws "Unexpected return
                     //    statement" when encountering ReturnStatement in a property getter block
-                    // Instead, service properties are eagerly populated in the generated setDatastore() method on the impl class (below).
+                    //
+                    // Instead, service properties are eagerly populated in the generated
+                    // setDatastore() method on the impl class (below).
                 }
             }
 
