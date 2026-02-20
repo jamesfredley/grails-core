@@ -19,29 +19,45 @@
 package org.grails.compiler.injection
 
 import spock.lang.Specification
+import spock.lang.Unroll
+import spock.util.environment.RestoreSystemProperties
 
+@RestoreSystemProperties
 class ApplicationClassInjectorSpec extends Specification {
 
-    def "EXCLUDED_AUTO_CONFIGURE_CLASSES contains expected entries"() {
+    @Unroll
+    def "EXCLUDED_AUTO_CONFIGURE_CLASSES contains expected entry #className"(String className) {
         expect:
-        ApplicationClassInjector.EXCLUDED_AUTO_CONFIGURE_CLASSES.contains(
-                'org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration')
-        ApplicationClassInjector.EXCLUDED_AUTO_CONFIGURE_CLASSES.contains(
-                'org.springframework.boot.autoconfigure.reactor.ReactorAutoConfiguration')
-        ApplicationClassInjector.EXCLUDED_AUTO_CONFIGURE_CLASSES.contains(
-                'org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration')
+        ApplicationClassInjector.EXCLUDED_AUTO_CONFIGURE_CLASSES.contains(className)
+
+        where:
+        className << [
+            'org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration',
+            'org.springframework.boot.autoconfigure.reactor.ReactorAutoConfiguration',
+            'org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration'
+        ]
     }
 
-    def "CONDITIONAL_EXCLUSIONS contains LiquibaseAutoConfiguration entry"() {
+    @Unroll
+    def "CONDITIONAL_EXCLUSIONS contains expected entry #expected.excludeClass"(Map<String, String> expected) {
         when:
         def exclusion = ApplicationClassInjector.CONDITIONAL_EXCLUSIONS.find {
-            it.excludeClass == 'org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration'
+            it.excludeClass == expected.excludeClass
         }
 
         then:
         exclusion != null
-        exclusion.pluginClass == 'org.grails.plugins.databasemigration.DatabaseMigrationGrailsPlugin'
-        exclusion.systemProperty == 'grails.dbmigration.excludeLiquibaseAutoConfiguration'
+        exclusion.pluginClass == expected.pluginClass
+        exclusion.systemProperty == expected.systemProperty
+
+        where:
+        expected << [
+            [
+                    excludeClass: 'org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration',
+                    pluginClass: 'org.grails.plugins.databasemigration.DatabaseMigrationGrailsPlugin',
+                    systemProperty: 'grails.dbmigration.excludeLiquibaseAutoConfiguration'
+            ]
+        ]
     }
 
     def "system property defaults to true (exclusion enabled)"() {
@@ -49,35 +65,21 @@ class ApplicationClassInjectorSpec extends Specification {
         def prop = 'grails.dbmigration.excludeLiquibaseAutoConfiguration'
 
         when:
-        def previousValue = System.getProperty(prop)
         System.clearProperty(prop)
 
         then:
         Boolean.parseBoolean(System.getProperty(prop, 'true'))
-
-        cleanup:
-        if (previousValue != null) {
-            System.setProperty(prop, previousValue)
-        }
     }
 
     def "system property set to false disables exclusion"() {
         given:
         def prop = 'grails.dbmigration.excludeLiquibaseAutoConfiguration'
-        def previousValue = System.getProperty(prop)
 
         when:
         System.setProperty(prop, 'false')
 
         then:
         !Boolean.parseBoolean(System.getProperty(prop, 'true'))
-
-        cleanup:
-        if (previousValue != null) {
-            System.setProperty(prop, previousValue)
-        } else {
-            System.clearProperty(prop)
-        }
     }
 
     def "shouldInject returns false for null URL"() {
