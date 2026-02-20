@@ -69,12 +69,19 @@ class GrailsMicronautGrailsPlugin extends Plugin {
                 new GrailsPlugin[0]
         int priority = AbstractPropertySourceLoader.DEFAULT_POSITION
         [plugins, pluginsFromContext].each { pluginsToProcess ->
-            Arrays.stream(pluginsToProcess)
-                    .filter { plugin -> plugin.propertySource != null }
-                    .forEach { plugin ->
-                        log.debug('Loading configurations from {} plugin to the parent Micronaut context', plugin.name)
-                        // If invoking the source as `.source`, the NavigableMapPropertySource will return null, while invoking the getter, it will return the correct value
-                        micronautEnv.addPropertySource(PropertySource.of("grails.plugins.$plugin.name", (Map) plugin.propertySource.getSource(), --priority))
+            pluginsToProcess
+                    .findAll { it.propertySource != null }
+                    .each {
+                        log.debug('Loading configurations from {} plugin to the parent Micronaut context', it.name)
+                        // If invoking the source as `.source`, the NavigableMapPropertySource will return null,
+                        // while invoking the getter, it will return the correct value
+                        micronautEnv.addPropertySource(
+                                PropertySource.of(
+                                        "grails.plugins.$it.name",
+                                        (Map) it.propertySource.getSource(),
+                                        --priority
+                                )
+                        )
                     }
         }
         micronautEnv.refresh()
