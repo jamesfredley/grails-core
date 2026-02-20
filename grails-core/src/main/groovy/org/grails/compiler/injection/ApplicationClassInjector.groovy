@@ -144,15 +144,21 @@ class ApplicationClassInjector implements GrailsArtefactClassInjector {
                     GrailsASTUtils.addExpressionToAnnotationMember(it, 'proxyBeanMethods', constX(false))
                 }
                 addAnnotation('org.springframework.web.servlet.config.annotation.EnableWebMvc', classNode, 'jakarta.servlet.ServletContext')
-                addAnnotation('org.springframework.boot.autoconfigure.EnableAutoConfiguration', classNode)?.with { AnnotationNode enableAutoConfigAnnotation ->
-                    for (excludeClassName in EXCLUDED_AUTO_CONFIGURE_CLASSES) {
-                        GrailsASTUtils.addExpressionToAnnotationMember(enableAutoConfigAnnotation, 'excludeName', constX(excludeClassName))
+                addAnnotation('org.springframework.boot.autoconfigure.EnableAutoConfiguration', classNode)?.with { annotation ->
+                    EXCLUDED_AUTO_CONFIGURE_CLASSES.each {
+                        GrailsASTUtils.addExpressionToAnnotationMember(
+                                annotation,
+                                'excludeName',
+                                constX(it)
+                        )
                     }
-                    def classLoader = getClass().classLoader
-                    for (Map<String, String> exclusion in CONDITIONAL_EXCLUSIONS) {
-                        if (ClassUtils.isPresent(exclusion.pluginClass, classLoader)
-                                && Boolean.parseBoolean(System.getProperty(exclusion.systemProperty, 'true'))) {
-                            GrailsASTUtils.addExpressionToAnnotationMember(enableAutoConfigAnnotation, 'excludeName', constX(exclusion.excludeClass))
+                    CONDITIONAL_EXCLUSIONS.each {
+                        if (shouldExcludeConditionalAutoConfiguration(it)) {
+                            GrailsASTUtils.addExpressionToAnnotationMember(
+                                    annotation,
+                                    'excludeName',
+                                    constX(it.excludeClass)
+                            )
                         }
                     }
                 }
@@ -165,6 +171,12 @@ class ApplicationClassInjector implements GrailsArtefactClassInjector {
         if (url == null) return false
         def res = new UrlResource(url)
         return GrailsResourceUtils.isGrailsResource(res) && res.filename == 'Application.groovy'
+    }
+
+    private static boolean shouldExcludeConditionalAutoConfiguration(Map<String, String> target) {
+        def classLoader = ApplicationClassInjector.classLoader
+        Boolean.parseBoolean(System.getProperty(target.systemProperty, 'true'))
+                && ClassUtils.isPresent(target.pluginClass, classLoader)
     }
 
     private AnnotationNode addAnnotation(String annotationClassName, ClassNode classNode, String conditionalClass = null) {
