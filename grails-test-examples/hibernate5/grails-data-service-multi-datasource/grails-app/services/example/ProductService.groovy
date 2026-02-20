@@ -19,17 +19,10 @@
 
 package example
 
+import grails.gorm.services.Query
 import grails.gorm.services.Service
 import grails.gorm.transactions.Transactional
 
-/**
- * GORM Data Service for the Product domain, routed to the 'secondary'
- * datasource via @Transactional(connection).
- *
- * All auto-implemented methods (save, get, delete, findByName, count)
- * should route through the connection-aware GormEnhancer APIs rather
- * than falling through to the default datasource.
- */
 @Service(Product)
 @Transactional(connection = 'secondary')
 abstract class ProductService {
@@ -45,4 +38,13 @@ abstract class ProductService {
     abstract Product findByName(String name)
 
     abstract List<Product> findAllByName(String name)
+
+    @Query("from ${Product p} where $p.name = $name")
+    abstract Product findOneByQuery(String name)
+
+    @Query("from ${Product p} where $p.amount >= $minAmount")
+    abstract List<Product> findAllByQuery(Integer minAmount)
+
+    @Query("update ${Product p} set $p.amount = $newAmount where $p.name = $name")
+    abstract Number updateAmountByName(String name, Integer newAmount)
 }

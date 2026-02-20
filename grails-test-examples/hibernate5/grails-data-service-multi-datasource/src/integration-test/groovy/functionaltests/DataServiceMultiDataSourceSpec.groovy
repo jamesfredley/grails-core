@@ -27,19 +27,6 @@ import grails.testing.mixin.integration.Integration
 import org.grails.orm.hibernate.HibernateDatastore
 import spock.lang.Specification
 
-/**
- * Integration test verifying that GORM Data Service auto-implemented
- * CRUD methods (save, get, delete, findByName, count) route correctly
- * to a non-default datasource when @Transactional(connection) is
- * specified on the service.
- *
- * Product is mapped exclusively to the 'secondary' datasource.
- * Without the connection-routing fix, auto-implemented save/get/delete
- * would use the default datasource where no Product table exists.
- *
- * The service is obtained from the secondary child datastore
- * (not auto-wired by Spring) to ensure proper session binding.
- */
 @Integration
 class DataServiceMultiDataSourceSpec extends Specification {
 
@@ -130,5 +117,51 @@ class DataServiceMultiDataSourceSpec extends Specification {
         then:
         found.size() == 2
         found.every { it.name == 'Duplicate' }
+    }
+
+    void "@Query find-one routes to secondary datasource"() {
+        given:
+        productService.save(new Product(name: 'QueryOne', amount: 50))
+
+        when:
+        def found = productService.findOneByQuery('QueryOne')
+
+        then:
+        found != null
+        found.name == 'QueryOne'
+        found.amount == 50
+    }
+
+    void "@Query find-one returns null for non-existent"() {
+        expect:
+        productService.findOneByQuery('NonExistent') == null
+    }
+
+    void "@Query find-all routes to secondary datasource"() {
+        given:
+        productService.save(new Product(name: 'Expensive1', amount: 500))
+        productService.save(new Product(name: 'Expensive2', amount: 600))
+        productService.save(new Product(name: 'Cheap1', amount: 10))
+
+        when:
+        def found = productService.findAllByQuery(400)
+
+        then:
+        found.size() == 2
+        found*.name.containsAll(['Expensive1', 'Expensive2'])
+    }
+
+    void "@Query update routes to secondary datasource"() {
+        given:
+        productService.save(new Product(name: 'UpdateTarget', amount: 100))
+
+        when:
+        def updated = productService.updateAmountByName('UpdateTarget', 999)
+
+        then:
+        updated == 1
+
+        and:
+        productService.findByName('UpdateTarget').amount == 999
     }
 }
