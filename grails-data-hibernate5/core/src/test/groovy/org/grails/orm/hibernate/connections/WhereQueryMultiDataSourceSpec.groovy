@@ -59,13 +59,14 @@ class WhereQueryMultiDataSourceSpec extends Specification {
                 .getService(ItemQueryService)
     }
 
-    void setup() {
-        def api = GormEnhancer.findStaticApi(Item, 'secondary')
-        api.withNewTransaction {
-            api.executeUpdate('delete from Item')
+    void cleanup() {
+        def secondaryApi = GormEnhancer.findStaticApi(Item, 'secondary')
+        secondaryApi.withNewTransaction {
+            secondaryApi.executeUpdate('delete from Item')
         }
-        GormEnhancer.findStaticApi(Item).withNewTransaction {
-            GormEnhancer.findStaticApi(Item).executeUpdate('delete from Item')
+        def defaultApi = GormEnhancer.findStaticApi(Item)
+        defaultApi.withNewTransaction {
+            defaultApi.executeUpdate('delete from Item')
         }
     }
 
