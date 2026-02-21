@@ -19,11 +19,10 @@
 package org.grails.web.converters.marshaller.json;
 
 import java.text.Format;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.Locale;
-import java.util.TimeZone;
-
-import org.apache.commons.lang3.time.FastDateFormat;
 
 import grails.converters.JSON;
 import org.grails.web.converters.exceptions.ConverterException;
@@ -39,21 +38,25 @@ import org.grails.web.json.JSONException;
  */
 public class DateMarshaller implements ObjectMarshaller<JSON> {
 
-    private final Format formatter;
+    private static final DateTimeFormatter DEFAULT_FORMATTER =
+            DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US)
+                    .withZone(ZoneOffset.UTC);
+
+    private final Format legacyFormatter;
 
     /**
      * Constructor with a custom formatter.
      * @param formatter the formatter
      */
     public DateMarshaller(Format formatter) {
-        this.formatter = formatter;
+        this.legacyFormatter = formatter;
     }
 
     /**
      * Default constructor.
      */
     public DateMarshaller() {
-        this(FastDateFormat.getInstance("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", TimeZone.getTimeZone("GMT"), Locale.US));
+        this.legacyFormatter = null;
     }
 
     public boolean supports(Object object) {
@@ -62,7 +65,11 @@ public class DateMarshaller implements ObjectMarshaller<JSON> {
 
     public void marshalObject(Object object, JSON converter) throws ConverterException {
         try {
-            converter.getWriter().value(formatter.format(object));
+            Date date = (Date) object;
+            String formatted = legacyFormatter != null
+                    ? legacyFormatter.format(date)
+                    : DEFAULT_FORMATTER.format(date.toInstant());
+            converter.getWriter().value(formatted);
         }
         catch (JSONException e) {
             throw new ConverterException(e);
