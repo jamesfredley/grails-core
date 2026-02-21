@@ -330,6 +330,19 @@ abstract class AbstractDatastoreInitializer implements ResourceLoaderAware {
                 final Class<Service> clazz = serviceDefinition.getType()
                 final Class<?> serviceClass = loadServiceClass(clazz)
                 final grails.gorm.services.Service ann = clazz.getAnnotation(grails.gorm.services.Service)
+
+                // Skip services whose domain class is not mapped in this initializer.
+                // When persistentClasses is explicitly set, only register services for
+                // domains that are actually configured - prevents classpath pollution from
+                // unrelated @Service implementations (e.g., TCK test services) causing
+                // startup failures due to missing datasource connections.
+                if (ann != null && !persistentClasses.isEmpty()) {
+                    Class domainClass = ann.value()
+                    if (domainClass != null && domainClass != Object && !persistentClasses.contains(domainClass)) {
+                        continue
+                    }
+                }
+
                 String serviceName = ann?.name()
                 if (!serviceName) {
                     serviceName = Introspector.decapitalize(serviceClass.simpleName)
