@@ -31,12 +31,17 @@ import org.codehaus.groovy.ast.FieldNode
 import org.codehaus.groovy.ast.MethodNode
 import org.codehaus.groovy.ast.Parameter
 import org.codehaus.groovy.ast.PropertyNode
+import org.codehaus.groovy.ast.expr.ArgumentListExpression
 import org.codehaus.groovy.ast.expr.ClassExpression
+import org.codehaus.groovy.ast.expr.ClosureExpression
 import org.codehaus.groovy.ast.expr.ConstantExpression
 import org.codehaus.groovy.ast.expr.Expression
 import org.codehaus.groovy.ast.expr.ListExpression
+import org.codehaus.groovy.ast.expr.MethodCallExpression
 import org.codehaus.groovy.ast.expr.VariableExpression
 import org.codehaus.groovy.ast.stmt.BlockStatement
+import org.codehaus.groovy.ast.stmt.ExpressionStatement
+import org.codehaus.groovy.ast.stmt.Statement
 import org.codehaus.groovy.ast.tools.GenericsUtils
 import org.codehaus.groovy.control.CompilePhase
 import org.codehaus.groovy.control.SourceUnit
@@ -51,6 +56,7 @@ import groovyjarjarasm.asm.Opcodes
 
 import grails.gorm.services.Service
 import grails.gorm.transactions.NotTransactional
+import grails.gorm.transactions.Transactional
 import org.apache.grails.common.compiler.GroovyTransformOrder
 import org.grails.datastore.gorm.services.Implemented
 import org.grails.datastore.gorm.services.ServiceEnhancer
@@ -86,6 +92,7 @@ import org.grails.datastore.gorm.transactions.transform.TransactionalTransform
 import org.grails.datastore.gorm.transform.AbstractTraitApplyingGormASTTransformation
 import org.grails.datastore.gorm.validation.jakarta.services.implementers.MethodValidationImplementer
 import org.grails.datastore.mapping.core.Datastore
+import org.grails.datastore.mapping.core.connections.ConnectionSource
 import org.grails.datastore.mapping.core.order.OrderedComparator
 
 import static org.apache.groovy.ast.tools.AnnotatedNodeUtils.markAsGenerated
@@ -262,6 +269,19 @@ class ServiceTransformation extends AbstractTraitApplyingGormASTTransformation i
             ClassNode targetDomainClass = ce != null ? ce.type : ClassHelper.OBJECT_TYPE
             // weave with generic argument
             weaveTraitWithGenerics(impl, getTraitClass(), targetDomainClass)
+
+            // Auto-inherit datasource from domain class's mapping if the service
+            // does not already have an explicit @Transactional(connection=...)
+            if (targetDomainClass != ClassHelper.OBJECT_TYPE) {
+                String domainConnection = resolveDomainDatasource(targetDomainClass)
+                if (domainConnection != null
+                        && !ConnectionSource.DEFAULT.equals(domainConnection)
+                        && !ConnectionSource.ALL.equals(domainConnection)) {
+                    if (!hasExplicitConnectionAnnotation(classNode)) {
+                        applyDomainConnectionToService(classNode, impl, domainConnection)
+                    }
+                }
+            }
 
             List<MethodNode> abstractMethods = findAllUnimplementedAbstractMethods(classNode)
             abstractMethods.sort(true) { it.name } // ensure a consistent order of processing methods
@@ -449,6 +469,87 @@ class ServiceTransformation extends AbstractTraitApplyingGormASTTransformation i
             } catch (Throwable e) {
                 warning(sourceUnit, classNode, "Error generating service loader descriptor for class [${className}]: $e.message")
             }
+        }
+    }
+
+    private static String resolveDomainDatasource(ClassNode domainClass) {
+        FieldNode mappingField = domainClass.getDeclaredField('mapping')
+        if (mappingField == null) {
+            PropertyNode mappingProp = domainClass.getProperty('mapping')
+            if (mappingProp != null) {
+                mappingField = mappingProp.getField()
+            }
+        }
+        if (mappingField != null) {
+            return extractDatasourceFromExpression(mappingField.getInitialValueExpression())
+        }
+        return null
+    }
+
+    private static String extractDatasourceFromExpression(Expression expr) {
+        if (!(expr instanceof ClosureExpression)) {
+            return null
+        }
+        Statement code = ((ClosureExpression) expr).getCode()
+        if (!(code instanceof BlockStatement)) {
+            return null
+        }
+        for (Statement stmt : ((BlockStatement) code).getStatements()) {
+            if (!(stmt instanceof ExpressionStatement)) {
+                continue
+            }
+            Expression stmtExpr = ((ExpressionStatement) stmt).getExpression()
+            if (!(stmtExpr instanceof MethodCallExpression)) {
+                continue
+            }
+            MethodCallExpression call = (MethodCallExpression) stmtExpr
+            String methodName = call.getMethodAsString()
+            if ('datasource' == methodName || 'connection' == methodName || 'connections' == methodName) {
+                Expression args = call.getArguments()
+                if (args instanceof ArgumentListExpression) {
+                    List<Expression> argExprs = ((ArgumentListExpression) args).getExpressions()
+                    if (!argExprs.isEmpty() && argExprs[0] instanceof ConstantExpression) {
+                        return ((ConstantExpression) argExprs[0]).getValue()?.toString()
+                    }
+                }
+            }
+        }
+        return null
+    }
+
+    private static boolean hasExplicitConnectionAnnotation(ClassNode classNode) {
+        AnnotationNode ann = findAnnotation(classNode, Transactional)
+        if (ann != null) {
+            Expression connection = ann.getMember('connection')
+            if (connection instanceof ConstantExpression) {
+                String value = ((ConstantExpression) connection).getValue()?.toString()
+                return value != null && !value.isEmpty()
+            }
+        }
+        return false
+    }
+
+    private static void applyDomainConnectionToService(ClassNode classNode, ClassNode implClass, String connectionName) {
+        ConstantExpression connectionExpr = new ConstantExpression(connectionName)
+
+        AnnotationNode classAnn = findAnnotation(classNode, Transactional)
+        if (classAnn != null) {
+            classAnn.setMember('connection', connectionExpr)
+        }
+        else {
+            AnnotationNode newAnn = new AnnotationNode(ClassHelper.make(Transactional))
+            newAnn.setMember('connection', connectionExpr)
+            classNode.addAnnotation(newAnn)
+        }
+
+        AnnotationNode implAnn = findAnnotation(implClass, Transactional)
+        if (implAnn != null) {
+            implAnn.setMember('connection', connectionExpr)
+        }
+        else {
+            AnnotationNode newImplAnn = new AnnotationNode(ClassHelper.make(Transactional))
+            newImplAnn.setMember('connection', connectionExpr)
+            implClass.addAnnotation(newImplAnn)
         }
     }
 

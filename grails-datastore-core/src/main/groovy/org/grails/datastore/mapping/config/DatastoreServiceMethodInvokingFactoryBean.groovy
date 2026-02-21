@@ -19,6 +19,8 @@
 
 package org.grails.datastore.mapping.config
 
+import java.lang.annotation.Annotation
+
 import groovy.transform.CompileStatic
 import groovy.transform.Internal
 
@@ -29,6 +31,10 @@ import org.springframework.beans.factory.config.MethodInvokingFactoryBean
 import org.springframework.lang.Nullable
 
 import org.grails.datastore.mapping.core.Datastore
+import org.grails.datastore.mapping.core.connections.ConnectionSource
+import org.grails.datastore.mapping.core.connections.ConnectionSourcesSupport
+import org.grails.datastore.mapping.core.connections.MultipleConnectionSourceCapableDatastore
+import org.grails.datastore.mapping.model.PersistentEntity
 import org.grails.datastore.mapping.services.Service
 
 /**
@@ -56,12 +62,51 @@ class DatastoreServiceMethodInvokingFactoryBean extends MethodInvokingFactoryBea
     protected Object invokeWithTargetException() throws Exception {
         Object object = super.invokeWithTargetException()
         if (object) {
-            ((Service) object).setDatastore((Datastore) targetObject)
+            Datastore effectiveDatastore = resolveEffectiveDatastore((Datastore) targetObject)
+            ((Service) object).setDatastore(effectiveDatastore)
             if (beanFactory instanceof AutowireCapableBeanFactory) {
                 ((AutowireCapableBeanFactory) beanFactory).autowireBeanProperties(object, AutowireCapableBeanFactory.AUTOWIRE_BY_TYPE, false)
             }
         }
         object
+    }
+
+    private Datastore resolveEffectiveDatastore(Datastore defaultDatastore) {
+        if (!(defaultDatastore instanceof MultipleConnectionSourceCapableDatastore)) {
+            return defaultDatastore
+        }
+
+        Class<?> domainClass = getServiceDomainClass()
+        if (domainClass == null || domainClass == Object) {
+            return defaultDatastore
+        }
+
+        PersistentEntity entity = defaultDatastore.getMappingContext()?.getPersistentEntity(domainClass.getName())
+        if (entity == null) {
+            return defaultDatastore
+        }
+
+        String domainConnection = ConnectionSourcesSupport.getDefaultConnectionSourceName(entity)
+        if (domainConnection != null
+                && !ConnectionSource.DEFAULT.equals(domainConnection)
+                && !ConnectionSource.ALL.equals(domainConnection)) {
+            return ((MultipleConnectionSourceCapableDatastore) defaultDatastore).getDatastoreForConnection(domainConnection)
+        }
+
+        return defaultDatastore
+    }
+
+    private Class<?> getServiceDomainClass() {
+        try {
+            for (Annotation ann : serviceClass.getAnnotations()) {
+                if ('grails.gorm.services.Service' == ann.annotationType().getName()) {
+                    return (Class<?>) ann.annotationType().getMethod('value').invoke(ann)
+                }
+            }
+        }
+        catch (Exception ignored) {
+        }
+        return null
     }
 
     @Override

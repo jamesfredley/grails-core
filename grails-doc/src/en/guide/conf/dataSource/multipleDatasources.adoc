@@ -260,6 +260,50 @@ Note that the datasource specified in a service has no bearing on which datasour
 
 If you have a `Foo` domain class in `dataSource1` and a `Bar` domain class in `dataSource2`, if `WahooService` uses `dataSource1`, a service method that saves a new `Foo` and a new `Bar` will only be transactional for `Foo` since they share the same datasource. The transaction won't affect the `Bar` instance. If you want both to be transactional you'd need to use two services and XA datasources for two-phase commit, e.g. with the Atomikos plugin.
 
+===== GORM Data Service Datasource Inheritance
+
+When using GORM Data Services (the `@Service` annotation), the service automatically inherits the datasource from its domain class's `mapping` block. This means you do not need to explicitly specify `@Transactional(connection = '...')` if the domain class already declares its datasource.
+
+For example, given a domain class mapped to the `'lookup'` datasource:
+
+[source,groovy]
+----
+class ZipCode {
+
+   String code
+
+   static mapping = {
+      datasource 'lookup'
+   }
+}
+----
+
+A GORM Data Service targeting this domain class will automatically route all auto-implemented operations (save, get, delete, find, count) to the `'lookup'` datasource:
+
+[source,groovy]
+----
+@Service(ZipCode)
+abstract class ZipCodeService {
+
+   abstract ZipCode get(Serializable id)
+   abstract ZipCode save(ZipCode zipCode)
+   abstract ZipCode delete(Serializable id)
+   abstract List<ZipCode> findByCode(String code)
+}
+----
+
+If you need to override the inherited datasource, you can still use an explicit `@Transactional(connection = '...')` annotation on the service, which takes precedence:
+
+[source,groovy]
+----
+@Service(ZipCode)
+@Transactional(connection = 'auditing')
+abstract class ZipCodeAuditService {
+
+   abstract ZipCode save(ZipCode zipCode)
+}
+----
+
 ==== Transactions across multiple data sources
 
 Grails does not by default try to handle transactions that span multiple data sources.
