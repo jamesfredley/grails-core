@@ -421,10 +421,15 @@ abstract class ProductService {
 
     abstract List<Product> findAllByName(String name)
 
+    /**
+     * Constructor-style save - GORM creates the entity from parameters.
+     * Tests that SaveImplementer routes multi-arg saves through connection-aware API.
+     */
     abstract Product saveProduct(String name, Integer amount)
 
     @Query("from ${Product p} where $p.name = $name")
     abstract Product findOneByQuery(String name)
+
 
     @Query("from ${Product p} where $p.amount >= $minAmount")
     abstract List<Product> findAllByQuery(Integer minAmount)
@@ -433,6 +438,11 @@ abstract class ProductService {
     abstract Number updateAmountByName(String name, Integer newAmount)
 }
 
+/**
+ * Interface-only Data Service pattern.
+ * Verifies that connection routing works identically whether the service
+ * is declared as an interface or an abstract class.
+ */
 @Service(Product)
 @Transactional(connection = 'books')
 interface ProductDataService {

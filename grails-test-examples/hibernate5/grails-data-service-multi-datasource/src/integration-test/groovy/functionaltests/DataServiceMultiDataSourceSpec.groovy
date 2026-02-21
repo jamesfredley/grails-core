@@ -27,6 +27,19 @@ import grails.testing.mixin.integration.Integration
 import org.grails.orm.hibernate.HibernateDatastore
 import spock.lang.Specification
 
+/**
+ * Integration test verifying that GORM Data Service auto-implemented
+ * CRUD methods (save, get, delete, findByName, count) route correctly
+ * to a non-default datasource when @Transactional(connection) is
+ * specified on the service.
+ *
+ * Product is mapped exclusively to the 'secondary' datasource.
+ * Without the connection-routing fix, auto-implemented save/get/delete
+ * would use the default datasource where no Product table exists.
+ *
+ * The service is obtained from the secondary child datastore
+ * (not auto-wired by Spring) to ensure proper session binding.
+ */
 @Integration
 class DataServiceMultiDataSourceSpec extends Specification {
 
