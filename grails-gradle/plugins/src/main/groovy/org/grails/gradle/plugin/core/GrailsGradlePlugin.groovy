@@ -588,13 +588,12 @@ class GrailsGradlePlugin extends GroovyPlugin {
      * @since 7.0.8
      */
     protected void configureToolchainForForkTasks(Project project) {
-        project.afterEvaluate {
-            def javaExtension = project.extensions.findByType(JavaPluginExtension)
-            if (javaExtension?.toolchain?.languageVersion?.isPresent()) {
-                def toolchainService = project.extensions.getByType(JavaToolchainService)
-                def launcher = toolchainService.launcherFor(javaExtension.toolchain)
-
-                project.tasks.withType(JavaExec).configureEach { JavaExec task ->
+        project.plugins.withId('java') {
+            project.tasks.withType(JavaExec).configureEach { JavaExec task ->
+                def javaExtension = project.extensions.findByType(JavaPluginExtension)
+                if (javaExtension?.toolchain?.languageVersion?.isPresent()) {
+                    def toolchainService = project.extensions.getByType(JavaToolchainService)
+                    def launcher = toolchainService.launcherFor(javaExtension.toolchain)
                     task.javaLauncher.convention(launcher)
                 }
             }
