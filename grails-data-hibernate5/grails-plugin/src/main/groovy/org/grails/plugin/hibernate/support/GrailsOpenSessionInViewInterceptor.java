@@ -145,21 +145,29 @@ public class GrailsOpenSessionInViewInterceptor extends OpenSessionInViewInterce
 
     @Override
     public void afterCompletion(WebRequest request, Exception ex) throws DataAccessException {
-        for (int i = additionalSessionFactories.size() - 1; i >= 0; i--) {
-            AdditionalSessionFactoryConfig config = additionalSessionFactories.get(i);
-            SessionFactory sf = config.sessionFactory;
-            SessionHolder sessionHolder = (SessionHolder) TransactionSynchronizationManager.getResource(sf);
-            if (sessionHolder != null) {
-                Session session = sessionHolder.getSession();
-                TransactionSynchronizationManager.unbindResource(sf);
-                if (logger.isDebugEnabled()) {
-                    logger.debug("Closing additional Hibernate Session in OpenSessionInViewInterceptor");
+        try {
+            for (int i = additionalSessionFactories.size() - 1; i >= 0; i--) {
+                AdditionalSessionFactoryConfig config = additionalSessionFactories.get(i);
+                SessionFactory sf = config.sessionFactory;
+                SessionHolder sessionHolder = (SessionHolder) TransactionSynchronizationManager.getResource(sf);
+                if (sessionHolder != null) {
+                    Session session = sessionHolder.getSession();
+                    TransactionSynchronizationManager.unbindResource(sf);
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("Closing additional Hibernate Session in OpenSessionInViewInterceptor");
+                    }
+                    try {
+                        SessionFactoryUtils.closeSession(session);
+                    }
+                    catch (RuntimeException closeEx) {
+                        logger.error("Unexpected exception on closing additional Hibernate Session", closeEx);
+                    }
                 }
-                SessionFactoryUtils.closeSession(session);
             }
         }
-
-        super.afterCompletion(request, ex);
+        finally {
+            super.afterCompletion(request, ex);
+        }
     }
 
     public void setHibernateDatastore(AbstractHibernateDatastore hibernateDatastore) {
