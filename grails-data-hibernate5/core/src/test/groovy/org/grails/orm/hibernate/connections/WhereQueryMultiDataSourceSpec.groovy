@@ -28,7 +28,6 @@ import grails.gorm.annotation.Entity
 import grails.gorm.services.Service
 import grails.gorm.services.Where
 import grails.gorm.transactions.Transactional
-import org.grails.datastore.gorm.GormEnhancer
 import org.grails.datastore.gorm.GormEntity
 import org.grails.datastore.mapping.core.DatastoreUtils
 import org.grails.orm.hibernate.HibernateDatastore
@@ -60,13 +59,11 @@ class WhereQueryMultiDataSourceSpec extends Specification {
     }
 
     void cleanup() {
-        def secondaryApi = GormEnhancer.findStaticApi(Item, 'secondary')
-        secondaryApi.withNewTransaction {
-            secondaryApi.executeUpdate('delete from Item')
+        Item.secondary.withNewTransaction {
+            Item.secondary.deleteAll(Item.secondary.list())
         }
-        def defaultApi = GormEnhancer.findStaticApi(Item)
-        defaultApi.withNewTransaction {
-            defaultApi.executeUpdate('delete from Item')
+        Item.withNewTransaction {
+            Item.deleteAll(Item.list())
         }
     }
 
@@ -138,20 +135,14 @@ class WhereQueryMultiDataSourceSpec extends Specification {
     }
 
     private void saveToSecondary(String name, Double amount) {
-        def api = GormEnhancer.findStaticApi(Item, 'secondary')
-        api.withNewTransaction {
-            def instanceApi = GormEnhancer.findInstanceApi(Item, 'secondary')
-            def item = new Item(name: name, amount: amount)
-            instanceApi.save(item, [flush: true])
+        Item.secondary.withNewTransaction {
+            new Item(name: name, amount: amount).secondary.save(flush: true)
         }
     }
 
     private void saveToDefault(String name, Double amount) {
-        def api = GormEnhancer.findStaticApi(Item)
-        api.withNewTransaction {
-            def instanceApi = GormEnhancer.findInstanceApi(Item)
-            def item = new Item(name: name, amount: amount)
-            instanceApi.save(item, [flush: true])
+        Item.withNewTransaction {
+            new Item(name: name, amount: amount).save(flush: true)
         }
     }
 }
