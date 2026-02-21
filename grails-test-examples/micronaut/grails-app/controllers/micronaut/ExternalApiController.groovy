@@ -74,4 +74,40 @@ class ExternalApiController {
             render([source: 'micronaut-client', error: result.error] as JSON)
         }
     }
+
+    def search() {
+        String q = params.q as String
+        String page = params.page as String ?: '1'
+        String data = externalApiService.search(q, page)
+        render([source: 'micronaut-client', data: data] as JSON)
+    }
+
+    def secureShow() {
+        String authHeader = request.getHeader('Authorization')
+        String data = externalApiService.fetchSecure(authHeader)
+        render([source: 'micronaut-client', data: data] as JSON)
+    }
+
+    def patchAction() {
+        String id = params.id as String
+        String body = request.inputStream.text
+        String data = externalApiService.patchResource(id, body)
+        render([source: 'micronaut-client', data: data] as JSON)
+    }
+
+    def asyncShow() {
+        String data = externalApiService.fetchAsync()
+        render([source: 'micronaut-client', data: data] as JSON)
+    }
+
+    def pathShow() {
+        String id = params.id as String
+        String data = externalApiService.fetchPathItem(id)
+        render([source: 'micronaut-client', data: data] as JSON)
+    }
+
+    def filteredShow() {
+        String data = externalApiService.fetchFiltered()
+        render([source: 'micronaut-client', data: data] as JSON)
+    }
 }

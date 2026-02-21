@@ -22,6 +22,10 @@ import groovy.transform.CompileStatic
 
 import io.micronaut.http.HttpResponse
 import io.micronaut.http.client.exceptions.HttpClientResponseException
+import micronaut.client.MicronautAdvancedClient
+import micronaut.client.MicronautFilteredClient
+import micronaut.client.MicronautPathClient
+import micronaut.client.MicronautReactiveClient
 import micronaut.client.MicronautTestClient
 
 import org.springframework.beans.factory.annotation.Autowired
@@ -31,6 +35,18 @@ class ExternalApiService {
 
     @Autowired
     MicronautTestClient micronautTestClient
+
+    @Autowired
+    MicronautAdvancedClient advancedClient
+
+    @Autowired
+    MicronautReactiveClient reactiveClient
+
+    @Autowired
+    MicronautPathClient pathClient
+
+    @Autowired
+    MicronautFilteredClient filteredClient
 
     String fetchAll() {
         micronautTestClient.index()
@@ -60,5 +76,35 @@ class ExternalApiService {
         } catch (HttpClientResponseException ex) {
             return [success: false, status: ex.status.code, error: ex.message]
         }
+    }
+
+    String search(String query, String page) {
+        advancedClient.search(query, page)
+    }
+
+    String fetchSecure(String authHeader) {
+        advancedClient.secureEndpoint(authHeader)
+    }
+
+    String patchResource(String id, String json) {
+        advancedClient.patch(id, json)
+    }
+
+    Map orchestrateMultiple(String id1, String id2) {
+        String first = micronautTestClient.show(id1)
+        String second = micronautTestClient.show(id2)
+        [first: first, second: second] as Map
+    }
+
+    String fetchAsync() {
+        reactiveClient.getAsync().get()
+    }
+
+    String fetchPathItem(String id) {
+        pathClient.getItem(id)
+    }
+
+    String fetchFiltered() {
+        filteredClient.getFilteredData()
     }
 }

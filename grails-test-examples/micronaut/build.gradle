@@ -38,6 +38,7 @@ dependencies {
     implementation platform(project(':grails-bom'))
 
     implementation "io.micronaut:micronaut-http-client:$micronautHttpClientVersion"
+    implementation "io.micronaut:micronaut-retry:$micronautHttpClientVersion"
     implementation "io.micronaut.serde:micronaut-serde-jackson:$micronautSerdeJacksonVersion"
     implementation 'org.apache.grails:grails-dependencies-starter-web'
     implementation 'org.apache.grails:grails-micronaut'
