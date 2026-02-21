@@ -66,9 +66,9 @@ public class DateMarshaller implements ObjectMarshaller<JSON> {
     public void marshalObject(Object object, JSON converter) throws ConverterException {
         try {
             Date date = (Date) object;
-            String formatted = legacyFormatter != null
-                    ? legacyFormatter.format(date)
-                    : DEFAULT_FORMATTER.format(date.toInstant());
+            String formatted = legacyFormatter != null ?
+                    legacyFormatter.format(date) :
+                    DEFAULT_FORMATTER.format(date.toInstant());
             converter.getWriter().value(formatted);
         }
         catch (JSONException e) {
