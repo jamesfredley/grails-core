@@ -30,6 +30,13 @@ class UrlMappings {
 
         "/micronaut-test"(controller: 'micronautTest', action: 'index')
 
+        "/external-api"(controller: 'externalApi', action: 'index', method: 'GET')
+        "/external-api/$id"(controller: 'externalApi', action: 'show', method: 'GET')
+        "/external-api"(controller: 'externalApi', action: 'save', method: 'POST')
+        "/external-api/$id"(controller: 'externalApi', action: 'update', method: 'PUT')
+        "/external-api/$id"(controller: 'externalApi', action: 'delete', method: 'DELETE')
+        "/external-api/safe/$id"(controller: 'externalApi', action: 'showWithErrorHandling')
+
         "/"(view:"/index")
         "500"(view:'/error')
         "404"(view:'/notFound')

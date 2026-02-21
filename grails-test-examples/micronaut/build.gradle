@@ -42,6 +42,7 @@ dependencies {
     implementation 'org.apache.grails:grails-dependencies-starter-web'
     implementation 'org.apache.grails:grails-micronaut'
     implementation 'org.apache.grails:grails-scaffolding'
+    implementation project(':grails-test-examples-plugins-micronaut-singleton')
 
     annotationProcessor platform("io.micronaut.platform:micronaut-platform:$micronautPlatformVersion")
     annotationProcessor 'io.micronaut:micronaut-inject-java'

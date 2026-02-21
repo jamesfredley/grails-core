@@ -385,6 +385,7 @@ include(
         'grails-test-examples-issue-15228',
         'grails-test-examples-plugins-exploded',
         'grails-test-examples-plugins-issue-11767',
+        'grails-test-examples-plugins-micronaut-singleton',
         'grails-test-examples-cache',
         'grails-test-examples-scaffolding',
         'grails-test-examples-scaffolding-fields',
@@ -419,6 +420,7 @@ project(':grails-test-examples-issue-11767').projectDir = file('grails-test-exam
 project(':grails-test-examples-issue-15228').projectDir = file('grails-test-examples/issue-15228')
 project(':grails-test-examples-plugins-exploded').projectDir = file('grails-test-examples/plugins/exploded')
 project(':grails-test-examples-plugins-issue-11767').projectDir = file('grails-test-examples/plugins/issue-11767')
+project(':grails-test-examples-plugins-micronaut-singleton').projectDir = file('grails-test-examples/plugins/micronaut-singleton')
 project(':grails-test-examples-cache').projectDir = file('grails-test-examples/cache')
 project(':grails-test-examples-scaffolding').projectDir = file('grails-test-examples/scaffolding')
 project(':grails-test-examples-scaffolding-fields').projectDir = file('grails-test-examples/scaffolding-fields')

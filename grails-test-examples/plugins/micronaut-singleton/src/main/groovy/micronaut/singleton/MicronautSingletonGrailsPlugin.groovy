@@ -16,32 +16,13 @@
  *  specific language governing permissions and limitations
  *  under the License.
  */
-package micronaut.client
+package micronaut.singleton
 
-import io.micronaut.http.HttpResponse
-import io.micronaut.http.annotation.Body
-import io.micronaut.http.annotation.Delete
-import io.micronaut.http.annotation.Get
-import io.micronaut.http.annotation.PathVariable
-import io.micronaut.http.annotation.Post
-import io.micronaut.http.annotation.Put
-import io.micronaut.http.client.annotation.Client
+import grails.plugins.Plugin
 
-@Client(id = 'grails-self')
-interface MicronautTestClient {
+class MicronautSingletonGrailsPlugin extends Plugin {
 
-    @Get('/micronaut-test')
-    String index()
-
-    @Post('/micronaut-test')
-    String create(@Body String body)
-
-    @Put('/micronaut-test/{id}')
-    String update(@PathVariable String id, @Body String body)
-
-    @Delete('/micronaut-test/{id}')
-    HttpResponse<?> delete(@PathVariable String id)
-
-    @Get('/micronaut-test/{id}')
-    String show(@PathVariable String id)
+    def grailsVersion = '7.0.0.SNAPSHOT > *'
+    def title = 'Micronaut Singleton'
+    def description = 'Test plugin providing a Micronaut @Singleton bean to verify cross-context bridge.'
 }
