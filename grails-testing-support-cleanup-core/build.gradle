@@ -40,17 +40,11 @@ dependencies {
     implementation platform(project(':grails-bom'))
     implementation 'org.slf4j:slf4j-api'
     implementation 'org.springframework.boot:spring-boot-test'
-    api 'org.springframework:spring-context'
-    api 'org.spockframework:spock-core', {
-        // api: IGlobalExtension, IMethodInterceptor, IMethodInvocation
-    }
-    implementation 'org.springframework:spring-test', {
-        // impl: TestContext, TestExecutionListener for TestContextHolderListener
-    }
+    implementation 'org.springframework:spring-context'
+    implementation 'org.springframework:spring-test'
+    implementation 'org.spockframework:spock-core'
 
-    compileOnly 'org.apache.groovy:groovy', {
-        // comp: CompileStatic, CompileDynamic, TypeCheckingMode
-    }
+    compileOnly 'org.apache.groovy:groovy'
 
     testImplementation project(':grails-testing-support-core')
     testImplementation 'org.apache.groovy:groovy'

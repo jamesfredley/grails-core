@@ -38,20 +38,13 @@ ext {
 dependencies {
     implementation platform(project(':grails-bom'))
 
-    api project(':grails-testing-support-cleanup-core') {
-        // api: DatabaseCleanupInterceptor
-    }
-
+    api project(':grails-testing-support-cleanup-core')
+    implementation 'org.springframework:spring-context'
     implementation 'org.slf4j:slf4j-api'
-    implementation('org.apache.groovy:groovy-sql')
+    implementation 'org.apache.groovy:groovy-sql'
+    implementation 'org.spockframework:spock-core'
 
-    api 'org.spockframework:spock-core', {
-        // api: IGlobalExtension, IMethodInterceptor, IMethodInvocation
-    }
-
-    compileOnly 'org.apache.groovy:groovy', {
-        // comp: CompileStatic, CompileDynamic, TypeCheckingMode
-    }
+    compileOnly 'org.apache.groovy:groovy'
 
     testImplementation 'org.apache.groovy:groovy'
     testImplementation 'org.postgresql:postgresql'
