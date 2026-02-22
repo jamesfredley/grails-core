@@ -317,23 +317,21 @@ When GORM compiles a `@Service` abstract class, the `ServiceTransformation` AST 
 
 1. Copies the `@Transactional(connection = 'books')` annotation from the abstract class to the generated implementation class
 2. For each auto-implemented method, resolves the connection identifier via `findConnectionId()`
-3. Generates method bodies that use the appropriate connection - `GormEnhancer.findStaticApi(Book, 'books')` for CRUD operations and `DetachedCriteria.withConnection('books')` for finder queries
+3. Generates method bodies that use the appropriate connection, routing CRUD operations and `DetachedCriteria`-based finder queries to the specified datasource
 
 This means auto-implemented methods like `get()`, `save()`, `delete()`, `findBy*()`, `countBy*()`, `@Where`-annotated methods, `@Query`-annotated methods, and `DetachedCriteria`-based queries all respect the connection parameter without requiring manual implementations.
 
 
-===== Complex Queries with GormEnhancer
+===== Complex Queries Using Domain Static Methods
 
 
-Auto-implemented Data Service methods cover most query patterns, including dynamic finders with comparators (`Between`, `Like`, `InList`, `IsNull`, etc.), pagination via a `Map` parameter, and property projections. For queries that require HQL, criteria builders, or aggregate functions, use `GormEnhancer.findStaticApi()` to obtain a statically compiled API handle for the target datasource:
+Auto-implemented Data Service methods cover most query patterns, including dynamic finders with comparators (`Between`, `Like`, `InList`, `IsNull`, etc.), pagination via a `Map` parameter, and property projections. For queries that require HQL, criteria builders, or aggregate functions, call domain static methods directly. When a domain class declares a non-default datasource in its mapping block, GORM registers its static API under that datasource. Methods like `Book.executeQuery()`, `Book.createCriteria()`, and `Book.withCriteria()` automatically route to the correct datasource:
 
 [source,groovy]
 ----
 import groovy.transform.CompileStatic
 import grails.gorm.services.Service
 import grails.gorm.transactions.Transactional
-import org.grails.datastore.gorm.GormEnhancer
-import org.grails.datastore.gorm.GormStaticApi
 
 @CompileStatic
 @Service(Book)
@@ -343,12 +341,8 @@ abstract class BookService implements BookDataService {
     // Auto-implemented methods from interface are inherited
     // and route to 'books' datasource automatically.
 
-    private GormStaticApi<Book> getBooksApi() {
-        GormEnhancer.findStaticApi(Book, 'books')
-    }
-
     List getTopAuthors(int limit) {
-        booksApi.executeQuery('''
+        Book.executeQuery('''
             SELECT b.author, COUNT(b) as bookCount
             FROM Book b
             GROUP BY b.author
@@ -357,7 +351,7 @@ abstract class BookService implements BookDataService {
     }
 
     List<Book> searchWithCriteria(String titlePattern, String author) {
-        booksApi.createCriteria().list {
+        Book.createCriteria().list {
             like('title', "%${titlePattern}%")
             eq('author', author)
             order('title', 'asc')
@@ -366,50 +360,44 @@ abstract class BookService implements BookDataService {
 }
 ----
 
-The `GormStaticApi` returned by `findStaticApi()` provides these methods, all routed to the specified datasource:
+These domain static methods all route to the datasource declared in the domain's mapping block:
 
 [cols="1,2"]
 |===
 | Method | Description
 
-| `executeQuery(String hql, Map params)`
+| `Book.executeQuery(String hql, Map params)`
 | HQL/JPQL queries
 
-| `executeUpdate(String hql, Map params)`
+| `Book.executeUpdate(String hql, Map params)`
 | Bulk UPDATE/DELETE statements
 
-| `find(String hql, Map params)`
-| Single-result HQL query
-
-| `findAll()` / `findAll(Map params)`
-| List all records with optional pagination
-
-| `withCriteria(Closure criteria)`
+| `Book.withCriteria(Closure criteria)`
 | Criteria query
 
-| `createCriteria()`
+| `Book.createCriteria()`
 | Criteria builder for complex queries
 
-| `where(Closure query)`
+| `Book.where(Closure query)`
 | Where query
 
-| `withTransaction(Closure action)`
+| `Book.withTransaction(Closure action)`
 | Manual transaction management
 
-| `count()`
+| `Book.withNewSession(Closure action)`
+| Obtain a new session for the domain's datasource
+
+| `Book.count()`
 | Total record count
 
-| `get(Serializable id)`
+| `Book.get(Serializable id)`
 | Find by primary key
 
-| `list(Map params)`
+| `Book.list(Map params)`
 | Paginated list
-
-| `save(Object instance)`
-| Persist an instance
 |===
 
-NOTE: `GormEnhancer.findStaticApi()` is the statically compiled equivalent of the namespace syntax (e.g., `Book.books.get(42)`). Unlike the namespace syntax, it works under `@CompileStatic` without requiring `@CompileDynamic` on individual methods.
+NOTE: Domain static methods work under `@CompileStatic` and route to the correct datasource automatically. The namespace syntax (e.g., `Book.books.get(42)`) is only needed when a domain is mapped to multiple datasources and you need to target a specific one.
 
 
 ===== Consuming Multi-Datasource Data Services
