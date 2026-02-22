@@ -40,24 +40,32 @@ import org.springframework.context.ApplicationContext
 @CompileStatic
 class DatabaseCleanupContext {
 
-    private final List<DatabaseCleaner> cleaners
-    private final Map<String, DatabaseCleaner> cleanersByType
     private ApplicationContext applicationContext
+    final Map<String, DatabaseCleaner> cleanersByType
 
     DatabaseCleanupContext(List<DatabaseCleaner> cleaners) {
-        this.cleaners = Collections.unmodifiableList(new ArrayList<>(cleaners))
-        Map<String, DatabaseCleaner> typeMap = [:]
-        for (DatabaseCleaner cleaner : cleaners) {
-            typeMap.put(cleaner.databaseType(), cleaner)
-        }
-        this.cleanersByType = Collections.unmodifiableMap(typeMap)
+        cleanersByType = createCleanersMap(cleaners)
     }
 
-    /**
-     * @return the list of discovered {@link DatabaseCleaner} implementations
-     */
-    List<DatabaseCleaner> getCleaners() {
-        cleaners
+    private static Map<String, DatabaseCleaner> createCleanersMap(List<DatabaseCleaner> cleaners) {
+        Map<String, DatabaseCleaner> typeMap = [:]
+        for (DatabaseCleaner cleaner : cleaners) {
+            def type = cleaner.databaseType()
+            if (!type || type.trim().isEmpty()) {
+                throw new IllegalStateException(
+                        "DatabaseCleaner implementation ${cleaner.class.name} returned a null or empty databaseType()" as String)
+            }
+
+            DatabaseCleaner existing = typeMap.get(type)
+            if (existing) {
+                throw new IllegalStateException(
+                        "Duplicate databaseType '${type}' declared by both ${existing.class.name} and ${cleaner.class.name}. Each DatabaseCleaner must declare a unique databaseType." as String)
+            }
+
+            typeMap.put(type, cleaner)
+            log.debug('Discovered DatabaseCleaner implementation: {} (type: {})', cleaner.class.name, type)
+        }
+        Collections.unmodifiableMap(typeMap)
     }
 
     /**
@@ -95,7 +103,7 @@ class DatabaseCleanupContext {
         if (!applicationContext) {
             throw new IllegalStateException('Cannot perform database cleanup: ApplicationContext is not available')
         }
-        if (cleaners.isEmpty()) {
+        if (!cleanersByType) {
             throw new IllegalStateException('Cannot perform database cleanup: no DatabaseCleaner implementations found')
         }
 
@@ -108,7 +116,7 @@ class DatabaseCleanupContext {
                 DatabaseCleaner cleaner = findCleanerFor(dataSource)
                 if (!cleaner) {
                     throw new IllegalStateException(
-                        "No DatabaseCleaner implementation found that supports datasource '${beanName}'. Ensure that a database-specific cleanup library (e.g., grails-testing-support-cleanup-h2) is on the classpath for each database type used in your tests. Available cleaners: ${cleaners.collect { it.databaseType() }}" as String)
+                            "No DatabaseCleaner implementation found that supports datasource '${beanName}'. Ensure that a database-specific cleanup library (e.g., grails-testing-support-cleanup-h2) is on the classpath for each database type used in your tests. Available cleaners: ${cleanersByType.values().collect { it.databaseType() }}" as String)
                 }
 
                 log.debug('Cleaning up datasource: {} (using {} cleaner)', beanName, cleaner.databaseType())
@@ -119,14 +127,13 @@ class DatabaseCleanupContext {
                 }
                 allStats.add(stats)
             }
-        }
-        else {
+        } else {
             // Clean specific datasources per the mapping entries
             for (DatasourceCleanupMapping.Entry entry : mapping.entries) {
                 DataSource dataSource = allDataSources.get(entry.datasourceName)
                 if (!dataSource) {
                     throw new IllegalStateException(
-                        "Datasource '${entry.datasourceName}' specified in @DatabaseCleanup was not found in the application context. Available datasources: ${allDataSources.keySet()}" as String)
+                            "Datasource '${entry.datasourceName}' specified in @DatabaseCleanup was not found in the application context. Available datasources: ${allDataSources.keySet()}" as String)
                 }
 
                 DatabaseCleaner cleaner
@@ -134,14 +141,13 @@ class DatabaseCleanupContext {
                     cleaner = cleanersByType.get(entry.databaseType)
                     if (!cleaner) {
                         throw new IllegalStateException(
-                            "No DatabaseCleaner found for database type '${entry.databaseType}' specified in @DatabaseCleanup for datasource '${entry.datasourceName}'. Available cleaner types: ${cleanersByType.keySet()}" as String)
+                                "No DatabaseCleaner found for database type '${entry.databaseType}' specified in @DatabaseCleanup for datasource '${entry.datasourceName}'. Available cleaner types: ${cleanersByType.keySet()}" as String)
                     }
-                }
-                else {
+                } else {
                     cleaner = findCleanerFor(dataSource)
                     if (!cleaner) {
                         throw new IllegalStateException(
-                            "No DatabaseCleaner implementation found that supports datasource '${entry.datasourceName}'. Ensure that a database-specific cleanup library (e.g., grails-testing-support-cleanup-h2) is on the classpath, or specify the database type explicitly: '${entry.datasourceName}:type'. Available cleaners: ${cleaners.collect { it.databaseType() }}" as String)
+                                "No DatabaseCleaner implementation found that supports datasource '${entry.datasourceName}'. Ensure that a database-specific cleanup library (e.g., grails-testing-support-cleanup-h2) is on the classpath, or specify the database type explicitly: '${entry.datasourceName}:type'. Available cleaners: ${cleanersByType.values().collect { it.databaseType() }}" as String)
                     }
                 }
 
@@ -165,7 +171,7 @@ class DatabaseCleanupContext {
      * @return the matching cleaner, or {@code null} if none supports it
      */
     private DatabaseCleaner findCleanerFor(DataSource dataSource) {
-        for (DatabaseCleaner cleaner : cleaners) {
+        for (DatabaseCleaner cleaner : cleanersByType.values()) {
             if (cleaner.supports(dataSource)) {
                 return cleaner
             }

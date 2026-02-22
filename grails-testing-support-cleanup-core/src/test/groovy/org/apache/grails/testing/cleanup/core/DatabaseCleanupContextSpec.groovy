@@ -36,20 +36,8 @@ class DatabaseCleanupContextSpec extends Specification {
         def context = new DatabaseCleanupContext(cleaners)
 
         then:
-        context.cleaners.size() == 1
-        context.cleaners[0].is(cleaner)
-    }
-
-    def "cleaners list is immutable"() {
-        given:
-        def cleaners = [createMockCleaner('h2')]
-        def context = new DatabaseCleanupContext(cleaners)
-
-        when:
-        context.cleaners.add(createMockCleaner('mysql'))
-
-        then:
-        thrown(UnsupportedOperationException)
+        context.cleanersByType.size() == 1
+        context.cleanersByType.get('h2').is(cleaner)
     }
 
     def "applicationContext is null by default"() {
@@ -384,8 +372,6 @@ class DatabaseCleanupContextSpec extends Specification {
         result.size() == 1
         result[0].datasourceName == 'dataSource'
     }
-
-    // --- Helper methods ---
 
     private DatabaseCleaner createMockCleaner(String type) {
         Mock(DatabaseCleaner) {

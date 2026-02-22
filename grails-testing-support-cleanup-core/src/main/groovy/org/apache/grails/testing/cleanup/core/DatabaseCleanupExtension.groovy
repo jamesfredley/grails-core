@@ -24,7 +24,7 @@ import java.lang.reflect.Method
 import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 
-import grails.testing.mixin.integration.Integration
+import org.springframework.boot.test.context.SpringBootTest
 
 import org.spockframework.runtime.extension.IGlobalExtension
 import org.spockframework.runtime.model.FeatureInfo
@@ -35,11 +35,7 @@ import org.spockframework.runtime.model.SpecInfo
  * and methods, and registers the {@link DatabaseCleanupInterceptor} to perform database
  * cleanup after annotated tests.
  *
- * <p>This extension requires the {@link Integration @Integration} annotation to be present
- * on the spec class. If a spec uses {@code @DatabaseCleanup} (at the class or method level)
- * without {@code @Integration}, an {@link IllegalStateException} is thrown, since
- * {@code @DatabaseCleanup} depends on the Spring application context provided by the
- * integration test infrastructure.</p>
+ * <p>This extension requires a Spring application context provided by the SpringBootTest infrastructure</p>
  *
  * <p>The extension uses the {@link ServiceLoader} mechanism to discover all available
  * {@link DatabaseCleaner} implementations at startup. It validates that each implementation
@@ -86,25 +82,6 @@ class DatabaseCleanupExtension implements IGlobalExtension {
             return
         }
 
-        // Validate uniqueness of databaseType across all cleaners
-        Map<String, DatabaseCleaner> typeMap = [:]
-        for (DatabaseCleaner cleaner : cleaners) {
-            String type = cleaner.databaseType()
-            if (!type || type.trim().isEmpty()) {
-                throw new IllegalStateException(
-                    "DatabaseCleaner implementation ${cleaner.class.name} returned a null or empty databaseType()" as String)
-            }
-
-            DatabaseCleaner existing = typeMap.get(type)
-            if (existing) {
-                throw new IllegalStateException(
-                    "Duplicate databaseType '${type}' declared by both ${existing.class.name} and ${cleaner.class.name}. Each DatabaseCleaner must declare a unique databaseType." as String)
-            }
-
-            typeMap.put(type, cleaner)
-            log.debug('Discovered DatabaseCleaner implementation: {} (type: {})', cleaner.class.name, type)
-        }
-
         context = new DatabaseCleanupContext(cleaners)
     }
 
@@ -114,18 +91,17 @@ class DatabaseCleanupExtension implements IGlobalExtension {
             return
         }
 
-        // @DatabaseCleanup requires @Integration since the cleanup framework depends on the
-        // Spring application context provided by the integration test infrastructure
-        if (!spec.isAnnotationPresent(Integration)) {
+        // Without an application context, there can be no database
+        boolean integrationEnvironment =  spec.isAnnotationPresent(SpringBootTest) && spec.getAnnotation(SpringBootTest).webEnvironment() in [SpringBootTest.WebEnvironment.DEFINED_PORT, SpringBootTest.WebEnvironment.RANDOM_PORT]
+        if (!integrationEnvironment) {
             if (hasDatabaseCleanupAnnotation(spec)) {
                 throw new IllegalStateException(
-                    "@DatabaseCleanup requires @Integration on spec '${spec.name}'. The database cleanup framework depends on the Spring application context provided by the integration test infrastructure." as String)
+                    "@DatabaseCleanup requires an environment with an ApplicationContext. Add @Integration or define the web environment on @SpringBootTest. Spec: ${spec.name}" as String)
             }
             return
         }
 
         boolean classAnnotated = spec.isAnnotationPresent(DatabaseCleanup)
-
         if (classAnnotated) {
             DatabaseCleanup annotation = spec.getAnnotation(DatabaseCleanup)
             DatasourceCleanupMapping mapping = DatasourceCleanupMapping.parse(annotation.value())

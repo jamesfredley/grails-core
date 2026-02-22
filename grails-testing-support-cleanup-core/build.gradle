@@ -39,9 +39,7 @@ ext {
 dependencies {
     implementation platform(project(':grails-bom'))
     implementation 'org.slf4j:slf4j-api'
-    implementation project(':grails-testing-support-core'), {
-        // impl: @Integration annotation for spec validation
-    }
+    implementation 'org.springframework.boot:spring-boot-test'
     api 'org.springframework:spring-context'
     api 'org.spockframework:spock-core', {
         // api: IGlobalExtension, IMethodInterceptor, IMethodInvocation
@@ -54,6 +52,7 @@ dependencies {
         // comp: CompileStatic, CompileDynamic, TypeCheckingMode
     }
 
+    testImplementation project(':grails-testing-support-core')
     testImplementation 'org.apache.groovy:groovy'
     testImplementation 'org.slf4j:slf4j-simple'
     testRuntimeOnly 'net.bytebuddy:byte-buddy'

@@ -83,33 +83,21 @@ class DatabaseCleanupInterceptor extends AbstractMethodInterceptor {
         }
         finally {
             try {
-                if (classLevelCleanup) {
-                    log.debug('Performing database cleanup after test method: {}',
-                            invocation.feature?.name ?: 'unknown')
-                    long startTime = System.currentTimeMillis()
-                    List<DatabaseCleanupStats> stats = context.performCleanup(mapping)
-                    logStats(stats, startTime)
+                def methodMapping = invocation.feature?.featureMethod?.isAnnotationPresent(DatabaseCleanup)
+                if (!classLevelCleanup && !methodMapping) {
+                    return
                 }
-                else if (isCurrentFeatureAnnotated(invocation)) {
-                    DatasourceCleanupMapping methodMapping = getMethodMapping(invocation)
-                    log.debug('Performing database cleanup after test method: {}',
-                            invocation.feature?.name ?: 'unknown')
-                    long startTime = System.currentTimeMillis()
-                    List<DatabaseCleanupStats> stats = context.performCleanup(methodMapping)
-                    logStats(stats, startTime)
-                }
+
+                log.debug('Performing database cleanup after test method: {}', invocation.feature?.name ?: 'unknown')
+                DatasourceCleanupMapping selectedMapping = methodMapping ? getMethodMapping(invocation) : mapping
+                long startTime = System.currentTimeMillis()
+                List<DatabaseCleanupStats> stats = context.performCleanup(selectedMapping)
+                logStats(stats, startTime)
             }
             finally {
                 TestContextHolderListener.CURRENT.remove()
             }
         }
-    }
-
-    /**
-     * Checks whether the current feature method is annotated with @DatabaseCleanup.
-     */
-    private static boolean isCurrentFeatureAnnotated(IMethodInvocation invocation) {
-        invocation.feature?.featureMethod?.isAnnotationPresent(DatabaseCleanup)
     }
 
     /**

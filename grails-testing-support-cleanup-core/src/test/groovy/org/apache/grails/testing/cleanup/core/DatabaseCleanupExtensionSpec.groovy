@@ -21,7 +21,7 @@ package org.apache.grails.testing.cleanup.core
 
 import spock.lang.Specification
 
-import grails.testing.mixin.integration.Integration
+import org.springframework.boot.test.context.SpringBootTest
 
 import org.spockframework.runtime.model.FeatureInfo
 import org.spockframework.runtime.model.MethodInfo
@@ -56,16 +56,14 @@ class DatabaseCleanupExtensionSpec extends Specification {
         0 * spec.addCleanupSpecInterceptor(_)
     }
 
-    def "visitSpec throws when @DatabaseCleanup is present without @Integration"() {
+    def "visitSpec throws when @DatabaseCleanup is present without @SpringBootTest"() {
         given:
         def extension = createExtensionWithCleaner()
 
-        def annotation = AnnotatedClassSpec.getAnnotation(DatabaseCleanup)
         def spec = Mock(SpecInfo) {
-            isAnnotationPresent(Integration) >> false
+            isAnnotationPresent(SpringBootTest) >> false
             isAnnotationPresent(DatabaseCleanup) >> true
-            getAnnotation(DatabaseCleanup) >> annotation
-            getFeatures() >> []
+            getAnnotation(DatabaseCleanup) >> AnnotatedClassSpec.getAnnotation(DatabaseCleanup)
             getName() >> 'NonIntegrationSpec'
         }
 
@@ -74,11 +72,11 @@ class DatabaseCleanupExtensionSpec extends Specification {
 
         then:
         def ex = thrown(IllegalStateException)
-        ex.message.contains('@DatabaseCleanup requires @Integration')
+        ex.message.contains('@DatabaseCleanup requires an environment with an ApplicationContext. Add @Integration or define the web environment on @SpringBootTest.')
         ex.message.contains('NonIntegrationSpec')
     }
 
-    def "visitSpec throws when method-level @DatabaseCleanup is present without @Integration"() {
+    def "visitSpec throws when method-level @DatabaseCleanup is present without @SpringBootTest"() {
         given:
         def extension = createExtensionWithCleaner()
 
@@ -92,7 +90,7 @@ class DatabaseCleanupExtensionSpec extends Specification {
         }
 
         def spec = Mock(SpecInfo) {
-            isAnnotationPresent(Integration) >> false
+            isAnnotationPresent(SpringBootTest) >> false
             isAnnotationPresent(DatabaseCleanup) >> false
             getReflection() >> MethodAnnotatedSpec
             getFeatures() >> [feature]
@@ -104,11 +102,32 @@ class DatabaseCleanupExtensionSpec extends Specification {
 
         then:
         def ex = thrown(IllegalStateException)
-        ex.message.contains('@DatabaseCleanup requires @Integration')
+        ex.message.contains('@DatabaseCleanup requires an environment with an ApplicationContext. Add @Integration or define the web environment on @SpringBootTest.')
         ex.message.contains('MethodAnnotatedNonIntegrationSpec')
     }
 
-    def "visitSpec silently skips spec without @Integration or @DatabaseCleanup"() {
+    def "visitSpec throws when @SpringBootTest has MOCK webEnvironment with @DatabaseCleanup"() {
+        given:
+        def extension = createExtensionWithCleaner()
+
+        def spec = Mock(SpecInfo) {
+            isAnnotationPresent(SpringBootTest) >> true
+            getAnnotation(SpringBootTest) >> createSpringBootTestAnnotation(SpringBootTest.WebEnvironment.MOCK)
+            isAnnotationPresent(DatabaseCleanup) >> true
+            getAnnotation(DatabaseCleanup) >> AnnotatedClassSpec.getAnnotation(DatabaseCleanup)
+            getName() >> 'MockWebEnvironmentSpec'
+        }
+
+        when:
+        extension.visitSpec(spec)
+
+        then:
+        def ex = thrown(IllegalStateException)
+        ex.message.contains('@DatabaseCleanup requires an environment with an ApplicationContext. Add @Integration or define the web environment on @SpringBootTest.')
+        ex.message.contains('MockWebEnvironmentSpec')
+    }
+
+    def "visitSpec silently skips spec without @SpringBootTest or @DatabaseCleanup"() {
         given:
         def extension = createExtensionWithCleaner()
 
@@ -122,7 +141,7 @@ class DatabaseCleanupExtensionSpec extends Specification {
         }
 
         def spec = Mock(SpecInfo) {
-            isAnnotationPresent(Integration) >> false
+            isAnnotationPresent(SpringBootTest) >> false
             isAnnotationPresent(DatabaseCleanup) >> false
             getReflection() >> NonAnnotatedSpec
             getFeatures() >> [feature]
@@ -137,16 +156,15 @@ class DatabaseCleanupExtensionSpec extends Specification {
         0 * spec.addCleanupSpecInterceptor(_)
     }
 
-    def "visitSpec registers interceptors when cleaner is available and class is annotated with @Integration"() {
+    def "visitSpec registers interceptors when cleaner is available and class is annotated with @SpringBootTest having an application context"() {
         given:
         def extension = createExtensionWithCleaner()
 
-        def annotation = AnnotatedClassSpec.getAnnotation(DatabaseCleanup)
         def spec = Mock(SpecInfo) {
-            isAnnotationPresent(Integration) >> true
+            isAnnotationPresent(SpringBootTest) >> true
+            getAnnotation(SpringBootTest) >> AnnotatedClassSpec.getAnnotation(SpringBootTest)
             isAnnotationPresent(DatabaseCleanup) >> true
-            getAnnotation(DatabaseCleanup) >> annotation
-            getFeatures() >> []
+            getAnnotation(DatabaseCleanup) >> AnnotatedClassSpec.getAnnotation(DatabaseCleanup)
         }
 
         when:
@@ -172,11 +190,11 @@ class DatabaseCleanupExtensionSpec extends Specification {
         }
 
         def spec = Mock(SpecInfo) {
-            isAnnotationPresent(Integration) >> true
+            isAnnotationPresent(SpringBootTest) >> true
+            getAnnotation(SpringBootTest) >> MethodAnnotatedSpec.getAnnotation(SpringBootTest)
             isAnnotationPresent(DatabaseCleanup) >> false
             getReflection() >> MethodAnnotatedSpec
             getFeatures() >> [feature]
-            getDeclaredMethods() >> []
         }
 
         when:
@@ -202,7 +220,8 @@ class DatabaseCleanupExtensionSpec extends Specification {
         }
 
         def spec = Mock(SpecInfo) {
-            isAnnotationPresent(Integration) >> true
+            isAnnotationPresent(SpringBootTest) >> true
+            getAnnotation(SpringBootTest) >> createSpringBootTestAnnotation()
             isAnnotationPresent(DatabaseCleanup) >> false
             getReflection() >> NonAnnotatedSpec
             getFeatures() >> [feature]
@@ -214,38 +233,6 @@ class DatabaseCleanupExtensionSpec extends Specification {
         then:
         0 * spec.addCleanupInterceptor(_)
         0 * spec.addCleanupSpecInterceptor(_)
-    }
-
-    def "start() throws when two cleaners declare the same databaseType"() {
-        given:
-        // We can't easily test ServiceLoader with duplicates, so we test the validation
-        // logic directly by using reflection to invoke the start logic
-        def extension = new DatabaseCleanupExtension()
-
-        // Create a custom ServiceLoader that returns two cleaners with same type
-        def cleaner1 = Mock(DatabaseCleaner) {
-            databaseType() >> 'h2'
-        }
-        def cleaner2 = Mock(DatabaseCleaner) {
-            databaseType() >> 'h2'
-        }
-
-        when:
-        // Manually replicate the uniqueness validation logic from start()
-        Map<String, DatabaseCleaner> typeMap = [:]
-        for (DatabaseCleaner cleaner : [cleaner1, cleaner2]) {
-            String type = cleaner.databaseType()
-            DatabaseCleaner existing = typeMap.get(type)
-            if (existing) {
-                throw new IllegalStateException(
-                    "Duplicate databaseType '${type}' declared by both ${existing.class.name} and ${cleaner.class.name}" as String)
-            }
-            typeMap.put(type, cleaner)
-        }
-
-        then:
-        def ex = thrown(IllegalStateException)
-        ex.message.contains("Duplicate databaseType 'h2'")
     }
 
     def "start() throws when a cleaner returns null databaseType"() {
@@ -300,7 +287,8 @@ class DatabaseCleanupExtensionSpec extends Specification {
         }
 
         def spec = Mock(SpecInfo) {
-            isAnnotationPresent(Integration) >> true
+            isAnnotationPresent(SpringBootTest) >> true
+            getAnnotation(_) >> createSpringBootTestAnnotation()
             isAnnotationPresent(DatabaseCleanup) >> false
             getReflection() >> SpecWithAnnotatedSetup
             getFeatures() >> [feature]
@@ -332,11 +320,11 @@ class DatabaseCleanupExtensionSpec extends Specification {
         }
 
         def spec = Mock(SpecInfo) {
-            isAnnotationPresent(Integration) >> true
+            isAnnotationPresent(SpringBootTest) >> true
+            getAnnotation(SpringBootTest) >> SpecWithAnnotatedSetup.getAnnotation(SpringBootTest)
             isAnnotationPresent(DatabaseCleanup) >> false
             getReflection() >> SpecWithAnnotatedSetup
             getFeatures() >> [feature]
-            getDeclaredMethods() >> []
         }
 
         when:
@@ -352,8 +340,6 @@ class DatabaseCleanupExtensionSpec extends Specification {
         System.clearProperty(DatabaseCleanupExtension.VALIDATE_PROPERTY)
     }
 
-    // --- Helper methods ---
-
     private DatabaseCleanupExtension createExtensionWithCleaner() {
         def extension = new DatabaseCleanupExtension()
         // Use reflection to set the context field directly since ServiceLoader won't find a cleaner in test
@@ -366,9 +352,13 @@ class DatabaseCleanupExtensionSpec extends Specification {
         extension
     }
 
-    // --- Stub classes for annotation detection ---
+    private SpringBootTest createSpringBootTestAnnotation(SpringBootTest.WebEnvironment webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT) {
+        Stub(SpringBootTest) {
+            webEnvironment() >> webEnvironment
+        }
+    }
 
-    @Integration
+    @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
     @DatabaseCleanup
     static class AnnotatedClassSpec {}
 
@@ -376,13 +366,13 @@ class DatabaseCleanupExtensionSpec extends Specification {
         void unannotatedMethod() {}
     }
 
-    @Integration
+    @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
     static class MethodAnnotatedSpec {
         @DatabaseCleanup
         void annotatedMethod() {}
     }
 
-    @Integration
+    @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
     static class SpecWithAnnotatedSetup {
         @DatabaseCleanup
         void setup() {}
