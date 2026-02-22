@@ -76,11 +76,6 @@ class DatabaseCleanupStatsSpec extends Specification {
         stats.datasourceName == 'dataSource'
     }
 
-    def "DEBUG_PROPERTY constant is correct"() {
-        expect:
-        DatabaseCleanupStats.DEBUG_PROPERTY == 'grails.testing.cleanup.debug'
-    }
-
     def "isDebugEnabled returns false when system property is not set"() {
         expect:
         !DatabaseCleanupStats.debugEnabled

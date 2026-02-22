@@ -65,9 +65,6 @@ class PostgresDatabaseCleanupHelper {
                 }
             }
         }
-        catch (Exception e) {
-            log.warn('Failed to resolve current schema from datasource', e)
-        }
         finally {
             if (connection) {
                 try {
@@ -78,7 +75,8 @@ class PostgresDatabaseCleanupHelper {
                 }
             }
         }
-        null
+
+        throw new IllegalStateException("Because postgres defaults to the search_patch when currentSchema isn't defined, a schema should always be found")
     }
 
     /**

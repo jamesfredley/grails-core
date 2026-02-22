@@ -71,6 +71,21 @@ class DatabaseCleanupStats {
     long endTimeMillis = 0L
 
     /**
+     * Whether detailed debug is enabled so row level counts are collected
+     */
+    boolean detailedStatCollection = false
+
+    DatabaseCleanupStats() {
+        detailedStatCollection = isDebugEnabled()
+    }
+
+    void addTableRowCount(String tableName, long rowCount) {
+        if (detailedStatCollection) {
+            tableRowCounts[tableName] += rowCount
+        }
+    }
+
+    /**
      * Starts the timer for individual schema/datasource cleanup.
      * Records the current time as the start time.
      */
@@ -91,7 +106,7 @@ class DatabaseCleanupStats {
      * is set to {@code "true"}.
      */
     static boolean isDebugEnabled() {
-        Boolean.getBoolean(DEBUG_PROPERTY)
+        Boolean.parseBoolean(System.getProperty(DEBUG_PROPERTY, 'false'))
     }
 
     /**

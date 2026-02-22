@@ -39,6 +39,16 @@ class H2DatabaseCleanerSpec extends Specification {
 
     ApplicationContext applicationContext
 
+    def setupSpec() {
+        // Enable detailed stat collection for unit tests
+        System.setProperty('grails.testing.cleanup.debug', 'true')
+    }
+
+    def cleanupSpec() {
+        // Clean up system property
+        System.clearProperty('grails.testing.cleanup.debug')
+    }
+
     def setup() {
         dataSource = new JdbcDataSource()
         dataSource.URL = 'jdbc:h2:mem:testDb;DB_CLOSE_DELAY=-1'

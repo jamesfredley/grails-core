@@ -57,7 +57,6 @@ import org.apache.grails.testing.cleanup.core.DatabaseCleanupStats
 class PostgresDatabaseCleaner implements DatabaseCleaner {
 
     private static final String DATABASE_TYPE = 'postgresql'
-    private static final List<String> SYSTEM_SCHEMAS = ['pg_catalog', 'information_schema', 'pg_toast', 'pg_temp_1']
 
     @Override
     String databaseType() {
@@ -102,15 +101,8 @@ class PostgresDatabaseCleaner implements DatabaseCleaner {
             sql.execute('SET session_replication_role = replica')
 
             String currentSchema = PostgresDatabaseCleanupHelper.resolveCurrentSchema(dataSource)
-
-            if (currentSchema) {
-                log.debug('Cleaning schema: {}', currentSchema)
-                cleanupSchema(sql, currentSchema, stats)
-            }
-            else {
-                log.debug('No currentSchema parameter found, cleaning all non-system schemas')
-                cleanupNonSystemSchemas(sql, stats)
-            }
+            log.debug('Cleaning schema: {}', currentSchema)
+            cleanupSchema(sql, currentSchema, stats)
 
             cleanupCacheLayer(applicationContext)
         }
@@ -132,48 +124,34 @@ class PostgresDatabaseCleaner implements DatabaseCleaner {
     @SuppressWarnings('SqlNoDataSourceInspection')
     private void cleanupSchema(Sql sql, String schemaName, DatabaseCleanupStats stats) {
         String query = """
-            SELECT tablename FROM pg_tables
-            WHERE schemaname = '${schemaName}'
-            AND tablename NOT LIKE 'pg_%'
+            SELECT n.nspname AS schemaname, 
+                c.relname AS table_name,
+                c.reltuples::bigint AS row_count_estimate
+            FROM pg_class c
+            JOIN pg_namespace n ON n.oid = c.relnamespace
+            WHERE c.relkind = 'r'
+            AND n.nspname = '${schemaName}'
+            ORDER BY row_count_estimate DESC;
         """ as String
 
+        List<String> tablesInSchema = []
         sql.eachRow(query) { GroovyResultSet row ->
-            String tableName = row['tablename'] as String
-            truncateTable(sql, schemaName, tableName, stats)
-        }
-    }
+            String tableName = row['table_name'] as String
+            tablesInSchema << tableName
 
-    @SuppressWarnings('SqlNoDataSourceInspection')
-    private void cleanupNonSystemSchemas(Sql sql, DatabaseCleanupStats stats) {
-        String query = """
-            SELECT schemaname FROM pg_namespace
-            WHERE schemaname NOT IN (${SYSTEM_SCHEMAS.collect { "'$it'" }.join(',')})
-        """ as String
-
-        sql.eachRow(query) { GroovyResultSet row ->
-            String schemaName = row['schemaname'] as String
-            cleanupSchema(sql, schemaName, stats)
-        }
-    }
-
-    @SuppressWarnings('SqlNoDataSourceInspection')
-    private void truncateTable(Sql sql, String schemaName, String tableName, DatabaseCleanupStats stats) {
-        String qualifiedTableName = "\"${schemaName}\".\"${tableName}\""
-        try {
-            // Get row count before truncate
-            String countQuery = "SELECT COUNT(*) AS cnt FROM ${qualifiedTableName}" as String
-            Long rowCount = sql.firstRow(countQuery)?.cnt as Long ?: 0L
-
-            if (rowCount > 0) {
-                log.debug('Truncating table: {}', qualifiedTableName)
-                // Since session_replication_role is set to 'replica', foreign keys are effectively disabled
-                String truncateQuery = "TRUNCATE TABLE ${qualifiedTableName}" as String
-                sql.execute(truncateQuery)
-                stats.tableRowCounts[tableName] += rowCount
+            def rowCount = row['row_count_estimate'] as Long
+            if (stats.detailedStatCollection) {
+                if (rowCount == -1) {
+                    String countQuery = "SELECT COUNT(*) AS cnt FROM ${tableName}" as String
+                    rowCount = sql.firstRow(countQuery)?.cnt as Long ?: 0L
+                }
             }
+            stats.addTableRowCount(tableName, rowCount)
         }
-        catch (Exception e) {
-            log.warn('Failed to truncate table {}', qualifiedTableName, e)
+
+        if (tablesInSchema) {
+            log.debug('Truncating tables: {}', tablesInSchema.join(','))
+            sql.executeUpdate("TRUNCATE TABLE ${tablesInSchema.collect { "\"$it\"" }.join(',')} RESTART IDENTITY CASCADE" as String)
         }
     }
 

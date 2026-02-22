@@ -99,8 +99,8 @@ class H2DatabaseCleaner implements DatabaseCleaner {
             String query = "SELECT table_name, row_count_estimate FROM information_schema.tables WHERE table_schema = '${schemaName}' AND row_count_estimate > 0" as String
             sql.eachRow(query) { GroovyResultSet row ->
                 String tableName = row['table_name'] as String
+                stats.addTableRowCount(tableName, row['row_count_estimate'] as Long)
                 log.debug('Truncating table: {}', tableName)
-                stats.tableRowCounts[tableName] += row['row_count_estimate'] as Long
                 sql.executeUpdate("TRUNCATE TABLE \"${tableName}\"" as String)
             }
 

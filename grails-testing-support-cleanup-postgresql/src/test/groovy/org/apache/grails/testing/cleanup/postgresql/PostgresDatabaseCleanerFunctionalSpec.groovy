@@ -22,6 +22,8 @@ package org.apache.grails.testing.cleanup.postgresql
 import groovy.sql.Sql
 
 import org.postgresql.ds.PGSimpleDataSource
+import spock.util.environment.RestoreSystemProperties
+
 import org.springframework.context.ApplicationContext
 import org.testcontainers.containers.GenericContainer
 import org.testcontainers.containers.PostgreSQLContainer
@@ -40,6 +42,7 @@ import org.apache.grails.testing.cleanup.core.DatabaseCleanupStats
  *
  * Run with: {@code ./gradlew test --tests "PostgresDatabaseCleanerFunctionalSpec"}
  */
+@RestoreSystemProperties
 @Requires({ os.linux || !System.getenv().containsKey('CI') })
 class PostgresDatabaseCleanerFunctionalSpec extends Specification {
 
@@ -55,6 +58,7 @@ class PostgresDatabaseCleanerFunctionalSpec extends Specification {
     }
 
     def setupSpec() {
+        System.setProperty(DatabaseCleanupStats.DEBUG_PROPERTY, 'true')
         containerHolder = setupContainerHolder()
         postgresContainer = containerHolder.container
     }
@@ -85,77 +89,73 @@ class PostgresDatabaseCleanerFunctionalSpec extends Specification {
         PGSimpleDataSource dataSource = createDataSourceWithSchema('testschema')
         Sql sql = new Sql(dataSource)
 
-        try {
-            // Create schema and tables
-            sql.execute('CREATE SCHEMA IF NOT EXISTS testschema')
-            sql.execute('CREATE TABLE IF NOT EXISTS testschema.users (id SERIAL PRIMARY KEY, name VARCHAR(255))')
-            sql.execute('CREATE TABLE IF NOT EXISTS testschema.books (id SERIAL PRIMARY KEY, title VARCHAR(255), user_id INTEGER)')
+        // Create schema and tables
+        sql.execute('CREATE SCHEMA IF NOT EXISTS testschema')
+        sql.execute('CREATE TABLE IF NOT EXISTS testschema.users (id SERIAL PRIMARY KEY, name VARCHAR(255))')
+        sql.execute('CREATE TABLE IF NOT EXISTS testschema.books (id SERIAL PRIMARY KEY, title VARCHAR(255), user_id INTEGER)')
 
-            // Insert data
-            sql.execute("INSERT INTO testschema.users (name) VALUES ('Alice')")
-            sql.execute("INSERT INTO testschema.users (name) VALUES ('Bob')")
-            sql.execute("INSERT INTO testschema.books (title, user_id) VALUES ('Book 1', 1)")
+        // Insert data
+        sql.execute("INSERT INTO testschema.users (name) VALUES ('Alice')")
+        sql.execute("INSERT INTO testschema.users (name) VALUES ('Bob')")
+        sql.execute("INSERT INTO testschema.books (title, user_id) VALUES ('Book 1', 1)")
 
-            ApplicationContext applicationContext = Stub(ApplicationContext)
-            PostgresDatabaseCleaner cleaner = new PostgresDatabaseCleaner()
+        ApplicationContext applicationContext = Stub(ApplicationContext)
+        PostgresDatabaseCleaner cleaner = new PostgresDatabaseCleaner()
 
-            when:
-            DatabaseCleanupStats stats = cleaner.cleanup(applicationContext, dataSource)
+        when:
+        DatabaseCleanupStats stats = cleaner.cleanup(applicationContext, dataSource)
 
-            then:
-            stats.tableRowCounts['users'] == 2L
-            stats.tableRowCounts['books'] == 1L
+        then:
+        stats.tableRowCounts['users'] == 2L
+        stats.tableRowCounts['books'] == 1L
 
-            and: 'tables are now empty'
-            sql.firstRow('SELECT COUNT(*) AS cnt FROM testschema.users').cnt == 0
-            sql.firstRow('SELECT COUNT(*) AS cnt FROM testschema.books').cnt == 0
-        }
-        finally {
-            sql.execute('DROP TABLE IF EXISTS testschema.books')
-            sql.execute('DROP TABLE IF EXISTS testschema.users')
-            sql.execute('DROP SCHEMA IF EXISTS testschema')
-            sql.close()
-        }
+        and: 'tables are now empty'
+        sql.firstRow('SELECT COUNT(*) AS cnt FROM testschema.users').cnt == 0
+        sql.firstRow('SELECT COUNT(*) AS cnt FROM testschema.books').cnt == 0
+
+        cleanup:
+        sql.execute('DROP TABLE IF EXISTS testschema.books')
+        sql.execute('DROP TABLE IF EXISTS testschema.users')
+        sql.execute('DROP SCHEMA IF EXISTS testschema')
+        sql.close()
     }
 
-    def "test cleanup without currentSchema cleans all non-system schemas"() {
+    def "test cleanup does not remove tables in other schemas"() {
         given:
-        PGSimpleDataSource dataSource = createDataSourceWithSchema()
+        PGSimpleDataSource dataSource = createDataSourceWithSchema('schema1')
         Sql sql = new Sql(dataSource)
 
-        try {
-            // Create multiple schemas and tables
-            sql.execute('CREATE SCHEMA IF NOT EXISTS schema1')
-            sql.execute('CREATE SCHEMA IF NOT EXISTS schema2')
-            sql.execute('CREATE TABLE IF NOT EXISTS schema1.items (id SERIAL PRIMARY KEY, name VARCHAR(255))')
-            sql.execute('CREATE TABLE IF NOT EXISTS schema2.orders (id SERIAL PRIMARY KEY, description VARCHAR(255))')
+        // Create multiple schemas and tables
+        sql.execute('CREATE SCHEMA IF NOT EXISTS schema1')
+        sql.execute('CREATE SCHEMA IF NOT EXISTS schema2')
+        sql.execute('CREATE TABLE IF NOT EXISTS schema1.items (id SERIAL PRIMARY KEY, name VARCHAR(255))')
+        sql.execute('CREATE TABLE IF NOT EXISTS schema2.orders (id SERIAL PRIMARY KEY, description VARCHAR(255))')
 
-            // Insert data
-            sql.execute("INSERT INTO schema1.items (name) VALUES ('Item 1')")
-            sql.execute("INSERT INTO schema1.items (name) VALUES ('Item 2')")
-            sql.execute("INSERT INTO schema2.orders (description) VALUES ('Order A')")
+        // Insert data
+        sql.execute("INSERT INTO schema1.items (name) VALUES ('Item 1')")
+        sql.execute("INSERT INTO schema1.items (name) VALUES ('Item 2')")
+        sql.execute("INSERT INTO schema2.orders (description) VALUES ('Order A')")
 
-            ApplicationContext applicationContext = Stub(ApplicationContext)
-            PostgresDatabaseCleaner cleaner = new PostgresDatabaseCleaner()
+        ApplicationContext applicationContext = Stub(ApplicationContext)
+        PostgresDatabaseCleaner cleaner = new PostgresDatabaseCleaner()
 
-            when:
-            DatabaseCleanupStats stats = cleaner.cleanup(applicationContext, dataSource)
+        when:
+        DatabaseCleanupStats stats = cleaner.cleanup(applicationContext, dataSource)
 
-            then:
-            stats.tableRowCounts['items'] == 2L
-            stats.tableRowCounts['orders'] == 1L
+        then:
+        stats.tableRowCounts['items'] == 2L
+        !stats.tableRowCounts.containsKey('orders')
 
-            and: 'all tables in all schemas are empty'
-            sql.firstRow('SELECT COUNT(*) AS cnt FROM schema1.items').cnt == 0
-            sql.firstRow('SELECT COUNT(*) AS cnt FROM schema2.orders').cnt == 0
-        }
-        finally {
-            sql.execute('DROP TABLE IF EXISTS schema2.orders')
-            sql.execute('DROP TABLE IF EXISTS schema1.items')
-            sql.execute('DROP SCHEMA IF EXISTS schema1')
-            sql.execute('DROP SCHEMA IF EXISTS schema2')
-            sql.close()
-        }
+        and: 'all tables in all schemas are empty'
+        sql.firstRow('SELECT COUNT(*) AS cnt FROM schema1.items').cnt == 0
+        sql.firstRow('SELECT COUNT(*) AS cnt FROM schema2.orders').cnt == 1
+
+        cleanup:
+        sql.execute('DROP TABLE IF EXISTS schema2.orders')
+        sql.execute('DROP TABLE IF EXISTS schema1.items')
+        sql.execute('DROP SCHEMA IF EXISTS schema1')
+        sql.execute('DROP SCHEMA IF EXISTS schema2')
+        sql.close()
     }
 
     def "test supports method identifies PostgreSQL databases"() {
@@ -173,34 +173,32 @@ class PostgresDatabaseCleanerFunctionalSpec extends Specification {
         PGSimpleDataSource dataSource = createDataSourceWithSchema('fktest')
         Sql sql = new Sql(dataSource)
 
-        try {
-            sql.execute('CREATE SCHEMA IF NOT EXISTS fktest')
-            sql.execute('CREATE TABLE IF NOT EXISTS fktest.categories (id SERIAL PRIMARY KEY, name VARCHAR(255))')
-            sql.execute('CREATE TABLE IF NOT EXISTS fktest.products (id SERIAL PRIMARY KEY, name VARCHAR(255), category_id INTEGER REFERENCES fktest.categories(id))')
+        sql.execute('CREATE SCHEMA IF NOT EXISTS fktest')
+        sql.execute('CREATE TABLE IF NOT EXISTS fktest.categories (id SERIAL PRIMARY KEY, name VARCHAR(255))')
+        sql.execute('CREATE TABLE IF NOT EXISTS fktest.products (id SERIAL PRIMARY KEY, name VARCHAR(255), category_id INTEGER REFERENCES fktest.categories(id))')
 
-            sql.execute("INSERT INTO fktest.categories (name) VALUES ('Electronics')")
-            sql.execute("INSERT INTO fktest.products (name, category_id) VALUES ('Laptop', 1)")
+        sql.execute("INSERT INTO fktest.categories (name) VALUES ('Electronics')")
+        sql.execute("INSERT INTO fktest.products (name, category_id) VALUES ('Laptop', 1)")
 
-            ApplicationContext applicationContext = Stub(ApplicationContext)
-            PostgresDatabaseCleaner cleaner = new PostgresDatabaseCleaner()
+        ApplicationContext applicationContext = Stub(ApplicationContext)
+        PostgresDatabaseCleaner cleaner = new PostgresDatabaseCleaner()
 
-            when:
-            DatabaseCleanupStats stats = cleaner.cleanup(applicationContext, dataSource)
+        when:
+        DatabaseCleanupStats stats = cleaner.cleanup(applicationContext, dataSource)
 
-            then:
-            stats.tableRowCounts['categories'] == 1L
-            stats.tableRowCounts['products'] == 1L
+        then:
+        stats.tableRowCounts['categories'] == 1L
+        stats.tableRowCounts['products'] == 1L
 
-            and: 'both tables are empty'
-            sql.firstRow('SELECT COUNT(*) AS cnt FROM fktest.categories').cnt == 0
-            sql.firstRow('SELECT COUNT(*) AS cnt FROM fktest.products').cnt == 0
-        }
-        finally {
-            sql.execute('DROP TABLE IF EXISTS fktest.products')
-            sql.execute('DROP TABLE IF EXISTS fktest.categories')
-            sql.execute('DROP SCHEMA IF EXISTS fktest')
-            sql.close()
-        }
+        and: 'both tables are empty'
+        sql.firstRow('SELECT COUNT(*) AS cnt FROM fktest.categories').cnt == 0
+        sql.firstRow('SELECT COUNT(*) AS cnt FROM fktest.products').cnt == 0
+
+        cleanup:
+        sql.execute('DROP TABLE IF EXISTS fktest.products')
+        sql.execute('DROP TABLE IF EXISTS fktest.categories')
+        sql.execute('DROP SCHEMA IF EXISTS fktest')
+        sql.close()
     }
 
     def "test cleanup with complex foreign key relationships"() {
@@ -208,49 +206,47 @@ class PostgresDatabaseCleanerFunctionalSpec extends Specification {
         PGSimpleDataSource dataSource = createDataSourceWithSchema('fkcomplex')
         Sql sql = new Sql(dataSource)
 
-        try {
-            sql.execute('CREATE SCHEMA IF NOT EXISTS fkcomplex')
-            // Create parent table
-            sql.execute('CREATE TABLE IF NOT EXISTS fkcomplex.departments (id SERIAL PRIMARY KEY, name VARCHAR(255))')
-            // Create child table with FK to departments
-            sql.execute('CREATE TABLE IF NOT EXISTS fkcomplex.employees (id SERIAL PRIMARY KEY, name VARCHAR(255), dept_id INTEGER REFERENCES fkcomplex.departments(id))')
-            // Create grandchild table with FK to employees
-            sql.execute('CREATE TABLE IF NOT EXISTS fkcomplex.projects (id SERIAL PRIMARY KEY, title VARCHAR(255), employee_id INTEGER REFERENCES fkcomplex.employees(id))')
+        sql.execute('CREATE SCHEMA IF NOT EXISTS fkcomplex')
+        // Create parent table
+        sql.execute('CREATE TABLE IF NOT EXISTS fkcomplex.departments (id SERIAL PRIMARY KEY, name VARCHAR(255))')
+        // Create child table with FK to departments
+        sql.execute('CREATE TABLE IF NOT EXISTS fkcomplex.employees (id SERIAL PRIMARY KEY, name VARCHAR(255), dept_id INTEGER REFERENCES fkcomplex.departments(id))')
+        // Create grandchild table with FK to employees
+        sql.execute('CREATE TABLE IF NOT EXISTS fkcomplex.projects (id SERIAL PRIMARY KEY, title VARCHAR(255), employee_id INTEGER REFERENCES fkcomplex.employees(id))')
 
-            // Insert data with FK relationships
-            sql.execute("INSERT INTO fkcomplex.departments (name) VALUES ('Engineering')")
-            sql.execute("INSERT INTO fkcomplex.departments (name) VALUES ('Sales')")
-            sql.execute("INSERT INTO fkcomplex.employees (name, dept_id) VALUES ('Alice', 1)")
-            sql.execute("INSERT INTO fkcomplex.employees (name, dept_id) VALUES ('Bob', 2)")
-            sql.execute("INSERT INTO fkcomplex.projects (title, employee_id) VALUES ('Project X', 1)")
-            sql.execute("INSERT INTO fkcomplex.projects (title, employee_id) VALUES ('Project Y', 2)")
+        // Insert data with FK relationships
+        sql.execute("INSERT INTO fkcomplex.departments (name) VALUES ('Engineering')")
+        sql.execute("INSERT INTO fkcomplex.departments (name) VALUES ('Sales')")
+        sql.execute("INSERT INTO fkcomplex.employees (name, dept_id) VALUES ('Alice', 1)")
+        sql.execute("INSERT INTO fkcomplex.employees (name, dept_id) VALUES ('Bob', 2)")
+        sql.execute("INSERT INTO fkcomplex.projects (title, employee_id) VALUES ('Project X', 1)")
+        sql.execute("INSERT INTO fkcomplex.projects (title, employee_id) VALUES ('Project Y', 2)")
 
-            ApplicationContext applicationContext = Stub(ApplicationContext)
-            PostgresDatabaseCleaner cleaner = new PostgresDatabaseCleaner()
+        ApplicationContext applicationContext = Stub(ApplicationContext)
+        PostgresDatabaseCleaner cleaner = new PostgresDatabaseCleaner()
 
-            when:
-            DatabaseCleanupStats stats = cleaner.cleanup(applicationContext, dataSource)
+        when:
+        DatabaseCleanupStats stats = cleaner.cleanup(applicationContext, dataSource)
 
-            then: 'all data before cleanup is recorded'
-            stats.tableRowCounts['departments'] == 2L
-            stats.tableRowCounts['employees'] == 2L
-            stats.tableRowCounts['projects'] == 2L
+        then: 'all data before cleanup is recorded'
+        stats.tableRowCounts['departments'] == 2L
+        stats.tableRowCounts['employees'] == 2L
+        stats.tableRowCounts['projects'] == 2L
 
-            and: 'all tables are truncated despite complex FK relationships'
-            sql.firstRow('SELECT COUNT(*) AS cnt FROM fkcomplex.departments').cnt == 0
-            sql.firstRow('SELECT COUNT(*) AS cnt FROM fkcomplex.employees').cnt == 0
-            sql.firstRow('SELECT COUNT(*) AS cnt FROM fkcomplex.projects').cnt == 0
+        and: 'all tables are truncated despite complex FK relationships'
+        sql.firstRow('SELECT COUNT(*) AS cnt FROM fkcomplex.departments').cnt == 0
+        sql.firstRow('SELECT COUNT(*) AS cnt FROM fkcomplex.employees').cnt == 0
+        sql.firstRow('SELECT COUNT(*) AS cnt FROM fkcomplex.projects').cnt == 0
 
-            and: 'sequences are reset for next test'
-            sql.firstRow('SELECT nextval(\'fkcomplex.departments_id_seq\') AS next_id').next_id == 3L
-        }
-        finally {
-            sql.execute('DROP TABLE IF EXISTS fkcomplex.projects')
-            sql.execute('DROP TABLE IF EXISTS fkcomplex.employees')
-            sql.execute('DROP TABLE IF EXISTS fkcomplex.departments')
-            sql.execute('DROP SCHEMA IF EXISTS fkcomplex')
-            sql.close()
-        }
+        and: 'sequences are reset for next test'
+        sql.firstRow('SELECT nextval(\'fkcomplex.departments_id_seq\') AS next_id').next_id == 1L
+
+        cleanup:
+        sql.execute('DROP TABLE IF EXISTS fkcomplex.projects')
+        sql.execute('DROP TABLE IF EXISTS fkcomplex.employees')
+        sql.execute('DROP TABLE IF EXISTS fkcomplex.departments')
+        sql.execute('DROP SCHEMA IF EXISTS fkcomplex')
+        sql.close()
     }
 
     def "test cleanup verifies foreign key constraints are disabled during cleanup"() {
@@ -258,35 +254,33 @@ class PostgresDatabaseCleanerFunctionalSpec extends Specification {
         PGSimpleDataSource dataSource = createDataSourceWithSchema('fkreplica')
         Sql sql = new Sql(dataSource)
 
-        try {
-            sql.execute('CREATE SCHEMA IF NOT EXISTS fkreplica')
-            sql.execute('CREATE TABLE IF NOT EXISTS fkreplica.authors (id SERIAL PRIMARY KEY, name VARCHAR(255))')
-            sql.execute('CREATE TABLE IF NOT EXISTS fkreplica.books (id SERIAL PRIMARY KEY, title VARCHAR(255), author_id INTEGER NOT NULL REFERENCES fkreplica.authors(id))')
+        sql.execute('CREATE SCHEMA IF NOT EXISTS fkreplica')
+        sql.execute('CREATE TABLE IF NOT EXISTS fkreplica.authors (id SERIAL PRIMARY KEY, name VARCHAR(255))')
+        sql.execute('CREATE TABLE IF NOT EXISTS fkreplica.books (id SERIAL PRIMARY KEY, title VARCHAR(255), author_id INTEGER NOT NULL REFERENCES fkreplica.authors(id))')
 
-            // Insert valid data
-            sql.execute("INSERT INTO fkreplica.authors (name) VALUES ('Author 1')")
-            sql.execute("INSERT INTO fkreplica.books (title, author_id) VALUES ('Book 1', 1)")
+        // Insert valid data
+        sql.execute("INSERT INTO fkreplica.authors (name) VALUES ('Author 1')")
+        sql.execute("INSERT INTO fkreplica.books (title, author_id) VALUES ('Book 1', 1)")
 
-            ApplicationContext applicationContext = Stub(ApplicationContext)
-            PostgresDatabaseCleaner cleaner = new PostgresDatabaseCleaner()
+        ApplicationContext applicationContext = Stub(ApplicationContext)
+        PostgresDatabaseCleaner cleaner = new PostgresDatabaseCleaner()
 
-            when: 'cleanup is executed'
-            DatabaseCleanupStats stats = cleaner.cleanup(applicationContext, dataSource)
+        when: 'cleanup is executed'
+        DatabaseCleanupStats stats = cleaner.cleanup(applicationContext, dataSource)
 
-            then: 'cleanup succeeds despite FK constraints'
-            stats.tableRowCounts['authors'] == 1L
-            stats.tableRowCounts['books'] == 1L
+        then: 'cleanup succeeds despite FK constraints'
+        stats.tableRowCounts['authors'] == 1L
+        stats.tableRowCounts['books'] == 1L
 
-            and: 'all tables are truncated'
-            sql.firstRow('SELECT COUNT(*) AS cnt FROM fkreplica.authors').cnt == 0
-            sql.firstRow('SELECT COUNT(*) AS cnt FROM fkreplica.books').cnt == 0
-        }
-        finally {
-            sql.execute('DROP TABLE IF EXISTS fkreplica.books')
-            sql.execute('DROP TABLE IF EXISTS fkreplica.authors')
-            sql.execute('DROP SCHEMA IF EXISTS fkreplica')
-            sql.close()
-        }
+        and: 'all tables are truncated'
+        sql.firstRow('SELECT COUNT(*) AS cnt FROM fkreplica.authors').cnt == 0
+        sql.firstRow('SELECT COUNT(*) AS cnt FROM fkreplica.books').cnt == 0
+
+        cleanup:
+        sql.execute('DROP TABLE IF EXISTS fkreplica.books')
+        sql.execute('DROP TABLE IF EXISTS fkreplica.authors')
+        sql.execute('DROP SCHEMA IF EXISTS fkreplica')
+        sql.close()
     }
 
     def "test cleanup with self-referencing foreign key"() {
@@ -294,33 +288,31 @@ class PostgresDatabaseCleanerFunctionalSpec extends Specification {
         PGSimpleDataSource dataSource = createDataSourceWithSchema('fkself')
         Sql sql = new Sql(dataSource)
 
-        try {
-            sql.execute('CREATE SCHEMA IF NOT EXISTS fkself')
-            // Create table with self-referencing FK
-            sql.execute('CREATE TABLE IF NOT EXISTS fkself.nodes (id SERIAL PRIMARY KEY, name VARCHAR(255), parent_id INTEGER REFERENCES fkself.nodes(id))')
+        sql.execute('CREATE SCHEMA IF NOT EXISTS fkself')
+        // Create table with self-referencing FK
+        sql.execute('CREATE TABLE IF NOT EXISTS fkself.nodes (id SERIAL PRIMARY KEY, name VARCHAR(255), parent_id INTEGER REFERENCES fkself.nodes(id))')
 
-            // Insert hierarchical data
-            sql.execute("INSERT INTO fkself.nodes (name, parent_id) VALUES ('Root', NULL)")
-            sql.execute("INSERT INTO fkself.nodes (name, parent_id) VALUES ('Child 1', 1)")
-            sql.execute("INSERT INTO fkself.nodes (name, parent_id) VALUES ('Child 2', 1)")
-            sql.execute("INSERT INTO fkself.nodes (name, parent_id) VALUES ('Grandchild', 2)")
+        // Insert hierarchical data
+        sql.execute("INSERT INTO fkself.nodes (name, parent_id) VALUES ('Root', NULL)")
+        sql.execute("INSERT INTO fkself.nodes (name, parent_id) VALUES ('Child 1', 1)")
+        sql.execute("INSERT INTO fkself.nodes (name, parent_id) VALUES ('Child 2', 1)")
+        sql.execute("INSERT INTO fkself.nodes (name, parent_id) VALUES ('Grandchild', 2)")
 
-            ApplicationContext applicationContext = Stub(ApplicationContext)
-            PostgresDatabaseCleaner cleaner = new PostgresDatabaseCleaner()
+        ApplicationContext applicationContext = Stub(ApplicationContext)
+        PostgresDatabaseCleaner cleaner = new PostgresDatabaseCleaner()
 
-            when:
-            DatabaseCleanupStats stats = cleaner.cleanup(applicationContext, dataSource)
+        when:
+        DatabaseCleanupStats stats = cleaner.cleanup(applicationContext, dataSource)
 
-            then: 'cleanup handles self-referencing FK'
-            stats.tableRowCounts['nodes'] == 4L
+        then: 'cleanup handles self-referencing FK'
+        stats.tableRowCounts['nodes'] == 4L
 
-            and: 'table is empty after cleanup'
-            sql.firstRow('SELECT COUNT(*) AS cnt FROM fkself.nodes').cnt == 0
-        }
-        finally {
-            sql.execute('DROP TABLE IF EXISTS fkself.nodes')
-            sql.execute('DROP SCHEMA IF EXISTS fkself')
-            sql.close()
-        }
+        and: 'table is empty after cleanup'
+        sql.firstRow('SELECT COUNT(*) AS cnt FROM fkself.nodes').cnt == 0
+
+        cleanup:
+        sql.execute('DROP TABLE IF EXISTS fkself.nodes')
+        sql.execute('DROP SCHEMA IF EXISTS fkself')
+        sql.close()
     }
 }

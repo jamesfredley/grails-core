@@ -19,11 +19,19 @@
 
 package org.apache.grails.testing.cleanup.postgresql
 
+import spock.util.environment.RestoreSystemProperties
+
 import org.springframework.context.ApplicationContext
 
 import spock.lang.Specification
 
+@RestoreSystemProperties
 class PostgresDatabaseCleanerSpec extends Specification {
+
+    def setupSpec() {
+        // Enable detailed stat collection for unit tests
+        System.setProperty('grails.testing.cleanup.debug', 'true')
+    }
 
     def "databaseType returns 'postgresql'"() {
         given:
