@@ -95,10 +95,8 @@ class PostgresDatabaseCleaner implements DatabaseCleaner {
         DatabaseCleanupStats stats = new DatabaseCleanupStats()
         stats.start()
 
-        Sql sql = null
+        Sql sql = new Sql(dataSource)
         try {
-            sql = new Sql(dataSource)
-
             // Disable all triggers and referential integrity checks for this session
             // This is more efficient than using CASCADE on each truncate
             sql.execute('SET session_replication_role = replica')
@@ -116,19 +114,14 @@ class PostgresDatabaseCleaner implements DatabaseCleaner {
 
             cleanupCacheLayer(applicationContext)
         }
-        catch (Exception e) {
-            log.warn('Error during database cleanup', e)
-        }
         finally {
-            if (sql) {
-                try {
-                    // Re-enable triggers and referential integrity checks
-                    sql.execute('SET session_replication_role = DEFAULT')
-                    sql.close()
-                }
-                catch (e) {
-                    log.error('Error closing SQL connection after cleanup', e)
-                }
+            try {
+                // Re-enable triggers and referential integrity checks
+                sql.execute('SET session_replication_role = DEFAULT')
+                sql.close()
+            }
+            catch (e) {
+                log.error('Error closing SQL connection after cleanup', e)
             }
             stats.stop()
         }

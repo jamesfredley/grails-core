@@ -89,7 +89,7 @@ class PostgresDatabaseCleanerSpec extends Specification {
         !cleaner.supports(badDataSource)
     }
 
-    def "cleanup returns empty stats when schema cannot be resolved"() {
+    def "cleanup errors when schema cannot be resolved"() {
         given:
         def applicationContext = Stub(ApplicationContext)
         def cleaner = new PostgresDatabaseCleaner()
@@ -101,6 +101,6 @@ class PostgresDatabaseCleanerSpec extends Specification {
         def stats = cleaner.cleanup(applicationContext, badDataSource)
 
         then:
-        stats.tableRowCounts.isEmpty()
+        thrown(RuntimeException)
     }
 }
