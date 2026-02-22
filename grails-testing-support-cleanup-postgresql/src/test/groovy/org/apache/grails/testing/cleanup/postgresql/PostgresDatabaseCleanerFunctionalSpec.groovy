@@ -27,7 +27,7 @@ import org.testcontainers.containers.GenericContainer
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.utility.DockerImageName
 
-import spock.lang.AutoCleanup
+import spock.lang.Requires
 import spock.lang.Shared
 import spock.lang.Specification
 
@@ -40,6 +40,7 @@ import org.apache.grails.testing.cleanup.core.DatabaseCleanupStats
  *
  * Run with: {@code ./gradlew test --tests "PostgresDatabaseCleanerFunctionalSpec"}
  */
+@Requires({ os.linux || !System.getenv().containsKey('CI') })
 class PostgresDatabaseCleanerFunctionalSpec extends Specification {
 
     @Shared
