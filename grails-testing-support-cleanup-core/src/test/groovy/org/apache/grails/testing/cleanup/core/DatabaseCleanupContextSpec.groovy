@@ -373,6 +373,103 @@ class DatabaseCleanupContextSpec extends Specification {
         result[0].datasourceName == 'dataSource'
     }
 
+    def "constructor throws IllegalStateException when cleaner returns null databaseType"() {
+        given:
+        def cleaner = Mock(DatabaseCleaner) {
+            databaseType() >> null
+        }
+
+        when:
+        new DatabaseCleanupContext([cleaner])
+
+        then:
+        def ex = thrown(IllegalStateException)
+        ex.message.contains('returned a null or empty databaseType()')
+        ex.message.contains(cleaner.class.name)
+    }
+
+    def "constructor throws IllegalStateException when cleaner returns empty databaseType"() {
+        given:
+        def cleaner = Mock(DatabaseCleaner) {
+            databaseType() >> ''
+        }
+
+        when:
+        new DatabaseCleanupContext([cleaner])
+
+        then:
+        def ex = thrown(IllegalStateException)
+        ex.message.contains('returned a null or empty databaseType()')
+    }
+
+    def "constructor throws IllegalStateException when cleaner returns whitespace-only databaseType"() {
+        given:
+        def cleaner = Mock(DatabaseCleaner) {
+            databaseType() >> '   '
+        }
+
+        when:
+        new DatabaseCleanupContext([cleaner])
+
+        then:
+        def ex = thrown(IllegalStateException)
+        ex.message.contains('returned a null or empty databaseType()')
+    }
+
+    def "constructor throws IllegalStateException when multiple cleaners declare same databaseType"() {
+        given:
+        def cleaner1 = Mock(DatabaseCleaner) {
+            databaseType() >> 'h2'
+        }
+        def cleaner2 = Mock(DatabaseCleaner) {
+            databaseType() >> 'h2'
+        }
+
+        when:
+        new DatabaseCleanupContext([cleaner1, cleaner2])
+
+        then:
+        def ex = thrown(IllegalStateException)
+        ex.message.contains("Duplicate databaseType 'h2'")
+        ex.message.contains('Each DatabaseCleaner must declare a unique databaseType')
+        ex.message.contains(cleaner1.class.name)
+        ex.message.contains(cleaner2.class.name)
+    }
+
+    def "constructor successfully creates map with valid unique cleaners"() {
+        given:
+        def h2Cleaner = Mock(DatabaseCleaner) {
+            databaseType() >> 'h2'
+        }
+        def pgCleaner = Mock(DatabaseCleaner) {
+            databaseType() >> 'postgresql'
+        }
+        def mySqlCleaner = Mock(DatabaseCleaner) {
+            databaseType() >> 'mysql'
+        }
+
+        when:
+        def context = new DatabaseCleanupContext([h2Cleaner, pgCleaner, mySqlCleaner])
+
+        then:
+        context.cleanersByType.size() == 3
+        context.cleanersByType.get('h2').is(h2Cleaner)
+        context.cleanersByType.get('postgresql').is(pgCleaner)
+        context.cleanersByType.get('mysql').is(mySqlCleaner)
+    }
+
+    def "constructor returns unmodifiable map"() {
+        given:
+        def cleaner = createMockCleaner('h2')
+        def context = new DatabaseCleanupContext([cleaner])
+
+        when:
+        context.cleanersByType.put('postgresql', createMockCleaner('postgresql'))
+
+        then:
+        thrown(UnsupportedOperationException)
+    }
+
     private DatabaseCleaner createMockCleaner(String type) {
         Mock(DatabaseCleaner) {
             databaseType() >> type
