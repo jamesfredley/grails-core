@@ -447,6 +447,82 @@ class DatabaseCleanupInterceptorSpec extends Specification {
         System.out = originalOut
     }
 
+    def "cleanup still runs even if test method fails"() {
+        given:
+        def dataSource = Mock(DataSource)
+        def appCtx = Mock(ApplicationContext) {
+            getBeansOfType(DataSource) >> ['dataSource': dataSource]
+        }
+        def cleaner = Mock(DatabaseCleaner) {
+            databaseType() >> 'h2'
+            supports(dataSource) >> true
+            cleanup(appCtx, dataSource) >> new DatabaseCleanupStats()
+        }
+        def context = new DatabaseCleanupContext([cleaner])
+        context.applicationContext = appCtx
+
+        def mapping = DatasourceCleanupMapping.parse(new String[0])
+        def resolver = new DefaultApplicationContextResolver()
+        def interceptor = new DatabaseCleanupInterceptor(context, true, mapping, resolver)
+
+        def testFailure = new RuntimeException('Test failed')
+        def invocation = Mock(IMethodInvocation) {
+            getInstance() >> new InstanceWithAppCtx(applicationContext: appCtx)
+            getFeature() >> Mock(FeatureInfo) {
+                getName() >> 'test feature'
+            }
+            proceed() >> { throw testFailure }
+        }
+
+        when:
+        interceptor.interceptCleanupMethod(invocation)
+
+        then: 'cleanup was performed before exception is re-thrown'
+        1 * cleaner.cleanup(appCtx, dataSource) >> new DatabaseCleanupStats()
+
+        and: 'the original test exception is re-thrown'
+        RuntimeException ex = thrown(RuntimeException)
+        ex.is(testFailure)
+    }
+
+    def "cleanup still runs even if cleanupSpec method fails"() {
+        given:
+        def dataSource = Mock(DataSource)
+        def appCtx = Mock(ApplicationContext) {
+            getBeansOfType(DataSource) >> ['dataSource': dataSource]
+        }
+        def cleaner = Mock(DatabaseCleaner) {
+            databaseType() >> 'h2'
+            supports(dataSource) >> true
+            cleanup(appCtx, dataSource) >> new DatabaseCleanupStats()
+        }
+        def context = new DatabaseCleanupContext([cleaner])
+        context.applicationContext = appCtx
+
+        def mapping = DatasourceCleanupMapping.parse(new String[0])
+        def resolver = new DefaultApplicationContextResolver()
+        def interceptor = new DatabaseCleanupInterceptor(context, true, mapping, resolver)
+
+        def specFailure = new RuntimeException('Cleanup spec failed')
+        def invocation = Mock(IMethodInvocation) {
+            getInstance() >> new InstanceWithAppCtx(applicationContext: appCtx)
+            getSpec() >> Mock(SpecInfo) {
+                getName() >> 'TestSpec'
+            }
+            proceed() >> { throw specFailure }
+        }
+
+        when:
+        interceptor.interceptCleanupSpecMethod(invocation)
+
+        then: 'cleanup was performed before exception is re-thrown'
+        1 * cleaner.cleanup(appCtx, dataSource) >> new DatabaseCleanupStats()
+
+        and: 'the original spec exception is re-thrown'
+        RuntimeException ex = thrown(RuntimeException)
+        ex.is(specFailure)
+    }
+
     // --- Helper classes ---
 
     static class InstanceWithAppCtx {

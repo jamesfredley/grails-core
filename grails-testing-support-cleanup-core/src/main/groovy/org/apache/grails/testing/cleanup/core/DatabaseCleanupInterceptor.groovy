@@ -62,34 +62,40 @@ class DatabaseCleanupInterceptor extends AbstractMethodInterceptor {
 
     @Override
     void interceptCleanupMethod(IMethodInvocation invocation) throws Throwable {
-        invocation.proceed()
-
-        if (classLevelCleanup) {
-            ensureApplicationContext(invocation)
-            log.debug('Performing database cleanup after test method: {}',
-                    invocation.feature?.name ?: 'unknown')
-            List<DatabaseCleanupStats> stats = context.performCleanup(mapping)
-            logStats(stats)
+        try {
+            invocation.proceed()
         }
-        else if (isCurrentFeatureAnnotated(invocation)) {
-            ensureApplicationContext(invocation)
-            DatasourceCleanupMapping methodMapping = getMethodMapping(invocation)
-            log.debug('Performing database cleanup after test method: {}',
-                    invocation.feature?.name ?: 'unknown')
-            List<DatabaseCleanupStats> stats = context.performCleanup(methodMapping)
-            logStats(stats)
+        finally {
+            if (classLevelCleanup) {
+                ensureApplicationContext(invocation)
+                log.debug('Performing database cleanup after test method: {}',
+                        invocation.feature?.name ?: 'unknown')
+                List<DatabaseCleanupStats> stats = context.performCleanup(mapping)
+                logStats(stats)
+            }
+            else if (isCurrentFeatureAnnotated(invocation)) {
+                ensureApplicationContext(invocation)
+                DatasourceCleanupMapping methodMapping = getMethodMapping(invocation)
+                log.debug('Performing database cleanup after test method: {}',
+                        invocation.feature?.name ?: 'unknown')
+                List<DatabaseCleanupStats> stats = context.performCleanup(methodMapping)
+                logStats(stats)
+            }
         }
     }
 
     @Override
     void interceptCleanupSpecMethod(IMethodInvocation invocation) throws Throwable {
-        invocation.proceed()
-
-        if (classLevelCleanup) {
-            ensureApplicationContext(invocation)
-            log.debug('Performing database cleanup after spec: {}', invocation.spec?.name ?: 'unknown')
-            List<DatabaseCleanupStats> stats = context.performCleanup(mapping)
-            logStats(stats)
+        try {
+            invocation.proceed()
+        }
+        finally {
+            if (classLevelCleanup) {
+                ensureApplicationContext(invocation)
+                log.debug('Performing database cleanup after spec: {}', invocation.spec?.name ?: 'unknown')
+                List<DatabaseCleanupStats> stats = context.performCleanup(mapping)
+                logStats(stats)
+            }
         }
     }
 
