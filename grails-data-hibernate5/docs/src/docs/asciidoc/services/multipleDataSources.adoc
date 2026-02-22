@@ -83,7 +83,7 @@ When GORM compiles a `@Service` abstract class, the `ServiceTransformation` AST 
 2. For each auto-implemented method, resolves the connection identifier via `findConnectionId()`
 3. Generates method bodies that use the appropriate connection - `GormEnhancer.findStaticApi(Book, 'books')` for CRUD operations and `DetachedCriteria.withConnection('books')` for finder queries
 
-This means auto-implemented methods like `get()`, `save()`, `delete()`, `findBy*()`, and `countBy*()` all respect the connection parameter without requiring manual implementations.
+This means auto-implemented methods like `get()`, `save()`, `delete()`, `findBy*()`, `countBy*()`, `@Where`-annotated methods, `@Query`-annotated methods, and `DetachedCriteria`-based queries all respect the connection parameter without requiring manual implementations.
 
 ==== Complex Queries with GormEnhancer
 
