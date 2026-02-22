@@ -33,6 +33,10 @@ import java.text.SimpleDateFormat
  * Spock method interceptor that performs database cleanup after tests annotated
  * with {@link DatabaseCleanup}. Supports both class-level and method-level annotations.
  *
+ * <p>During setup, this interceptor eagerly resolves the {@link ApplicationContext} from
+ * the {@link TestContextHolderListener} ThreadLocal and stores it on the
+ * {@link DatabaseCleanupContext}. After cleanup completes, the ThreadLocal is cleared.</p>
+ *
  * <p>When datasource entries are specified in the annotation (with optional database type
  * mappings), only those datasources are cleaned using the specified or auto-discovered
  * cleaners. Otherwise, all datasources are cleaned.</p>
@@ -63,43 +67,40 @@ class DatabaseCleanupInterceptor extends AbstractMethodInterceptor {
     }
 
     @Override
+    void interceptSetupMethod(IMethodInvocation invocation) throws Throwable {
+        try {
+            invocation.proceed()
+        }
+        finally {
+            ensureApplicationContext(invocation)
+        }
+    }
+
+    @Override
     void interceptCleanupMethod(IMethodInvocation invocation) throws Throwable {
         try {
             invocation.proceed()
         }
         finally {
-            if (classLevelCleanup) {
-                ensureApplicationContext(invocation)
-                log.debug('Performing database cleanup after test method: {}',
-                        invocation.feature?.name ?: 'unknown')
-                long startTime = System.currentTimeMillis()
-                List<DatabaseCleanupStats> stats = context.performCleanup(mapping)
-                logStats(stats, startTime)
+            try {
+                if (classLevelCleanup) {
+                    log.debug('Performing database cleanup after test method: {}',
+                            invocation.feature?.name ?: 'unknown')
+                    long startTime = System.currentTimeMillis()
+                    List<DatabaseCleanupStats> stats = context.performCleanup(mapping)
+                    logStats(stats, startTime)
+                }
+                else if (isCurrentFeatureAnnotated(invocation)) {
+                    DatasourceCleanupMapping methodMapping = getMethodMapping(invocation)
+                    log.debug('Performing database cleanup after test method: {}',
+                            invocation.feature?.name ?: 'unknown')
+                    long startTime = System.currentTimeMillis()
+                    List<DatabaseCleanupStats> stats = context.performCleanup(methodMapping)
+                    logStats(stats, startTime)
+                }
             }
-            else if (isCurrentFeatureAnnotated(invocation)) {
-                ensureApplicationContext(invocation)
-                DatasourceCleanupMapping methodMapping = getMethodMapping(invocation)
-                log.debug('Performing database cleanup after test method: {}',
-                        invocation.feature?.name ?: 'unknown')
-                long startTime = System.currentTimeMillis()
-                List<DatabaseCleanupStats> stats = context.performCleanup(methodMapping)
-                logStats(stats, startTime)
-            }
-        }
-    }
-
-    @Override
-    void interceptCleanupSpecMethod(IMethodInvocation invocation) throws Throwable {
-        try {
-            invocation.proceed()
-        }
-        finally {
-            if (classLevelCleanup) {
-                ensureApplicationContext(invocation)
-                log.debug('Performing database cleanup after spec: {}', invocation.spec?.name ?: 'unknown')
-                long startTime = System.currentTimeMillis()
-                List<DatabaseCleanupStats> stats = context.performCleanup(mapping)
-                logStats(stats, startTime)
+            finally {
+                TestContextHolderListener.CURRENT.remove()
             }
         }
     }

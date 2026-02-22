@@ -131,8 +131,8 @@ class DatabaseCleanupExtension implements IGlobalExtension {
             DatasourceCleanupMapping mapping = DatasourceCleanupMapping.parse(annotation.value())
             ApplicationContextResolver resolver = createResolver(annotation.resolver())
             DatabaseCleanupInterceptor interceptor = new DatabaseCleanupInterceptor(context, true, mapping, resolver)
+            spec.addSetupInterceptor(interceptor)
             spec.addCleanupInterceptor(interceptor)
-            spec.addCleanupSpecInterceptor(interceptor)
             log.debug('Registered DatabaseCleanupInterceptor for spec: {} (class-level)', spec.name)
             return
         }
@@ -159,6 +159,7 @@ class DatabaseCleanupExtension implements IGlobalExtension {
             DatasourceCleanupMapping defaultMapping = DatasourceCleanupMapping.parse(new String[0])
             ApplicationContextResolver defaultResolver = new DefaultApplicationContextResolver()
             DatabaseCleanupInterceptor interceptor = new DatabaseCleanupInterceptor(context, false, defaultMapping, defaultResolver)
+            spec.addSetupInterceptor(interceptor)
             spec.addCleanupInterceptor(interceptor)
             log.debug('Registered DatabaseCleanupInterceptor for spec: {} (method-level)', spec.name)
         }

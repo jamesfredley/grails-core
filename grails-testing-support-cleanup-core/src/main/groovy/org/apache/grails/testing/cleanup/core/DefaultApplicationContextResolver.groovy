@@ -19,25 +19,28 @@
 
 package org.apache.grails.testing.cleanup.core
 
-import groovy.transform.CompileDynamic
 import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 
 import org.spockframework.runtime.extension.IMethodInvocation
 
 import org.springframework.context.ApplicationContext
+import org.springframework.test.context.TestContext
 
 /**
  * Default implementation of {@link ApplicationContextResolver} that resolves the
- * {@link ApplicationContext} from a Spock test instance via Groovy property access.
+ * {@link ApplicationContext} from the Spring {@link TestContext} captured by
+ * {@link TestContextHolderListener}.
  *
- * <p>Since {@link DatabaseCleanup @DatabaseCleanup} requires {@code @Integration}, the
- * {@code IntegrationTestAstTransformation} ensures that test classes implement
- * {@code ApplicationContextAware} and have a {@code setApplicationContext()} method
- * injected at compile time. This means the {@code applicationContext} property is always
- * available as a standard Groovy property on the test instance.</p>
+ * <p>The {@code @Integration} AST transformation adds {@code @SpringBootTest} and
+ * {@code @ContextConfiguration} to the test class, so Spring's test infrastructure
+ * manages the {@link ApplicationContext} lifecycle. The {@link TestContextHolderListener}
+ * is auto-registered as a {@link org.springframework.test.context.TestExecutionListener}
+ * and captures the current {@link TestContext} on a {@link ThreadLocal} before each test
+ * method. This resolver simply reads from that {@link ThreadLocal}.</p>
  *
  * @see ApplicationContextResolver
+ * @see TestContextHolderListener
  * @see DatabaseCleanup#resolver()
  */
 @Slf4j
@@ -46,36 +49,16 @@ class DefaultApplicationContextResolver implements ApplicationContextResolver {
 
     @Override
     ApplicationContext resolve(IMethodInvocation invocation) {
-        resolveApplicationContext(invocation)
-    }
-
-    /**
-     * Resolves the ApplicationContext from the test instance via Groovy property access.
-     *
-     * <p>The {@code @Integration} AST transformation ensures that all integration test
-     * instances have an {@code applicationContext} property available.</p>
-     *
-     * @throws IllegalStateException if the ApplicationContext cannot be resolved
-     */
-    @CompileDynamic
-    private static ApplicationContext resolveApplicationContext(IMethodInvocation invocation) {
-        Object instance = invocation.instance
-
-        if (instance && instance.hasProperty('applicationContext')) {
-            try {
-                Object ctx = instance.applicationContext
-                if (ctx instanceof ApplicationContext) {
-                    return (ApplicationContext) ctx
-                }
-            }
-            catch (Exception e) {
-                throw new IllegalStateException(
-                    "Failed to read applicationContext property from test instance of type ${instance.getClass().name}" as String, e)
+        TestContext testContext = TestContextHolderListener.CURRENT.get()
+        if (testContext) {
+            ApplicationContext ctx = testContext.applicationContext
+            if (ctx) {
+                log.debug('Resolved ApplicationContext via TestContextHolderListener')
+                return ctx
             }
         }
 
-        String instanceType = instance ? instance.getClass().name : 'null'
         throw new IllegalStateException(
-            "Could not resolve ApplicationContext from test instance (type: ${instanceType}). Ensure the spec is annotated with @Integration so the applicationContext property is available." as String)
+            'Could not resolve ApplicationContext. Ensure the spec is annotated with @Integration and that TestContextHolderListener is registered as a TestExecutionListener.')
     }
 }

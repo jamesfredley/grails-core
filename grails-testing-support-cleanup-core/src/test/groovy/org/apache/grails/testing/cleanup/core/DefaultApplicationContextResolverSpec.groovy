@@ -24,17 +24,24 @@ import spock.lang.Specification
 import org.spockframework.runtime.extension.IMethodInvocation
 
 import org.springframework.context.ApplicationContext
+import org.springframework.test.context.TestContext
 
 class DefaultApplicationContextResolverSpec extends Specification {
 
-    def "resolve returns ApplicationContext from Groovy property"() {
+    def cleanup() {
+        TestContextHolderListener.CURRENT.remove()
+    }
+
+    def "resolve returns ApplicationContext from TestContextHolderListener ThreadLocal"() {
         given:
         def appCtx = Mock(ApplicationContext)
-        def resolver = new DefaultApplicationContextResolver()
-
-        def invocation = Mock(IMethodInvocation) {
-            getInstance() >> new InstanceWithProperty(applicationContext: appCtx)
+        def testContext = Mock(TestContext) {
+            getApplicationContext() >> appCtx
         }
+        TestContextHolderListener.CURRENT.set(testContext)
+
+        def resolver = new DefaultApplicationContextResolver()
+        def invocation = Mock(IMethodInvocation)
 
         when:
         ApplicationContext result = resolver.resolve(invocation)
@@ -43,13 +50,10 @@ class DefaultApplicationContextResolverSpec extends Specification {
         result.is(appCtx)
     }
 
-    def "resolve throws when no ApplicationContext can be found"() {
+    def "resolve throws IllegalStateException when ThreadLocal is empty"() {
         given:
         def resolver = new DefaultApplicationContextResolver()
-
-        def invocation = Mock(IMethodInvocation) {
-            getInstance() >> new InstanceWithNoContext()
-        }
+        def invocation = Mock(IMethodInvocation)
 
         when:
         resolver.resolve(invocation)
@@ -57,33 +61,17 @@ class DefaultApplicationContextResolverSpec extends Specification {
         then:
         def ex = thrown(IllegalStateException)
         ex.message.contains('Could not resolve ApplicationContext')
-        ex.message.contains('InstanceWithNoContext')
     }
 
-    def "resolve throws when instance is null"() {
+    def "resolve throws IllegalStateException when TestContext has null ApplicationContext"() {
         given:
-        def resolver = new DefaultApplicationContextResolver()
-
-        def invocation = Mock(IMethodInvocation) {
-            getInstance() >> null
+        def testContext = Mock(TestContext) {
+            getApplicationContext() >> null
         }
+        TestContextHolderListener.CURRENT.set(testContext)
 
-        when:
-        resolver.resolve(invocation)
-
-        then:
-        def ex = thrown(IllegalStateException)
-        ex.message.contains('Could not resolve ApplicationContext')
-        ex.message.contains('null')
-    }
-
-    def "resolve throws when applicationContext property is null"() {
-        given:
         def resolver = new DefaultApplicationContextResolver()
-
-        def invocation = Mock(IMethodInvocation) {
-            getInstance() >> new InstanceWithProperty()
-        }
+        def invocation = Mock(IMethodInvocation)
 
         when:
         resolver.resolve(invocation)
@@ -101,13 +89,8 @@ class DefaultApplicationContextResolverSpec extends Specification {
         resolver instanceof ApplicationContextResolver
     }
 
-    // --- Helper classes ---
-
-    static class InstanceWithProperty {
-        ApplicationContext applicationContext
-    }
-
-    static class InstanceWithNoContext {
-        String name = 'test'
+    def "resolver implements ApplicationContextResolver interface"() {
+        expect:
+        ApplicationContextResolver.isAssignableFrom(DefaultApplicationContextResolver)
     }
 }

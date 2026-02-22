@@ -153,8 +153,9 @@ class DatabaseCleanupExtensionSpec extends Specification {
         extension.visitSpec(spec)
 
         then:
+        1 * spec.addSetupInterceptor(_ as DatabaseCleanupInterceptor)
         1 * spec.addCleanupInterceptor(_ as DatabaseCleanupInterceptor)
-        1 * spec.addCleanupSpecInterceptor(_ as DatabaseCleanupInterceptor)
+        0 * spec.addCleanupSpecInterceptor(_)
     }
 
     def "visitSpec registers cleanup interceptor for method-level annotation"() {
@@ -182,6 +183,7 @@ class DatabaseCleanupExtensionSpec extends Specification {
         extension.visitSpec(spec)
 
         then:
+        1 * spec.addSetupInterceptor(_ as DatabaseCleanupInterceptor)
         1 * spec.addCleanupInterceptor(_ as DatabaseCleanupInterceptor)
         0 * spec.addCleanupSpecInterceptor(_)
     }

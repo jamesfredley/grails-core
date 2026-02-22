@@ -46,6 +46,9 @@ dependencies {
     api 'org.spockframework:spock-core', {
         // api: IGlobalExtension, IMethodInterceptor, IMethodInvocation
     }
+    implementation 'org.springframework:spring-test', {
+        // impl: TestContext, TestExecutionListener for TestContextHolderListener
+    }
 
     compileOnly 'org.apache.groovy:groovy', {
         // comp: CompileStatic, CompileDynamic, TypeCheckingMode
