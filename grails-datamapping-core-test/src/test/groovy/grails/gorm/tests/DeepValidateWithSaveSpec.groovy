@@ -22,35 +22,37 @@ import org.apache.grails.data.testing.tck.base.GrailsDataTckSpec
 import org.apache.grails.data.testing.tck.domains.ChildEntity
 import org.apache.grails.data.testing.tck.domains.TestEntity
 import org.apache.grails.data.simple.core.GrailsDataCoreTckManager
+import org.grails.datastore.gorm.validation.CascadingValidator
 
-/**
- * Created by graemerocher on 16/02/2017.
- */
 class DeepValidateWithSaveSpec extends GrailsDataTckSpec<GrailsDataCoreTckManager> {
 
-    void "save with deepValidate: true succeeds for a valid entity"() {
-        given: "a valid TestEntity"
-        def entity = new TestEntity(name: 'testDeepValidate', age: 10, child: new ChildEntity(name: 'child'))
+    void "save delegates deepValidate:true to CascadingValidator"() {
+        given: "a CascadingValidator mock installed for TestEntity"
+        def persistentEntity = manager.session.mappingContext.persistentEntities.find { it.javaClass == TestEntity }
+        def mockValidator = Mock(CascadingValidator)
+        mockValidator.supports(_) >> true
+        manager.session.mappingContext.addEntityValidator(persistentEntity, mockValidator)
+        def entity = new TestEntity(name: 'test', age: 10, child: new ChildEntity(name: 'child'))
 
         when: "saved with deepValidate: true"
-        def saved = entity.save(deepValidate: true, flush: true)
+        entity.save(deepValidate: true)
 
-        then: "the entity is persisted without errors"
-        saved != null
-        saved.id != null
-        !saved.hasErrors()
+        then: "CascadingValidator is called with cascade=true"
+        1 * mockValidator.validate(entity, _, true)
     }
 
-    void "save with deepValidate: false still saves a valid entity"() {
-        given: "a valid TestEntity"
-        def entity = new TestEntity(name: 'testShallowValidate', age: 10, child: new ChildEntity(name: 'child'))
+    void "save delegates deepValidate:false to CascadingValidator"() {
+        given: "a CascadingValidator mock installed for TestEntity"
+        def persistentEntity = manager.session.mappingContext.persistentEntities.find { it.javaClass == TestEntity }
+        def mockValidator = Mock(CascadingValidator)
+        mockValidator.supports(_) >> true
+        manager.session.mappingContext.addEntityValidator(persistentEntity, mockValidator)
+        def entity = new TestEntity(name: 'test', age: 10, child: new ChildEntity(name: 'child'))
 
         when: "saved with deepValidate: false"
-        def saved = entity.save(deepValidate: false, flush: true)
+        entity.save(deepValidate: false)
 
-        then: "the entity is persisted without errors"
-        saved != null
-        saved.id != null
-        !saved.hasErrors()
+        then: "CascadingValidator is called with cascade=false"
+        1 * mockValidator.validate(entity, _, false)
     }
 }
