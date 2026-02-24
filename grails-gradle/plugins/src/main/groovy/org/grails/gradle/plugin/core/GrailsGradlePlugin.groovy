@@ -234,8 +234,8 @@ class GrailsGradlePlugin extends GroovyPlugin {
                 c.groovyOptions.optimizationOptions.indy = indyEnabled
             }
             if (!indyEnabled) {
-                project.logger.lifecycle('Grails: Groovy invokedynamic (indy) is disabled to improve performance (see issue #15293).')
-                project.logger.lifecycle('        To enable invokedynamic: grails { indy = true } in build.gradle')
+                project.logger.info('Grails: Groovy invokedynamic (indy) is disabled to improve performance (see issue #15293).')
+                project.logger.info('        To enable invokedynamic: grails { indy = true } in build.gradle')
             }
         }
     }
