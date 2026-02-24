@@ -110,14 +110,13 @@ class WhereQueryConnectionRoutingSpec extends GrailsDataTckSpec {
     }
 
     private void saveToConnection(String connectionName, String name, Double amount) {
-        def item = new WhereRoutingItem(name: name, amount: amount)
         if (connectionName) {
             WhereRoutingItem."${connectionName}".withNewTransaction {
-                item.save(flush: true)
+                new WhereRoutingItem(name: name, amount: amount)."${connectionName}".save(flush: true)
             }
         } else {
             WhereRoutingItem.withNewTransaction {
-                item.save(flush: true)
+                new WhereRoutingItem(name: name, amount: amount).save(flush: true)
             }
         }
     }
@@ -125,7 +124,7 @@ class WhereQueryConnectionRoutingSpec extends GrailsDataTckSpec {
     private void deleteAllFromConnection(String connectionName) {
         if (connectionName) {
             WhereRoutingItem."${connectionName}".withNewTransaction {
-                WhereRoutingItem."${connectionName}".list().each { it.delete(flush: true) }
+                WhereRoutingItem."${connectionName}".list().each { it."${connectionName}".delete(flush: true) }
             }
         } else {
             WhereRoutingItem.withNewTransaction {
@@ -133,4 +132,5 @@ class WhereQueryConnectionRoutingSpec extends GrailsDataTckSpec {
             }
         }
     }
+
 }
