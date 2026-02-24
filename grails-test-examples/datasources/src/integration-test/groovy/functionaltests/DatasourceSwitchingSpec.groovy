@@ -380,7 +380,7 @@ class DatasourceSwitchingSpec extends Specification {
         when: "executing query on secondary"
         def results
         SecondBook.withTransaction {
-            results = SecondBook.executeQuery("from ds2.Book where title = :t", [t: secondaryTitle])
+            results = SecondBook.executeQuery("from " + SecondBook.name + " where title = :t", [t: secondaryTitle])
         }
 
         then: "only secondary data is returned"
@@ -445,7 +445,7 @@ class DatasourceSwitchingSpec extends Specification {
         when: "executing update on secondary"
         int updated
         SecondBook.withTransaction {
-            updated = SecondBook.executeUpdate("update ds2.Book set title = :newTitle where title = :oldTitle", [newTitle: updatedTitle, oldTitle: secondaryTitle])
+            updated = SecondBook.executeUpdate("update " + SecondBook.name + " set title = :newTitle where title = :oldTitle", [newTitle: updatedTitle, oldTitle: secondaryTitle])
         }
 
         then: "only secondary data is updated"
