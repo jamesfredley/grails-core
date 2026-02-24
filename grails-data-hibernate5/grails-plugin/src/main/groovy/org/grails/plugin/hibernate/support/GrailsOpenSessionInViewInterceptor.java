@@ -123,25 +123,39 @@ public class GrailsOpenSessionInViewInterceptor extends OpenSessionInViewInterce
             }
         }
 
+        RuntimeException firstFlushException = null;
         for (AdditionalSessionFactoryConfig config : additionalSessionFactories) {
             SessionFactory sf = config.sessionFactory;
             SessionHolder additionalHolder = (SessionHolder) TransactionSynchronizationManager.getResource(sf);
             if (additionalHolder != null) {
                 Session additionalSession = additionalHolder.getSession();
                 try {
-                    FlushMode additionalFlushMode = additionalSession.getHibernateFlushMode();
-                    boolean additionalIsNotManual = additionalFlushMode != FlushMode.MANUAL && additionalFlushMode != FlushMode.COMMIT;
-                    if (additionalIsNotManual) {
-                        if (logger.isDebugEnabled()) {
-                            logger.debug("Eagerly flushing additional Hibernate session for datasource '" + config.connectionName + "'");
+                    try {
+                        FlushMode additionalFlushMode = additionalSession.getHibernateFlushMode();
+                        boolean additionalIsNotManual = additionalFlushMode != FlushMode.MANUAL && additionalFlushMode != FlushMode.COMMIT;
+                        if (additionalIsNotManual) {
+                            if (logger.isDebugEnabled()) {
+                                logger.debug("Eagerly flushing additional Hibernate session for datasource '" + config.connectionName + "'");
+                            }
+                            additionalSession.flush();
                         }
-                        additionalSession.flush();
+                    }
+                    catch (RuntimeException ex) {
+                        if (firstFlushException == null) {
+                            firstFlushException = ex;
+                        }
+                        else {
+                            firstFlushException.addSuppressed(ex);
+                        }
                     }
                 }
                 finally {
                     additionalSession.setHibernateFlushMode(FlushMode.MANUAL);
                 }
             }
+        }
+        if (firstFlushException != null) {
+            throw firstFlushException;
         }
     }
 
