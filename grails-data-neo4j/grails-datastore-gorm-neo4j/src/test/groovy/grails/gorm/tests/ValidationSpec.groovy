@@ -19,7 +19,6 @@
 
 package grails.gorm.tests
 
-import org.grails.datastore.gorm.GormEnhancer
 import org.grails.datastore.gorm.validation.CascadingValidator
 import org.grails.datastore.mapping.model.PersistentEntity
 import org.springframework.validation.Validator
@@ -38,7 +37,7 @@ class ValidationSpec extends GormDatastoreSpec {
     def setup() {
         for(cls in domainClasses) {
             setupValidator(cls)
-            GormEnhancer.findValidationApi(cls).validator = null
+            session.mappingContext.addEntityValidator(persistentEntityFor(cls), null)
         }
     }
 

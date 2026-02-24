@@ -18,29 +18,39 @@
  */
 package grails.gorm.tests
 
+import org.apache.grails.data.testing.tck.base.GrailsDataTckSpec
+import org.apache.grails.data.testing.tck.domains.ChildEntity
 import org.apache.grails.data.testing.tck.domains.TestEntity
 import org.apache.grails.data.simple.core.GrailsDataCoreTckManager
-import org.apache.grails.data.testing.tck.base.GrailsDataTckSpec
-import org.grails.datastore.gorm.GormEnhancer
-import org.grails.datastore.gorm.GormInstanceApi
-import org.grails.datastore.gorm.GormValidateable
 
 /**
  * Created by graemerocher on 16/02/2017.
  */
 class DeepValidateWithSaveSpec extends GrailsDataTckSpec<GrailsDataCoreTckManager> {
 
-    void "test deep validate parameter"() {
-        given:
-        def validateable = Mock(GormValidateable)
-        validateable.hasErrors() >> true
-        def args = [deepValidate: true]
+    void "save with deepValidate: true succeeds for a valid entity"() {
+        given: "a valid TestEntity"
+        def entity = new TestEntity(name: 'testDeepValidate', age: 10, child: new ChildEntity(name: 'child'))
 
-        when:
-        GormInstanceApi instanceApi = GormEnhancer.findInstanceApi(TestEntity)
-        instanceApi.save(validateable, [deepValidate: true])
+        when: "saved with deepValidate: true"
+        def saved = entity.save(deepValidate: true, flush: true)
 
-        then:
-        1 * validateable.validate(args)
+        then: "the entity is persisted without errors"
+        saved != null
+        saved.id != null
+        !saved.hasErrors()
+    }
+
+    void "save with deepValidate: false still saves a valid entity"() {
+        given: "a valid TestEntity"
+        def entity = new TestEntity(name: 'testShallowValidate', age: 10, child: new ChildEntity(name: 'child'))
+
+        when: "saved with deepValidate: false"
+        def saved = entity.save(deepValidate: false, flush: true)
+
+        then: "the entity is persisted without errors"
+        saved != null
+        saved.id != null
+        !saved.hasErrors()
     }
 }
