@@ -102,4 +102,28 @@ class DetachedCriteriaJoinSpec extends GrailsDataTckSpec<GrailsDataHibernate5Tck
         team != null
         Hibernate.isInitialized(team.club)
     }
+
+    def 'check list with join and projected association property works without explicit alias'() {
+        given:
+        def club = new Club(name: 'Milan').save(flush: true)
+        new Team(name: 'Rossoneri', club: club).save(flush: true)
+
+        when:
+        def result = Team.where { name == 'Rossoneri' }.join('club').property('club.name').list()
+
+        then:
+        result == ['Milan']
+    }
+
+    def 'check get with join and projected association property works without explicit alias'() {
+        given:
+        def club = new Club(name: 'Inter').save(flush: true)
+        new Team(name: 'Nerazzurri', club: club).save(flush: true)
+
+        when:
+        def result = Team.where { name == 'Nerazzurri' }.join('club').property('club.name').get()
+
+        then:
+        result == 'Inter'
+    }
 }
