@@ -53,7 +53,7 @@ jobs:
       - name: "🌐 Output Agent IP" # in the event RAO blocks this agent, this can be used to debug it
         run: curl -s https://api.ipify.org
       - name: "📥 Checkout repository"
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0 # needed for docs release dropdown, (fetch-tags: true with fetch-depth: 1 does not work; https://github.com/actions/checkout/issues/1471)
           filter: tree:0 # limit size, keeping tags for docs release dropdown
@@ -239,7 +239,7 @@ jobs:
       - name: "📝 Establish release version"
         run: echo "VERSION=${TAG#v}" >> "$GITHUB_ENV"
       - name: "📥 Checkout Grails Core repository"
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           path: grails
           ref: ${{ env.TAG }}
@@ -434,7 +434,7 @@ jobs:
           tag_name: ${{ env.TAG }}
           files: dev-repo/DIST_SVN_REVISION.txt
       - name: "📥 Checkout repository"
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           path: ${{ env.REPO_NAME }}
           ref: ${{ env.TAG }}
@@ -479,7 +479,7 @@ jobs:
       - name: "📝 Establish release version"
         run: echo "VERSION=${TAG#v}" >> "$GITHUB_ENV"
       - name: "📥 Checkout repository"
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           ref: ${{ env.TAG }}
       - name: "🛠️️ Install tools"
@@ -548,17 +548,19 @@ jobs:
       - name: "📝 Establish release version"
         run: echo "VERSION=${TAG#v}" >> "$GITHUB_ENV"
       - name: "⚙️ Maximize build space"
-        uses: easimon/maximize-build-space@c28619d8999a147d5e09c1199f84ff6af6ad5794
-        with:
-          root-reserve-mb: 3072  # Leave ~3 GB on root FS
-          swap-size-mb: 2048     # Allocate 2 GB swap (default: 4 GB; reduce if not needed)
-          remove-dotnet: 'true'  # Remove .NET SDK (~3-4 GB savings)
-          remove-android: 'true' # Remove Android tools (~2 GB savings)
-          remove-haskell: 'true' # Remove Haskell (~1 GB savings)
-          remove-codeql: 'true'  # Remove CodeQL (~500 MB savings)
-          remove-docker-images: 'false'  # Prune Docker if used (~1-2 GB savings)
+        run: |
+          echo "-- Dotnet"
+          sudo rm -rf /usr/share/dotnet
+          echo "-- Android"
+          sudo rm -rf /usr/local/lib/android
+          echo "-- Haskell"
+          sudo rm -rf /opt/ghc
+          echo "-- CodeQL"
+          sudo rm -rf /opt/hostedtoolcache/CodeQL
+
+          df -h
       - name: "📥 Checkout repository"
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0 # needed for docs release dropdown, (fetch-tags: true with fetch-depth: 1 does not work; https://github.com/actions/checkout/issues/1471)
           filter: tree:0 # limit size, keeping tags for docs release dropdown
@@ -595,7 +597,7 @@ jobs:
       - name: "📝 Establish release version"
         run: echo "VERSION=${TAG#v}" >> "$GITHUB_ENV"
       - name: "📥 Checkout repository"
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           ref: ${{ env.TAG }}
       - name: "☕️ Setup JDK"
@@ -635,7 +637,7 @@ jobs:
       - name: "📝 Establish release version"
         run: echo "VERSION=${TAG#v}" >> "$GITHUB_ENV"
       - name: "📥 Checkout repository"
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           ref: ${{ env.TAG }}
           token: ${{ secrets.GITHUB_TOKEN }}

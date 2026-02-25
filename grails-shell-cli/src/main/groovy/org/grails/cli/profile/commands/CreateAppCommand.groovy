@@ -504,8 +504,10 @@ class CreateAppCommand extends ArgumentCompletingCommand implements ProfileRepos
                     .filter(s -> !s.isEmpty())
                     .toList()
             for (String overrideUrl : overrideRepos) {
-                System.out.println("Grails repo url override detected, including repo: ${overrideUrl}")
-                configuredRepositories.add(new GrailsGradleRepository(url: overrideUrl))
+                // when setting the environment variable, it's either a path or url so update the path case to ensure
+                String updatedUrl = overrideUrl.startsWith('http') ? overrideUrl : "uri('${overrideUrl}')"
+                System.out.println("Grails repo url override detected, including repo: ${overrideUrl} using ${updatedUrl}")
+                configuredRepositories.add(new GrailsGradleRepository(url: updatedUrl))
             }
         }
         for (String repoUrl : baseRepositories) {
@@ -834,7 +836,7 @@ class CreateAppCommand extends ArgumentCompletingCommand implements ProfileRepos
         String generate(int spaces, String lineSeparator) {
             validate()
 
-            if (!url.startsWith('http')) {
+            if (!url.startsWith('http') && !url.startsWith('uri(')) {
                 // mavenLocal(), mavenCentral(), etc
                 return "${' ' * spaces}${url}" as String
             }
