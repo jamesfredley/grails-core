@@ -166,7 +166,7 @@ class DatabaseCleanupInterceptor extends AbstractMethodInterceptor {
             println("Duration:   $overallDuration ms")
             println(separator)
 
-            statsList.each {
+            for (def it : statsList) {
                 if (it.tableRowCounts) {
                     println(it.toFormattedReport())
                 }
