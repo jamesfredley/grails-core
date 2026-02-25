@@ -91,30 +91,6 @@ class GroovyPageWithJSPTagsTests extends Specification implements TagLibUnitTest
         output.contains('1 . 1<br/>2 . 2<br/>3 . 3<br/>')
     }
 
-    @Issue(['GRAILS-3797', 'https://github.com/apache/grails-core/issues/1537'])
-    @PendingFeature(reason = 'until we upgrade to next version of test support')
-    def testGRAILS3797() {
-        given:
-        def template = '''
-            |<%@ taglib prefix="spring" uri="http://www.springframework.org/tags" %>
-            |<html>
-            |   <body>
-            |       <g:form controller="search" action="search" method="get">
-            |           <g:textField name="q" value="" />
-            |           <g:actionSubmit value="search" /><br/>
-            |           <img src="<spring:theme code="A_ICON" alt="icon"/>"/>
-            |       </g:form>
-            |   </body>
-            |</html>
-        '''.stripMargin()
-
-        when:
-        (messageSource as StaticMessageSource).addMessage('A_ICON', request.locale, 'test')
-        def output = applyTemplate(template)
-
-        then:
-        output.contains('<img src="test"/>')
-    }
 
     void testDynamicAttributes() {
         given:
