@@ -16,7 +16,6 @@
  *  specific language governing permissions and limitations
  *  under the License.
  */
-
 package org.apache.grails.testing.cleanup.core
 
 import javax.sql.DataSource
@@ -28,7 +27,7 @@ import org.springframework.context.ApplicationContext
 
 /**
  * Context that holds the discovered {@link DatabaseCleaner} implementations and
- * provides access to the application's datasources for cleanup operations.
+ * provides access to the application's data sources for cleanup operations.
  *
  * <p>Multiple cleaners can be registered (one per database type). When performing cleanup,
  * the context matches each datasource to an appropriate cleaner using either an explicit
@@ -41,31 +40,39 @@ import org.springframework.context.ApplicationContext
 class DatabaseCleanupContext {
 
     private ApplicationContext applicationContext
-    final Map<String, DatabaseCleaner> cleanersByType
+    private final Map<String, DatabaseCleaner> cleanersByType
 
     DatabaseCleanupContext(List<DatabaseCleaner> cleaners) {
         cleanersByType = createCleanersMap(cleaners)
     }
 
     private static Map<String, DatabaseCleaner> createCleanersMap(List<DatabaseCleaner> cleaners) {
-        Map<String, DatabaseCleaner> typeMap = [:]
-        for (DatabaseCleaner cleaner : cleaners) {
-            def type = cleaner.databaseType()
-            if (!type || type.trim().isEmpty()) {
+        def typeMap = [:] as Map<String, DatabaseCleaner>
+        cleaners.each {
+            def type = it.databaseType()?.trim()
+            if (!type) {
                 throw new IllegalStateException(
-                        "DatabaseCleaner implementation ${cleaner.class.name} returned a null or empty databaseType()" as String)
+                        "DatabaseCleaner implementation $it.class.name " +
+                        'returned a null or empty databaseType()'
+                )
             }
-
-            DatabaseCleaner existing = typeMap.get(type)
+            def existing = typeMap[type]
             if (existing) {
                 throw new IllegalStateException(
-                        "Duplicate databaseType '${type}' declared by both ${existing.class.name} and ${cleaner.class.name}. Each DatabaseCleaner must declare a unique databaseType." as String)
+                        "Duplicate databaseType '$type' declared by both " +
+                        "$existing.class.name and $it.class.name. " +
+                        'Each DatabaseCleaner must declare a unique databaseType.'
+                )
             }
 
-            typeMap.put(type, cleaner)
-            log.debug('Discovered DatabaseCleaner implementation: {} (type: {})', cleaner.class.name, type)
+            typeMap[type] = it
+            log.debug(
+                    'Discovered DatabaseCleaner implementation: {} (type: {})',
+                    it.class.name,
+                    type
+            )
         }
-        Collections.unmodifiableMap(typeMap)
+        typeMap.asImmutable()
     }
 
     /**
@@ -84,14 +91,14 @@ class DatabaseCleanupContext {
     }
 
     /**
-     * Performs cleanup on datasources found in the application context using the
+     * Performs cleanup on data sources found in the application context using the
      * provided mapping from the {@link DatabaseCleanup} annotation.
      *
-     * <p>If the mapping specifies explicit database types for datasources, those types
+     * <p>If the mapping specifies explicit database types for data sources, those types
      * are used to look up the cleaner directly. Otherwise, auto-discovery via
      * {@link DatabaseCleaner#supports(DataSource)} is used.</p>
      *
-     * @param mapping the parsed annotation value describing which datasources to clean
+     * @param mapping the parsed annotation value describing which data sources to clean
      *        and optionally which cleaner types to use
      * @return a list of {@link DatabaseCleanupStats}, one per datasource cleaned
      * @throws IllegalStateException if a datasource marked for cleanup has no
@@ -101,63 +108,100 @@ class DatabaseCleanupContext {
      */
     List<DatabaseCleanupStats> performCleanup(DatasourceCleanupMapping mapping) {
         if (!applicationContext) {
-            throw new IllegalStateException('Cannot perform database cleanup: ApplicationContext is not available')
+            throw new IllegalStateException(
+                    'Cannot perform database cleanup: ApplicationContext is not available'
+            )
         }
         if (!cleanersByType) {
-            throw new IllegalStateException('Cannot perform database cleanup: no DatabaseCleaner implementations found')
+            throw new IllegalStateException(
+                    'Cannot perform database cleanup: no DatabaseCleaner implementations found'
+            )
         }
 
-        Map<String, DataSource> allDataSources = applicationContext.getBeansOfType(DataSource)
-        List<DatabaseCleanupStats> allStats = []
+        def allDataSources = applicationContext.getBeansOfType(DataSource)
+        def allStats = [] as List<DatabaseCleanupStats>
 
         if (mapping.cleanAll) {
-            // Clean all datasources using auto-discovery
-            allDataSources.each { String beanName, DataSource dataSource ->
-                DatabaseCleaner cleaner = findCleanerFor(dataSource)
+            // Clean all data sources using auto-discovery
+            allDataSources.each { beanName, dataSource ->
+                def cleaner = findCleanerFor(dataSource)
                 if (!cleaner) {
                     throw new IllegalStateException(
-                            "No DatabaseCleaner implementation found that supports datasource '${beanName}'. Ensure that a database-specific cleanup library (e.g., grails-testing-support-cleanup-h2) is on the classpath for each database type used in your tests. Available cleaners: ${cleanersByType.values().collect { it.databaseType() }}" as String)
+                            'No DatabaseCleaner implementation found that supports ' +
+                            "datasource '$beanName'. Ensure that a database-specific " +
+                            'cleanup library (e.g., grails-testing-support-cleanup-h2) ' +
+                            'is on the classpath for each database type used in your tests. ' +
+                            "Available cleaners: ${cleanersByType.values()*.databaseType()}"
+                    )
                 }
 
-                log.debug('Cleaning up datasource: {} (using {} cleaner)', beanName, cleaner.databaseType())
-                DatabaseCleanupStats stats = cleaner.cleanup(applicationContext, dataSource)
+                log.debug(
+                        'Cleaning up datasource: {} (using {} cleaner)',
+                        beanName,
+                        cleaner.databaseType()
+                )
+                def stats = cleaner.cleanup(applicationContext, dataSource)
                 stats.datasourceName = beanName
                 if (stats.tableRowCounts) {
-                    log.debug('Cleaned {} tables from datasource {}', stats.tableRowCounts.size(), beanName)
+                    log.debug(
+                            'Cleaned {} tables from datasource {}',
+                            stats.tableRowCounts.size(),
+                            beanName
+                    )
                 }
-                allStats.add(stats)
+                allStats << stats
             }
         } else {
-            // Clean specific datasources per the mapping entries
-            for (DatasourceCleanupMapping.Entry entry : mapping.entries) {
-                DataSource dataSource = allDataSources.get(entry.datasourceName)
+            // Clean specific data sources per the mapping entries
+            mapping.entries.each {
+                def dsName = it.datasourceName
+                def dataSource = allDataSources[dsName]
                 if (!dataSource) {
                     throw new IllegalStateException(
-                            "Datasource '${entry.datasourceName}' specified in @DatabaseCleanup was not found in the application context. Available datasources: ${allDataSources.keySet()}" as String)
+                            "Datasource '$dsName' specified in @DatabaseCleanup " +
+                            'was not found in the application context. ' +
+                            "Available datasources: ${allDataSources.keySet()}"
+                    )
                 }
 
-                DatabaseCleaner cleaner
-                if (entry.hasExplicitType()) {
-                    cleaner = cleanersByType.get(entry.databaseType)
-                    if (!cleaner) {
+                def cleaner = it.hasExplicitType() ?
+                        cleanersByType[it.databaseType] :
+                        findCleanerFor(dataSource)
+
+                if (!cleaner) {
+                    if (it.hasExplicitType()) {
                         throw new IllegalStateException(
-                                "No DatabaseCleaner found for database type '${entry.databaseType}' specified in @DatabaseCleanup for datasource '${entry.datasourceName}'. Available cleaner types: ${cleanersByType.keySet()}" as String)
+                                "No DatabaseCleaner found for database type '$it.databaseType' " +
+                                "specified in @DatabaseCleanup for datasource '$dsName'. " +
+                                "Available cleaner types: ${cleanersByType.keySet()}"
+                        )
                     }
-                } else {
-                    cleaner = findCleanerFor(dataSource)
-                    if (!cleaner) {
-                        throw new IllegalStateException(
-                                "No DatabaseCleaner implementation found that supports datasource '${entry.datasourceName}'. Ensure that a database-specific cleanup library (e.g., grails-testing-support-cleanup-h2) is on the classpath, or specify the database type explicitly: '${entry.datasourceName}:type'. Available cleaners: ${cleanersByType.values().collect { it.databaseType() }}" as String)
-                    }
+                    throw new IllegalStateException(
+                            "No DatabaseCleaner implementation found that supports datasource '$dsName'. " +
+                            'Ensure that a database-specific cleanup library ' +
+                            '(e.g., grails-testing-support-cleanup-h2) is on the classpath, ' +
+                            "or specify the database type explicitly: '$dsName:type'. " +
+                            "Available cleaners: ${cleanersByType.values()*.databaseType()}"
+                    )
                 }
 
-                log.debug('Cleaning up datasource: {} (using {} cleaner)', entry.datasourceName, cleaner.databaseType())
-                DatabaseCleanupStats stats = cleaner.cleanup(applicationContext, dataSource)
-                stats.datasourceName = entry.datasourceName
+                log.debug(
+                        'Cleaning up datasource: {} (using {} cleaner)',
+                        dsName,
+                        cleaner.databaseType()
+                )
+                def stats = cleaner.cleanup(applicationContext, dataSource)
+                stats.datasourceName = dsName
+
                 if (stats.tableRowCounts) {
-                    log.debug('Cleaned {} tables from datasource {}', stats.tableRowCounts.size(), entry.datasourceName)
+                    log.debug(
+                            'Cleaned {} tables from datasource {}',
+                            stats.tableRowCounts.size(),
+                            dsName
+                    )
                 }
-                allStats.add(stats)
+
+                allStats << stats
             }
         }
 
@@ -171,11 +215,6 @@ class DatabaseCleanupContext {
      * @return the matching cleaner, or {@code null} if none supports it
      */
     private DatabaseCleaner findCleanerFor(DataSource dataSource) {
-        for (DatabaseCleaner cleaner : cleanersByType.values()) {
-            if (cleaner.supports(dataSource)) {
-                return cleaner
-            }
-        }
-        null
+        cleanersByType.values().find { it.supports(dataSource) }
     }
 }

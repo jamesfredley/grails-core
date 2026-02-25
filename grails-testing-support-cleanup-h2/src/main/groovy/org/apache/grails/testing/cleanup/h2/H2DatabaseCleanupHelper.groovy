@@ -16,11 +16,7 @@
  *  specific language governing permissions and limitations
  *  under the License.
  */
-
 package org.apache.grails.testing.cleanup.h2
-
-import java.sql.Connection
-import java.sql.DatabaseMetaData
 
 import javax.sql.DataSource
 
@@ -45,36 +41,20 @@ class H2DatabaseCleanupHelper {
      * @return the schema name, or {@code null} if it cannot be determined
      */
     static String resolveSchemaName(DataSource dataSource) {
-        Connection connection = null
-        try {
-            connection = dataSource.getConnection()
-            String schema = connection.getSchema()
+        try (def con = dataSource.getConnection()) {
+            def schema = con.getSchema()
             if (schema) {
                 log.debug('Resolved schema name from connection: {}', schema)
                 return schema
             }
-
-            // Fallback: try to get the schema from the database metadata URL
-            DatabaseMetaData metaData = connection.getMetaData()
-            String url = metaData.getURL()
+            def url = con.metaData.URL
             if (url) {
-                schema = extractSchemaFromUrl(url)
-                log.debug('Resolved schema name from URL {}: {}', url, schema)
-                return schema
+                def extracted = extractSchemaFromUrl(url)
+                log.debug('Resolved schema name from URL {}: {}', url, extracted)
+                return extracted
             }
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             log.warn('Failed to resolve schema name from datasource', e)
-        }
-        finally {
-            if (connection) {
-                try {
-                    connection.close()
-                }
-                catch (Exception ignored) {
-                    // ignore
-                }
-            }
         }
         null
     }
@@ -94,53 +74,48 @@ class H2DatabaseCleanupHelper {
      * @return the uppercase schema name, or {@code null} if the URL format is not recognized
      */
     static String extractSchemaFromUrl(String url) {
-        if (!url) {
+        if (!url?.startsWith('jdbc:h2:')) {
             return null
         }
 
         // Handle H2 in-memory URLs: jdbc:h2:mem:dbName or jdbc:h2:mem:dbName;params
         if (url.startsWith('jdbc:h2:mem:')) {
-            String remainder = url.substring('jdbc:h2:mem:'.length())
-            // Remove any trailing parameters after ';'
-            int semicolonIdx = remainder.indexOf(';')
-            if (semicolonIdx >= 0) {
-                remainder = remainder.substring(0, semicolonIdx)
-            }
-            return remainder ? remainder.toUpperCase() : null
+            def name = stripParams(url.substring('jdbc:h2:mem:'.length()))
+            return toSchema(name)
         }
 
-        // Handle H2 file-based URLs: jdbc:h2:./dbName, jdbc:h2:file:./path/dbName, jdbc:h2:tcp://host/dbName
-        if (url.startsWith('jdbc:h2:')) {
-            String remainder = url.substring('jdbc:h2:'.length())
+        def remainder = url.substring('jdbc:h2:'.length())
 
-            // Remove protocol prefixes (tcp://, ssl://)
-            if (remainder.startsWith('tcp://') || remainder.startsWith('ssl://')) {
-                int slashIdx = remainder.indexOf('/', remainder.indexOf('//') + 2)
-                if (slashIdx >= 0) {
-                    remainder = remainder.substring(slashIdx + 1)
-                }
+        // Remove protocol prefixes (tcp://, ssl://)
+        if (remainder.startsWith('tcp://') || remainder.startsWith('ssl://')) {
+            int slashIdx = remainder.indexOf('/', remainder.indexOf('//') + 2)
+            if (slashIdx >= 0) {
+                remainder = remainder.substring(slashIdx + 1)
             }
-
-            // Remove 'file:' prefix
-            if (remainder.startsWith('file:')) {
-                remainder = remainder.substring('file:'.length())
-            }
-
-            // Remove any trailing parameters after ';'
-            int semicolonIdx = remainder.indexOf(';')
-            if (semicolonIdx >= 0) {
-                remainder = remainder.substring(0, semicolonIdx)
-            }
-
-            // Get the last path segment as the database name
-            int lastSlash = remainder.lastIndexOf('/')
-            if (lastSlash >= 0) {
-                remainder = remainder.substring(lastSlash + 1)
-            }
-
-            return remainder ? remainder.toUpperCase() : null
         }
 
-        null
+        // Remove 'file:' prefix
+        if (remainder.startsWith('file:')) {
+            remainder = remainder.substring('file:'.length())
+        }
+
+        remainder = stripParams(remainder)
+
+        // last path segment
+        int lastSlash = remainder.lastIndexOf('/')
+        if (lastSlash >= 0) {
+            remainder = remainder.substring(lastSlash + 1)
+        }
+
+        return toSchema(remainder)
+    }
+
+    private static String stripParams(String s) {
+        int idx = s.indexOf(';')
+        idx >= 0 ? s.substring(0, idx) : s
+    }
+
+    private static String toSchema(String s) {
+        s ? s.toUpperCase() : null
     }
 }

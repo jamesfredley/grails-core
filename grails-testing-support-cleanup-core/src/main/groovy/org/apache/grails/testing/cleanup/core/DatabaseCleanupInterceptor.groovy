@@ -16,7 +16,6 @@
  *  specific language governing permissions and limitations
  *  under the License.
  */
-
 package org.apache.grails.testing.cleanup.core
 
 import groovy.transform.CompileStatic
@@ -27,8 +26,6 @@ import org.spockframework.runtime.extension.IMethodInvocation
 
 import org.springframework.context.ApplicationContext
 
-import java.text.SimpleDateFormat
-
 /**
  * Spock method interceptor that performs database cleanup after tests annotated
  * with {@link DatabaseCleanup}. Supports both class-level and method-level annotations.
@@ -38,8 +35,8 @@ import java.text.SimpleDateFormat
  * {@link DatabaseCleanupContext}. After cleanup completes, the ThreadLocal is cleared.</p>
  *
  * <p>When datasource entries are specified in the annotation (with optional database type
- * mappings), only those datasources are cleaned using the specified or auto-discovered
- * cleaners. Otherwise, all datasources are cleaned.</p>
+ * mappings), only those data sources are cleaned using the specified or auto-discovered
+ * cleaners. Otherwise, all datas ources are cleaned.</p>
  */
 @Slf4j
 @CompileStatic
@@ -58,8 +55,12 @@ class DatabaseCleanupInterceptor extends AbstractMethodInterceptor {
      *        for method-level cleanup, the method's own annotation values are parsed at runtime
      * @param resolver the strategy for resolving the ApplicationContext from test instances
      */
-    DatabaseCleanupInterceptor(DatabaseCleanupContext context, boolean classLevelCleanup,
-                               DatasourceCleanupMapping mapping, ApplicationContextResolver resolver) {
+    DatabaseCleanupInterceptor(
+            DatabaseCleanupContext context,
+            boolean classLevelCleanup,
+            DatasourceCleanupMapping mapping,
+            ApplicationContextResolver resolver
+    ) {
         this.context = context
         this.classLevelCleanup = classLevelCleanup
         this.mapping = mapping
@@ -83,15 +84,22 @@ class DatabaseCleanupInterceptor extends AbstractMethodInterceptor {
         }
         finally {
             try {
-                def methodMapping = invocation.feature?.featureMethod?.isAnnotationPresent(DatabaseCleanup)
+                def methodMapping = invocation.
+                        feature?.
+                        featureMethod?.
+                        isAnnotationPresent(DatabaseCleanup)
                 if (!classLevelCleanup && !methodMapping) {
                     return
                 }
-
-                log.debug('Performing database cleanup after test method: {}', invocation.feature?.name ?: 'unknown')
-                DatasourceCleanupMapping selectedMapping = methodMapping ? getMethodMapping(invocation) : mapping
+                log.debug(
+                        'Performing database cleanup after test method: {}',
+                        invocation.feature?.name ?: 'unknown'
+                )
+                def selectedMapping = methodMapping ?
+                        getMethodMapping(invocation)
+                        : mapping
                 long startTime = System.currentTimeMillis()
-                List<DatabaseCleanupStats> stats = context.performCleanup(selectedMapping)
+                def stats = context.performCleanup(selectedMapping)
                 logStats(stats, startTime)
             }
             finally {
@@ -104,8 +112,13 @@ class DatabaseCleanupInterceptor extends AbstractMethodInterceptor {
      * Gets the parsed mapping from the method-level @DatabaseCleanup annotation.
      */
     private static DatasourceCleanupMapping getMethodMapping(IMethodInvocation invocation) {
-        DatabaseCleanup annotation = invocation.feature?.featureMethod?.getAnnotation(DatabaseCleanup)
-        annotation ? DatasourceCleanupMapping.parse(annotation.value()) : DatasourceCleanupMapping.parse(new String[0])
+        def annotation = invocation.
+                feature?.
+                featureMethod?.
+                getAnnotation(DatabaseCleanup)
+        annotation ?
+                DatasourceCleanupMapping.parse(annotation.value()) :
+                DatasourceCleanupMapping.parse(new String[0])
     }
 
     /**
@@ -119,20 +132,22 @@ class DatabaseCleanupInterceptor extends AbstractMethodInterceptor {
             return
         }
 
-        ApplicationContext appCtx = resolver.resolve(invocation)
+        def appCtx = resolver.resolve(invocation)
         if (appCtx) {
             context.applicationContext = appCtx
         }
         else {
             throw new IllegalStateException(
-                'Could not resolve ApplicationContext from test instance. Ensure the spec is annotated with @Integration.')
+                'Could not resolve ApplicationContext from test instance. ' +
+                'Ensure the spec is annotated with @Integration.'
+            )
         }
     }
 
     /**
      * Logs cleanup statistics and overall timing information for the cleanup operation.
      *
-     * @param statsList the list of cleanup statistics from individual datasources
+     * @param statsList the list of cleanup statistics from individual data sources
      * @param overallStartTime the overall start time of the cleanup operation
      */
     private static void logStats(List<DatabaseCleanupStats> statsList, long overallStartTime) {
@@ -140,20 +155,20 @@ class DatabaseCleanupInterceptor extends AbstractMethodInterceptor {
             long overallEndTime = System.currentTimeMillis()
             long overallDuration = overallEndTime - overallStartTime
 
-            String separator = '=========================================================='
-            String startTimeFormatted = DatabaseCleanupStats.formatTime(overallStartTime)
-            String endTimeFormatted = DatabaseCleanupStats.formatTime(overallEndTime)
+            def separator = '=========================================================='
+            def startTimeFormatted = DatabaseCleanupStats.formatTime(overallStartTime)
+            def endTimeFormatted = DatabaseCleanupStats.formatTime(overallEndTime)
 
-            System.out.println(separator)
-            System.out.println('Overall Cleanup Timing')
-            System.out.println("Start Time: ${startTimeFormatted}")
-            System.out.println("End Time:   ${endTimeFormatted}")
-            System.out.println("Duration:   ${overallDuration} ms")
-            System.out.println(separator)
+            println(separator)
+            println('Overall Cleanup Timing')
+            println("Start Time: $startTimeFormatted")
+            println("End Time:   $endTimeFormatted")
+            println("Duration:   $overallDuration ms")
+            println(separator)
 
-            for (DatabaseCleanupStats stats : statsList) {
-                if (stats.tableRowCounts) {
-                    System.out.println(stats.toFormattedReport())
+            statsList.each {
+                if (it.tableRowCounts) {
+                    println(it.toFormattedReport())
                 }
             }
         }

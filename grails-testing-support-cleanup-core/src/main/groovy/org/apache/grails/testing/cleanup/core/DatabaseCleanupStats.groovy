@@ -16,11 +16,11 @@
  *  specific language governing permissions and limitations
  *  under the License.
  */
-
 package org.apache.grails.testing.cleanup.core
 
-import groovy.transform.CompileStatic
 import java.text.SimpleDateFormat
+
+import groovy.transform.CompileStatic
 
 /**
  * Captures statistics from a single datasource cleanup operation, including which
@@ -147,10 +147,10 @@ class DatabaseCleanupStats {
         String separator = '=========================================================='
         String divider = '----------------------------------------------------------'
 
-        StringBuilder sb = new StringBuilder()
+        def sb = new StringBuilder()
         sb.append(separator).append('\n')
         if (datasourceName) {
-            sb.append("Database Cleanup Stats (datasource: ${datasourceName})").append('\n')
+            sb.append("Database Cleanup Stats (datasource: $datasourceName)").append('\n')
         }
         else {
             sb.append('Database Cleanup Stats').append('\n')
@@ -165,7 +165,7 @@ class DatabaseCleanupStats {
                 sb.append("End Time:   ${formatTime(endTimeMillis)}").append('\n')
             }
             if (startTimeMillis > 0L && endTimeMillis > 0L) {
-                sb.append("Duration:   ${durationMillis} ms").append('\n')
+                sb.append("Duration:   $durationMillis ms").append('\n')
             }
         }
 
@@ -193,8 +193,8 @@ class DatabaseCleanupStats {
      * @return the formatted time string
      */
     static String formatTime(long timeMillis) {
-        SimpleDateFormat sdf = new SimpleDateFormat('yyyy-MM-dd\'T\'HH:mm:ss.SSS\'Z\'')
-        sdf.setTimeZone(TimeZone.getTimeZone('UTC'))
-        sdf.format(new Date(timeMillis))
+        new SimpleDateFormat(/yyyy-MM-dd'T'HH:mm:ss.SSS'Z'/).tap {
+            timeZone = TimeZone.getTimeZone('UTC')
+        }.format(new Date(timeMillis))
     }
 }

@@ -16,7 +16,6 @@
  *  specific language governing permissions and limitations
  *  under the License.
  */
-
 package org.apache.grails.testing.cleanup.core
 
 import groovy.transform.CompileStatic
@@ -33,18 +32,18 @@ import groovy.transform.CompileStatic
  *       cleaner that declares the specified {@link DatabaseCleaner#databaseType()}</li>
  * </ul>
  *
- * <p>If the annotation value is empty (the default), all datasources in the application
+ * <p>If the annotation value is empty (the default), all data sources in the application
  * context are cleaned using auto-discovery.</p>
  *
  * <p>Examples:</p>
  * <pre>
- * // Clean all datasources (auto-discover cleaners)
+ * // Clean all data sources (auto-discover cleaners)
  * &#64;DatabaseCleanup
  *
- * // Clean specific datasources (auto-discover cleaners)
+ * // Clean specific data sources (auto-discover cleaners)
  * &#64;DatabaseCleanup(['dataSource', 'dataSource_secondary'])
  *
- * // Clean specific datasources with explicit cleaner types
+ * // Clean specific data sources with explicit cleaner types
  * &#64;DatabaseCleanup(['dataSource:h2', 'dataSource_pg:postgresql'])
  *
  * // Mixed: some explicit, some auto-discovered
@@ -71,12 +70,14 @@ class DatasourceCleanupMapping {
          * @return {@code true} if this entry has an explicit database type mapping
          */
         boolean hasExplicitType() {
-            databaseType as boolean
+            databaseType
         }
 
         @Override
         String toString() {
-            hasExplicitType() ? "${datasourceName}:${databaseType}" : datasourceName
+            hasExplicitType() ?
+                    "$datasourceName:$databaseType" :
+                    datasourceName
         }
     }
 
@@ -84,7 +85,7 @@ class DatasourceCleanupMapping {
     private final boolean cleanAll
 
     private DatasourceCleanupMapping(List<Entry> entries, boolean cleanAll) {
-        this.entries = Collections.unmodifiableList(new ArrayList<>(entries))
+        this.entries = entries.asImmutable()
         this.cleanAll = cleanAll
     }
 
@@ -96,8 +97,8 @@ class DatasourceCleanupMapping {
     }
 
     /**
-     * @return {@code true} if no specific datasources were specified, meaning all
-     *         datasources in the application context should be cleaned
+     * @return {@code true} if no specific data sources were specified, meaning all
+     *         datas ources in the application context should be cleaned
      */
     boolean isCleanAll() {
         cleanAll
@@ -114,37 +115,40 @@ class DatasourceCleanupMapping {
      * @throws IllegalArgumentException if an entry has an empty datasource name or database type
      */
     static DatasourceCleanupMapping parse(String[] annotationValues) {
-        if (!annotationValues || annotationValues.length == 0) {
+        if (!annotationValues) {
             return new DatasourceCleanupMapping([], true)
         }
 
-        List<Entry> entries = []
-        for (String value : annotationValues) {
-            if (!value || value.trim().isEmpty()) {
+        def entries = annotationValues.collect {
+            def v = it?.trim()
+            if (!v) {
                 throw new IllegalArgumentException(
-                    '@DatabaseCleanup contains a null or empty entry')
+                        '@DatabaseCleanup contains a null or empty entry'
+                )
             }
 
-            int colonIdx = value.indexOf(':')
-            if (colonIdx < 0) {
+            def parts = v.split(':', 2)*.trim()
+            if (parts.size() == 1) {
                 // No colon — datasource name only, auto-discover cleaner
-                entries.add(new Entry(value.trim(), null))
+                return new Entry(parts[0], null)
             }
-            else {
-                String name = value.substring(0, colonIdx).trim()
-                String type = value.substring(colonIdx + 1).trim()
 
-                if (name.isEmpty()) {
-                    throw new IllegalArgumentException(
-                        "Invalid @DatabaseCleanup entry '${value}': datasource name cannot be empty")
-                }
-                if (type.isEmpty()) {
-                    throw new IllegalArgumentException(
-                        "Invalid @DatabaseCleanup entry '${value}': database type cannot be empty after ':'")
-                }
-
-                entries.add(new Entry(name, type))
+            def name = parts[0]
+            def type = parts[1]
+            if (!name) {
+                throw new IllegalArgumentException(
+                        "Invalid @DatabaseCleanup entry '$it': " +
+                        'datasource name cannot be empty'
+                )
             }
+            if (!type) {
+                throw new IllegalArgumentException(
+                        "Invalid @DatabaseCleanup entry '$it': " +
+                        "database type cannot be empty after ':'"
+                )
+            }
+
+            new Entry(name, type)
         }
 
         new DatasourceCleanupMapping(entries, false)

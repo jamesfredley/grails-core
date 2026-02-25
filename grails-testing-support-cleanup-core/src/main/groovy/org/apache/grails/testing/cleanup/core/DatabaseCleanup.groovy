@@ -16,7 +16,6 @@
  *  specific language governing permissions and limitations
  *  under the License.
  */
-
 package org.apache.grails.testing.cleanup.core
 
 import java.lang.annotation.ElementType
@@ -85,7 +84,7 @@ import java.lang.annotation.Target
     /**
      * The datasource entries to clean up. Each entry can be a plain datasource bean name
      * (e.g., {@code "dataSource"}) or a datasource-to-type mapping
-     * (e.g., {@code "dataSource:h2"}). If empty (the default), all datasources found
+     * (e.g., {@code "dataSource:h2"}). If empty (the default), all data sources found
      * in the application context will be cleaned using auto-discovery.
      *
      * @return an array of datasource entries

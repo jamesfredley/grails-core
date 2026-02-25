@@ -16,22 +16,15 @@
  *  specific language governing permissions and limitations
  *  under the License.
  */
-
 package org.apache.grails.testing.cleanup.postgresql
-
-import java.sql.Connection
-import java.sql.DatabaseMetaData
 
 import javax.sql.DataSource
 
-import groovy.sql.GroovyResultSet
 import groovy.sql.Sql
-import groovy.transform.CompileDynamic
 import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 
 import org.springframework.context.ApplicationContext
-import org.springframework.util.ClassUtils
 
 import org.apache.grails.testing.cleanup.core.DatabaseCleaner
 import org.apache.grails.testing.cleanup.core.DatabaseCleanupStats
@@ -57,6 +50,16 @@ import org.apache.grails.testing.cleanup.core.DatabaseCleanupStats
 class PostgresDatabaseCleaner implements DatabaseCleaner {
 
     private static final String DATABASE_TYPE = 'postgresql'
+    private static final String QUERY = '''
+            SELECT n.nspname AS schemaname, 
+                c.relname AS table_name,
+                c.reltuples::bigint AS row_count_estimate
+            FROM pg_class c
+            JOIN pg_namespace n ON n.oid = c.relnamespace
+            WHERE c.relkind = 'r'
+            AND n.nspname = ?
+            ORDER BY row_count_estimate DESC;
+        '''
 
     @Override
     String databaseType() {
@@ -65,45 +68,27 @@ class PostgresDatabaseCleaner implements DatabaseCleaner {
 
     @Override
     boolean supports(DataSource dataSource) {
-        Connection connection = null
-        try {
-            connection = dataSource.getConnection()
-            DatabaseMetaData metaData = connection.getMetaData()
-            String url = metaData.getURL()
-            return url && url.startsWith('jdbc:postgresql:')
-        }
-        catch (Exception e) {
+        try (def con = dataSource.connection) {
+            return con.metaData?.URL?.startsWith('jdbc:postgresql:')
+        } catch (Exception e) {
             log.debug('Could not determine if datasource is PostgreSQL', e)
             return false
         }
-        finally {
-            if (connection) {
-                try {
-                    connection.close()
-                }
-                catch (Exception ignored) {
-                    // ignore
-                }
-            }
-        }
     }
 
-    @SuppressWarnings('SqlNoDataSourceInspection')
     @Override
+    @SuppressWarnings('SqlNoDataSourceInspection')
     DatabaseCleanupStats cleanup(ApplicationContext applicationContext, DataSource dataSource) {
-        DatabaseCleanupStats stats = new DatabaseCleanupStats()
-        stats.start()
 
-        Sql sql = new Sql(dataSource)
+        def stats = new DatabaseCleanupStats().tap { start() }
+        def sql = new Sql(dataSource)
         try {
             // Disable all triggers and referential integrity checks for this session
             // This is more efficient than using CASCADE on each truncate
             sql.execute('SET session_replication_role = replica')
-
-            String currentSchema = PostgresDatabaseCleanupHelper.resolveCurrentSchema(dataSource)
+            def currentSchema = PostgresDatabaseCleanupHelper.resolveCurrentSchema(dataSource)
             log.debug('Cleaning schema: {}', currentSchema)
             cleanupSchema(sql, currentSchema, stats)
-
             cleanupCacheLayer(applicationContext)
         }
         finally {
@@ -117,32 +102,19 @@ class PostgresDatabaseCleaner implements DatabaseCleaner {
             }
             stats.stop()
         }
-
         stats
     }
 
     @SuppressWarnings('SqlNoDataSourceInspection')
-    private void cleanupSchema(Sql sql, String schemaName, DatabaseCleanupStats stats) {
-        String query = """
-            SELECT n.nspname AS schemaname, 
-                c.relname AS table_name,
-                c.reltuples::bigint AS row_count_estimate
-            FROM pg_class c
-            JOIN pg_namespace n ON n.oid = c.relnamespace
-            WHERE c.relkind = 'r'
-            AND n.nspname = '${schemaName}'
-            ORDER BY row_count_estimate DESC;
-        """ as String
-
-        List<String> tablesInSchema = []
-        sql.eachRow(query) { GroovyResultSet row ->
-            String tableName = row['table_name'] as String
+    private static void cleanupSchema(Sql sql, String schemaName, DatabaseCleanupStats stats) {
+        def tablesInSchema = [] as List<String>
+        sql.eachRow(QUERY, [schemaName] as List<Object>) { row ->
+            def tableName = row.getString('table_name')
             tablesInSchema << tableName
-
-            def rowCount = row['row_count_estimate'] as Long
+            def rowCount = row.getLong('row_count_estimate')
             if (stats.detailedStatCollection) {
                 if (rowCount == -1) {
-                    String countQuery = "SELECT COUNT(*) AS cnt FROM ${tableName}" as String
+                    def countQuery = "SELECT COUNT(*) AS cnt FROM $tableName" as String
                     rowCount = sql.firstRow(countQuery)?.cnt as Long ?: 0L
                 }
             }
@@ -150,17 +122,11 @@ class PostgresDatabaseCleaner implements DatabaseCleaner {
         }
 
         if (tablesInSchema) {
-            log.debug('Truncating tables: {}', tablesInSchema.join(','))
-            sql.executeUpdate("TRUNCATE TABLE ${tablesInSchema.collect { "\"$it\"" }.join(',')} RESTART IDENTITY CASCADE" as String)
-        }
-    }
-
-    @CompileDynamic
-    private void cleanupCacheLayer(ApplicationContext applicationContext) {
-        // Clear the 2nd layer cache if it exists
-        if (ClassUtils.isPresent('org.hibernate.SessionFactory', this.class.classLoader)) {
-            def sessionFactory = applicationContext.getBean('sessionFactory', Class.forName('org.hibernate.SessionFactory'))
-            sessionFactory?.cache?.evictAllRegions()
+            log.debug('Truncating tables: {}', tablesInSchema.join(', '))
+            def tables = tablesInSchema.collect { "\"$it\"" }.join(',')
+            sql.executeUpdate(
+                    "TRUNCATE TABLE $tables RESTART IDENTITY CASCADE" as String
+            )
         }
     }
 }

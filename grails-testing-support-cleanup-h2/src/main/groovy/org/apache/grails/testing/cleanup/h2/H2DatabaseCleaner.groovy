@@ -16,22 +16,15 @@
  *  specific language governing permissions and limitations
  *  under the License.
  */
-
 package org.apache.grails.testing.cleanup.h2
-
-import java.sql.Connection
-import java.sql.DatabaseMetaData
 
 import javax.sql.DataSource
 
-import groovy.sql.GroovyResultSet
 import groovy.sql.Sql
-import groovy.transform.CompileDynamic
 import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 
 import org.springframework.context.ApplicationContext
-import org.springframework.util.ClassUtils
 
 import org.apache.grails.testing.cleanup.core.DatabaseCleaner
 import org.apache.grails.testing.cleanup.core.DatabaseCleanupStats
@@ -49,6 +42,11 @@ import org.apache.grails.testing.cleanup.core.DatabaseCleanupStats
 class H2DatabaseCleaner implements DatabaseCleaner {
 
     private static final String DATABASE_TYPE = 'h2'
+    private static final String QUERY = '''
+            SELECT table_name, row_count_estimate
+            FROM information_schema.tables
+            WHERE table_schema = ? AND row_count_estimate > 0
+    '''
 
     @Override
     String databaseType() {
@@ -57,53 +55,36 @@ class H2DatabaseCleaner implements DatabaseCleaner {
 
     @Override
     boolean supports(DataSource dataSource) {
-        Connection connection = null
-        try {
-            connection = dataSource.getConnection()
-            DatabaseMetaData metaData = connection.getMetaData()
-            String url = metaData.getURL()
-            return url && url.startsWith('jdbc:h2:')
-        }
-        catch (Exception e) {
+        try (def con = dataSource.connection) {
+            return con.metaData?.URL?.startsWith('jdbc:h2:')
+        } catch (Exception e) {
             log.debug('Could not determine if datasource is H2', e)
             return false
         }
-        finally {
-            if (connection) {
-                try {
-                    connection.close()
-                }
-                catch (Exception ignored) {
-                    // ignore
-                }
-            }
-        }
     }
 
-    @SuppressWarnings('SqlNoDataSourceInspection')
     @Override
+    @SuppressWarnings('SqlNoDataSourceInspection')
     DatabaseCleanupStats cleanup(ApplicationContext applicationContext, DataSource dataSource) {
-        DatabaseCleanupStats stats = new DatabaseCleanupStats()
+        def stats = new DatabaseCleanupStats()
         stats.start()
 
-        String schemaName = H2DatabaseCleanupHelper.resolveSchemaName(dataSource)
+        def schemaName = H2DatabaseCleanupHelper.resolveSchemaName(dataSource)
         if (!schemaName) {
             log.warn('Could not resolve schema name for datasource, skipping cleanup')
             stats.stop()
             return stats
         }
 
-        Sql sql = new Sql(dataSource)
+        def sql = new Sql(dataSource)
         try {
             sql.execute('SET REFERENTIAL_INTEGRITY FALSE')
-            String query = "SELECT table_name, row_count_estimate FROM information_schema.tables WHERE table_schema = '${schemaName}' AND row_count_estimate > 0" as String
-            sql.eachRow(query) { GroovyResultSet row ->
-                String tableName = row['table_name'] as String
-                stats.addTableRowCount(tableName, row['row_count_estimate'] as Long)
+            sql.eachRow(QUERY, [schemaName] as List<Object>) { row ->
+                def tableName = row.getString('table_name')
+                stats.addTableRowCount(tableName, row.getLong('row_count_estimate'))
                 log.debug('Truncating table: {}', tableName)
-                sql.executeUpdate("TRUNCATE TABLE \"${tableName}\"" as String)
+                sql.executeUpdate(/TRUNCATE TABLE "$tableName"/)
             }
-
             cleanupCacheLayer(applicationContext)
         }
         finally {
@@ -118,14 +99,5 @@ class H2DatabaseCleaner implements DatabaseCleaner {
         }
 
         stats
-    }
-
-    @CompileDynamic
-    private void cleanupCacheLayer(ApplicationContext applicationContext) {
-        // Clear the 2nd layer cache if it exists
-        if (ClassUtils.isPresent('org.hibernate.SessionFactory', this.class.classLoader)) {
-            def sessionFactory = applicationContext.getBean('sessionFactory', Class.forName('org.hibernate.SessionFactory'))
-            sessionFactory?.cache?.evictAllRegions()
-        }
     }
 }

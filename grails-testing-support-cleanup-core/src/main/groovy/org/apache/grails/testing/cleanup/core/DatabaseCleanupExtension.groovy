@@ -16,19 +16,15 @@
  *  specific language governing permissions and limitations
  *  under the License.
  */
-
 package org.apache.grails.testing.cleanup.core
-
-import java.lang.reflect.Method
 
 import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 
-import org.springframework.boot.test.context.SpringBootTest
-
 import org.spockframework.runtime.extension.IGlobalExtension
-import org.spockframework.runtime.model.FeatureInfo
 import org.spockframework.runtime.model.SpecInfo
+
+import org.springframework.boot.test.context.SpringBootTest
 
 /**
  * Spock global extension that detects the {@link DatabaseCleanup} annotation on test classes
@@ -74,8 +70,8 @@ class DatabaseCleanupExtension implements IGlobalExtension {
 
     @Override
     void start() {
-        ServiceLoader<DatabaseCleaner> cleanerLoader = ServiceLoader.load(DatabaseCleaner)
-        List<DatabaseCleaner> cleaners = cleanerLoader.toList()
+        def cleanerLoader = ServiceLoader.load(DatabaseCleaner)
+        def cleaners = cleanerLoader.toList()
 
         if (cleaners.isEmpty()) {
             log.debug('No DatabaseCleaner implementations found on classpath')
@@ -92,21 +88,28 @@ class DatabaseCleanupExtension implements IGlobalExtension {
         }
 
         // Without an application context, there can be no database
-        boolean integrationEnvironment =  spec.isAnnotationPresent(SpringBootTest) && spec.getAnnotation(SpringBootTest).webEnvironment() in [SpringBootTest.WebEnvironment.DEFINED_PORT, SpringBootTest.WebEnvironment.RANDOM_PORT]
+        boolean integrationEnvironment =
+                spec.isAnnotationPresent(SpringBootTest)
+                        && spec.getAnnotation(SpringBootTest).webEnvironment() in [
+                            SpringBootTest.WebEnvironment.DEFINED_PORT,
+                            SpringBootTest.WebEnvironment.RANDOM_PORT
+                        ]
         if (!integrationEnvironment) {
             if (hasDatabaseCleanupAnnotation(spec)) {
                 throw new IllegalStateException(
-                    "@DatabaseCleanup requires an environment with an ApplicationContext. Add @Integration or define the web environment on @SpringBootTest. Spec: ${spec.name}" as String)
+                    '@DatabaseCleanup requires an environment with an ApplicationContext. ' +
+                    'Add @Integration or define the web environment on @SpringBootTest. ' +
+                    "Spec: $spec.name")
             }
             return
         }
 
         boolean classAnnotated = spec.isAnnotationPresent(DatabaseCleanup)
         if (classAnnotated) {
-            DatabaseCleanup annotation = spec.getAnnotation(DatabaseCleanup)
-            DatasourceCleanupMapping mapping = DatasourceCleanupMapping.parse(annotation.value())
-            ApplicationContextResolver resolver = createResolver(annotation.resolver())
-            DatabaseCleanupInterceptor interceptor = new DatabaseCleanupInterceptor(context, true, mapping, resolver)
+            def annotation = spec.getAnnotation(DatabaseCleanup)
+            def mapping = DatasourceCleanupMapping.parse(annotation.value())
+            def resolver = createResolver(annotation.resolver())
+            def interceptor = new DatabaseCleanupInterceptor(context, true, mapping, resolver)
             spec.addSetupInterceptor(interceptor)
             spec.addCleanupInterceptor(interceptor)
             log.debug('Registered DatabaseCleanupInterceptor for spec: {} (class-level)', spec.name)
@@ -120,21 +123,17 @@ class DatabaseCleanupExtension implements IGlobalExtension {
         }
 
         // Check for method-level annotations on feature methods
-        boolean hasMethodAnnotation = false
-        for (FeatureInfo feature : spec.features) {
-            if (feature.featureMethod.isAnnotationPresent(DatabaseCleanup)) {
-                hasMethodAnnotation = true
-                break
-            }
+        boolean hasMethodAnnotation = spec.features.any {
+            it.featureMethod.isAnnotationPresent(DatabaseCleanup)
         }
 
         if (hasMethodAnnotation) {
             // For method-level, pass a clean-all mapping as default; the interceptor reads
             // each method's own annotation at runtime.
             // Use the default resolver; the interceptor will read the method-level resolver at runtime.
-            DatasourceCleanupMapping defaultMapping = DatasourceCleanupMapping.parse(new String[0])
-            ApplicationContextResolver defaultResolver = new DefaultApplicationContextResolver()
-            DatabaseCleanupInterceptor interceptor = new DatabaseCleanupInterceptor(context, false, defaultMapping, defaultResolver)
+            def defaultMapping = DatasourceCleanupMapping.parse(new String[0])
+            def defaultResolver = new DefaultApplicationContextResolver()
+            def interceptor = new DatabaseCleanupInterceptor(context, false, defaultMapping, defaultResolver)
             spec.addSetupInterceptor(interceptor)
             spec.addCleanupInterceptor(interceptor)
             log.debug('Registered DatabaseCleanupInterceptor for spec: {} (method-level)', spec.name)
@@ -153,7 +152,10 @@ class DatabaseCleanupExtension implements IGlobalExtension {
         }
         catch (Exception e) {
             throw new IllegalStateException(
-                "Failed to instantiate ApplicationContextResolver: ${resolverClass.name}. Ensure it has a no-arg constructor." as String, e)
+                    'Failed to instantiate ApplicationContextResolver: ' +
+                    "$resolverClass.name. Ensure it has a no-arg constructor.",
+                    e
+            )
         }
     }
 
@@ -171,19 +173,22 @@ class DatabaseCleanupExtension implements IGlobalExtension {
      */
     private static void validateNoAnnotationOnNonFeatureMethods(SpecInfo spec) {
         // Collect all feature method names for comparison
-        Set<String> featureMethodNames = [] as Set
-        for (FeatureInfo feature : spec.features) {
-            featureMethodNames.add(feature.featureMethod.name)
-        }
+        def featureMethodNames = spec.features*.name as Set<String>
 
         // Check all declared methods in the spec class for misplaced annotations
         // This necessarily uses spec.reflection since we need to scan raw Java methods
         // that are not exposed as Spock features
-        for (Method method : spec.reflection.declaredMethods) {
-            if (method.isAnnotationPresent(DatabaseCleanup) && !featureMethodNames.contains(method.name)) {
-                throw new IllegalStateException(
-                    "@DatabaseCleanup annotation on method '${method.name}' in ${spec.reflection.name} is not valid. @DatabaseCleanup can only be applied to Spock feature methods (test methods) or at the class level. It cannot be applied to setup(), cleanup(), setupSpec(), or cleanupSpec() methods." as String)
-            }
+        def invalid = spec.reflection.declaredMethods.find {
+            it.isAnnotationPresent(DatabaseCleanup) && !featureMethodNames.contains(it.name)
+        }
+        if (invalid) {
+            throw new IllegalStateException(
+                    "@DatabaseCleanup annotation on method '$invalid.name' " +
+                    "in $spec.reflection.name is not valid. @DatabaseCleanup " +
+                    'can only be applied to Spock feature methods (test methods) ' +
+                    'or at the class level. It cannot be applied to setup(), ' +
+                    'cleanup(), setupSpec(), or cleanupSpec() methods.'
+            )
         }
     }
 
@@ -192,14 +197,7 @@ class DatabaseCleanupExtension implements IGlobalExtension {
      * class level or on any feature method.
      */
     private static boolean hasDatabaseCleanupAnnotation(SpecInfo spec) {
-        if (spec.isAnnotationPresent(DatabaseCleanup)) {
-            return true
-        }
-        for (FeatureInfo feature : spec.features) {
-            if (feature.featureMethod.isAnnotationPresent(DatabaseCleanup)) {
-                return true
-            }
-        }
-        false
+        spec.isAnnotationPresent(DatabaseCleanup) ||
+                spec.features.any { it.featureMethod.isAnnotationPresent(DatabaseCleanup) }
     }
 }

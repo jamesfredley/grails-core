@@ -16,7 +16,6 @@
  *  specific language governing permissions and limitations
  *  under the License.
  */
-
 package org.apache.grails.testing.cleanup.core
 
 import groovy.transform.CompileStatic
@@ -49,9 +48,9 @@ class DefaultApplicationContextResolver implements ApplicationContextResolver {
 
     @Override
     ApplicationContext resolve(IMethodInvocation invocation) {
-        TestContext testContext = TestContextHolderListener.CURRENT.get()
+        def testContext = TestContextHolderListener.CURRENT.get()
         if (testContext) {
-            ApplicationContext ctx = testContext.applicationContext
+            def ctx = testContext.applicationContext
             if (ctx) {
                 log.debug('Resolved ApplicationContext via TestContextHolderListener')
                 return ctx
@@ -59,6 +58,10 @@ class DefaultApplicationContextResolver implements ApplicationContextResolver {
         }
 
         throw new IllegalStateException(
-            'Could not resolve ApplicationContext. Ensure the spec is annotated with @Integration and that TestContextHolderListener is registered as a TestExecutionListener.')
+                'Could not resolve ApplicationContext. ' +
+                'Ensure the spec is annotated with @Integration ' +
+                'and that TestContextHolderListener is registered ' +
+                'as a TestExecutionListener.'
+        )
     }
 }

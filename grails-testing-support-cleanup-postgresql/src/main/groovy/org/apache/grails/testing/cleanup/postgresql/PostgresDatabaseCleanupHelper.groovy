@@ -16,11 +16,7 @@
  *  specific language governing permissions and limitations
  *  under the License.
  */
-
 package org.apache.grails.testing.cleanup.postgresql
-
-import java.sql.Connection
-import java.sql.DatabaseMetaData
 
 import javax.sql.DataSource
 
@@ -28,55 +24,44 @@ import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 
 /**
- * Helper utility for PostgreSQL database cleanup operations. Provides PostgreSQL-specific logic such as
- * resolving the current schema from a {@link DataSource} by inspecting JDBC connection metadata
- * and parsing PostgreSQL JDBC URLs.
+ * Helper utility for PostgreSQL database cleanup operations.
+ * Provides PostgreSQL-specific logic such as resolving the
+ * current schema from a {@link DataSource} by inspecting
+ * JDBC connection metadata and parsing PostgreSQL JDBC URLs.
  */
 @Slf4j
 @CompileStatic
 class PostgresDatabaseCleanupHelper {
 
     /**
-     * Resolves the current schema for the given PostgreSQL datasource by inspecting the JDBC connection metadata.
-     * If the JDBC URL contains a `currentSchema` parameter, returns that schema.
+     * Resolves the current schema for the given PostgreSQL datasource
+     * by inspecting the JDBC connection metadata. If the JDBC URL
+     * contains a `currentSchema` parameter, returns that schema.
      * Otherwise, returns the connection's current schema.
      *
      * @param dataSource the datasource to resolve the schema for
      * @return the schema name, or {@code null} if it cannot be determined
      */
     static String resolveCurrentSchema(DataSource dataSource) {
-        Connection connection = null
-        try {
-            connection = dataSource.getConnection()
-            String schema = connection.getSchema()
+        try (def con = dataSource.connection) {
+            def schema = con.getSchema()
             if (schema) {
                 log.debug('Resolved current schema from connection: {}', schema)
                 return schema
             }
 
-            // Fallback: try to get the schema from the database metadata URL
-            DatabaseMetaData metaData = connection.getMetaData()
-            String url = metaData.getURL()
+            def url = con.metaData.URL
             if (url) {
                 schema = extractCurrentSchemaFromUrl(url)
-                if (schema) {
-                    log.debug('Resolved current schema from URL {}: {}', url, schema)
-                    return schema
-                }
+                log.debug('Resolved current schema from URL {}: {}', url, schema)
+                return schema
             }
         }
-        finally {
-            if (connection) {
-                try {
-                    connection.close()
-                }
-                catch (Exception ignored) {
-                    // ignore
-                }
-            }
-        }
-
-        throw new IllegalStateException("Because postgres defaults to the search_path when currentSchema isn't defined, a schema should always be found")
+        throw new IllegalStateException(
+                'Because postgres defaults to the search_path ' +
+                'when currentSchema isn\'t defined, a schema ' +
+                'should always be found'
+        )
     }
 
     /**
@@ -98,29 +83,18 @@ class PostgresDatabaseCleanupHelper {
             return null
         }
 
-        // Look for currentSchema parameter in query string
-        int questionIdx = url.indexOf('?')
-        if (questionIdx < 0) {
+        int q = url.indexOf('?')
+        if (q < 0) {
             return null
         }
 
-        String queryString = url.substring(questionIdx + 1)
-        String[] params = queryString.split('&')
-        for (String param : params) {
+        def query = url.substring(q + 1)
+        for (def param : query.split('&')) {
             if (param.startsWith('currentSchema=')) {
-                String schema = param.substring('currentSchema='.length())
-                // URL decode if needed (handle common cases)
-                if (schema) {
-                    // Remove any trailing parameters if present
-                    int ampIdx = schema.indexOf('&')
-                    if (ampIdx >= 0) {
-                        schema = schema.substring(0, ampIdx)
-                    }
-                    return schema ?: null
-                }
+                def schema = param.substring('currentSchema='.length())
+                return schema ?: null
             }
         }
-
-        null
+        return null
     }
 }
