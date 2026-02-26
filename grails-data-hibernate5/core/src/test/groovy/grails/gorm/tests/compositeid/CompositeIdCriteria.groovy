@@ -122,6 +122,22 @@ class CompositeIdCriteria extends Specification {
     results.size() == 1
     results[0] == compositeIdToMany
   }
+
+  @Issue("https://github.com/apache/grails-core/issues/14516")
+  def "test that eq on composite id component entity works"() {
+    Author _author = new Author(name:"Author3").save()
+    Book _book = new Book(title:"Book3").save()
+    CompositeIdToMany compositeIdToMany = new CompositeIdToMany(author:_author, book:_book).save(failOnError:true, flush:true)
+
+    when: "querying with eq on composite ID component association"
+    def results = CompositeIdToMany.createCriteria().list {
+      eq('author', _author)
+    }
+
+    then: "the entity is found"
+    results.size() == 1
+    results[0] == compositeIdToMany
+  }
 }
 
 @Entity

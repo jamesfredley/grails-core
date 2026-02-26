@@ -1841,8 +1841,9 @@ public abstract class AbstractHibernateCriteriaBuilder extends GroovyObjectSuppo
                         targetClass = oldTargetClass;
                         return name;
                     } catch (IllegalArgumentException ignored) {
-                        // Not a managed entity type - re-throw original exception
-                        throw e;
+                        // Not a managed entity type - wrap the original exception to preserve stack trace
+                        throw new IllegalArgumentException(
+                                "Unable to locate attribute [" + name + "] on entity [" + entityType.getName() + "]", e);
                     }
                 }
 
