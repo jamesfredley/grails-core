@@ -26,7 +26,7 @@ import spock.lang.Specification
 import grails.gorm.annotation.Entity
 import grails.gorm.services.Service
 import grails.gorm.transactions.Transactional
-import org.grails.datastore.gorm.GormEnhancer
+
 import org.grails.datastore.mapping.core.DatastoreUtils
 import org.grails.orm.hibernate.HibernateDatastore
 
@@ -63,9 +63,8 @@ class DataServiceDatasourceInheritanceSpec extends Specification {
     }
 
     void setup() {
-        def api = GormEnhancer.findStaticApi(Inventory, 'warehouse')
-        api.withNewTransaction {
-            api.executeUpdate('delete from Inventory')
+        Inventory.warehouse.withNewTransaction {
+            Inventory.warehouse.executeUpdate('delete from Inventory')
         }
     }
 
@@ -79,8 +78,8 @@ class DataServiceDatasourceInheritanceSpec extends Specification {
         saved.sku == 'ABC-001'
 
         and: "it exists on the warehouse datasource"
-        GormEnhancer.findStaticApi(Inventory, 'warehouse').withNewTransaction {
-            GormEnhancer.findStaticApi(Inventory, 'warehouse').count()
+        Inventory.warehouse.withNewTransaction {
+            Inventory.warehouse.count()
         } == 1
     }
 
@@ -93,8 +92,8 @@ class DataServiceDatasourceInheritanceSpec extends Specification {
         saved.id != null
 
         and: "it exists on the warehouse datasource"
-        GormEnhancer.findStaticApi(Inventory, 'warehouse').withNewTransaction {
-            GormEnhancer.findStaticApi(Inventory, 'warehouse').count()
+        Inventory.warehouse.withNewTransaction {
+            Inventory.warehouse.count()
         } == 1
 
         and: "retrievable through the same service"
