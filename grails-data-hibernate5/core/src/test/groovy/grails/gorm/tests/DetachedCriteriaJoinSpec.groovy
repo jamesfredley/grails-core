@@ -29,7 +29,7 @@ import jakarta.persistence.criteria.JoinType
 
 class DetachedCriteriaJoinSpec extends GrailsDataTckSpec<GrailsDataHibernate5TckManager> {
     void setupSpec() {
-        manager.domainClasses.addAll([Team, Club])
+        manager.domainClasses.addAll([Team, Club, Player, Contract])
     }
 
     def "check if count works as expected"() {
@@ -155,5 +155,59 @@ class DetachedCriteriaJoinSpec extends GrailsDataTckSpec<GrailsDataHibernate5Tck
 
         then:
         result == ['Team A', 'Team B']
+    }
+
+    def 'check get honours join with join type and eagerly loads association'() {
+        given:
+        def club = new Club(name: 'PSG').save(flush: true)
+        new Team(name: 'Paris', club: club).save(flush: true)
+
+        when:
+        Team team = Team.where { name == 'Paris' }.join('club', JoinType.LEFT).get()
+
+        then:
+        team != null
+        Hibernate.isInitialized(team.club)
+    }
+
+    def 'check list with multiple projections on joined association'() {
+        given:
+        def club = new Club(name: 'Benfica').save(flush: true)
+        new Team(name: 'Lisbon', club: club).save(flush: true)
+
+        when:
+        def result = Team.where { name == 'Lisbon' }.join('club').property('club.name').property('name').list()
+
+        then:
+        result.size() == 1
+        result[0][0] == 'Benfica'
+        result[0][1] == 'Lisbon'
+    }
+
+    def 'check list with deep nested projection path on players'() {
+        given:
+        def club = new Club(name: 'Boca Juniors').save(flush: true)
+        def team = new Team(name: 'Xeneizes', club: club).save(flush: true)
+        def player = new Player(name: 'Roman', team: team)
+        player.contract = new Contract(salary: 5_000_000G, player: player)
+        player.save(flush: true)
+
+        when:
+        def result = Team.where { name == 'Xeneizes' }.join('players').property('players.name').list()
+
+        then:
+        result == ['Roman']
+    }
+
+    def 'check invalid projection path throws exception'() {
+        when:
+        new DetachedCriteria(Team).build {
+            projections {
+                property('nonexistent.field')
+            }
+        }.list()
+
+        then:
+        thrown(Exception)
     }
 }
