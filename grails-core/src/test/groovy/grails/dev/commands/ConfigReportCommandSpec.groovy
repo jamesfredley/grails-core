@@ -67,7 +67,8 @@ class ConfigReportCommandSpec extends Specification {
             'grails.profile': 'web',
             'grails.codegen.defaultPackage': 'myapp',
             'server.port': '8080',
-            'spring.main.banner-mode': 'off'
+            'spring.main.banner-mode': 'off',
+            'my.custom.prop': 'value'
         ]
         propertySources.addFirst(new MapPropertySource('test', props))
         props.each { String key, Object value ->
@@ -100,6 +101,8 @@ class ConfigReportCommandSpec extends Specification {
         content.contains('`8080`')
         content.contains('`spring.main.banner-mode`')
         content.contains('`off`')
+        content.contains('`my.custom.prop`')
+        content.contains('`value`')
 
         cleanup:
         reportFile?.delete()
@@ -185,7 +188,7 @@ class ConfigReportCommandSpec extends Specification {
     def "writeReport uses 3-column format with metadata categories"() {
         given:
         Map<String, String> runtimeProperties = new TreeMap<String, String>()
-        runtimeProperties.put('grails.controllers.defaultScope', 'singleton')
+        runtimeProperties.put('grails.gorm.autoFlush', 'true')
         runtimeProperties.put('grails.profile', 'web')
         runtimeProperties.put('server.port', '8080')
 
@@ -203,7 +206,7 @@ class ConfigReportCommandSpec extends Specification {
 
         and: "metadata categories are used as section headers"
         content.contains('== Core Properties')
-        content.contains('== Web & Controllers')
+        content.contains('== GORM')
 
         and: "3-column table format is used for known properties"
         content.contains('[cols="2,5,2", options="header"]')
@@ -211,11 +214,11 @@ class ConfigReportCommandSpec extends Specification {
 
         and: "known properties appear with descriptions"
         content.contains('`grails.profile`')
-        content.contains('`grails.controllers.defaultScope`')
+        content.contains('`grails.gorm.autoFlush`')
 
         and: "runtime values override static defaults for known properties"
         content.contains('`web`')
-        content.contains('`singleton`')
+        content.contains('`true`')
 
         and: "unknown runtime properties go to Other Properties section"
         content.contains('== Other Properties')
@@ -286,7 +289,7 @@ class ConfigReportCommandSpec extends Specification {
         String content = reportFile.text
         content.contains('= Grails Application Configuration Report')
 
-        and: "metadata categories still appear from the YAML"
+        and: "metadata categories still appear from the metadata"
         content.contains('== Core Properties')
 
         and: "no Other Properties section when no unknown runtime properties"
@@ -323,20 +326,57 @@ class ConfigReportCommandSpec extends Specification {
         otherSection.contains('| Property | Default')
     }
 
-    def "loadPropertyMetadata returns properties from classpath YAML"() {
-        when:
-        Map<String, Map<String, String>> metadata = command.loadPropertyMetadata()
+    def "writeReport moves environment-derived properties to environment section"() {
+        given:
+        Map<String, String> runtimeProperties = new TreeMap<String, String>()
+        runtimeProperties.put('my.custom.value', 'custom')
+        runtimeProperties.put('grails.profile', 'web')
+        File reportFile = new File(tempDir, 'env-report.adoc')
 
-        then: "metadata is loaded from the config-properties.yml on the classpath"
-        !metadata.isEmpty()
-        metadata.containsKey('grails.profile')
+        and:
+        String envKey = 'MY_CUSTOM_VALUE'
+        String originalValue = System.getenv(envKey)
+        setEnvVar(envKey, 'from-env')
+
+        when:
+        command.writeReport(runtimeProperties, reportFile)
+
+        then:
+        String content = reportFile.text
+        int envIndex = content.indexOf('== Environment Properties')
+        envIndex > -1
+        String envSection = content.substring(envIndex)
+        envSection.contains('`my.custom.value`')
+        envSection.contains('`custom`')
+
+        and:
+        int otherIndex = content.indexOf('== Other Properties')
+        String otherSection = otherIndex > -1 ? content.substring(otherIndex, envIndex) : ''
+        !otherSection.contains('`my.custom.value`')
+
+        cleanup:
+        if (originalValue != null) {
+            setEnvVar(envKey, originalValue)
+        }
+        else {
+            clearEnvVar(envKey)
+        }
+    }
+
+    def "loadPropertyMetadata returns properties from classpath JSON metadata"() {
+        when:
+        ConfigReportCommand.MetadataResult metadataResult = command.loadPropertyMetadata()
+
+        then: "metadata is loaded from spring-configuration-metadata.json on the classpath"
+        !metadataResult.properties.isEmpty()
+        metadataResult.properties.find { ConfigReportCommand.ConfigPropertyMetadata property -> property.name == 'grails.profile' }
 
         and: "each entry has the expected fields"
-        Map<String, String> profileEntry = metadata.get('grails.profile')
-        profileEntry.get('key') == 'grails.profile'
-        profileEntry.get('description') != null
-        profileEntry.get('description').length() > 0
-        profileEntry.get('category') == 'Core Properties'
+        ConfigReportCommand.ConfigPropertyMetadata profileEntry = metadataResult.properties.find { ConfigReportCommand.ConfigPropertyMetadata property -> property.name == 'grails.profile' }
+        profileEntry.name == 'grails.profile'
+        profileEntry.description != null
+        profileEntry.description.length() > 0
+        metadataResult.groupDescriptions.get('grails') == 'Core Properties'
     }
 
     def "escapeAsciidoc handles null and empty strings"() {
@@ -345,6 +385,41 @@ class ConfigReportCommandSpec extends Specification {
         ConfigReportCommand.escapeAsciidoc('') == ''
         ConfigReportCommand.escapeAsciidoc('simple') == 'simple'
         ConfigReportCommand.escapeAsciidoc('a|b') == 'a\\|b'
+    }
+
+    private void setEnvVar(String key, String value) {
+        setEnvironmentVariable(key, value)
+    }
+
+    private void clearEnvVar(String key) {
+        setEnvironmentVariable(key, null)
+    }
+
+    private void setEnvironmentVariable(String key, String value) {
+        Map<String, String> env = System.getenv()
+        Class<?> envClass = env.getClass()
+        try {
+            java.lang.reflect.Field field = envClass.getDeclaredField('m')
+            field.setAccessible(true)
+            Map<String, String> writable = (Map<String, String>) field.get(env)
+            if (value == null) {
+                writable.remove(key)
+            }
+            else {
+                writable.put(key, value)
+            }
+        }
+        catch (NoSuchFieldException ignored) {
+            java.lang.reflect.Field field = envClass.getDeclaredField('delegate')
+            field.setAccessible(true)
+            Map<String, String> writable = (Map<String, String>) field.get(env)
+            if (value == null) {
+                writable.remove(key)
+            }
+            else {
+                writable.put(key, value)
+            }
+        }
     }
 
 }

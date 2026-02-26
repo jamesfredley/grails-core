@@ -38,7 +38,7 @@ import spock.lang.Specification
  *   <li>{@code @ConfigurationProperties} - Type-safe configuration beans</li>
  * </ul>
  *
- * <p>The hybrid report uses curated property metadata (from {@code config-properties.yml})
+ * <p>The hybrid report uses curated property metadata (from {@code spring-configuration-metadata.json})
  * to produce a 3-column AsciiDoc table (Property | Description | Default) for known
  * Grails properties, with runtime values overriding static defaults. Properties not
  * found in the metadata appear in a separate "Other Properties" section.
