@@ -24,9 +24,9 @@ import java.util.Map.Entry;
 
 import groovy.lang.GroovySystem;
 
+import jakarta.persistence.FetchType;
 import jakarta.persistence.metamodel.Attribute;
 import jakarta.persistence.metamodel.PluralAttribute;
-import jakarta.persistence.FetchType;
 
 import org.hibernate.Criteria;
 import org.hibernate.SessionFactory;
@@ -41,9 +41,9 @@ import org.hibernate.type.Type;
 import org.springframework.orm.hibernate5.SessionHolder;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
+import org.grails.datastore.gorm.query.criteria.AbstractDetachedCriteria;
 import org.grails.datastore.mapping.model.PersistentEntity;
 import org.grails.datastore.mapping.query.api.QueryableCriteria;
-import org.grails.datastore.gorm.query.criteria.AbstractDetachedCriteria;
 import org.grails.orm.hibernate.GrailsHibernateTemplate;
 import org.grails.orm.hibernate.HibernateDatastore;
 import org.grails.orm.hibernate.cfg.GrailsHibernateUtil;

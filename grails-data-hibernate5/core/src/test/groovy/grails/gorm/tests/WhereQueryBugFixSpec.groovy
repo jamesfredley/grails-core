@@ -18,7 +18,6 @@
  */
 package grails.gorm.tests
 
-import grails.gorm.DetachedCriteria
 import grails.gorm.annotation.Entity
 import grails.gorm.hibernate.HibernateEntity
 import org.grails.orm.hibernate.HibernateDatastore
@@ -38,7 +37,7 @@ import jakarta.persistence.criteria.JoinType
 class WhereQueryBugFixSpec extends Specification {
 
     @Shared @AutoCleanup HibernateDatastore datastore = new HibernateDatastore(
-        WqAuthor, WqBookItem, WqCase, WqEvent, WqPerson
+        WqAuthor, WqBookItem
     )
     @Shared PlatformTransactionManager transactionManager = datastore.transactionManager
 
@@ -104,19 +103,4 @@ class WqAuthor implements HibernateEntity<WqAuthor> {
 class WqBookItem implements HibernateEntity<WqBookItem> {
     String title
     static belongsTo = [wqAuthor: WqAuthor]
-}
-
-@Entity
-class WqCase implements HibernateEntity<WqCase> {
-    WqPerson person
-}
-
-@Entity
-class WqEvent implements HibernateEntity<WqEvent> {
-    WqCase generalCase
-}
-
-@Entity
-class WqPerson implements HibernateEntity<WqPerson> {
-    String fullname
 }
