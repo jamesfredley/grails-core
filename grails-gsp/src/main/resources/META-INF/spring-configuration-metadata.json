@@ -21,7 +21,7 @@
         {
             "name": "grails.views.default.codec",
             "type": "java.lang.String",
-            "description": "The default encoding codec for GSP output where html reduces XSS risk and options are none, html, base64.",
+            "description": "The default encoding codec for GSP output. Set to `html` to reduce XSS risk. Options: `none`, `html`, `base64`.",
             "defaultValue": "none"
         },
         {
@@ -63,7 +63,7 @@
         {
             "name": "grails.views.gsp.layout.preprocess",
             "type": "java.lang.Boolean",
-            "description": "Whether GSP layout preprocessing is enabled, where disabling allows Grails to parse rendered HTML but slows rendering.",
+            "description": "Whether GSP layout preprocessing is enabled. Disabling allows Grails to parse rendered HTML but slows rendering.",
             "defaultValue": true
         },
         {

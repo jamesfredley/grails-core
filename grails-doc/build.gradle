@@ -176,7 +176,11 @@ generateConfigReference.configure { Task it ->
             project(':grails-web-core').tasks.named('jar'),
             project(':grails-gsp').tasks.named('jar'),
             project(':grails-databinding').tasks.named('jar'),
-            project(':grails-data-hibernate5-core').tasks.named('jar')
+            project(':grails-data-hibernate5-core').tasks.named('jar'),
+            project(':grails-cache').tasks.named('jar'),
+            project(':grails-data-hibernate5-dbmigration').tasks.named('jar'),
+            project(':grails-data-mongodb').tasks.named('jar'),
+            project(':grails-views-gson').tasks.named('jar')
     )
 
     it.description = 'Generates the Application Properties reference from configuration metadata.'
@@ -190,7 +194,11 @@ generateConfigReference.configure { Task it ->
             project(':grails-web-core').tasks.named('jar').flatMap { task -> task.archiveFile },
             project(':grails-gsp').tasks.named('jar').flatMap { task -> task.archiveFile },
             project(':grails-databinding').tasks.named('jar').flatMap { task -> task.archiveFile },
-            project(':grails-data-hibernate5-core').tasks.named('jar').flatMap { task -> task.archiveFile }
+            project(':grails-data-hibernate5-core').tasks.named('jar').flatMap { task -> task.archiveFile },
+            project(':grails-cache').tasks.named('jar').flatMap { task -> task.archiveFile },
+            project(':grails-data-hibernate5-dbmigration').tasks.named('jar').flatMap { task -> task.archiveFile },
+            project(':grails-data-mongodb').tasks.named('jar').flatMap { task -> task.archiveFile },
+            project(':grails-views-gson').tasks.named('jar').flatMap { task -> task.archiveFile }
     )
     it.outputs.file(outputFile)
 
@@ -204,7 +212,11 @@ generateConfigReference.configure { Task it ->
                 project(':grails-web-core').tasks.named('jar').get().archiveFile.get().asFile,
                 project(':grails-gsp').tasks.named('jar').get().archiveFile.get().asFile,
                 project(':grails-databinding').tasks.named('jar').get().archiveFile.get().asFile,
-                project(':grails-data-hibernate5-core').tasks.named('jar').get().archiveFile.get().asFile
+                project(':grails-data-hibernate5-core').tasks.named('jar').get().archiveFile.get().asFile,
+                project(':grails-cache').tasks.named('jar').get().archiveFile.get().asFile,
+                project(':grails-data-hibernate5-dbmigration').tasks.named('jar').get().archiveFile.get().asFile,
+                project(':grails-data-mongodb').tasks.named('jar').get().archiveFile.get().asFile,
+                project(':grails-views-gson').tasks.named('jar').get().archiveFile.get().asFile
         ]
 
         Map<String, String> groupDescriptions = new LinkedHashMap<String, String>()
@@ -347,7 +359,10 @@ generateConfigReference.configure { Task it ->
                 'JSON & Converters',
                 'GORM',
                 'DataSource',
-                'Hibernate'
+                'Hibernate',
+                'Database Migration Plugin',
+                'Cache Plugin',
+                'MongoDB GORM Plugin'
         ]
         List<String> orderedCategories = new ArrayList<String>()
         preferredOrder.each { String category ->
@@ -464,11 +479,8 @@ generateConfigReference.configure { Task it ->
             writer.writeLine('')
             writer.writeLine('The following plugin documentation covers configuration properties that are not listed above:')
             writer.writeLine('')
-            writer.writeLine('- Spring Security - https://apache.github.io/grails-spring-security/')
-            writer.writeLine('- Asset Pipeline - https://github.com/bertramdev/asset-pipeline')
-            writer.writeLine('- Database Migration - https://github.com/grails/grails-database-migration')
-            writer.writeLine('- Cache - https://github.com/grails/grails-cache')
-            writer.writeLine('- MongoDB - https://github.com/grails/grails-data-mapping')
+            writer.writeLine('- https://apache.github.io/grails-spring-security/snapshot/spring-security-core/index.html#_configuration_properties[Spring Security Core Configuration Properties]')
+            writer.writeLine('- https://github.com/bertramdev/asset-pipeline#configuration[Asset Pipeline Configuration Properties]')
             writer.writeLine('')
         }
 
