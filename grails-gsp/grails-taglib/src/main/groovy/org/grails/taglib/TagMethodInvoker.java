@@ -29,17 +29,33 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import groovy.lang.Closure;
 import groovy.lang.GroovyObject;
 import groovy.lang.MissingMethodException;
 
 public final class TagMethodInvoker {
+
+    /**
+     * Method names inherited from framework traits and interfaces that must never
+     * be treated as tag methods.  These come from {@code TagLibrary},
+     * {@code TagLibraryInvoker}, {@code WebAttributes}, {@code ServletAttributes},
+     * and related Spring interfaces.
+     */
+    private static final Set<String> FRAMEWORK_METHOD_NAMES = Set.of(
+            "initializeTagLibrary",
+            "raw",
+            "throwTagError",
+            "withCodec",
+            "currentRequestAttributes"
+    );
+
     private static final ClassValue<Map<String, List<Method>>> INVOKABLE_METHODS_BY_NAME = new ClassValue<>() {
         @Override
         protected Map<String, List<Method>> computeValue(Class<?> type) {
             Map<String, List<Method>> methodsByName = new HashMap<>();
-            for (Method method : type.getMethods()) {
+            for (Method method : type.getDeclaredMethods()) {
                 if (isTagMethodCandidate(method)) {
                     methodsByName.computeIfAbsent(method.getName(), ignored -> new ArrayList<>()).add(method);
                 }
@@ -137,6 +153,9 @@ public final class TagMethodInvoker {
             return false;
         }
         if ("invokeMethod".equals(name) || "methodMissing".equals(name) || "propertyMissing".equals(name)) {
+            return false;
+        }
+        if (FRAMEWORK_METHOD_NAMES.contains(name)) {
             return false;
         }
         return method.getDeclaringClass() != Object.class && method.getDeclaringClass() != GroovyObject.class;

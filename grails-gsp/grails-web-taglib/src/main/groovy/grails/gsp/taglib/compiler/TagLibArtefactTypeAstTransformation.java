@@ -18,8 +18,8 @@
  */
 
 package grails.gsp.taglib.compiler;
-import groovy.lang.Closure;
 
+import groovy.lang.Closure;
 import org.codehaus.groovy.ast.AnnotationNode;
 import org.codehaus.groovy.ast.ClassNode;
 import org.codehaus.groovy.ast.FieldNode;
