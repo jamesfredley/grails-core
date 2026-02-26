@@ -91,6 +91,38 @@ class BasicCollectionInQuerySpec extends Specification {
         then:
         results.sort() == ['alice2@test.com', 'bob2@test.com']
     }
+
+    def "multiple in queries on same basic collection should not fail with duplicate alias"() {
+        given:
+        def s1 = new BcStudent(name: "Dave", email: "dave@test.com")
+        s1.addToSchools("MIT")
+        s1.addToSchools("Harvard")
+        s1.save()
+
+        def s2 = new BcStudent(name: "Eve", email: "eve@test.com")
+        s2.addToSchools("Stanford")
+        s2.addToSchools("Berkeley")
+        s2.save()
+
+        def s3 = new BcStudent(name: "Frank", email: "frank@test.com")
+        s3.addToSchools("MIT")
+        s3.addToSchools("Stanford")
+        s3.save(flush: true)
+
+        when:
+        def results = BcStudent.createCriteria().list {
+            or {
+                'in'('schools', ['MIT'])
+                'in'('schools', ['Stanford'])
+            }
+            projections {
+                property 'email'
+            }
+        }
+
+        then: "all matching students are found (duplicates possible from OR on join table)"
+        results.unique().sort() == ['dave@test.com', 'eve@test.com', 'frank@test.com']
+    }
 }
 
 @Entity
