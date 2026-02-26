@@ -23,6 +23,89 @@ A comprehensive reference of all configuration properties specific to Grails and
 
 Since Grails is built on Spring Boot, all https://docs.spring.io/spring-boot/{springBootVersion}/appendix/application-properties/index.html[Spring Boot Common Application Properties] are also available (for example `server.port`, `logging.*`, `spring.datasource.hikari.*`, and `management.*`). This reference covers only Grails-specific properties.
 
+=== Environment-Specific Configuration
+
+Properties in `application.yml` (or `application.groovy`) are **global by default** - they apply to all environments. To override a property for a specific environment, nest it under an `environments` block:
+
+[source,yaml]
+----
+# Global (applies to all environments)
+grails:
+    serverURL: https://my.app.com
+
+# Environment-specific overrides
+environments:
+    development:
+        grails:
+            serverURL: http://localhost:8080
+    test:
+        grails:
+            serverURL: http://localhost:8080
+    production:
+        grails:
+            serverURL: https://my.app.com
+----
+
+Or in `application.groovy`:
+
+[source,groovy]
+----
+grails.serverURL = 'https://my.app.com'
+
+environments {
+    development {
+        grails.serverURL = 'http://localhost:8080'
+    }
+    test {
+        grails.serverURL = 'http://localhost:8080'
+    }
+    production {
+        grails.serverURL = 'https://my.app.com'
+    }
+}
+----
+
+==== Default Environments
+
+Grails ships with three standard environments:
+
+[cols="2,2,5", options="header"]
+|===
+| Environment | Short Name | Description
+
+| `development`
+| `dev`
+| Active during `grails run-app` and local development. Enables reloading and development-mode defaults.
+
+| `test`
+| `test`
+| Active during `grails test-app` and test execution.
+
+| `production`
+| `prod`
+| Active when the application is packaged and deployed (e.g., `java -jar`). The default when no environment is explicitly set in a packaged application.
+|===
+
+You can also define custom environments by name. Any environment name not matching the three defaults is treated as a custom environment:
+
+[source,yaml]
+----
+environments:
+    staging:
+        grails:
+            serverURL: https://staging.my.app.com
+----
+
+Run with a custom environment using the `-Dgrails.env` system property or the `GRAILS_ENV` environment variable:
+
+[source,bash]
+----
+java -Dgrails.env=staging -jar my-app.jar
+----
+
+Environment-specific values **override** global values. If a property is not set under the current environment block, the global value is used. This allows you to define sensible defaults globally and override only what differs per environment.
+
+
 === Core Properties
 
 [cols="3,5,2", options="header"]
