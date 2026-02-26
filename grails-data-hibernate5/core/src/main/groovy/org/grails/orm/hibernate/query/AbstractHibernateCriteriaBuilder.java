@@ -72,6 +72,9 @@ import org.grails.datastore.mapping.query.Query;
 import org.grails.datastore.mapping.query.api.BuildableCriteria;
 import org.grails.datastore.mapping.query.api.QueryableCriteria;
 import org.grails.datastore.mapping.reflect.NameUtils;
+import org.grails.datastore.mapping.model.PersistentEntity;
+import org.grails.datastore.mapping.model.PersistentProperty;
+import org.grails.datastore.mapping.model.types.Basic;
 import org.grails.orm.hibernate.AbstractHibernateDatastore;
 
 /**
@@ -1286,7 +1289,17 @@ public abstract class AbstractHibernateCriteriaBuilder extends GroovyObjectSuppo
         if (values instanceof List) {
             values = convertArgumentList((List) values);
         }
-        addToCriteria(Restrictions.in(propertyName, values == null ? Collections.EMPTY_LIST : values));
+
+        // Handle basic collection types (hasMany to String/Integer/etc.)
+        // These are stored in a separate join table and cannot use simple Restrictions.in().
+        // Instead, create an alias to the collection table and restrict on 'elements'.
+        if (isBasicCollectionProperty(propertyName)) {
+            String alias = propertyName + ALIAS;
+            createAlias(propertyName, alias);
+            addToCriteria(Restrictions.in(alias + ".elements", values == null ? Collections.EMPTY_LIST : values));
+        } else {
+            addToCriteria(Restrictions.in(propertyName, values == null ? Collections.EMPTY_LIST : values));
+        }
         return this;
     }
 
@@ -1331,7 +1344,15 @@ public abstract class AbstractHibernateCriteriaBuilder extends GroovyObjectSuppo
         }
 
         propertyName = calculatePropertyName(propertyName);
-        addToCriteria(Restrictions.in(propertyName, values));
+
+        // Handle basic collection types (hasMany to String/Integer/etc.)
+        if (isBasicCollectionProperty(propertyName)) {
+            String alias = propertyName + ALIAS;
+            createAlias(propertyName, alias);
+            addToCriteria(Restrictions.in(alias + ".elements", values));
+        } else {
+            addToCriteria(Restrictions.in(propertyName, values));
+        }
         return this;
     }
 
@@ -1981,6 +2002,23 @@ public abstract class AbstractHibernateCriteriaBuilder extends GroovyObjectSuppo
         else {
             c.addOrder(ignoreCase ? Order.asc(sort).ignoreCase() : Order.asc(sort));
         }
+    }
+
+    /**
+     * Checks if the given property name refers to a Basic collection type
+     * (e.g. hasMany: [schools: String]). Basic collections are stored in
+     * a separate join table and require special handling for 'in' queries.
+     */
+    private boolean isBasicCollectionProperty(String propertyName) {
+        if (datastore == null) {
+            return false;
+        }
+        PersistentEntity entity = datastore.getMappingContext().getPersistentEntity(targetClass.getName());
+        if (entity == null) {
+            return false;
+        }
+        PersistentProperty property = entity.getPropertyByName(propertyName);
+        return property instanceof Basic;
     }
 
     /**
