@@ -18,11 +18,9 @@
  */
 package grails.gorm.tests
 
-import grails.gorm.DetachedCriteria
 import grails.gorm.annotation.Entity
 import grails.gorm.hibernate.HibernateEntity
 import grails.gorm.transactions.Rollback
-import grails.gorm.transactions.Transactional
 import org.grails.orm.hibernate.HibernateDatastore
 import org.springframework.transaction.PlatformTransactionManager
 import spock.lang.AutoCleanup
