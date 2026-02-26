@@ -195,6 +195,9 @@ class ConfigReportCommand implements ApplicationCommand {
         finally {
             stream.close()
         }
+        if (!(yamlData instanceof Map)) {
+            return metadata
+        }
         Object categories = yamlData.get('categories')
         if (!(categories instanceof List)) {
             return metadata

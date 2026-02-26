@@ -27,7 +27,7 @@ import grails.testing.mixin.integration.Integration
 import org.grails.build.parsing.CommandLine
 import spock.lang.Narrative
 import spock.lang.Specification
-import spock.lang.TempDir
+
 
 /**
  * Integration tests for {@link ConfigReportCommand} that verify the command
@@ -53,8 +53,6 @@ class ConfigReportCommandIntegrationSpec extends Specification {
     @Autowired
     AppProperties appProperties
 
-    @TempDir
-    File tempDir
 
     private ConfigReportCommand createCommand() {
         ConfigReportCommand command = new ConfigReportCommand()
