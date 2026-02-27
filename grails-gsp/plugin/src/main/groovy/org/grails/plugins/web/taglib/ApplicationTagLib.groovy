@@ -453,7 +453,7 @@ class ApplicationTagLib implements ApplicationContextAware, InitializingBean, Gr
         if (!attrs.name) {
             throwTagError('Tag ["meta"] missing required attribute ["name"]')
         }
-        return Metadata.current[attrs.name]
+        return Metadata.current.getOrDefault(attrs.name, null)
     }
 
     /**
