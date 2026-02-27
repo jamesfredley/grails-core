@@ -203,6 +203,16 @@ class MongoDbDataStoreSpringInitializerSpec extends AutoStartedMongoSpec {
         Person.first().birthday == birthday
         Person.findByBirthday(birthday).birthday == birthday
         !Person.findByBirthday(new Birthday(new Date() - 7))
+
+    }
+
+    private MongoDbDataStoreSpringInitializer makeInitializer(Map config, Class... domainClasses) {
+        new MongoDbDataStoreSpringInitializer(config, domainClasses) {
+            @Override
+            protected Map<String, Class<?>> loadDataServices(String secondaryDatastore = null) {
+                [:]
+            }
+        }
     }
 
     private MongoDbDataStoreSpringInitializer makeInitializer(Map config, Class... domainClasses) {
