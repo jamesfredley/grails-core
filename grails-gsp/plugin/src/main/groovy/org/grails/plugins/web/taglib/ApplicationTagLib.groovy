@@ -142,6 +142,7 @@ class ApplicationTagLib implements ApplicationContextAware, InitializingBean, Gr
      *
      * @emptyTag
      */
+    @Deprecated(forRemoval = true)
     Closure createLinkTo = { attrs ->
         GrailsUtil.deprecated('Tag [createLinkTo] is deprecated please use [resource] instead')
         return resource(attrs)
