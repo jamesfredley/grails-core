@@ -16,10 +16,7 @@
  *  specific language governing permissions and limitations
  *  under the License.
  */
-
 package org.grails.datastore.mapping.config
-
-import java.lang.annotation.Annotation
 
 import groovy.transform.CompileStatic
 import groovy.transform.Internal
@@ -34,7 +31,6 @@ import org.grails.datastore.mapping.core.Datastore
 import org.grails.datastore.mapping.core.connections.ConnectionSource
 import org.grails.datastore.mapping.core.connections.ConnectionSourcesSupport
 import org.grails.datastore.mapping.core.connections.MultipleConnectionSourceCapableDatastore
-import org.grails.datastore.mapping.model.PersistentEntity
 import org.grails.datastore.mapping.services.Service
 
 /**
