@@ -33,4 +33,5 @@ import java.lang.annotation.Target
 @Retention(RetentionPolicy.RUNTIME)
 @Inherited
 @Documented
+@Deprecated(forRemoval = true, since = "4.0.0")
 @interface Consumer {}
