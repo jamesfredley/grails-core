@@ -18,25 +18,25 @@
  */
 package org.grails.forge.api.options;
 
-import org.grails.forge.api.SelectOptionDTO;
-import org.grails.forge.api.TestFrameworkDTO;
 import io.swagger.v3.oas.annotations.media.Schema;
+import org.grails.forge.api.SelectOptionDTO;
+import org.grails.forge.api.DevelopmentReloadingDTO;
 
 import java.util.List;
 
-@Schema(name = "TestFrameworkSelectOptions")
-public class TestFrameworkSelectOptions extends SelectOptionDTO<TestFrameworkDTO> {
-    public TestFrameworkSelectOptions(List<TestFrameworkDTO> options, TestFrameworkDTO defaultOption) {
+@Schema(name = "DevelopmentReloadingSelectOptions")
+public class DevelopmentReloadingSelectOptions extends SelectOptionDTO<DevelopmentReloadingDTO> {
+    public DevelopmentReloadingSelectOptions(List<DevelopmentReloadingDTO> options, DevelopmentReloadingDTO defaultOption) {
         super(options, defaultOption);
     }
 
     @Override
-    public List<TestFrameworkDTO> getOptions() {
+    public List<DevelopmentReloadingDTO> getOptions() {
         return super.getOptions();
     }
 
     @Override
-    public TestFrameworkDTO getDefaultOption() {
+    public DevelopmentReloadingDTO getDefaultOption() {
         return super.getDefaultOption();
     }
 }
