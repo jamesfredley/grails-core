@@ -16,36 +16,25 @@
  *  specific language governing permissions and limitations
  *  under the License.
  */
-package org.grails.forge.api;
+package org.grails.forge.cli.command;
 
-import io.micronaut.core.annotation.NonNull;
+import org.grails.forge.options.DevelopmentReloading;
+import picocli.CommandLine;
 
-import java.util.Locale;
+public class DevelopmentReloadingConverter implements CommandLine.ITypeConverter<DevelopmentReloading> {
 
-public enum TestFramework {
-    JUNIT,
-    SPOCK;
-
-    static final TestFramework DEFAULT_OPTION = SPOCK;
+    public static final DevelopmentReloading DEFAULT_RELOADING = DevelopmentReloading.DEVTOOLS;
 
     @Override
-    public String toString() {
-        return this.name().toLowerCase();
-    }
-
-    @NonNull
-    public String getName() {
-        return name().toLowerCase(Locale.ENGLISH);
-    }
-
-    public org.grails.forge.options.TestFramework toTestFramework() {
-        switch (this) {
-            case SPOCK:
-                return org.grails.forge.options.TestFramework.SPOCK;
-            default:
-            case JUNIT:
-                return org.grails.forge.options.TestFramework.JUNIT;
+    public DevelopmentReloading convert(String value) throws Exception {
+        if (value == null) {
+            return DEFAULT_RELOADING;
         }
+        for (DevelopmentReloading bt : DevelopmentReloading.values()) {
+            if (value.equalsIgnoreCase(bt.toString())) {
+                return bt;
+            }
+        }
+        return DEFAULT_RELOADING;
     }
-
 }
