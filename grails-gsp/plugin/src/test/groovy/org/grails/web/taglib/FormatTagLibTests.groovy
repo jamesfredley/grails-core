@@ -331,4 +331,32 @@ class FormatTagLibTests extends AbstractGrailsTagTests {
         def template = '<g:formatNumber number="${number}" nan="n/a"/>'
         assertOutputEquals("n/a", template, [number: number])
     }
+
+    @Issue('https://github.com/apache/grails-core/issues/15178')
+    @Test
+    void testFormatNumberNegativeWithNorwegianLocale() {
+        def template = '<g:formatNumber number="${myNumber}" type="number" locale="nb_NO"/>'
+        def result = applyTemplate(template, [myNumber: -42])
+        // Verify ASCII minus (U+002D) is used, not Unicode minus (U+2212)
+        assert result.charAt(0) == '-' as char
+        assert !result.contains('\u2212')
+    }
+
+    @Issue('https://github.com/apache/grails-core/issues/15178')
+    @Test
+    void testFormatNumberNegativeLongWithNorwegianLocale() {
+        def template = '<g:formatNumber number="${myNumber}" format="0" locale="nb_NO"/>'
+        def result = applyTemplate(template, [myNumber: -123456L])
+        assert result.contains('-')
+        assert !result.contains('\u2212')
+    }
+
+    @Issue('https://github.com/apache/grails-core/issues/15178')
+    @Test
+    void testFormatNumberNegativeBigDecimalWithNorwegianLocale() {
+        def template = '<g:formatNumber number="${myNumber}" format="0.00" locale="nb_NO"/>'
+        def result = applyTemplate(template, [myNumber: new BigDecimal("-99.95")])
+        assert result.contains('-')
+        assert !result.contains('\u2212')
+    }
 }

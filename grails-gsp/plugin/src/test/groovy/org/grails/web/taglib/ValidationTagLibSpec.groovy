@@ -31,6 +31,7 @@ import org.springframework.beans.factory.support.RootBeanDefinition
 import org.springframework.context.MessageSourceResolvable
 import org.springframework.context.i18n.LocaleContextHolder
 import org.springframework.validation.FieldError
+import spock.lang.Issue
 import spock.lang.PendingFeature
 import spock.lang.Specification
 
@@ -257,6 +258,22 @@ class ValidationTagLibSpec extends Specification implements TagLibUnitTest<Valid
 
         then:
         applyTemplate(template, [book:b]) == "1.045,456"
+    }
+
+    @Issue('https://github.com/apache/grails-core/issues/15178')
+    void testFieldValueTagWithNorwegianLocaleUsesAsciiMinus() {
+        given:
+        def b = new ValidationTagLibBook()
+        b.usPrice = -42.5
+        def template = '<g:fieldValue bean="${book}" field="usPrice" />'
+
+        when:
+        webRequest.currentRequest.addPreferredLocale(new Locale('nb', 'NO'))
+        def result = applyTemplate(template, [book: b])
+
+        then:
+        result.contains('-')
+        !result.contains('\u2212')
     }
 
     @PendingFeature // Was valid for JVM lower than 14 because space is converted to narrow no-break space 8239 and is not encoded

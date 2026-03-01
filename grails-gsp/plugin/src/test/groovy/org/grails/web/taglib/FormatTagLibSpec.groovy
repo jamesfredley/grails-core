@@ -21,6 +21,7 @@ package org.grails.web.taglib
 import grails.testing.web.taglib.TagLibUnitTest
 import org.grails.plugins.web.taglib.FormatTagLib
 import spock.lang.IgnoreIf
+import spock.lang.Issue
 import spock.lang.Requires
 import spock.lang.Specification
 
@@ -56,5 +57,15 @@ class FormatTagLibSpec extends Specification implements TagLibUnitTest<FormatTag
 
         expect:
         "3,12${new String([160] as char[])}\$" == applyTemplate('<g:formatNumber type="currency" currencyCode="USD" number="${number}" locale="fi_FI" />',  [number: number])
+    }
+
+    @Issue('https://github.com/apache/grails-core/issues/15178')
+    void "formatNumber uses ASCII minus sign for negative numbers with Norwegian locale"() {
+        when:
+        def result = applyTemplate('<g:formatNumber number="${n}" type="number" locale="nb_NO"/>', [n: -42])
+
+        then: "ASCII minus (U+002D) is used, not Unicode minus (U+2212)"
+        result.contains('-')
+        !result.contains('\u2212')
     }
 }
