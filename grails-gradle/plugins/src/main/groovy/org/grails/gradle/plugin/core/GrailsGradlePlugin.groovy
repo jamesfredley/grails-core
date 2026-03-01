@@ -231,16 +231,22 @@ class GrailsGradlePlugin implements Plugin<Project> {
             boolean indyEnabled = grailsExtension?.indy?.getOrElse(false) ?: false
             boolean preserveParameterNames = grailsExtension?.preserveParameterNames != null
                 ? grailsExtension.preserveParameterNames.getOrElse(true) : true
+
             project.tasks.withType(GroovyCompile).configureEach { GroovyCompile c ->
                 c.groovyOptions.optimizationOptions.indy = indyEnabled
                 c.groovyOptions.parameters = preserveParameterNames
             }
+
             if (!indyEnabled) {
                 project.logger.info('Grails: Groovy invokedynamic (indy) is disabled to improve performance (see issue #15293).')
                 project.logger.info('        To enable invokedynamic: grails { indy = true } in build.gradle')
             }
-            project.logger.info("Grails: Parameter name preservation is ${preserveParameterNames ? 'enabled' : 'disabled'} (-parameters flag). " +
-                "To change: grails { preserveParameterNames = ${!preserveParameterNames} } in build.gradle (see #13028)")        }
+
+            if (preserveParameterNames) {
+                project.logger.info('Grails: Parameter name preservation is enabled (-parameters flag), refer to issue #13028.')
+                project.logger.info('        To disable: grails { preserveParameterNames = false } in build.gradle')
+            }
+        }
     }
 
     protected Closure<String> getGroovyCompilerScript(GroovyCompile compile, Project project) {
