@@ -294,7 +294,11 @@ docsTask.configure { Sync it ->
 
     it.outputs.dir mergedDocsDir
 
-    it.from manualDocsDir, apiDocsDir, dataDocsDir
+    it.from(manualDocsDir) {
+        exclude "guide/pages/**"
+    }
+
+    it.from apiDocsDir, dataDocsDir
     it.into mergedDocsDir
 }
 
