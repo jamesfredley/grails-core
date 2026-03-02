@@ -184,44 +184,6 @@ class GspTagLibSpec extends ContainerGebSpec {
         $('#boolean-display').text().contains('Yes')
     }
 
-    def "g:formatNumber with Norwegian locale uses ASCII minus for negative int"() {
-        when:
-        go('tagLib/formatLocaleNumber')
-
-        then:
-        def text = $('#neg-int-no').text()
-        text.contains('-')
-        !text.contains('\u2212')
-    }
-
-    def "g:formatNumber with Norwegian locale uses ASCII minus for negative long"() {
-        when:
-        go('tagLib/formatLocaleNumber')
-
-        then:
-        def text = $('#neg-long-no').text()
-        text.contains('-')
-        !text.contains('\u2212')
-    }
-
-    def "g:formatNumber with Norwegian locale uses ASCII minus for negative BigDecimal"() {
-        when:
-        go('tagLib/formatLocaleNumber')
-
-        then:
-        def text = $('#neg-decimal-no').text()
-        text.contains('-')
-        !text.contains('\u2212')
-    }
-
-    def "g:formatNumber with Norwegian locale formats positive numbers correctly"() {
-        when:
-        go('tagLib/formatLocaleNumber')
-
-        then:
-        $('#pos-number-no').text() == '42'
-    }
-
     def "g:set creates local variable"() {
         when:
         go('tagLib/setTag')
@@ -309,43 +271,5 @@ class GspTagLibSpec extends ContainerGebSpec {
         $('#url-encoded').text().contains('%26') ||  // encoded &
         $('#url-encoded').text().contains('%3D') ||  // encoded =
         $('#url-encoded').text().contains('param')   // at least the content is there
-    }
-
-    def "g:formatNumber with Norwegian locale uses ASCII minus for negative int"() {
-        when:
-        go('tagLib/formatLocaleNumber')
-
-        then:
-        def text = $('#neg-int-no').text()
-        text.contains('-')
-        !text.contains('\u2212')
-    }
-
-    def "g:formatNumber with Norwegian locale uses ASCII minus for negative long"() {
-        when:
-        go('tagLib/formatLocaleNumber')
-
-        then:
-        def text = $('#neg-long-no').text()
-        text.contains('-')
-        !text.contains('\u2212')
-    }
-
-    def "g:formatNumber with Norwegian locale uses ASCII minus for negative BigDecimal"() {
-        when:
-        go('tagLib/formatLocaleNumber')
-
-        then:
-        def text = $('#neg-decimal-no').text()
-        text.contains('-')
-        !text.contains('\u2212')
-    }
-
-    def "g:formatNumber with Norwegian locale formats positive numbers correctly"() {
-        when:
-        go('tagLib/formatLocaleNumber')
-
-        then:
-        $('#pos-number-no').text() == '42'
     }
 }

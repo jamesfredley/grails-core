@@ -327,25 +327,13 @@ class FormatTagLib implements TagLibrary {
             number = decimalFormat.parse(number as String)
         }
 
-        // Normalize Unicode minus sign (U+2212) to ASCII hyphen-minus (U+002D)
-        // for HTML compatibility (fixes grails-core#15178)
-        DecimalFormatSymbols formatSymbols = decimalFormat.decimalFormatSymbols
-        formatSymbols.minusSign = '-' as char
-        decimalFormat.decimalFormatSymbols = formatSymbols
-
         def formatted
         try {
             formatted = decimalFormat.format(number)
         }
         catch (ArithmeticException e) {
             // if roundingMode is UNNECESSARY and ArithemeticException raises, just return original number formatted with default number formatting
-            NumberFormat fallbackFormat = NumberFormat.getNumberInstance(locale)
-            if (fallbackFormat instanceof DecimalFormat) {
-                DecimalFormatSymbols fallbackSymbols = ((DecimalFormat) fallbackFormat).decimalFormatSymbols
-                fallbackSymbols.minusSign = '-' as char
-                ((DecimalFormat) fallbackFormat).decimalFormatSymbols = fallbackSymbols
-            }
-            formatted = fallbackFormat.format(number)
+            formatted = NumberFormat.getNumberInstance(locale).format(number)
         }
         return formatted
     }

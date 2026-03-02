@@ -471,12 +471,7 @@ class ValidationTagLib implements TagLibrary {
         PropertyEditor editor = registry.findCustomEditor(value.getClass(), propertyPath)
         if (editor) {
             editor.setValue(value)
-            String formattedValue = editor.asText
-            if (value instanceof Number && formattedValue != null) {
-                DecimalFormatSymbols formatSymbols = new DecimalFormatSymbols(webRequest.getLocale())
-                formattedValue = formattedValue.replace(formatSymbols.minusSign, '-' as char)
-            }
-            return !(value instanceof Number) ? formattedValue?.encodeAsHTML() : formattedValue
+            return !(value instanceof Number) ? editor.asText?.encodeAsHTML() : editor.asText
         }
 
         if (value instanceof Number) {
@@ -487,7 +482,6 @@ class ValidationTagLib implements TagLibrary {
 
             def locale = webRequest.getLocale()
             def dcfs = locale ? new DecimalFormatSymbols(locale) : new DecimalFormatSymbols()
-            dcfs.minusSign = '-' as char
             def decimalFormat = new DecimalFormat(pattern, dcfs)
             value = decimalFormat.format(value)
         }

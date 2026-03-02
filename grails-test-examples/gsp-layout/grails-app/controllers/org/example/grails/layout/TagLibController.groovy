@@ -57,14 +57,6 @@ class TagLibController {
         ]
     }
 
-    def formatLocaleNumber() {
-        [
-            negativeInt: -42,
-            negativeLong: -123456789L,
-            negativeBigDecimal: new BigDecimal('-99999.99')
-        ]
-    }
-
     def setTag() {
         render(view: 'setTag')
     }
