@@ -44,6 +44,7 @@ class GrailsExtension {
         this.project = project
         this.pluginDefiner = new PluginDefiner(project)
         this.indy = project.objects.property(Boolean).convention(false)
+        this.preserveParameterNames = project.objects.property(Boolean).convention(true)
     }
 
     /**
@@ -107,13 +108,13 @@ class GrailsExtension {
     }
 
     /**
-     * Preserve method parameter names in .class files
-     * This would make grails to not have to specify '@qualifier' for wiring by name.
-     * Additionally enables better IDE code completion for method parameters, reflection-based tools, bean introspection, etc.).
-     * Corresponds to groovyc `-parameters`.
-     * Default: true (See #13028)
+     * Keep class file parameter names so autowire by name can be supported without additional annotations such as '@qualifier'.
      */
-    boolean preserveParameterNames = true
+    final Property<Boolean> preserveParameterNames
+
+    void setPreserveParameterNames(boolean enabled) {
+        this.preserveParameterNames.set(enabled)
+    }
 
     DependencyHandler getPlugins() {
         if (pluginDefiner == null) {
