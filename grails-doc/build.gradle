@@ -294,6 +294,8 @@ docsTask.configure { Sync it ->
 
     it.outputs.dir mergedDocsDir
 
+    // Exclude page fragments - they have broken links/CSS/JS and are already
+    // included in the assembled guide pages (see #14986)
     it.from(manualDocsDir) {
         exclude "guide/pages/**"
     }
