@@ -26,6 +26,7 @@ import java.lang.reflect.Parameter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -55,7 +56,7 @@ public final class TagMethodInvoker {
         @Override
         protected Map<String, List<Method>> computeValue(Class<?> type) {
             Map<String, List<Method>> methodsByName = new HashMap<>();
-            for (Method method : type.getDeclaredMethods()) {
+            for (Method method : getCandidateMethods(type)) {
                 if (isTagMethodCandidate(method)) {
                     methodsByName.computeIfAbsent(method.getName(), ignored -> new ArrayList<>()).add(method);
                 }
@@ -100,7 +101,7 @@ public final class TagMethodInvoker {
             return Collections.emptyList();
         }
         List<String> names = new ArrayList<>();
-        for (Method method : tagLibClass.getDeclaredMethods()) {
+        for (Method method : getCandidateMethods(tagLibClass)) {
             if (isTagMethodCandidate(method)) {
                 names.add(method.getName());
             }
@@ -159,6 +160,34 @@ public final class TagMethodInvoker {
             return false;
         }
         return method.getDeclaringClass() != Object.class && method.getDeclaringClass() != GroovyObject.class;
+    }
+
+    private static Collection<Method> getCandidateMethods(Class<?> type) {
+        List<Method> methods = new ArrayList<>();
+        Set<String> seenSignatures = new HashSet<>();
+        Class<?> current = type;
+        while (current != null && current != Object.class && current != GroovyObject.class) {
+            for (Method method : current.getDeclaredMethods()) {
+                String signature = signature(method);
+                if (seenSignatures.add(signature)) {
+                    methods.add(method);
+                }
+            }
+            current = current.getSuperclass();
+        }
+        return methods;
+    }
+
+    private static String signature(Method method) {
+        StringBuilder builder = new StringBuilder(method.getName()).append('(');
+        Class<?>[] parameterTypes = method.getParameterTypes();
+        for (int i = 0; i < parameterTypes.length; i++) {
+            if (i > 0) {
+                builder.append(',');
+            }
+            builder.append(parameterTypes[i].getName());
+        }
+        return builder.append(')').toString();
     }
 
     private static Object[] toMethodArguments(Method method, Map<?, ?> attrs, Closure<?> body) {

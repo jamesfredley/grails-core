@@ -29,7 +29,6 @@ import org.springframework.context.ApplicationContext
 import grails.core.gsp.GrailsTagLibClass
 import grails.util.GrailsClassUtils
 import org.grails.taglib.encoder.OutputContextLookupHelper
-import org.grails.taglib.encoder.OutputEncodingStack
 
 class TagLibraryMetaUtils {
 
@@ -113,12 +112,6 @@ class TagLibraryMetaUtils {
     @CompileStatic
     private static Object captureTagOutputForMethodCall(TagLibraryLookup gspTagLibraryLookup, String namespace, String name, Map attrs, Object body) {
         Object output = TagOutput.captureTagOutput(gspTagLibraryLookup, namespace, name, attrs, body, OutputContextLookupHelper.lookupOutputContext())
-        boolean returnsObject = gspTagLibraryLookup.doesTagReturnObject(namespace, name)
-        boolean gspTagSyntaxCall = attrs instanceof GroovyPageAttributes && ((GroovyPageAttributes) attrs).isGspTagSyntaxCall()
-        if (gspTagSyntaxCall && !returnsObject && output != null) {
-            OutputEncodingStack.currentStack().taglibWriter.print(output)
-            return null
-        }
         return output
     }
 
