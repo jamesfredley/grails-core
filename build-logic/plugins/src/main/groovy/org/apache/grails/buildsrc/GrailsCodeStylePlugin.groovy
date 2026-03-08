@@ -178,6 +178,7 @@ class GrailsCodeStylePlugin implements Plugin<Project> {
 
             // Redirect XML report output to a single directory to consolidate
             // reports across all subprojects into one known location
+            it.reports.xml.required.set(true)
             it.reports.xml.outputLocation.set(
                     project.extensions.getByType(GrailsCodeStyleExtension)
                             .reportsDirectory.get()
