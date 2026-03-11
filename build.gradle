@@ -79,6 +79,36 @@ apply {
     from layout.projectDirectory.file('gradle/rat-root-config.gradle')
 }
 
+tasks.register('publishAllToMavenLocal') {
+    group = 'publishing'
+    description = 'Publishes grails-gradle, the root build, and grails-forge to the local Maven cache (in order).'
+
+    doLast {
+        def rootDir = layout.projectDirectory.asFile
+
+        // 1. Publish grails-gradle (provides Gradle plugins used by the main build)
+        logger.lifecycle('--- Publishing grails-gradle to Maven Local ---')
+        exec {
+            workingDir file("${rootDir}/grails-gradle")
+            commandLine "${rootDir}/grails-gradle/gradlew", 'publishToMavenLocal'
+        }
+
+        // 2. Publish the root (main) build
+        logger.lifecycle('--- Publishing root build to Maven Local ---')
+        exec {
+            workingDir rootDir
+            commandLine "${rootDir}/gradlew", 'publishToMavenLocal'
+        }
+
+        // 3. Publish grails-forge
+        logger.lifecycle('--- Publishing grails-forge to Maven Local ---')
+        exec {
+            workingDir file("${rootDir}/grails-forge")
+            commandLine "${rootDir}/grails-forge/gradlew", 'publishToMavenLocal'
+        }
+    }
+}
+
 // For debugging the gradle task graph: Uncomment to show task dependencies when a task is run
 //gradle.taskGraph.whenReady {taskGraph ->
 //    logger.lifecycle("Found ${taskGraph.allTasks.size()} tasks.")
