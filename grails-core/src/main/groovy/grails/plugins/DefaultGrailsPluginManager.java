@@ -72,28 +72,32 @@ import org.grails.spring.DefaultRuntimeSpringConfiguration;
 import org.grails.spring.RuntimeSpringConfiguration;
 
 /**
- * <p>Handles the loading and management of plug-ins in the Grails system.
- * A plugin is just like a normal Grails application except that it contains a file ending
- * in *Plugin.groovy in the root of the directory.
- * <p>A Plugin class is a Groovy class that has a version and optionally closures
- * called doWithSpring, doWithContext and doWithWebDescriptor
- * <p>The doWithSpring closure uses the BeanBuilder syntax (@see grails.spring.BeanBuilder) to
+ * Handles the loading and management of plug-ins in the Grails framework.
+ * A plugin is just like a normal Grails application except that it contains
+ * a class with a name ending with *GrailsPlugin.
+ * <p>
+ * This plugin descriptor class is a Groovy class that has a version and optionally
+ * closures called doWithSpring and doWithApplicationContext.
+ * <p>
+ * The doWithSpring closure uses the BeanBuilder syntax (@see grails.spring.BeanBuilder) to
  * provide runtime configuration of Grails via Spring
- * <p>The doWithContext closure is called after the Spring ApplicationContext is built and accepts
- * a single argument (the ApplicationContext)
- * <p>The doWithWebDescriptor uses mark-up building to provide additional functionality to the web.xml
- * file
- * <p> Example:
+ * <p>
+ * The doWithApplicationContext closure is called after the Spring ApplicationContext is built
+ * and accepts a single argument (the ApplicationContext)
+ *
+ * <p>
+ * Example:
  * <pre>
  * class ClassEditorGrailsPlugin {
- *      def version = '1.1'
+ *      def version = 1.1
  *      def doWithSpring = { application ->
  *          classEditor(org.springframework.beans.propertyeditors.ClassEditor, application.classLoader)
  *      }
  * }
  * </pre>
- * <p>A plugin can also define "dependsOn" and "evict" properties that specify what plugins the plugin
- * depends on and which ones it is incompatible with and should evict
+ * <p>
+ * The plugin descriptor class can also define "dependsOn" and "evict" properties that specify
+ * what plugins the plugin depends on and which ones it is incompatible with and should evict
  *
  * @author Graeme Rocher
  * @since 0.4
@@ -400,7 +404,7 @@ public class DefaultGrailsPluginManager extends AbstractGrailsPluginManager {
         final String pluginGrailsVersion = getPluginGrailsVersion(plugin);
 
         if (pluginGrailsVersion == null || pluginGrailsVersion.contains("@")) {
-            LOG.debug("Plugin grails version is null or containing '@'. Compatibility check skipped.");
+            LOG.debug("Plugin grailsVersion is null or containing '@'. Compatibility check skipped.");
             return true;
         }
 
@@ -430,9 +434,9 @@ public class DefaultGrailsPluginManager extends AbstractGrailsPluginManager {
             }
         }
         if (!pluginMaxGrailsVersion.equals("*")) {
-            // Case 1: max version not specified. Forward compatibility expected
+            // Case 1: a max version was not specified. Forward compatibility expected
 
-            // minimum version required by plugin cannot be greater than grails app version
+            // a minimum version required by plugin cannot be greater than grails app version
             if (comparator.compare(pluginMinGrailsVersion, appGrailsVersion) > 0) {
                 LOG.warn("Plugin [" + plugin.getName() + ":" + plugin.getVersion() +
                         "] may not be compatible with this application as the application Grails version is less" +

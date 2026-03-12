@@ -32,23 +32,21 @@ import grails.plugins.exceptions.PluginException;
 import org.grails.spring.RuntimeSpringConfiguration;
 
 /**
- * <p>Handles the loading and management of plug-ins in the Grails system.
- * A plugin a just like a normal Grails application except that it contains a file ending
- * in *Plugin.groovy  in the root of the directory.
- *
- * <p>A Plugin class is a Groovy class that has a version and optionally closures
- * called doWithSpring, doWithContext and doWithWebDescriptor
- *
- * <p>The doWithSpring closure uses the BeanBuilder syntax (@see grails.spring.BeanBuilder) to
+ * Handles the loading and management of plug-ins in the Grails framework.
+ * A plugin is just like a normal Grails application except that it contains
+ * a class with a name ending with *GrailsPlugin.
+ * <p>
+ * This plugin descriptor class is a Groovy class that has a version and optionally
+ * closures called doWithSpring and doWithApplicationContext.
+ * <p>
+ * The doWithSpring closure uses the BeanBuilder syntax (@see grails.spring.BeanBuilder) to
  * provide runtime configuration of Grails via Spring
+ * <p>
+ * The doWithApplicationContext closure is called after the Spring ApplicationContext is built
+ * and accepts a single argument (the ApplicationContext)
  *
- * <p>The doWithContext closure is called after the Spring ApplicationContext is built and accepts
- * a single argument (the ApplicationContext)
- *
- * <p>The doWithWebDescriptor uses mark-up building to provide additional functionality to the web.xml
- * file
- *
- *<p> Example:
+ * <p>
+ * Example:
  * <pre>
  * class ClassEditorGrailsPlugin {
  *      def version = 1.1
@@ -57,9 +55,9 @@ import org.grails.spring.RuntimeSpringConfiguration;
  *      }
  * }
  * </pre>
- *
- * <p>A plugin can also define "dependsOn" and "evict" properties that specify what plugins the plugin
- * depends on and which ones it is incompatable with and should evict
+ * <p>
+ * The plugin descriptor class can also define "dependsOn" and "evict" properties that specify
+ * what plugins the plugin depends on and which ones it is incompatible with and should evict
  *
  * @author Graeme Rocher
  * @since 0.4
@@ -101,7 +99,7 @@ public interface GrailsPluginManager extends ApplicationContextAware {
     void doRuntimeConfiguration(RuntimeSpringConfiguration springConfig);
 
     /**
-     * Performs post initialization configuration for each plug-in, passing
+     * Performs post-initialization configuration for each plug-in, passing
      * the built application context
      *
      * @param applicationContext The ApplicationContext instance
@@ -138,7 +136,7 @@ public interface GrailsPluginManager extends ApplicationContextAware {
     /**
      *
      * @param name The name of the plugin
-     * @return true if the the manager has a loaded plugin with the given name
+     * @return true if the manager has a loaded plugin with the given name
      */
     boolean hasGrailsPlugin(String name);
 
@@ -162,13 +160,13 @@ public interface GrailsPluginManager extends ApplicationContextAware {
     /**
      * Executes the runtime configuration for a specific plugin AND all its dependencies
      *
-     * @param pluginName The name of he plugin
+     * @param pluginName The name of the plugin
      * @param springConfig The runtime spring config instance
      */
     void doRuntimeConfiguration(String pluginName, RuntimeSpringConfiguration springConfig);
 
     /**
-     * Sets the GrailsApplication used be this plugin manager
+     * Sets the GrailsApplication used by this plugin manager
      * @param application The GrailsApplication instance
      */
     void setApplication(GrailsApplication application);
@@ -179,7 +177,7 @@ public interface GrailsPluginManager extends ApplicationContextAware {
     boolean isInitialised();
 
     /**
-     * Refreshes the specified plugin. A refresh will force to plugin to "touch" each of its watched resources
+     * Refreshes the specified plugin. A refresh will force the plugin to "touch" each of its watched resources
      * and fire modified events for each
      *
      * @param name The name of the plugin to refresh
@@ -196,7 +194,7 @@ public interface GrailsPluginManager extends ApplicationContextAware {
     Collection getPluginObservers(GrailsPlugin plugin);
 
     /**
-     * inform the specified plugins observers of the event specified by the passed Map instance
+     * Notify observers of the specified plugin of the event described by the given Map
      *
      * @param pluginName The name of the plugin
      * @param event The event
@@ -237,7 +235,7 @@ public interface GrailsPluginManager extends ApplicationContextAware {
     void informOfClassChange(Class<?> aClass);
 
     /**
-     * Get all of the TypeFilter definitions defined by the plugins
+     * Get all the TypeFilter definitions defined by the plugins
      * @return A list of TypeFilter definitions
      */
     List<TypeFilter> getTypeFilters();
@@ -251,8 +249,8 @@ public interface GrailsPluginManager extends ApplicationContextAware {
     String getPluginPath(String name);
 
     /**
-     * Returns the pluginContextPath for the given plugin and will force name to camel case instead of '-' lower case
-     *
+     * Returns the pluginContextPath for the given plugin and will force the name to camel case instead of '-' lower case
+     * <p>
      * my-plug-web would resolve to myPlugWeb if forceCamelCase is true.
      *
      * @param name The plugin name
@@ -262,8 +260,8 @@ public interface GrailsPluginManager extends ApplicationContextAware {
     String getPluginPath(String name, boolean forceCamelCase);
 
     /**
-     * Looks up the plugin that defined the given instance. If no plugin
-     * defined the instance then null is returned.
+     * Looks up the plugin that defined the given instance.
+     * If no plugin is defined the instance, then null is returned.
      *
      * @param instance The instance
      * @return The plugin that defined the instance or null
