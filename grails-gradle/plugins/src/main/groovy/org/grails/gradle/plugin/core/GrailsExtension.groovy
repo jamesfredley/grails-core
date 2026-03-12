@@ -108,7 +108,7 @@ class GrailsExtension {
     }
 
     /**
-     * Keep class file parameter names so autowire by name can be supported without additional annotations such as '@qualifier'.
+     * Keep class file parameter names so autowire by name can be supported without additional annotations such as '@Qualifier'.
      */
     final Property<Boolean> preserveParameterNames
 
