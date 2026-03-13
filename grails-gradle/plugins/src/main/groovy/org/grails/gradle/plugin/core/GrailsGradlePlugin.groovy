@@ -18,6 +18,8 @@
  */
 package org.grails.gradle.plugin.core
 
+import java.util.zip.ZipFile
+
 import grails.util.BuildSettings
 import grails.util.Environment
 import grails.util.GrailsNameUtils
@@ -190,6 +192,8 @@ class GrailsGradlePlugin extends GroovyPlugin {
     private void configureGroovyCompiler(Project project) {
         Provider<RegularFile> groovyCompilerConfigFile = project.layout.buildDirectory.file('grailsGroovyCompilerConfig.groovy')
 
+        GrailsExtension grailsExtension = project.extensions.findByType(GrailsExtension)
+
         project.tasks.withType(GroovyCompile).configureEach { GroovyCompile c ->
             c.outputs.file(groovyCompilerConfigFile)
 
@@ -222,21 +226,88 @@ class GrailsGradlePlugin extends GroovyPlugin {
                 c.groovyOptions.configurationScript = combinedFile
             }
         }
+
+        // Configure indy and log status after evaluation so user's grails { } block has been applied
+        project.afterEvaluate {
+            boolean indyEnabled = grailsExtension?.indy?.getOrElse(false) ?: false
+            project.tasks.withType(GroovyCompile).configureEach { GroovyCompile c ->
+                c.groovyOptions.optimizationOptions.indy = indyEnabled
+            }
+            if (!indyEnabled) {
+                project.logger.info('Grails: Groovy invokedynamic (indy) is disabled to improve performance (see issue #15293).')
+                project.logger.info('        To enable invokedynamic: grails { indy = true } in build.gradle')
+            }
+        }
     }
 
     protected Closure<String> getGroovyCompilerScript(GroovyCompile compile, Project project) {
         GrailsExtension grails = project.extensions.findByType(GrailsExtension)
-        if (!grails.importJavaTime) {
+
+        // Start with user-configured imports
+        Set<String> starImports = new LinkedHashSet<>(grails.starImports)
+
+        // Add java.time if enabled
+        if (grails.importJavaTime) {
+            starImports.add('java.time')
+        }
+
+        // Add Grails annotation packages and common validation annotations if enabled
+        if (grails.importGrailsCommonAnnotations) {
+            // Always add jakarta.validation.constraints
+            starImports.add('jakarta.validation.constraints')
+
+            // Check for grails.gorm.annotation.* classes on classpath
+            if (isClassOnClasspath(compile.classpath, 'grails.gorm.annotation.CreatedDate')) {
+                starImports.add('grails.gorm.annotation')
+            }
+
+            // Check for grails.plugin.scaffolding.annotation.* classes on classpath
+            if (isClassOnClasspath(compile.classpath, 'grails.plugin.scaffolding.annotation.Scaffold')) {
+                starImports.add('grails.plugin.scaffolding.annotation')
+            }
+        }
+
+        // Return null if no imports are needed
+        if (starImports.isEmpty()) {
             return null
         }
 
+        // Build the import statements
         return { ->
-            '''withConfig(configuration) {
+            def importStatements = starImports.collect { pkg -> "                        star '$pkg'" }.join('\n')
+            """withConfig(configuration) {
                     imports {
-                        star 'java.time'
+${importStatements}
                     }
                 }
-            '''
+            """
+        }
+    }
+
+    /**
+     * Check if a class exists on the given classpath.
+     * This detects classes from any source: direct dependencies, transitive dependencies, or local jars.
+     *
+     * @param classpath The FileCollection representing the classpath to search
+     * @param className The fully qualified class name to look for (e.g., 'grails.gorm.annotation.CreatedDate')
+     * @return true if the class is found on the classpath
+     */
+    private static boolean isClassOnClasspath(FileCollection classpath, String className) {
+        def classEntry = className.replace('.', '/') + '.class'
+        classpath.files.any { f ->
+            try {
+                if (f.file && f.name.endsWith('.jar')) {
+                    new ZipFile(f).withCloseable { zip ->
+                        zip.getEntry(classEntry) != null
+                    }
+                } else if (f.directory) {
+                    new File(f, classEntry).exists()
+                } else {
+                    false
+                }
+            } catch (Exception ignored) {
+                false
+            }
         }
     }
 
