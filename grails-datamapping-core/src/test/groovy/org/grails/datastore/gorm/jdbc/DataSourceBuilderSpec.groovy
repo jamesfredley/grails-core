@@ -741,4 +741,187 @@ class DataSourceBuilderSpec extends Specification {
         cleanup:
         ds?.close()
     }
+
+    def "HikariCP pool sizing properties are bound correctly"() {
+        given:
+        def builder = DataSourceBuilder.create()
+                .type(HikariDataSource)
+                .url("jdbc:h2:mem:poolSizeTest;DB_CLOSE_DELAY=-1")
+                .driverClassName("org.h2.Driver")
+                .username("sa")
+                .password("")
+        builder.properties([maximumPoolSize: '20', minimumIdle: '5'])
+
+        when:
+        HikariDataSource ds = (HikariDataSource) builder.build()
+
+        then:
+        ds.maximumPoolSize == 20
+        ds.minimumIdle == 5
+
+        cleanup:
+        ds?.close()
+    }
+
+    def "HikariCP timeout properties are bound correctly"() {
+        given:
+        def builder = DataSourceBuilder.create()
+                .type(HikariDataSource)
+                .url("jdbc:h2:mem:timeoutTest;DB_CLOSE_DELAY=-1")
+                .driverClassName("org.h2.Driver")
+                .username("sa")
+                .password("")
+        builder.properties([
+                connectionTimeout        : '15000',
+                idleTimeout              : '300000',
+                maxLifetime              : '900000',
+                validationTimeout        : '3000',
+                keepaliveTime            : '30000',
+                leakDetectionThreshold   : '60000',
+                initializationFailTimeout: '5000'
+        ])
+
+        when:
+        HikariDataSource ds = (HikariDataSource) builder.build()
+
+        then:
+        ds.connectionTimeout == 15000
+        ds.idleTimeout == 300000
+        ds.maxLifetime == 900000
+        ds.validationTimeout == 3000
+        ds.keepaliveTime == 30000
+        ds.leakDetectionThreshold == 60000
+        ds.initializationFailTimeout == 5000
+
+        cleanup:
+        ds?.close()
+    }
+
+    def "HikariCP connection behavior properties are bound correctly"() {
+        given:
+        def builder = DataSourceBuilder.create()
+                .type(HikariDataSource)
+                .url("jdbc:h2:mem:connBehaviorTest;DB_CLOSE_DELAY=-1")
+                .driverClassName("org.h2.Driver")
+                .username("sa")
+                .password("")
+        builder.properties([
+                autoCommit            : 'false',
+                connectionTestQuery   : 'SELECT 1',
+                connectionInitSql     : 'SET LOCK_TIMEOUT 5000',
+                transactionIsolation  : 'TRANSACTION_READ_COMMITTED',
+                catalog               : 'testCatalog',
+                schema                : 'testSchema',
+                isolateInternalQueries: 'true'
+        ])
+
+        when:
+        HikariDataSource ds = (HikariDataSource) builder.build()
+
+        then:
+        ds.autoCommit == false
+        ds.connectionTestQuery == 'SELECT 1'
+        ds.connectionInitSql == 'SET LOCK_TIMEOUT 5000'
+        ds.transactionIsolation == 'TRANSACTION_READ_COMMITTED'
+        ds.catalog == 'testCatalog'
+        ds.schema == 'testSchema'
+        ds.isolateInternalQueries == true
+
+        cleanup:
+        ds?.close()
+    }
+
+    def "HikariCP pool management properties are bound correctly"() {
+        given:
+        def builder = DataSourceBuilder.create()
+                .type(HikariDataSource)
+                .url("jdbc:h2:mem:poolMgmtTest;DB_CLOSE_DELAY=-1")
+                .driverClassName("org.h2.Driver")
+                .username("sa")
+                .password("")
+        builder.properties([
+                poolName      : 'TestPool',
+                registerMbeans: 'true'
+        ])
+
+        when:
+        HikariDataSource ds = (HikariDataSource) builder.build()
+
+        then:
+        ds.poolName == 'TestPool'
+        ds.registerMbeans == true
+
+        cleanup:
+        ds?.close()
+    }
+
+    def "HikariDataSource is fully configured from comprehensive Grails config map"() {
+        given: "a config map resembling a complete dataSource block from application.yml"
+        def builder = DataSourceBuilder.create()
+                .type(HikariDataSource)
+
+        Map config = [
+                url                      : "jdbc:h2:mem:fullHikariTest;DB_CLOSE_DELAY=-1",
+                driverClassName          : "org.h2.Driver",
+                username                 : "sa",
+                password                 : "",
+                maximumPoolSize          : '15',
+                minimumIdle              : '3',
+                connectionTimeout        : '20000',
+                idleTimeout              : '400000',
+                maxLifetime              : '1200000',
+                validationTimeout        : '4000',
+                keepaliveTime            : '60000',
+                leakDetectionThreshold   : '30000',
+                initializationFailTimeout: '2000',
+                autoCommit               : 'false',
+                connectionTestQuery      : 'SELECT 1',
+                connectionInitSql        : 'SET LOCK_TIMEOUT 5000',
+                poolName                 : 'GrailsPool',
+                registerMbeans           : 'true',
+                isolateInternalQueries   : 'true',
+                dbProperties             : [
+                        cachePrepStmts       : 'true',
+                        prepStmtCacheSize    : '250',
+                        prepStmtCacheSqlLimit: '2048',
+                        useSSL               : 'false'
+                ]
+        ]
+        builder.properties(config)
+
+        when:
+        HikariDataSource ds = (HikariDataSource) builder.build()
+
+        then: "all pool properties are configured"
+        ds.jdbcUrl == "jdbc:h2:mem:fullHikariTest;DB_CLOSE_DELAY=-1"
+        ds.username == "sa"
+        ds.maximumPoolSize == 15
+        ds.minimumIdle == 3
+
+        and: "all timeout properties are configured"
+        ds.connectionTimeout == 20000
+        ds.idleTimeout == 400000
+        ds.maxLifetime == 1200000
+        ds.validationTimeout == 4000
+        ds.keepaliveTime == 60000
+        ds.leakDetectionThreshold == 30000
+        ds.initializationFailTimeout == 2000
+
+        and: "all connection behavior properties are configured"
+        ds.autoCommit == false
+        ds.connectionTestQuery == 'SELECT 1'
+        ds.connectionInitSql == 'SET LOCK_TIMEOUT 5000'
+        ds.poolName == 'GrailsPool'
+        ds.registerMbeans == true
+        ds.isolateInternalQueries == true
+
+        and: "JDBC driver pass-through properties are bound"
+        ds.dataSourceProperties.getProperty('cachePrepStmts') == 'true'
+        ds.dataSourceProperties.getProperty('prepStmtCacheSize') == '250'
+        ds.dataSourceProperties.getProperty('prepStmtCacheSqlLimit') == '2048'
+        ds.dataSourceProperties.getProperty('useSSL') == 'false'
+
+        cleanup:
+        ds?.close()
+    }
 }
