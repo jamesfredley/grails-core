@@ -51,12 +51,12 @@ import org.grails.datastore.mapping.core.exceptions.ConfigurationException;
  */
 public class DataSourceBuilder {
 
-    private static final String[] DATA_SOURCE_TYPE_NAMES = new String[] {
-        "org.apache.tomcat.jdbc.pool.DataSource",
-        "com.zaxxer.hikari.HikariDataSource",
-        "org.apache.commons.dbcp.BasicDataSource",
-        "org.apache.commons.dbcp2.BasicDataSource",
-        "org.springframework.jdbc.datasource.DriverManagerDataSource"
+    private static final String[] DATA_SOURCE_TYPE_NAMES = new String[]{
+            "org.apache.tomcat.jdbc.pool.DataSource",
+            "com.zaxxer.hikari.HikariDataSource",
+            "org.apache.commons.dbcp.BasicDataSource",
+            "org.apache.commons.dbcp2.BasicDataSource",
+            "org.springframework.jdbc.datasource.DriverManagerDataSource"
     };
 
     private Class<? extends DataSource> type;
@@ -98,14 +98,24 @@ public class DataSourceBuilder {
     }
 
     private void bind(DataSource result) {
+        if (properties.containsKey("dbProperties") && properties.containsKey("dataSourceProperties")) {
+            throw new ConfigurationException("Cannot specify both dbProperties and dataSourceProperties");
+        }
+        if (properties.containsKey("healthCheckProperties")) {
+            coerceDbProperties("healthCheckProperties");
+        }
         if (properties.containsKey("dbProperties")) {
-            coerceDbProperties();
+            coerceDbProperties("dbProperties");
+        }
+        if (properties.containsKey("dataSourceProperties")) {
+            coerceDbProperties("dataSourceProperties");
         }
         MutablePropertyValues properties = new MutablePropertyValues(this.properties);
         new RelaxedDataBinder(result).withAlias("url", "jdbcUrl")
                 .withAlias("username", "user")
-                // The HikariConfig's property name is dataSourceProperties, not dbProperties so support both
+                // The HikariConfig's property name is dataSourceProperties, not dbProperties so support both or either way being defined in config
                 .withAlias("dbProperties", "dataSourceProperties")
+                .withAlias("dataSourceProperties", "dbProperties")
                 .bind(properties);
     }
 
@@ -126,14 +136,14 @@ public class DataSourceBuilder {
      * <p>When dbProperties originate from YAML configuration, the keys are already flat
      * strings and are simply converted to a Properties object.</p>
      */
-    private void coerceDbProperties() {
+    private void coerceDbProperties(String keyname) {
         Map propertiesMap = this.properties;
-        Object dbPropertiesObject = propertiesMap.get("dbProperties");
+        Object dbPropertiesObject = propertiesMap.get(keyname);
         if (dbPropertiesObject instanceof Map) {
             Map dbProperties = (Map) dbPropertiesObject;
             Properties properties = new Properties();
             flattenMap("", dbProperties, properties);
-            propertiesMap.put("dbProperties", properties);
+            propertiesMap.put(keyname, properties);
         }
     }
 
@@ -180,12 +190,10 @@ public class DataSourceBuilder {
 
         if (this.type != null) {
             return this.type;
-        }
-        else if (!pooled) {
+        } else if (!pooled) {
             if (this.readOnly) {
                 return ReadOnlyDriverManagerDataSource.class;
-            }
-            else {
+            } else {
                 return org.springframework.jdbc.datasource.DriverManagerDataSource.class;
             }
         }
@@ -194,8 +202,7 @@ public class DataSourceBuilder {
             try {
                 return (Class<? extends DataSource>) ClassUtils.forName(name,
                         this.classLoader);
-            }
-            catch (Exception ex) {
+            } catch (Exception ex) {
                 // Swallow and continue
             }
         }

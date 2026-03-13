@@ -19,6 +19,7 @@
 package org.grails.datastore.gorm.jdbc
 
 import com.zaxxer.hikari.HikariDataSource
+import org.grails.datastore.mapping.core.exceptions.ConfigurationException
 import org.springframework.jdbc.datasource.DriverManagerDataSource
 import spock.lang.Specification
 
@@ -424,6 +425,318 @@ class DataSourceBuilderSpec extends Specification {
 
         and: "all values are String instances"
         ds.dataSourceProperties.every { k, v -> v instanceof String }
+
+        cleanup:
+        ds?.close()
+    }
+
+    // ---- dataSourceProperties as config key (alternative to dbProperties) ----
+
+    def "dataSourceProperties as config key binds to HikariDataSource"() {
+        given: "a config map using dataSourceProperties instead of dbProperties"
+        Map config = [
+                url                  : "jdbc:h2:mem:dspKeyTest;DB_CLOSE_DELAY=-1",
+                driverClassName      : "org.h2.Driver",
+                username             : "sa",
+                password             : "",
+                dataSourceProperties : [
+                        cachePrepStmts   : 'true',
+                        prepStmtCacheSize: '250'
+                ]
+        ]
+
+        when:
+        HikariDataSource ds = (HikariDataSource) DataSourceBuilder.create()
+                .type(HikariDataSource)
+                .properties(config)
+                .build()
+
+        then:
+        ds.dataSourceProperties.getProperty('cachePrepStmts') == 'true'
+        ds.dataSourceProperties.getProperty('prepStmtCacheSize') == '250'
+
+        cleanup:
+        ds?.close()
+    }
+
+    def "dataSourceProperties with nested maps are flattened to dotted keys"() {
+        given: "a config map using dataSourceProperties with nested maps from ConfigSlurper"
+        Map config = [
+                url                  : "jdbc:h2:mem:dspNestedTest;DB_CLOSE_DELAY=-1",
+                driverClassName      : "org.h2.Driver",
+                username             : "sa",
+                password             : "",
+                dataSourceProperties : [
+                        oracle: [
+                                jdbc: [
+                                        sendBooleanAsNativeBoolean: false,
+                                        TcpNoDelay                : true
+                                ]
+                        ]
+                ]
+        ]
+
+        when:
+        HikariDataSource ds = (HikariDataSource) DataSourceBuilder.create()
+                .type(HikariDataSource)
+                .properties(config)
+                .build()
+
+        then: "nested maps are flattened to dotted keys"
+        ds.dataSourceProperties.getProperty('oracle.jdbc.sendBooleanAsNativeBoolean') == 'false'
+        ds.dataSourceProperties.getProperty('oracle.jdbc.TcpNoDelay') == 'true'
+
+        and: "no nested map entries exist"
+        !ds.dataSourceProperties.containsKey('oracle')
+
+        cleanup:
+        ds?.close()
+    }
+
+    def "dataSourceProperties with non-string values are coerced to strings"() {
+        given:
+        Map config = [
+                url                  : "jdbc:h2:mem:dspCoercionTest;DB_CLOSE_DELAY=-1",
+                driverClassName      : "org.h2.Driver",
+                username             : "sa",
+                password             : "",
+                dataSourceProperties : [
+                        useSSL        : false,
+                        connectTimeout: 30000
+                ]
+        ]
+
+        when:
+        HikariDataSource ds = (HikariDataSource) DataSourceBuilder.create()
+                .type(HikariDataSource)
+                .properties(config)
+                .build()
+
+        then:
+        ds.dataSourceProperties.getProperty('useSSL') == 'false'
+        ds.dataSourceProperties.getProperty('connectTimeout') == '30000'
+
+        and: "all values are String instances"
+        ds.dataSourceProperties.every { k, v -> v instanceof String }
+
+        cleanup:
+        ds?.close()
+    }
+
+    def "dataSourceProperties as pre-built Properties object is passed through"() {
+        given:
+        Properties dsp = new Properties()
+        dsp.setProperty('oracle.jdbc.sendBooleanAsNativeBoolean', 'false')
+
+        Map config = [
+                url                  : "jdbc:h2:mem:dspPrebuiltTest;DB_CLOSE_DELAY=-1",
+                driverClassName      : "org.h2.Driver",
+                username             : "sa",
+                password             : "",
+                dataSourceProperties : dsp
+        ]
+
+        when:
+        HikariDataSource ds = (HikariDataSource) DataSourceBuilder.create()
+                .type(HikariDataSource)
+                .properties(config)
+                .build()
+
+        then:
+        ds.dataSourceProperties.getProperty('oracle.jdbc.sendBooleanAsNativeBoolean') == 'false'
+
+        cleanup:
+        ds?.close()
+    }
+
+    // ---- Mutual exclusion: dbProperties and dataSourceProperties cannot both be specified ----
+
+    def "specifying both dbProperties and dataSourceProperties throws ConfigurationException"() {
+        given:
+        Map config = [
+                url                  : "jdbc:h2:mem:bothPropsTest;DB_CLOSE_DELAY=-1",
+                driverClassName      : "org.h2.Driver",
+                username             : "sa",
+                password             : "",
+                dbProperties         : [cachePrepStmts: 'true'],
+                dataSourceProperties : [useSSL: 'false']
+        ]
+
+        when:
+        DataSourceBuilder.create()
+                .type(HikariDataSource)
+                .properties(config)
+                .build()
+
+        then:
+        thrown(ConfigurationException)
+    }
+
+    // ---- healthCheckProperties support ----
+
+    def "healthCheckProperties as Map is coerced and bound to HikariDataSource"() {
+        given:
+        Map config = [
+                url                   : "jdbc:h2:mem:hcPropsTest;DB_CLOSE_DELAY=-1",
+                driverClassName       : "org.h2.Driver",
+                username              : "sa",
+                password              : "",
+                healthCheckProperties : [
+                        connectivityCheckTimeoutMs: '1000',
+                        expected99thPercentileMs  : '10'
+                ]
+        ]
+
+        when:
+        HikariDataSource ds = (HikariDataSource) DataSourceBuilder.create()
+                .type(HikariDataSource)
+                .properties(config)
+                .build()
+
+        then:
+        ds.healthCheckProperties.getProperty('connectivityCheckTimeoutMs') == '1000'
+        ds.healthCheckProperties.getProperty('expected99thPercentileMs') == '10'
+
+        cleanup:
+        ds?.close()
+    }
+
+    def "healthCheckProperties with nested maps are flattened"() {
+        given:
+        Map config = [
+                url                   : "jdbc:h2:mem:hcNestedTest;DB_CLOSE_DELAY=-1",
+                driverClassName       : "org.h2.Driver",
+                username              : "sa",
+                password              : "",
+                healthCheckProperties : [
+                        some: [
+                                nested: [
+                                        setting: '42'
+                                ]
+                        ]
+                ]
+        ]
+
+        when:
+        HikariDataSource ds = (HikariDataSource) DataSourceBuilder.create()
+                .type(HikariDataSource)
+                .properties(config)
+                .build()
+
+        then:
+        ds.healthCheckProperties.getProperty('some.nested.setting') == '42'
+        !ds.healthCheckProperties.containsKey('some')
+
+        cleanup:
+        ds?.close()
+    }
+
+    def "healthCheckProperties with non-string values are coerced"() {
+        given:
+        Map config = [
+                url                   : "jdbc:h2:mem:hcCoercionTest;DB_CLOSE_DELAY=-1",
+                driverClassName       : "org.h2.Driver",
+                username              : "sa",
+                password              : "",
+                healthCheckProperties : [
+                        timeoutMs: 5000,
+                        enabled  : true
+                ]
+        ]
+
+        when:
+        HikariDataSource ds = (HikariDataSource) DataSourceBuilder.create()
+                .type(HikariDataSource)
+                .properties(config)
+                .build()
+
+        then:
+        ds.healthCheckProperties.getProperty('timeoutMs') == '5000'
+        ds.healthCheckProperties.getProperty('enabled') == 'true'
+
+        cleanup:
+        ds?.close()
+    }
+
+    def "healthCheckProperties can be used alongside dbProperties"() {
+        given:
+        Map config = [
+                url                   : "jdbc:h2:mem:hcWithDbPropsTest;DB_CLOSE_DELAY=-1",
+                driverClassName       : "org.h2.Driver",
+                username              : "sa",
+                password              : "",
+                dbProperties          : [
+                        cachePrepStmts: 'true'
+                ],
+                healthCheckProperties : [
+                        connectivityCheckTimeoutMs: '1000'
+                ]
+        ]
+
+        when:
+        HikariDataSource ds = (HikariDataSource) DataSourceBuilder.create()
+                .type(HikariDataSource)
+                .properties(config)
+                .build()
+
+        then: "both property sets are bound independently"
+        ds.dataSourceProperties.getProperty('cachePrepStmts') == 'true'
+        ds.healthCheckProperties.getProperty('connectivityCheckTimeoutMs') == '1000'
+
+        cleanup:
+        ds?.close()
+    }
+
+    def "healthCheckProperties can be used alongside dataSourceProperties"() {
+        given:
+        Map config = [
+                url                   : "jdbc:h2:mem:hcWithDspTest;DB_CLOSE_DELAY=-1",
+                driverClassName       : "org.h2.Driver",
+                username              : "sa",
+                password              : "",
+                dataSourceProperties  : [
+                        cachePrepStmts: 'true'
+                ],
+                healthCheckProperties : [
+                        connectivityCheckTimeoutMs: '1000'
+                ]
+        ]
+
+        when:
+        HikariDataSource ds = (HikariDataSource) DataSourceBuilder.create()
+                .type(HikariDataSource)
+                .properties(config)
+                .build()
+
+        then: "both property sets are bound independently"
+        ds.dataSourceProperties.getProperty('cachePrepStmts') == 'true'
+        ds.healthCheckProperties.getProperty('connectivityCheckTimeoutMs') == '1000'
+
+        cleanup:
+        ds?.close()
+    }
+
+    def "healthCheckProperties as pre-built Properties object is passed through"() {
+        given:
+        Properties hcProps = new Properties()
+        hcProps.setProperty('connectivityCheckTimeoutMs', '2000')
+
+        Map config = [
+                url                   : "jdbc:h2:mem:hcPrebuiltTest;DB_CLOSE_DELAY=-1",
+                driverClassName       : "org.h2.Driver",
+                username              : "sa",
+                password              : "",
+                healthCheckProperties : hcProps
+        ]
+
+        when:
+        HikariDataSource ds = (HikariDataSource) DataSourceBuilder.create()
+                .type(HikariDataSource)
+                .properties(config)
+                .build()
+
+        then:
+        ds.healthCheckProperties.getProperty('connectivityCheckTimeoutMs') == '2000'
 
         cleanup:
         ds?.close()
