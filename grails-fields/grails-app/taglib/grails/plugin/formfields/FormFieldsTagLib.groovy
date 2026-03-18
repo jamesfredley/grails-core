@@ -315,6 +315,7 @@ class FormFieldsTagLib {
      * @attr property REQUIRED The name of the property to display. This is resolved
      * against the specified bean or the bean in the current scope.
      */
+    @Deprecated(since = '1.5', forRemoval = true)
     def input = { attrs ->
         out << widget(attrs)
     }
