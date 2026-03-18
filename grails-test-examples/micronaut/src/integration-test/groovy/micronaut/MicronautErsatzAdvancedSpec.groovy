@@ -170,7 +170,7 @@ class MicronautErsatzAdvancedSpec extends Specification implements HttpClientSup
         def response = http('/external-api/search?q=grails&page=2', 'Accept': 'application/json')
 
         then: 'the response contains the mocked data'
-        response.expectContains(200, 'roundtrip')
+        response.assertContains(200, 'roundtrip')
 
         and: 'ersatz verifies the call'
         ersatz.verify()
@@ -278,7 +278,7 @@ class MicronautErsatzAdvancedSpec extends Specification implements HttpClientSup
         )
 
         then: 'the response contains the secured payload'
-        response.expectContains(200, 'roundtrip')
+        response.assertContains(200, 'roundtrip')
 
         and: 'ersatz verifies the call'
         ersatz.verify()
@@ -501,7 +501,7 @@ class MicronautErsatzAdvancedSpec extends Specification implements HttpClientSup
         )
 
         then: 'the response contains the patched payload'
-        response.expectContains(200, 'patched')
+        response.assertContains(200, 'patched')
 
         and: 'ersatz verifies the call'
         ersatz.verify()
@@ -528,7 +528,7 @@ class MicronautErsatzAdvancedSpec extends Specification implements HttpClientSup
         )
 
         then: 'the response contains the mocked data'
-        response.expectContains(200, 'test-query')
+        response.assertContains(200, 'test-query')
 
         and: 'ersatz verifies the call'
         ersatz.verify()

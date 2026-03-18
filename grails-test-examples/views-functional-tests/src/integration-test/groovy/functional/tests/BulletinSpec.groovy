@@ -33,7 +33,7 @@ class BulletinSpec extends Specification implements HttpClientSupport {
         def response = http('/bulletin')
 
         then: 'The REST resource is retrieved and the correct JSON is returned'
-        response.expectStatus(200)
+        response.assertStatus(200)
         def json = response.json()
         json.content == 'Hi everyone!'
 

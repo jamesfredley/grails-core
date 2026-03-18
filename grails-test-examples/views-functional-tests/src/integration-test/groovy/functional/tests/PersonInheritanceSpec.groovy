@@ -32,7 +32,7 @@ class PersonInheritanceSpec extends Specification implements HttpClientSupport {
         def response = http('/person-inheritance')
 
         then: 'the response is correct'
-        response.expect(200, '{"dob":"01/01/1970","lastName":"Doe","firstName":"John"}')
+        response.assertEquals(200, '{"dob":"01/01/1970","lastName":"Doe","firstName":"John"}')
     }
 
     @Issue("https://github.com/apache/grails-views/issues/234")
@@ -41,6 +41,6 @@ class PersonInheritanceSpec extends Specification implements HttpClientSupport {
         def response = http('/person-inheritance/npe')
 
         then: 'the response is correct'
-        response.expectStatus(200)
+        response.assertStatus(200)
     }
 }

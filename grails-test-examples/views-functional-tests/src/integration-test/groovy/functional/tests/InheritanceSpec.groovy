@@ -32,7 +32,7 @@ class InheritanceSpec extends Specification implements HttpClientSupport {
 
         then: "The response is correct"
         // Note current behaviour is that the captain is not rendered twice
-        response.expectJson(200, 'Content-Type': 'application/json;charset=UTF-8', '''
+        response.assertJson(200, 'Content-Type': 'application/json;charset=UTF-8', '''
             {
                 "levelTwo": true,
                 "levelOne": true,

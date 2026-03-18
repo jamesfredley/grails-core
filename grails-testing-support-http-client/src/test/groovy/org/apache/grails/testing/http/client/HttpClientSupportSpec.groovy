@@ -18,26 +18,30 @@
  */
 package org.apache.grails.testing.http.client
 
+import com.sun.net.httpserver.HttpServer
+
 import java.net.http.HttpClient
-import java.net.http.HttpHeaders
 import java.net.http.HttpRequest
-import java.net.http.HttpResponse
 import java.time.Duration
-import java.util.concurrent.CompletableFuture
 import java.util.concurrent.CountDownLatch
-import java.util.concurrent.Executor
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicReference
-import java.nio.ByteBuffer
-import java.nio.charset.StandardCharsets
-import java.util.concurrent.Flow
 
-import javax.net.ssl.SSLContext
-import javax.net.ssl.SSLParameters
+import groovy.xml.XmlSlurper
 
+import io.github.cjstehno.ersatz.GroovyErsatzServer
+import io.github.cjstehno.ersatz.encdec.Decoders
+import io.github.cjstehno.ersatz.encdec.JsonDecoder
+import io.github.cjstehno.ersatz.encdec.MultipartRequestContent
+import spock.lang.AutoCleanup
 import spock.lang.Specification
+import spock.lang.Unroll
+
+import org.apache.grails.testing.http.client.utils.XmlUtils
 
 class HttpClientSupportSpec extends Specification {
+
+    @AutoCleanup GroovyErsatzServer server = new GroovyErsatzServer({})
 
     void 'getHttpBaseUrl() throws if not set'() {
         given:
@@ -75,24 +79,24 @@ class HttpClientSupportSpec extends Specification {
         mainThreadClient.is(otherThreadClientRef.get())
     }
 
-    void 'httpRequestWith uses hard-coded default request timeout'() {
+    void 'newHttpRequestWith uses hard-coded default request timeout'() {
         given:
         def testClient = new TestClient('http://localhost:8080')
 
         when:
-        def request = testClient.httpRequestWith('/demo')
+        def request = testClient.newHttpRequestWith('/demo')
 
         then:
         request.timeout().isPresent()
         request.timeout().get() == Duration.ofSeconds(60)
     }
 
-    void 'httpClientWith applies custom client builder configuration'() {
+    void 'newHttpClientWith applies custom client builder configuration'() {
         given:
         def testClient = new TestClient()
 
         when:
-        def client = testClient.httpClientWith {
+        def client = testClient.newHttpClientWith {
             connectTimeout(Duration.ofSeconds(5))
             followRedirects(HttpClient.Redirect.NEVER)
         }
@@ -103,12 +107,12 @@ class HttpClientSupportSpec extends Specification {
         client.followRedirects() == HttpClient.Redirect.NEVER
     }
 
-    void 'httpRequestWith allows overriding defaults and resolves relative URI'() {
+    void 'newHttpRequestWith allows overriding defaults and resolves relative URI'() {
         given:
         def testClient = new TestClient('http://localhost:8080')
 
         when:
-        def request = testClient.httpRequestWith('api/demo') {
+        def request = testClient.newHttpRequestWith('api/demo') {
             timeout(Duration.ofSeconds(10))
             GET()
         }
@@ -125,7 +129,7 @@ class HttpClientSupportSpec extends Specification {
         def testClient = new TestClient()
 
         when:
-        def client = testClient.httpClientWith()
+        def client = testClient.newHttpClientWith()
 
         then:
         client.connectTimeout().isPresent()
@@ -133,12 +137,12 @@ class HttpClientSupportSpec extends Specification {
         client.followRedirects() == HttpClient.Redirect.ALWAYS
     }
 
-    void 'httpRequestWith keeps absolute URI and default timeout when no configurer is provided'() {
+    void 'newHttpRequestWith keeps absolute URI and default timeout when no configurer is provided'() {
         given:
         def testClient = new TestClient('http://localhost:9999')
 
         when:
-        def request = testClient.httpRequestWith('https://example.org/ping')
+        def request = testClient.newHttpRequestWith('https://example.org/ping')
 
         then:
         request.uri() == URI.create('https://example.org/ping')
@@ -146,280 +150,966 @@ class HttpClientSupportSpec extends Specification {
         request.timeout().get() == Duration.ofSeconds(60)
     }
 
-    void 'httpDelete(path, client) uses DELETE method and provided client'() {
+    @Unroll
+    void 'httpTrace uses TRACE method with #label client'(HttpClient client) {
         given:
-        def testClient = new TestClient('http://localhost:8080')
-        def jdkClient = new FakeHttpClient(Optional.of(Duration.ofSeconds(2)))
+        def traceServer = HttpServer.create(new InetSocketAddress(0), 0)
+        traceServer.createContext('/products/trace') { exchange ->
+            exchange.responseHeaders.add('Content-Type', 'message/http')
+            def responseBody = "${exchange.requestMethod} ${exchange.requestURI.path} HTTP/1.1"
+            byte[] bytes = responseBody.getBytes('UTF-8')
+            exchange.sendResponseHeaders(200, bytes.length)
+            exchange.responseBody.withCloseable {
+                it.write(bytes)
+            }
+        }
+        traceServer.start()
+
+        and:
+        def testClient = new TestClient("http://localhost:${traceServer.address.port}")
 
         when:
-        def result = testClient.httpDelete('/products/1', jdkClient)
+        def response = testClient.httpTrace('/products/trace', client)
 
         then:
-        jdkClient.lastRequest != null
-        jdkClient.lastRequest.method() == 'DELETE'
-        jdkClient.lastRequest.uri().toString() == 'http://localhost:8080/products/1'
-        result.statusCode() == 200
+        response.assertEquals(200, 'TRACE /products/trace HTTP/1.1')
+
+        cleanup:
+        traceServer.stop(0)
+
+        where:
+        label    | client
+        'shared' | null
+        'custom' | HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(2)).build()
     }
 
-    void 'httpOptions(path, client) uses OPTIONS method and provided client'() {
+    @Unroll
+    void 'httpHead uses HEAD method with #label client'(HttpClient client) {
         given:
-        def testClient = new TestClient('http://localhost:8080')
-        def jdkClient = new FakeHttpClient(Optional.of(Duration.ofSeconds(2)))
+        server.expectations {
+            HEAD('/products/1') {
+                called(1)
+            }
+        }
+
+        and:
+        def testClient = new TestClient(server.httpUrl)
 
         when:
-        def result = testClient.httpOptions('/products', jdkClient)
+        def response = testClient.httpHead(server.httpUrl('/products/1'), client)
 
         then:
-        jdkClient.lastRequest != null
-        jdkClient.lastRequest.method() == 'OPTIONS'
-        jdkClient.lastRequest.uri().toString() == 'http://localhost:8080/products'
-        result.statusCode() == 200
+        response.assertStatus(204)
+        response.body() == ''
+        server.verify()
+
+        where:
+        label    | client
+        'shared' | null
+        'custom' | HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(2)).build()
     }
 
-    void 'sendHttpRequest(HttpRequest, client) prints timeout warning when request timeout is missing'() {
+    @Unroll
+    void 'httpDelete uses DELETE method with #label client'(HttpClient client) {
         given:
-        def testClient = new TestClient('http://localhost:8080')
-        def request = HttpRequest.newBuilder(URI.create('http://localhost:8080/no-timeout')).GET().build()
-        def client = new FakeHttpClient(Optional.of(Duration.ofSeconds(2)))
+        server.expectations {
+            DELETE('/products/1') {
+                called(1)
+            }
+        }
+
+        and:
+        def testClient = new TestClient(server.httpUrl)
+
+        when:
+        def response = testClient.httpDelete(server.httpUrl('/products/1'), client)
+
+        then:
+        response.assertStatus(204)
+        server.verify()
+
+        where:
+        label    | client
+        'shared' | null
+        'custom' | HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(2)).build()
+    }
+
+    @Unroll
+    void 'httpOptions uses OPTIONS method with #label client'(HttpClient client) {
+        given:
+        server.expectations {
+            OPTIONS('/products') {
+                called(1)
+            }
+        }
+
+        and:
+        def testClient = new TestClient(server.httpUrl)
+
+        when:
+        def response = testClient.httpOptions('/products', client)
+
+        then:
+        response.assertStatus(204)
+        server.verify()
+
+        where:
+        label    | client
+        'shared' | null
+        'custom' | HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(2)).build()
+    }
+
+    void 'sendHttpRequest(HttpRequest) prints timeout warning when request timeout is missing'() {
+        given:
+        server.expectations {
+            GET('/no-timeout') {
+                called(1)
+                responder {
+                    body('hello')
+                }
+            }
+        }
+
+        and:
+        def testClient = new TestClient(server.httpUrl)
+        def request = HttpRequest.newBuilder(server.httpUrl('/no-timeout').toURI()).GET().build()
 
         and:
         def oldOut = System.out
         def out = new ByteArrayOutputStream()
-        System.setOut(new PrintStream(out, true, 'UTF-8'))
+        System.out = new PrintStream(out, true, 'UTF-8')
 
         when:
-        def response = testClient.sendHttpRequest(request, client)
+        def response = testClient.sendHttpRequest(request)
 
         then:
-        response.statusCode() == 200
-        client.lastRequest.is(request)
-        out.toString('UTF-8').contains('without timeout set')
+        response.assertEquals(200, 'hello')
+        out.toString('UTF-8').contains('without configured timeout')
+        server.verify()
 
         cleanup:
-        System.setOut(oldOut)
+        System.out = oldOut
     }
 
     void 'sendHttpRequest(HttpRequest, client) prints connect-timeout warning when custom client has no connect timeout'() {
         given:
-        def testClient = new TestClient('http://localhost:8080')
-        def request = testClient.httpRequestWith('/uses-custom-client') { GET() }
-        def client = new FakeHttpClient(Optional.empty())
+        server.expectations {
+            GET('/uses-custom-client') {
+                called(1)
+                responder {
+                    body('hello')
+                }
+            }
+        }
+
+        and:
+        def testClient = new TestClient(server.httpUrl)
+        def request = testClient.newHttpRequestWith('/uses-custom-client') { GET() }
 
         and:
         def oldOut = System.out
         def out = new ByteArrayOutputStream()
-        System.setOut(new PrintStream(out, true, 'UTF-8'))
+        System.out = new PrintStream(out, true, 'UTF-8')
 
         when:
-        def response = testClient.sendHttpRequest(request, client)
+        def response = testClient.sendHttpRequest(request, HttpClient.newHttpClient())
 
         then:
-        response.statusCode() == 200
-        out.toString('UTF-8').contains('without connect timeout set')
+        response.assertEquals(200, 'hello')
+        out.toString('UTF-8').contains('without configured connect timeout')
+        server.verify()
 
         cleanup:
-        System.setOut(oldOut)
+        System.out = oldOut
     }
 
     void 'http(headers, path, client) forwards request headers'() {
         given:
-        def testClient = new TestClient('http://localhost:8080')
-        def jdkClient = new FakeHttpClient(Optional.of(Duration.ofSeconds(2)))
+        server.expectations {
+            GET('/products') {
+                called(1)
+                headers('X-Trace-Id': 'abc-123')
+                responder {
+                    body('hello')
+                }
+            }
+        }
+
+        and:
+        def testClient = new TestClient(server.httpUrl)
+        def customClient = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(2)).build()
 
         when:
-        def result = testClient.http(['X-Trace-Id': 'abc-123'], '/products', jdkClient)
+        def response = testClient.http('/products', 'X-Trace-Id': 'abc-123', customClient)
 
         then:
-        result.statusCode() == 200
-        jdkClient.lastRequest.headers().firstValue('X-Trace-Id').orElse(null) == 'abc-123'
+        response.assertEquals(200, 'hello')
+        server.verify()
     }
 
-    void 'post with String body sets method content type and body'() {
+    @Unroll
+    void 'post with String body sets method content type and body with #label client'(HttpClient client) {
         given:
-        def testClient = new TestClient('http://localhost:8080')
-        def jdkClient = new FakeHttpClient(Optional.of(Duration.ofSeconds(2)))
+        server.expectations {
+            POST('/products') {
+                called(1)
+                decoder('application/json', new JsonDecoder())
+                headers('X-Req': '1')
+                body([name: 'Widget'], 'application/json')
+                responder {
+                    body('hello')
+                }
+            }
+        }
+
+        and:
+        def testClient = new TestClient(server.httpUrl)
 
         when:
-        def result = testClient.httpPost(['X-Req': '1'], '/products', '{"name":"Widget"}', 'application/json', jdkClient)
+        def response = testClient.httpPost('/products', 'X-Req': '1', '{"name":"Widget"}', 'application/json', client)
 
         then:
-        result.statusCode() == 200
-        jdkClient.lastRequest.method() == 'POST'
-        jdkClient.lastRequest.headers().firstValue('Content-Type').orElse(null) == 'application/json'
-        jdkClient.lastRequest.headers().firstValue('X-Req').orElse(null) == '1'
-        readRequestBody(jdkClient.lastRequest) == '{"name":"Widget"}'
+        response.assertEquals(200, 'hello')
+        server.verify()
+
+        where:
+        label    | client
+        'shared' | null
+        'custom' | HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(2)).build()
     }
 
-    void 'post with Map body serializes JSON'() {
+    @Unroll
+    void 'post with Map body serializes JSON with #label client'(HttpClient client) {
         given:
-        def testClient = new TestClient('http://localhost:8080')
-        def jdkClient = new FakeHttpClient(Optional.of(Duration.ofSeconds(2)))
+        server.expectations {
+            POST('/products') {
+                called(1)
+                decoder('application/json', new JsonDecoder())
+                body([name: 'Widget', qty: 2], 'application/json')
+                responder {
+                    body('hello')
+                }
+            }
+        }
+
+        and:
+        def testClient = new TestClient(server.httpUrl)
 
         when:
-        testClient.httpPostJson('/products', [name: 'Widget', qty: 2], jdkClient)
+        def response = testClient.httpPostJson('/products', [name: 'Widget', qty: 2], client)
 
         then:
-        jdkClient.lastRequest.method() == 'POST'
-        jdkClient.lastRequest.headers().firstValue('Content-Type').orElse(null) == 'application/json'
-        def body = readRequestBody(jdkClient.lastRequest)
-        body.contains('"name":"Widget"')
-        body.contains('"qty":2')
+        response.assertEquals(200, 'hello')
+        server.verify()
+
+        where:
+        label    | client
+        'shared' | null
+        'custom' | HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(2)).build()
     }
 
-    void 'post with MultipartBody sends multipart content type and payload bytes'() {
+    @Unroll
+    void 'post with MultipartBody sends multipart content type and payload bytes with #label client'(HttpClient client) {
         given:
-        def testClient = new TestClient('http://localhost:8080')
-        def jdkClient = new FakeHttpClient(Optional.of(Duration.ofSeconds(2)))
+        server.expectations {
+            POST('/upload') {
+                called(1)
+                decoder('text/plain', Decoders.utf8String)
+                decoder('multipart/form-data', Decoders.multipart)
+                body(MultipartRequestContent.multipartRequest {
+                    part('title', 'demo')
+                    part('file', 'a.txt', 'text/plain', 'hello')
+                }, 'multipart/form-data')
+                responder {
+                    body('hello')
+                }
+            }
+        }
+
+        and:
+        def testClient = new TestClient(server.httpUrl)
         def multipart = MultipartBody.builder()
                 .addPart('title', 'demo')
                 .addPart('file', 'a.txt', 'text/plain', 'hello')
                 .build()
 
         when:
-        testClient.httpPostMultipart('/upload', multipart, jdkClient)
+        def response = testClient.httpPostMultipart('/upload', multipart, client)
 
         then:
-        jdkClient.lastRequest.method() == 'POST'
-        def contentType = jdkClient.lastRequest.headers().firstValue('Content-Type').orElse(null)
-        contentType.startsWith('multipart/form-data; boundary=')
-        def body = readRequestBody(jdkClient.lastRequest)
-        body.contains('name="title"')
-        body.contains('name="file"; filename="a.txt"')
-        body.contains('hello')
+        response.assertEquals(200, 'hello')
+        server.verify()
+
+        where:
+        label    | client
+        'shared' | null
+        'custom' | HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(2)).build()
     }
 
-    void 'put and patch map overloads serialize JSON and set correct methods'() {
+    @Unroll
+    void 'put and patch map overloads serialize JSON and set correct methods with #label client'(HttpClient client) {
         given:
-        def testClient = new TestClient('http://localhost:8080')
-        def jdkClient = new FakeHttpClient(Optional.of(Duration.ofSeconds(2)))
+        server.expectations {
+            PUT('/products/1') {
+                called(1)
+                decoder('application/json', new JsonDecoder())
+                body([name: 'updated'], 'application/json')
+            }
+            PATCH('/products/1') {
+                called(1)
+                decoder('application/json', new JsonDecoder())
+                body([name: 'patched'], 'application/json')
+            }
+        }
+
+        and:
+        def testClient = new TestClient(server.httpUrl)
 
         when: 'PUT with map body'
-        testClient.httpPutJson('/products/1', [name: 'updated'], jdkClient)
+        def response = testClient.httpPutJson('/products/1', [name: 'updated'], client)
 
         then:
-        jdkClient.lastRequest.method() == 'PUT'
-        jdkClient.lastRequest.headers().firstValue('Content-Type').orElse(null) == 'application/json'
-        readRequestBody(jdkClient.lastRequest).contains('"name":"updated"')
+        response.assertStatus(204)
 
         when: 'PATCH with map body'
-        testClient.httpPatchJson('/products/1', [name: 'patched'], jdkClient)
+        response = testClient.httpPatchJson('/products/1', [name: 'patched'], client)
 
         then:
-        jdkClient.lastRequest.method() == 'PATCH'
-        jdkClient.lastRequest.headers().firstValue('Content-Type').orElse(null) == 'application/json'
-        readRequestBody(jdkClient.lastRequest).contains('"name":"patched"')
+        response.assertStatus(204)
+
+        and:
+        server.verify()
+
+        where:
+        label    | client
+        'shared' | null
+        'custom' | HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(2)).build()
     }
 
-    void 'postXml uses XML content type and generated payload'() {
+    @Unroll
+    void 'httpPostXml uses XML content type and generated payload with #label client'(HttpClient client) {
         given:
-        def testClient = new TestClient('http://localhost:8080')
-        def jdkClient = new FakeHttpClient(Optional.of(Duration.ofSeconds(2)))
+        server.expectations {
+            POST('/products') {
+                called(1)
+                headers('X-Req': '1')
+                decoder('application/xml') { bytes, _ ->
+                    new XmlSlurper().parseText(new String(bytes, 'utf-8')).text()
+                }
+                body('Widget', 'application/xml')
+            }
+        }
+
+        and:
+        def testClient = new TestClient(server.httpUrl)
 
         when:
-        testClient.httpPostXml('/products', 'X-Req': '1', {
+        def response = testClient.httpPostXml('/products', 'X-Req': '1', new XmlUtils.Format(omitEmptyAttributes: true), {
             product {
                 name('Widget')
             }
-        }, jdkClient)
+        }, client)
 
         then:
-        jdkClient.lastRequest.method() == 'POST'
-        jdkClient.lastRequest.headers().firstValue('Content-Type').orElse(null) == 'application/xml'
-        jdkClient.lastRequest.headers().firstValue('X-Req').orElse(null) == '1'
-        readRequestBody(jdkClient.lastRequest).contains('<name>Widget</name>')
+        response.assertStatus(204)
+        server.verify()
+
+        where:
+        label    | client
+        'shared' | null
+        'custom' | HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(2)).build()
     }
 
-    void 'putXml uses XML content type and generated payload'() {
+    @Unroll
+    void 'httpPutXml uses XML content type and generated payload with #label client'(HttpClient client) {
         given:
-        def testClient = new TestClient('http://localhost:8080')
-        def jdkClient = new FakeHttpClient(Optional.of(Duration.ofSeconds(2)))
+        server.expectations {
+            PUT('/products/1') {
+                called(1)
+                headers('X-Req': '2')
+                decoder('application/xml') { bytes, _ ->
+                    new XmlSlurper().parseText(new String(bytes, 'utf-8')).text()
+                }
+                body('Updated', 'application/xml')
+            }
+        }
+
+        and:
+        def testClient = new TestClient(server.httpUrl)
 
         when:
-        testClient.httpPutXml('/products/1', 'X-Req': '2', {
+        def response = testClient.httpPutXml('/products/1', 'X-Req': '2', {
             product {
                 name('Updated')
             }
-        }, jdkClient)
+        }, client)
 
         then:
-        jdkClient.lastRequest.method() == 'PUT'
-        jdkClient.lastRequest.headers().firstValue('Content-Type').orElse(null) == 'application/xml'
-        jdkClient.lastRequest.headers().firstValue('X-Req').orElse(null) == '2'
-        readRequestBody(jdkClient.lastRequest).contains('<name>Updated</name>')
+        response.assertStatus(204)
+        server.verify()
+
+        where:
+        label    | client
+        'shared' | null
+        'custom' | HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(2)).build()
     }
 
-    void 'patchXml uses XML content type and generated payload'() {
+    @Unroll
+    void 'httpPatchXml uses XML content type and generated payload with #label client'(HttpClient client) {
         given:
-        def testClient = new TestClient('http://localhost:8080')
-        def jdkClient = new FakeHttpClient(Optional.of(Duration.ofSeconds(2)))
+        server.expectations {
+            PATCH('/products/1') {
+                called(1)
+                headers('X-Req': '3')
+                decoder('application/xml') { bytes, _ ->
+                    new XmlSlurper().parseText(new String(bytes, 'utf-8')).text()
+                }
+                body('Patched', 'application/xml')
+            }
+        }
+
+        and:
+        def testClient = new TestClient(server.httpUrl)
 
         when:
-        testClient.httpPatchXml('/products/1', 'X-Req': '3', {
+        def response = testClient.httpPatchXml('/products/1', 'X-Req': '3', {
             product {
                 name('Patched')
             }
-        }, jdkClient)
+        }, client)
 
         then:
-        jdkClient.lastRequest.method() == 'PATCH'
-        jdkClient.lastRequest.headers().firstValue('Content-Type').orElse(null) == 'application/xml'
-        jdkClient.lastRequest.headers().firstValue('X-Req').orElse(null) == '3'
-        readRequestBody(jdkClient.lastRequest).contains('<name>Patched</name>')
+        response.assertStatus(204)
+        server.verify()
+
+        where:
+        label    | client
+        'shared' | null
+        'custom' | HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(2)).build()
     }
 
-    void 'patch map overload with headers and client serializes json payload'() {
+    @Unroll
+    void 'patch map overload with headers serializes json payload with #label client'(HttpClient client) {
         given:
-        def testClient = new TestClient('http://localhost:8080')
-        def jdkClient = new FakeHttpClient(Optional.of(Duration.ofSeconds(2)))
+        server.expectations {
+            PATCH('/products/1') {
+                called(1)
+                header('X-Req', '4')
+                decoder('application/json', new JsonDecoder())
+                body([name: 'patched'], 'application/json')
+            }
+        }
+
+        and:
+        def testClient = new TestClient(server.httpUrl)
 
         when:
-        testClient.httpPatchJson('/products/1', 'X-Req': '4', [name: 'patched'], jdkClient)
+        def response = testClient.httpPatchJson('/products/1', 'X-Req': '4', [name: 'patched'], client)
 
         then:
-        jdkClient.lastRequest.method() == 'PATCH'
-        jdkClient.lastRequest.headers().firstValue('Content-Type').orElse(null) == 'application/json'
-        jdkClient.lastRequest.headers().firstValue('X-Req').orElse(null) == '4'
-        readRequestBody(jdkClient.lastRequest).contains('"name":"patched"')
+        response.assertStatus(204)
+        server.verify()
+
+        where:
+        label    | client
+        'shared' | null
+        'custom' | HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(2)).build()
     }
 
-    void 'delete and options with headers forward header and method'() {
+    @Unroll
+    void 'httpTrace forwards headers with #label client'(HttpClient client) {
         given:
-        def testClient = new TestClient('http://localhost:8080')
-        def jdkClient = new FakeHttpClient(Optional.of(Duration.ofSeconds(2)))
+        def traceServer = HttpServer.create(new InetSocketAddress(0), 0)
+        def capturedHeader = new AtomicReference<String>()
+        traceServer.createContext('/products/trace') { exchange ->
+            capturedHeader.set(exchange.requestHeaders.getFirst('X-Req'))
+            exchange.responseHeaders.add('Content-Type', 'message/http')
+            def responseBody = "${exchange.requestMethod} ${exchange.requestURI.path} HTTP/1.1"
+            byte[] bytes = responseBody.getBytes('UTF-8')
+            exchange.sendResponseHeaders(200, bytes.length)
+            exchange.responseBody.withCloseable {
+                it.write(bytes)
+            }
+        }
+        traceServer.start()
+
+        and:
+        def testClient = new TestClient("http://localhost:${traceServer.address.port}")
 
         when:
-        testClient.httpDelete('/products/1', 'X-Req': '5', jdkClient)
+        def response = testClient.httpTrace('/products/trace', 'X-Req': '3', client)
 
         then:
-        jdkClient.lastRequest.method() == 'DELETE'
-        jdkClient.lastRequest.headers().firstValue('X-Req').orElse(null) == '5'
+        response.assertEquals(200, 'TRACE /products/trace HTTP/1.1')
+        capturedHeader.get() == '3'
 
-        when:
-        testClient.httpOptions('/products', 'X-Req': '6', jdkClient)
+        cleanup:
+        traceServer.stop(0)
 
-        then:
-        jdkClient.lastRequest.method() == 'OPTIONS'
-        jdkClient.lastRequest.headers().firstValue('X-Req').orElse(null) == '6'
+        where:
+        label    | client
+        'shared' | null
+        'custom' | HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(2)).build()
     }
 
-    void 'httpRequestWith throws IllegalArgumentException for null pathOrUrl'() {
+    void 'no body request helper overloads without explicit clients are called explicitly'() {
         given:
-        def testClient = new TestClient('http://localhost:8080')
+        server.expectations {
+            HEAD('/products/head-default') {
+                called(1)
+            }
+            HEAD('/products/head-header') {
+                called(1)
+                header('X-Req', '4')
+            }
+            DELETE('/products/delete-default') {
+                called(1)
+            }
+            DELETE('/products/delete-header') {
+                called(1)
+                header('X-Req', '5')
+            }
+            OPTIONS('/products/options-default') {
+                called(1)
+            }
+            OPTIONS('/products/options-header') {
+                called(1)
+                header('X-Req', '6')
+            }
+        }
+
+        and:
+        def traceRequests = Collections.synchronizedMap([:] as Map<String, String>)
+        def traceServer = HttpServer.create(new InetSocketAddress(0), 0)
+        traceServer.createContext('/products') { exchange ->
+            traceRequests[exchange.requestURI.path] = exchange.requestHeaders.getFirst('X-Req')
+            exchange.responseHeaders.add('Content-Type', 'message/http')
+            def responseBody = "${exchange.requestMethod} ${exchange.requestURI.path} HTTP/1.1"
+            byte[] bytes = responseBody.getBytes('UTF-8')
+            exchange.sendResponseHeaders(200, bytes.length)
+            exchange.responseBody.withCloseable {
+                it.write(bytes)
+            }
+        }
+        traceServer.start()
+
+        and:
+        def testClient = new TestClient(server.httpUrl)
+        def traceClient = new TestClient("http://localhost:${traceServer.address.port}")
 
         when:
-        testClient.httpRequestWith(null)
+        def traceDefault = traceClient.httpTrace('/products/trace-default')
+        def traceHeader = traceClient.httpTrace('/products/trace-header', 'X-Req': '3')
+        def headDefault = testClient.httpHead('/products/head-default')
+        def headHeader = testClient.httpHead('/products/head-header', 'X-Req': '4')
+        def deleteDefault = testClient.httpDelete('/products/delete-default')
+        def deleteHeader = testClient.httpDelete('/products/delete-header', 'X-Req': '5')
+        def optionsDefault = testClient.httpOptions('/products/options-default')
+        def optionsHeader = testClient.httpOptions('/products/options-header', 'X-Req': '6')
+
+        then:
+        traceDefault.assertEquals(200, 'TRACE /products/trace-default HTTP/1.1')
+        traceHeader.assertEquals(200, 'TRACE /products/trace-header HTTP/1.1')
+        traceRequests['/products/trace-default'] == null
+        traceRequests['/products/trace-header'] == '3'
+        headDefault.assertStatus(204)
+        headDefault.body() == ''
+        headHeader.assertStatus(204)
+        headHeader.body() == ''
+        deleteDefault.assertStatus(204)
+        deleteHeader.assertStatus(204)
+        optionsDefault.assertStatus(204)
+        optionsHeader.assertStatus(204)
+        server.verify()
+
+        cleanup:
+        traceServer.stop(0)
+    }
+
+    void 'json request helper overloads are called explicitly'() {
+        given:
+        server.expectations {
+            POST('/json/post-string') {
+                called(1)
+                decoder('application/json', new JsonDecoder())
+                body([name: 'PostString'], 'application/json')
+            }
+            POST('/json/post-default') {
+                called(1)
+                decoder('application/json', new JsonDecoder())
+                body([name: 'PostDefault'], 'application/json')
+            }
+            POST('/json/post-client') {
+                called(1)
+                decoder('application/json', new JsonDecoder())
+                body([name: 'PostClient'], 'application/json')
+            }
+            POST('/json/post-header') {
+                called(1)
+                header('X-Req', 'P1')
+                decoder('application/json', new JsonDecoder())
+                body([name: 'PostHeader'], 'application/json')
+            }
+            POST('/json/post-header-client') {
+                called(1)
+                header('X-Req', 'P2')
+                decoder('application/json', new JsonDecoder())
+                body([name: 'PostHeaderClient'], 'application/json')
+            }
+            PUT('/json/put-string') {
+                called(1)
+                decoder('application/json', new JsonDecoder())
+                body([name: 'PutString'], 'application/json')
+            }
+            PUT('/json/put-default') {
+                called(1)
+                decoder('application/json', new JsonDecoder())
+                body([name: 'PutDefault'], 'application/json')
+            }
+            PUT('/json/put-client') {
+                called(1)
+                decoder('application/json', new JsonDecoder())
+                body([name: 'PutClient'], 'application/json')
+            }
+            PUT('/json/put-header') {
+                called(1)
+                header('X-Req', 'P3')
+                decoder('application/json', new JsonDecoder())
+                body([name: 'PutHeader'], 'application/json')
+            }
+            PUT('/json/put-header-client') {
+                called(1)
+                header('X-Req', 'P4')
+                decoder('application/json', new JsonDecoder())
+                body([name: 'PutHeaderClient'], 'application/json')
+            }
+            PATCH('/json/patch-string') {
+                called(1)
+                decoder('application/json', new JsonDecoder())
+                body([name: 'PatchString'], 'application/json')
+            }
+            PATCH('/json/patch-default') {
+                called(1)
+                decoder('application/json', new JsonDecoder())
+                body([name: 'PatchDefault'], 'application/json')
+            }
+            PATCH('/json/patch-client') {
+                called(1)
+                decoder('application/json', new JsonDecoder())
+                body([name: 'PatchClient'], 'application/json')
+            }
+            PATCH('/json/patch-header') {
+                called(1)
+                header('X-Req', 'P5')
+                decoder('application/json', new JsonDecoder())
+                body([name: 'PatchHeader'], 'application/json')
+            }
+            PATCH('/json/patch-header-client') {
+                called(1)
+                header('X-Req', 'P6')
+                decoder('application/json', new JsonDecoder())
+                body([name: 'PatchHeaderClient'], 'application/json')
+            }
+        }
+
+        and:
+        def testClient = new TestClient(server.httpUrl)
+        def customClient = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(2)).build()
+
+        when:
+        def postString = testClient.httpPostJson('/json/post-string', '{"name":"PostString"}')
+        def postDefault = testClient.httpPostJson('/json/post-default', [name: 'PostDefault'])
+        def postClient = testClient.httpPostJson('/json/post-client', [name: 'PostClient'], customClient)
+        def postHeader = testClient.httpPostJson('/json/post-header', 'X-Req': 'P1', [name: 'PostHeader'])
+        def postHeaderClient = testClient.httpPostJson('/json/post-header-client', 'X-Req': 'P2', [name: 'PostHeaderClient'], customClient)
+        def putString = testClient.httpPutJson('/json/put-string', '{"name":"PutString"}')
+        def putDefault = testClient.httpPutJson('/json/put-default', [name: 'PutDefault'])
+        def putClient = testClient.httpPutJson('/json/put-client', [name: 'PutClient'], customClient)
+        def putHeader = testClient.httpPutJson('/json/put-header', 'X-Req': 'P3', [name: 'PutHeader'])
+        def putHeaderClient = testClient.httpPutJson('/json/put-header-client', 'X-Req': 'P4', [name: 'PutHeaderClient'], customClient)
+        def patchString = testClient.httpPatchJson('/json/patch-string', '{"name":"PatchString"}')
+        def patchDefault = testClient.httpPatchJson('/json/patch-default', [name: 'PatchDefault'])
+        def patchClient = testClient.httpPatchJson('/json/patch-client', [name: 'PatchClient'], customClient)
+        def patchHeader = testClient.httpPatchJson('/json/patch-header', 'X-Req': 'P5', [name: 'PatchHeader'])
+        def patchHeaderClient = testClient.httpPatchJson('/json/patch-header-client', 'X-Req': 'P6', [name: 'PatchHeaderClient'], customClient)
+
+        then:
+        [postString, postDefault, postClient, postHeader, postHeaderClient,
+         putString, putDefault, putClient, putHeader, putHeaderClient,
+         patchString, patchDefault, patchClient, patchHeader, patchHeaderClient].each {
+            it.assertStatus(204)
+        }
+        server.verify()
+    }
+
+    void 'xml request helper overloads are called explicitly'() {
+        given:
+        server.expectations {
+            POST('/xml/post-string') {
+                called(1)
+                decoder('application/xml') { bytes, _ ->
+                    new XmlSlurper().parseText(new String(bytes, 'utf-8')).text()
+                }
+                body('PostString', 'application/xml')
+            }
+            POST('/xml/post-default') {
+                called(1)
+                decoder('application/xml') { bytes, _ ->
+                    new XmlSlurper().parseText(new String(bytes, 'utf-8')).text()
+                }
+                body('PostDefault', 'application/xml')
+            }
+            POST('/xml/post-client') {
+                called(1)
+                decoder('application/xml') { bytes, _ ->
+                    new XmlSlurper().parseText(new String(bytes, 'utf-8')).text()
+                }
+                body('PostClient', 'application/xml')
+            }
+            POST('/xml/post-header') {
+                called(1)
+                header('X-Req', 'X1')
+                decoder('application/xml') { bytes, _ ->
+                    new XmlSlurper().parseText(new String(bytes, 'utf-8')).text()
+                }
+                body('PostHeader', 'application/xml')
+            }
+            POST('/xml/post-header-client') {
+                called(1)
+                header('X-Req', 'X2')
+                decoder('application/xml') { bytes, _ ->
+                    new XmlSlurper().parseText(new String(bytes, 'utf-8')).text()
+                }
+                body('PostHeaderClient', 'application/xml')
+            }
+            PUT('/xml/put-default') {
+                called(1)
+                decoder('application/xml') { bytes, _ ->
+                    new XmlSlurper().parseText(new String(bytes, 'utf-8')).text()
+                }
+                body('PutDefault', 'application/xml')
+            }
+            PUT('/xml/put-client') {
+                called(1)
+                decoder('application/xml') { bytes, _ ->
+                    new XmlSlurper().parseText(new String(bytes, 'utf-8')).text()
+                }
+                body('PutClient', 'application/xml')
+            }
+            PUT('/xml/put-header') {
+                called(1)
+                header('X-Req', 'X3')
+                decoder('application/xml') { bytes, _ ->
+                    new XmlSlurper().parseText(new String(bytes, 'utf-8')).text()
+                }
+                body('PutHeader', 'application/xml')
+            }
+            PUT('/xml/put-header-client') {
+                called(1)
+                header('X-Req', 'X4')
+                decoder('application/xml') { bytes, _ ->
+                    new XmlSlurper().parseText(new String(bytes, 'utf-8')).text()
+                }
+                body('PutHeaderClient', 'application/xml')
+            }
+            PATCH('/xml/patch-default') {
+                called(1)
+                decoder('application/xml') { bytes, _ ->
+                    new XmlSlurper().parseText(new String(bytes, 'utf-8')).text()
+                }
+                body('PatchDefault', 'application/xml')
+            }
+            PATCH('/xml/patch-client') {
+                called(1)
+                decoder('application/xml') { bytes, _ ->
+                    new XmlSlurper().parseText(new String(bytes, 'utf-8')).text()
+                }
+                body('PatchClient', 'application/xml')
+            }
+            PATCH('/xml/patch-header') {
+                called(1)
+                header('X-Req', 'X5')
+                decoder('application/xml') { bytes, _ ->
+                    new XmlSlurper().parseText(new String(bytes, 'utf-8')).text()
+                }
+                body('PatchHeader', 'application/xml')
+            }
+            PATCH('/xml/patch-header-client') {
+                called(1)
+                header('X-Req', 'X6')
+                decoder('application/xml') { bytes, _ ->
+                    new XmlSlurper().parseText(new String(bytes, 'utf-8')).text()
+                }
+                body('PatchHeaderClient', 'application/xml')
+            }
+        }
+
+        and:
+        def testClient = new TestClient(server.httpUrl)
+        def customClient = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(2)).build()
+        def format = new XmlUtils.Format()
+
+        when:
+        def postString = testClient.httpPostXml('/xml/post-string', '<product><name>PostString</name></product>')
+        def postDefault = testClient.httpPostXml('/xml/post-default', format, {
+            product {
+                name('PostDefault')
+            }
+        })
+        def postClient = testClient.httpPostXml('/xml/post-client', format, {
+            product {
+                name('PostClient')
+            }
+        }, customClient)
+        def postHeader = testClient.httpPostXml('/xml/post-header', 'X-Req': 'X1', format, {
+            product {
+                name('PostHeader')
+            }
+        })
+        def postHeaderClient = testClient.httpPostXml('/xml/post-header-client', 'X-Req': 'X2', format, {
+            product {
+                name('PostHeaderClient')
+            }
+        }, customClient)
+        def putDefault = testClient.httpPutXml('/xml/put-default', format, {
+            product {
+                name('PutDefault')
+            }
+        })
+        def putClient = testClient.httpPutXml('/xml/put-client', format, {
+            product {
+                name('PutClient')
+            }
+        }, customClient)
+        def putHeader = testClient.httpPutXml('/xml/put-header', 'X-Req': 'X3', format, {
+            product {
+                name('PutHeader')
+            }
+        })
+        def putHeaderClient = testClient.httpPutXml('/xml/put-header-client', 'X-Req': 'X4', format, {
+            product {
+                name('PutHeaderClient')
+            }
+        }, customClient)
+        def patchDefault = testClient.httpPatchXml('/xml/patch-default', format, {
+            product {
+                name('PatchDefault')
+            }
+        })
+        def patchClient = testClient.httpPatchXml('/xml/patch-client', format, {
+            product {
+                name('PatchClient')
+            }
+        }, customClient)
+        def patchHeader = testClient.httpPatchXml('/xml/patch-header', 'X-Req': 'X5', format, {
+            product {
+                name('PatchHeader')
+            }
+        })
+        def patchHeaderClient = testClient.httpPatchXml('/xml/patch-header-client', 'X-Req': 'X6', format, {
+            product {
+                name('PatchHeaderClient')
+            }
+        }, customClient)
+
+        then:
+        [postString, postDefault, postClient, postHeader, postHeaderClient,
+         putDefault, putClient, putHeader, putHeaderClient,
+         patchDefault, patchClient, patchHeader, patchHeaderClient].each {
+            it.assertStatus(204)
+        }
+        server.verify()
+    }
+
+    void 'multipart request helper overload with headers and default client is called explicitly'() {
+        given:
+        server.expectations {
+            POST('/upload-with-header') {
+                called(1)
+                header('X-Req', 'M1')
+                decoder('text/plain', Decoders.utf8String)
+                decoder('multipart/form-data', Decoders.multipart)
+                body(MultipartRequestContent.multipartRequest {
+                    part('title', 'demo')
+                    part('file', 'a.txt', 'text/plain', 'hello')
+                }, 'multipart/form-data')
+                responder {
+                    body('hello')
+                }
+            }
+        }
+
+        and:
+        def testClient = new TestClient(server.httpUrl)
+        def multipart = MultipartBody.builder()
+                .addPart('title', 'demo')
+                .addPart('file', 'a.txt', 'text/plain', 'hello')
+                .build()
+
+        when:
+        def response = testClient.httpPostMultipart('/upload-with-header', 'X-Req': 'M1', multipart)
+
+        then:
+        response.assertEquals(200, 'hello')
+        server.verify()
+    }
+
+    @Unroll
+    void 'head delete and options with headers forward header and method with #label client'(HttpClient client) {
+        given:
+        server.expectations {
+            HEAD('/products/head') {
+                called(1)
+                header('X-Req', '4')
+            }
+            DELETE('/products/1') {
+                called(1)
+                header('X-Req', '5')
+            }
+            OPTIONS('/products') {
+                called(1)
+                header('X-Req', '6')
+            }
+        }
+
+        and:
+        def testClient = new TestClient(server.httpUrl)
+
+        when:
+        def headResponse = testClient.httpHead('/products/head', 'X-Req': '4', client)
+        def deleteResponse = testClient.httpDelete('/products/1', 'X-Req': '5', client)
+        def optionsResponse = testClient.httpOptions('/products', 'X-Req': '6', client)
+
+        then:
+        headResponse.assertStatus(204)
+        deleteResponse.assertStatus(204)
+        optionsResponse.assertStatus(204)
+        server.verify()
+
+        where:
+        label    | client
+        'shared' | null
+        'custom' | HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(2)).build()
+    }
+
+    void 'newHttpRequestWith throws IllegalArgumentException for null pathOrUrl'() {
+        given:
+        def testClient = new TestClient()
+
+        when:
+        testClient.newHttpRequestWith(null)
 
         then:
         def e = thrown(IllegalArgumentException)
         e.message.contains('pathOrUrl must not be null')
     }
 
-    void 'httpRequestWith relative path without baseUrl throws IllegalStateException'() {
+    void 'newHttpRequestWith relative path without baseUrl throws IllegalStateException'() {
         given:
         def testClient = new TestClient()
 
         when:
-        testClient.httpRequestWith('/products')
+        testClient.newHttpRequestWith('/products')
 
         then:
         def e = thrown(IllegalStateException)
@@ -428,24 +1118,31 @@ class HttpClientSupportSpec extends Specification {
 
     void 'sendHttpRequest(HttpRequest, client) does not print timeout warnings when timeout is present and client is configured'() {
         given:
-        def testClient = new TestClient('http://localhost:8080')
-        def request = testClient.httpRequestWith('/ok') { GET() }
-        def client = new FakeHttpClient(Optional.of(Duration.ofSeconds(2)))
+        server.expectations {
+            GET('/ok') {
+                called(1)
+            }
+        }
+
+        and:
+        def testClient = new TestClient(server.httpUrl)
+        def request = testClient.newHttpRequestWith('/ok') { GET() }
+        def customClient = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(2)).build()
 
         and:
         def oldOut = System.out
         def out = new ByteArrayOutputStream()
-        System.setOut(new PrintStream(out, true, 'UTF-8'))
+        System.out = new PrintStream(out, true, 'UTF-8')
 
         when:
-        def response = testClient.sendHttpRequest(request, client)
+        def response = testClient.sendHttpRequest(request, customClient)
 
         then:
-        response.statusCode() == 200
+        response.assertStatus(204)
         out.toString('UTF-8').trim().isEmpty()
 
         cleanup:
-        System.setOut(oldOut)
+        System.out = oldOut
     }
 
     private static class TestClient implements HttpClientSupport {
@@ -462,109 +1159,7 @@ class HttpClientSupportSpec extends Specification {
             if (base) {
                 return base
             }
-            HttpClientSupport.super.getHttpBaseUrl()
-        }
-    }
-
-    private static String readRequestBody(HttpRequest request) {
-        def publisher = request.bodyPublisher().orElse(null)
-        if (!publisher) {
-            return ''
-        }
-        def bytes = new ByteArrayOutputStream()
-        def done = new CountDownLatch(1)
-        def failure = new AtomicReference<Throwable>()
-        publisher.subscribe(new Flow.Subscriber<ByteBuffer>() {
-            private Flow.Subscription subscription
-
-            @Override
-            void onSubscribe(Flow.Subscription subscription) {
-                this.subscription = subscription
-                subscription.request(Long.MAX_VALUE)
-            }
-
-            @Override
-            void onNext(ByteBuffer item) {
-                def chunk = new byte[item.remaining()]
-                item.get(chunk)
-                bytes.write(chunk)
-            }
-
-            @Override
-            void onError(Throwable throwable) {
-                failure.set(throwable)
-                done.countDown()
-            }
-
-            @Override
-            void onComplete() {
-                done.countDown()
-            }
-        })
-
-        if (!done.await(5, TimeUnit.SECONDS)) {
-            throw new AssertionError('Timed out reading request body publisher' as Object)
-        }
-        if (failure.get()) {
-            throw new AssertionError('Failed reading request body', failure.get())
-        }
-        return new String(bytes.toByteArray(), StandardCharsets.UTF_8)
-    }
-
-    private static class FakeHttpClient extends HttpClient {
-
-        private final Optional<Duration> connectTimeoutValue
-        HttpRequest lastRequest
-
-        FakeHttpClient(Optional<Duration> connectTimeoutValue) {
-            this.connectTimeoutValue = connectTimeoutValue
-        }
-
-        @Override
-        Optional<Duration> connectTimeout() {
-            connectTimeoutValue
-        }
-
-        @Override
-        <T> HttpResponse<T> send(HttpRequest request, HttpResponse.BodyHandler<T> responseBodyHandler)
-                throws IOException, InterruptedException {
-            this.lastRequest = request
-            [
-                    statusCode: { -> 200 },
-                    body: { -> 'OK' as T },
-                    headers: { -> HttpHeaders.of([:], { k, v -> true }) },
-                    request: { -> request },
-                    previousResponse: { -> Optional.empty() },
-                    sslSession: { -> Optional.empty() },
-                    uri: { -> request.uri() },
-                    version: { -> Version.HTTP_1_1 }
-            ] as HttpResponse<T>
-        }
-
-        @Override Optional<CookieHandler> cookieHandler() { Optional.empty() }
-        @Override Redirect followRedirects() { Redirect.NEVER }
-        @Override Optional<ProxySelector> proxy() { Optional.empty() }
-        @Override SSLContext sslContext() { null }
-        @Override SSLParameters sslParameters() { null }
-        @Override Optional<Authenticator> authenticator() { Optional.empty() }
-        @Override Version version() { Version.HTTP_1_1 }
-        @Override Optional<Executor> executor() { Optional.empty() }
-
-        @Override
-        <T> CompletableFuture<HttpResponse<T>> sendAsync(
-                HttpRequest request,
-                HttpResponse.BodyHandler<T> responseBodyHandler
-        ) {
-            throw new UnsupportedOperationException('not needed for tests')
-        }
-
-        @Override
-        <T> CompletableFuture<HttpResponse<T>> sendAsync(
-                HttpRequest request,
-                HttpResponse.BodyHandler<T> responseBodyHandler,
-                HttpResponse.PushPromiseHandler<T> pushPromiseHandler
-        ) {
-            throw new UnsupportedOperationException('not needed for tests')
+            HttpClientSupport.super.httpBaseUrl
         }
     }
 }

@@ -46,7 +46,7 @@ class FileUploadSpec extends Specification implements HttpClientSupport {
         def response = httpPostMultipart('/fileUploadTest/uploadSingle', body)
 
         then:
-        response.expectJson(200, [
+        response.assertJson(200, [
                 contentType: 'text/plain',
                 filename: 'test.txt',
                 size: content.bytes.length,
@@ -64,7 +64,7 @@ class FileUploadSpec extends Specification implements HttpClientSupport {
         def response = httpPostMultipart('/fileUploadTest/uploadSingle', body)
 
         then:
-        response.expectStatus(400)
+        response.assertStatus(400)
     }
 
     def "upload file with metadata includes description and category"() {
@@ -80,7 +80,7 @@ class FileUploadSpec extends Specification implements HttpClientSupport {
         def response = httpPostMultipart('/fileUploadTest/uploadWithMetadata', body)
 
         then:
-        response.expectJsonContains(200, [
+        response.assertJsonContains(200, [
                 success: true,
                 description: 'My test file',
                 category: 'documents'
@@ -101,7 +101,7 @@ class FileUploadSpec extends Specification implements HttpClientSupport {
         def response = httpPostMultipart('/fileUploadTest/uploadMultiple', body)
 
         then:
-        response.expectStatus(200)
+        response.assertStatus(200)
         with(response.json()) {
             success == true
             count == 3
@@ -128,7 +128,7 @@ class FileUploadSpec extends Specification implements HttpClientSupport {
         def response = httpPostMultipart('/fileUploadTest/uploadTextFile', body)
 
         then:
-        response.expectStatus(200)
+        response.assertStatus(200)
         with(response.json()) {
             success == true
             lineCount == 4
@@ -148,7 +148,7 @@ class FileUploadSpec extends Specification implements HttpClientSupport {
         def response = httpPostMultipart('/fileUploadTest/uploadAndEcho', body)
 
         then:
-        response.expectJsonContains(200, [
+        response.assertJsonContains(200, [
                 success: true,
                 content: content
         ])
@@ -166,7 +166,7 @@ class FileUploadSpec extends Specification implements HttpClientSupport {
         def response = httpPostMultipart('/fileUploadTest/uploadWithValidation', body)
 
         then:
-        response.expectJsonContains(200, [
+        response.assertJsonContains(200, [
                 success: true,
                 validated: true
         ])
@@ -182,7 +182,7 @@ class FileUploadSpec extends Specification implements HttpClientSupport {
         def response = httpPostMultipart('/fileUploadTest/uploadWithExtensionValidation', body)
 
         then:
-        response.expectJsonContains(200, [
+        response.assertJsonContains(200, [
                 success: true,
                 validated: true,
                 extension: 'json'
@@ -200,7 +200,7 @@ class FileUploadSpec extends Specification implements HttpClientSupport {
         def response = httpPostMultipart('/fileUploadTest/uploadWithExtensionValidation', body)
 
         then:
-        response.expectJsonContains(200, [
+        response.assertJsonContains(200, [
                     success: true,
                     extension :'csv'
         ])
@@ -219,7 +219,7 @@ class FileUploadSpec extends Specification implements HttpClientSupport {
         def response = httpPostMultipart('/fileUploadTest/getFileInfo', body)
 
         then:
-        response.expectJsonContains(200, [
+        response.assertJsonContains(200, [
                 originalFilename: 'document.txt',
                 basename: 'document',
                 extension: 'txt',
@@ -238,7 +238,7 @@ class FileUploadSpec extends Specification implements HttpClientSupport {
         def response = httpPostMultipart('/fileUploadTest/getFileInfo', body)
 
         then:
-        response.expectJsonContains(200, [
+        response.assertJsonContains(200, [
                 originalFilename: 'README',
                 basename: 'README',
                 extension: ''
@@ -257,7 +257,7 @@ class FileUploadSpec extends Specification implements HttpClientSupport {
         def response = httpPostMultipart('/fileUploadTest/uploadViaParams', body)
 
         then:
-        response.expectJsonContains(200, [
+        response.assertJsonContains(200, [
                 success: true,
                 accessedViaParams: true,
                 filename: 'params-test.txt'
@@ -277,7 +277,7 @@ class FileUploadSpec extends Specification implements HttpClientSupport {
         def response = httpPostMultipart('/fileUploadTest/uploadSingle', body)
 
         then:
-        response.expectJsonContains(200, [
+        response.assertJsonContains(200, [
                 success: true,
                 size: 1000
         ])
@@ -294,7 +294,7 @@ class FileUploadSpec extends Specification implements HttpClientSupport {
         def response = httpPostMultipart('/fileUploadTest/uploadAndEcho', body)
 
         then:
-        response.expectJson(200, [
+        response.assertJson(200, [
                 success: true,
                 filename: 'users.json',
                 content: jsonContent
@@ -312,7 +312,7 @@ class FileUploadSpec extends Specification implements HttpClientSupport {
         def response = httpPostMultipart('/fileUploadTest/uploadAndEcho', body)
 
         then:
-        response.expectJson(200, [
+        response.assertJson(200, [
                 success: true,
                 filename: 'data.xml',
                 content: xmlContent

@@ -39,7 +39,7 @@ class CorsAdvancedSpec extends Specification implements HttpClientSupport {
         def response = http('/api/cors', 'Origin': 'http://example.com')
 
         then: 'CORS headers should be present'
-        response.expectHeaders(200, 'Access-Control-Allow-Origin': '*')
+        response.assertHeaders(200, 'Access-Control-Allow-Origin': '*')
     }
 
     def "OPTIONS preflight request returns appropriate headers"() {
@@ -51,7 +51,7 @@ class CorsAdvancedSpec extends Specification implements HttpClientSupport {
         )
 
         then:
-        response.expectHeaders(200,
+        response.assertHeaders(200,
                 'Access-Control-Allow-Methods': 'GET',
                 'Access-Control-Allow-Origin': '*'
         )
@@ -67,7 +67,7 @@ class CorsAdvancedSpec extends Specification implements HttpClientSupport {
         )
 
         then:
-        response.expectHeaders(200,
+        response.assertHeaders(200,
                 'Access-Control-Allow-Methods': 'POST',
                 'Access-Control-Allow-Origin': '*'
         )
@@ -83,7 +83,7 @@ class CorsAdvancedSpec extends Specification implements HttpClientSupport {
         )
 
         then:
-        response.expectStatus(200)
+        response.assertStatus(200)
     }
 
     def "preflight request for DELETE method succeeds"() {
@@ -95,7 +95,7 @@ class CorsAdvancedSpec extends Specification implements HttpClientSupport {
         )
 
         then:
-        response.expectStatus(200)
+        response.assertStatus(200)
     }
 
     // ========== Actual Request Tests ==========
@@ -108,7 +108,7 @@ class CorsAdvancedSpec extends Specification implements HttpClientSupport {
         )
 
         then:
-        response.expectStatus(200).json()
+        response.assertStatus(200).json()
         with(response.json()) {
             data.size() == 3
             total == 3
@@ -125,7 +125,7 @@ class CorsAdvancedSpec extends Specification implements HttpClientSupport {
 
 
         then:
-        response.expectJsonContains(200, [
+        response.assertJsonContains(200, [
                 created: true,
                 method: 'POST'
         ])
@@ -140,7 +140,7 @@ class CorsAdvancedSpec extends Specification implements HttpClientSupport {
         )
 
         then:
-        response.expectJsonContains(200, [
+        response.assertJsonContains(200, [
                 updated: true,
                 id: '42',
                 method: 'PUT'
@@ -155,7 +155,7 @@ class CorsAdvancedSpec extends Specification implements HttpClientSupport {
         )
 
         then:
-        response.expectJson(200, [
+        response.assertJson(200, [
                 deleted: true,
                 id: '99',
                 method: 'DELETE'
@@ -169,7 +169,7 @@ class CorsAdvancedSpec extends Specification implements HttpClientSupport {
         def response = http('/api/cors/custom-headers', 'Origin': 'http://example.com')
 
         then:
-        response.expectJson(200, 'X-Custom-Response': 'custom-value', [
+        response.assertJson(200, 'X-Custom-Response': 'custom-value', [
                 customHeadersSet: true,
                 message: 'Response with custom headers'
         ])
@@ -180,7 +180,7 @@ class CorsAdvancedSpec extends Specification implements HttpClientSupport {
         def response = http('/api/cors/echo-origin', 'Origin': 'http://my-app.example.com')
 
         then:
-        response.expectJson(200, [
+        response.assertJson(200, [
                 message: 'Origin header received',
                 receivedOrigin: 'http://my-app.example.com'
         ])
@@ -197,7 +197,7 @@ class CorsAdvancedSpec extends Specification implements HttpClientSupport {
         )
 
         then:
-        response.expectJson(200, [
+        response.assertJson(200, [
                 authenticated: true,
                 authType: 'Bearer',
                 message: 'Credentials received'
@@ -209,7 +209,7 @@ class CorsAdvancedSpec extends Specification implements HttpClientSupport {
         def response = http('/api/cors/authenticated', 'Origin': 'http://example.com')
 
         then:
-        response.expectJson(200, [
+        response.assertJson(200, [
                 authType: null,
                 authenticated: false,
                 message: 'No credentials'
@@ -223,7 +223,7 @@ class CorsAdvancedSpec extends Specification implements HttpClientSupport {
         def response = http('/api/cors', 'Origin': 'http://localhost:3000')
 
         then:
-        response.expectJson(200, [
+        response.assertJson(200, [
                 message: 'CORS test endpoint',
                 path: '/api/corsTest'
         ])
@@ -234,7 +234,7 @@ class CorsAdvancedSpec extends Specification implements HttpClientSupport {
         def response = http('/api/cors', 'Origin': 'https://secure.example.com')
 
         then:
-        response.expectJson(200, [
+        response.assertJson(200, [
                 message: 'CORS test endpoint',
                 path: '/api/corsTest'
         ])
@@ -245,7 +245,7 @@ class CorsAdvancedSpec extends Specification implements HttpClientSupport {
         def response = http('/api/cors', 'Origin': 'http://example.com:8080')
 
         then:
-        response.expectJson(200, [
+        response.assertJson(200, [
                 message: 'CORS test endpoint',
                 path: '/api/corsTest'
         ])

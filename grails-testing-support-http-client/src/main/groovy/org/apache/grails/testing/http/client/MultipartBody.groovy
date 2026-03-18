@@ -28,7 +28,7 @@ import groovy.transform.CompileStatic
  * <p>
  * Use {@code builder()} to create instances.
  *
- * @since 7.0.9
+ * @since 7.0.10
  */
 @CompileStatic
 class MultipartBody {

@@ -31,7 +31,7 @@ class CircularSpec extends Specification implements HttpClientSupport {
         def response = http('/circular/show/1')
 
         then: "The REST resource is retrieved and the correct JSON is returned"
-        response.expectHeaders(200, 'Content-Type': 'application/json;charset=UTF-8')
+        response.assertHeaders(200, 'Content-Type': 'application/json;charset=UTF-8')
         with(response.json()) {
             id == 1
             name == 'topLevel'
@@ -47,7 +47,7 @@ class CircularSpec extends Specification implements HttpClientSupport {
         def response = http('/circular/circular/1')
 
         then: "The REST resource is retrieved and the correct JSON is returned"
-        response.expectHeaders(200, 'Content-Type': 'application/json;charset=UTF-8')
+        response.assertHeaders(200, 'Content-Type': 'application/json;charset=UTF-8')
         with(response.json()) {
             name == 'topLevel'
             children.size() == 2

@@ -32,6 +32,6 @@ class ProxySpec extends Specification implements HttpClientSupport {
 
         then: "The response is correct"
         // Note current behaviour is that the captain is not rendered twice
-        response.expect(200, 'Content-Type': 'application/json;charset=UTF-8', '[{"id":1,"name":"Sally","fromTemplate":true}]')
+        response.assertEquals(200, 'Content-Type': 'application/json;charset=UTF-8', '[{"id":1,"name":"Sally","fromTemplate":true}]')
     }
 }

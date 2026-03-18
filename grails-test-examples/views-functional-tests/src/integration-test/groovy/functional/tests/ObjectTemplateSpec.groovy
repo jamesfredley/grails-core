@@ -31,6 +31,6 @@ class ObjectTemplateSpec extends Specification implements HttpClientSupport {
         def response = http('/place/test')
 
         then: "The correct response is returned"
-        response.expect(200, '{"location":"UK","name":"London"}')
+        response.assertEquals(200, '{"location":"UK","name":"London"}')
     }
 }

@@ -31,7 +31,7 @@ class BookSpec extends Specification implements HttpClientSupport {
         def response = httpPostJson('/books', [title: ''])
 
         then: 'The proper error is returned'
-        response.expectJson(422, 'Content-Type': 'application/vnd.error;charset=UTF-8', """
+        response.assertJson(422, 'Content-Type': 'application/vnd.error;charset=UTF-8', """
             {
               "message": "Property [title] of class [class functional.tests.Book] cannot be null",
               "path": "/book/index",
@@ -49,13 +49,13 @@ class BookSpec extends Specification implements HttpClientSupport {
         def response = http('/books')
 
         then: 'The response is correct'
-        response.expectJson(200, 'Content-Type': 'application/json;charset=UTF-8', '[]')
+        response.assertJson(200, 'Content-Type': 'application/json;charset=UTF-8', '[]')
 
         when: 'A POST is issued to create a new book'
         response = httpPostJson('/books', [title: 'The Stand'])
 
         then: 'The REST resource is created and the correct JSON is returned'
-        response.expectJson(201, 'Content-Type': 'application/json;charset=UTF-8', [
+        response.assertJson(201, 'Content-Type': 'application/json;charset=UTF-8', [
                 id: 1,
                 timeZone: 'America/New_York',
                 title: 'The Stand',
@@ -66,7 +66,7 @@ class BookSpec extends Specification implements HttpClientSupport {
        response = http('/books/1')
 
         then: 'The response is correct'
-        response.expectJson(200, 'Content-Type': 'application/json;charset=UTF-8', [
+        response.assertJson(200, 'Content-Type': 'application/json;charset=UTF-8', [
                 id: 1,
                 timeZone: 'America/New_York',
                 title: 'The Stand',
@@ -77,7 +77,7 @@ class BookSpec extends Specification implements HttpClientSupport {
         response = httpPutJson('/books/1', [title: 'The Changeling'])
 
         then: 'The resource is updated'
-        response.expectJson(200, 'Content-Type': 'application/json;charset=UTF-8', [
+        response.assertJson(200, 'Content-Type': 'application/json;charset=UTF-8', [
                 id: 1,
                 timeZone: 'America/New_York',
                 title: 'The Changeling',
@@ -88,7 +88,7 @@ class BookSpec extends Specification implements HttpClientSupport {
        response = http('/books')
 
         then: 'The response is correct'
-        response.expectJson(200, 'Content-Type': 'application/json;charset=UTF-8', '''
+        response.assertJson(200, 'Content-Type': 'application/json;charset=UTF-8', '''
             [
                 {
                     "id": 1,
@@ -103,7 +103,7 @@ class BookSpec extends Specification implements HttpClientSupport {
        response = http('/books/listExcludes?testParam=3')
 
         then: 'Access to config and params works'
-        response.expectJson(200, 'Content-Type': 'application/json;charset=UTF-8', '''
+        response.assertJson(200, 'Content-Type': 'application/json;charset=UTF-8', '''
             [
                 {
                     "id": 1,
@@ -119,7 +119,7 @@ class BookSpec extends Specification implements HttpClientSupport {
        response = http('/books/listExcludesRespond?testParam=4')
 
         then: 'view rendering works with a map with respond'
-        response.expectJson(200, 'Content-Type': 'application/json;charset=UTF-8', '''
+        response.assertJson(200, 'Content-Type': 'application/json;charset=UTF-8', '''
             [
                 {
                     "id": 1,
@@ -134,7 +134,7 @@ class BookSpec extends Specification implements HttpClientSupport {
        response = http('/books/showWithParams/1?expand=foo')
 
         then: 'view rendering with template passes parameters'
-        response.expectStatus(200)
+        response.assertStatus(200)
         response.hasHeaderValue('Content-Type', 'application/json;charset=UTF-8')
         def json = response.json()
         json.paramsFromView == json.book['paramsFromTemplate']
@@ -146,7 +146,7 @@ class BookSpec extends Specification implements HttpClientSupport {
         def response = http('/books/non-standard-template')
 
         then: 'The template was rendered successfully. The custom converter was also used'
-        response.expectJson(200, 'Content-Type': 'application/json;charset=UTF-8', '''
+        response.assertJson(200, 'Content-Type': 'application/json;charset=UTF-8', '''
             {
                 "bookTitle": "template found",
                 "custom": "Sally"
@@ -159,7 +159,7 @@ class BookSpec extends Specification implements HttpClientSupport {
         def response = http('/books/listCallsTmpl')
 
         then: 'The template was rendered successfully'
-        response.expectJson(200, 'Content-Type': 'application/json;charset=UTF-8', '''
+        response.assertJson(200, 'Content-Type': 'application/json;charset=UTF-8', '''
             [
                 {
                     "title": "The Changeling"
@@ -173,7 +173,7 @@ class BookSpec extends Specification implements HttpClientSupport {
         def response = http('/books/listCallsTmplExtraData')
 
         then: 'The template was rendered successfully'
-        response.expectJson(200, 'Content-Type': 'application/json;charset=UTF-8', '''
+        response.assertJson(200, 'Content-Type': 'application/json;charset=UTF-8', '''
             [
                 {
                     "title": "The Changeling",
@@ -188,7 +188,7 @@ class BookSpec extends Specification implements HttpClientSupport {
         def response = http('/books/listCallsTmplVar')
 
         then: 'The template was rendered successfully'
-        response.expectJson(200, 'Content-Type': 'application/json;charset=UTF-8', '''
+        response.assertJson(200, 'Content-Type': 'application/json;charset=UTF-8', '''
             [
                 {
                     "title": "The Changeling",

@@ -38,7 +38,7 @@ class CommandObjectDISpec extends Specification implements HttpClientSupport {
         def response = http('/commandDI/testServiceInjection')
 
         then: "service is injected"
-        response.expectJson(200, [
+        response.assertJson(200, [
                 serviceInjected: true,
                 serviceId: 'ValidationHelperService-v1'
         ])
@@ -49,7 +49,7 @@ class CommandObjectDISpec extends Specification implements HttpClientSupport {
         def response = http('/commandDI/testMultipleServices')
 
         then: "both services are injected"
-        response.expectJson(200, [
+        response.assertJson(200, [
                 pricingServiceInjected: true,
                 notificationServiceInjected: true,
                 pricingServiceId: 'PricingService-v1',
@@ -62,7 +62,7 @@ class CommandObjectDISpec extends Specification implements HttpClientSupport {
         def response = http('/commandDI/testAutowiredAnnotation')
 
         then: "service is injected via @Autowired"
-        response.expectJson(200, [
+        response.assertJson(200, [
                 serviceInjected: true,
                 serviceId: 'ValidationHelperService-v1'
         ])
@@ -75,7 +75,7 @@ class CommandObjectDISpec extends Specification implements HttpClientSupport {
         def response = http('/commandDI/registerUser?username=johndoe&email=john@example.com&age=25')
 
         then: "validation passes"
-        response.expectStatus(200)
+        response.assertStatus(200)
         with(response.json()) {
             valid == true
             errors.isEmpty()
@@ -89,7 +89,7 @@ class CommandObjectDISpec extends Specification implements HttpClientSupport {
         def response = http('/commandDI/registerUser?username=admin&email=admin@example.com')
 
         then: "validation fails with username error"
-        response.expectStatus(200)
+        response.assertStatus(200)
         with(response.json()) {
             valid == false
             errors.any { it.field == 'username' }
@@ -103,7 +103,7 @@ class CommandObjectDISpec extends Specification implements HttpClientSupport {
         def response = http("/commandDI/registerUser?username=testuser&email=${URLEncoder.encode(email, 'UTF-8')}")
 
         then: "validation result is as expected"
-        response.expectStatus(200)
+        response.assertStatus(200)
         response.json().valid == expectedValid
 
         where:
@@ -121,7 +121,7 @@ class CommandObjectDISpec extends Specification implements HttpClientSupport {
         def response = http("/commandDI/registerUser?username=testuser&email=user@example.com&age=${age}")
 
         then: "validation result matches expectation"
-        response.expectStatus(200)
+        response.assertStatus(200)
         def json = response.json()
         if (expectedValid) {
             json.errors.findAll { it.field == 'age' }.isEmpty()
@@ -143,7 +143,7 @@ class CommandObjectDISpec extends Specification implements HttpClientSupport {
         def response = http('/commandDI/registerUser?username=testuser&email=user@example.com&phone=555-123-4567')
 
         then: "validation passes for valid phone"
-        response.expectStatus(200)
+        response.assertStatus(200)
         response.json().errors.findAll { it.field == 'phone' }.isEmpty()
     }
 
@@ -152,7 +152,7 @@ class CommandObjectDISpec extends Specification implements HttpClientSupport {
         def response = http('/commandDI/registerUser?username=testuser&email=user@example.com&phone=123')
 
         then: "validation fails for invalid phone"
-        response.expectStatus(200)
+        response.assertStatus(200)
         response.json().errors.any { it.field == 'phone' }
     }
 
@@ -164,7 +164,7 @@ class CommandObjectDISpec extends Specification implements HttpClientSupport {
         def response = http("/commandDI/calculateOrder?productName=Widget&quantity=${quantity}&unitPrice=10.00")
 
         then: "discount is calculated correctly"
-        response.expectStatus(200)
+        response.assertStatus(200)
         response.json().discount == expectedDiscount
 
         where:
@@ -184,7 +184,7 @@ class CommandObjectDISpec extends Specification implements HttpClientSupport {
         def response = http('/commandDI/calculateOrder?productName=Widget&quantity=100&unitPrice=10.00')
 
         then: "total price includes 25% discount (100*10=1000, minus 25% = 750)"
-        response.expectStatus(200)
+        response.assertStatus(200)
         response.json().totalPrice == 750.0
     }
 
@@ -193,7 +193,7 @@ class CommandObjectDISpec extends Specification implements HttpClientSupport {
         def response = http('/commandDI/calculateOrder?productName=Premium+Widget&quantity=10&unitPrice=100.00')
 
         then: "price with tax is calculated (10*100=1000, 10% discount=900, 8% tax=972)"
-        response.expectStatus(200)
+        response.assertStatus(200)
         with(response.json()) {
             totalPrice == 900.0
             priceWithTax == 972.0
@@ -207,7 +207,7 @@ class CommandObjectDISpec extends Specification implements HttpClientSupport {
         def response = http('/commandDI/validateOrder?productName=Widget&quantity=5&unitPrice=25.00')
 
         then: "order is valid"
-        response.expectStatus(200)
+        response.assertStatus(200)
         with(response.json()) {
             valid == true
             errors.isEmpty()
@@ -219,7 +219,7 @@ class CommandObjectDISpec extends Specification implements HttpClientSupport {
         def response = http('/commandDI/validateOrder?productName=Widget&quantity=5&unitPrice=99999.00')
 
         then: "order is invalid due to price"
-        response.expectStatus(200)
+        response.assertStatus(200)
         with(response.json()) {
             valid == false
             errors.any { it.field == 'unitPrice' }
@@ -235,7 +235,7 @@ class CommandObjectDISpec extends Specification implements HttpClientSupport {
         )
 
         then: "notification is sent successfully"
-        response.expectStatus(200)
+        response.assertStatus(200)
         with(response.json()) {
             notificationSent == true
             lastNotification.recipient == 'customer@example.com'
@@ -250,13 +250,13 @@ class CommandObjectDISpec extends Specification implements HttpClientSupport {
         def response1 = http('/commandDI/testPrototypeScope')
 
         then: "counter is 2 (incremented twice within request)"
-        response1.expectJson(200, [counter: 2, expectedValue: 2])
+        response1.assertJson(200, [counter: 2, expectedValue: 2])
 
         when: "making second request"
         def response2 = http('/commandDI/testPrototypeScope')
 
         then: "counter is still 2 (fresh command instance)"
-        response2.expectJson(200, [counter: 2, expectedValue: 2])
+        response2.assertJson(200, [counter: 2, expectedValue: 2])
     }
 
     // ========== Service Persistence Tests ==========
@@ -266,7 +266,7 @@ class CommandObjectDISpec extends Specification implements HttpClientSupport {
         def response = http('/commandDI/testServiceAfterValidation?username=admin&email=test@example.com')
 
         then: "service remains available after multiple validations"
-        response.expectJsonContains(200, [
+        response.assertJsonContains(200, [
                 serviceAfterFirst: true,
                 serviceAfterSecond: true
         ])
@@ -279,7 +279,7 @@ class CommandObjectDISpec extends Specification implements HttpClientSupport {
         def response = http('/commandDI/testOptionalService?data=test')
 
         then: "required service present, optional is null"
-        response.expectJsonContains(200, [
+        response.assertJsonContains(200, [
                 requiredServicePresent: true,
                 optionalServicePresent: false
         ])
@@ -292,7 +292,7 @@ class CommandObjectDISpec extends Specification implements HttpClientSupport {
         def response = http('/commandDI/validateWithServiceState?price=100.00')
 
         then: "validation passes and shows current tax rate"
-        response.expectJsonContains(200, [
+        response.assertJsonContains(200, [
                 valid: true,
                 currentTaxRate: 0.08
         ])
@@ -305,7 +305,7 @@ class CommandObjectDISpec extends Specification implements HttpClientSupport {
         def response = http('/commandDI/registerUser?username=validuser&email=user@example.com')
 
         then: "request succeeds"
-        response.expectJsonContains(200, [username: 'validuser'])
+        response.assertJsonContains(200, [username: 'validuser'])
     }
 
     @Unroll
@@ -314,7 +314,7 @@ class CommandObjectDISpec extends Specification implements HttpClientSupport {
         def response = http("/commandDI/registerUser?username=${username}&email=test@example.com")
 
         then: "validation fails"
-        response.expectJsonContains(200, [
+        response.assertJsonContains(200, [
                 valid: false,
                 usernameAvailable: false
         ])

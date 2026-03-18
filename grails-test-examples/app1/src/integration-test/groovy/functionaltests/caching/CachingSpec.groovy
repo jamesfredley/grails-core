@@ -271,8 +271,8 @@ class CachingSpec extends Specification implements HttpClientSupport {
         def response2 = http('/cacheTest/basicData')
 
         then: "same data returned (caching works)"
-        response1.expectStatus(200)
-        response2.expectStatus(200)
+        response1.assertStatus(200)
+        response2.assertStatus(200)
         response1.json().data == response2.json().data
     }
 

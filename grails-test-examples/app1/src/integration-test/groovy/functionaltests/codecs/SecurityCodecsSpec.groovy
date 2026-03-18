@@ -49,7 +49,7 @@ class SecurityCodecsSpec extends Specification implements HttpClientSupport {
         )
 
         then: "script tags should be HTML encoded"
-        response.expectStatus(200)
+        response.assertStatus(200)
         with(response.json()) {
             input == '<script>alert("XSS")</script>'
             encoded.contains('&lt;script&gt;')
@@ -64,7 +64,7 @@ class SecurityCodecsSpec extends Specification implements HttpClientSupport {
         def response = http('/codecTest/encodeHtml?input=%22quoted%22')
 
         then: "quotes should be HTML encoded"
-        response.expectStatus(200)
+        response.assertStatus(200)
         with(response.json()) {
             encoded.contains('&quot;')
             decodedBack == '"quoted"'
@@ -76,7 +76,7 @@ class SecurityCodecsSpec extends Specification implements HttpClientSupport {
         def response = http('/codecTest/encodeHtml?input=foo%26bar')
 
         then: "ampersands should be HTML encoded"
-        response.expectStatus(200)
+        response.assertStatus(200)
         with(response.json()) {
             input == 'foo&bar'
             encoded.contains('&amp;')
@@ -91,7 +91,7 @@ class SecurityCodecsSpec extends Specification implements HttpClientSupport {
         def response = http('/codecTest/encodeUrl?input=hello+world%26foo%3Dbar')
 
         then: "spaces and special chars should be URL encoded"
-        response.expectStatus(200)
+        response.assertStatus(200)
         with(response.json()) {
             input == 'hello world&foo=bar'
             encoded.contains('+') || json.encoded.contains('%20')
@@ -108,7 +108,7 @@ class SecurityCodecsSpec extends Specification implements HttpClientSupport {
         def response = http('/codecTest/encodeBase64?input=Hello%2C+World!')
 
         then: "text should be Base64 encoded and decodable"
-        response.expectJson(200, [
+        response.assertJson(200, [
                 input: 'Hello, World!',
                 encoded: 'SGVsbG8sIFdvcmxkIQ==',
                 decodedBack: 'Hello, World!'
@@ -120,7 +120,7 @@ class SecurityCodecsSpec extends Specification implements HttpClientSupport {
         def response = http('/codecTest/encodeBase64Binary')
 
         then: "binary data should be correctly Base64 encoded"
-        response.expectJson(200, [
+        response.assertJson(200, [
                 originalBytes: [72, 101, 108, 108, 111], // "Hello" in ASCII
                 encoded: 'SGVsbG8=',
                 decodedBytes: [72, 101, 108, 108, 111]
@@ -134,7 +134,7 @@ class SecurityCodecsSpec extends Specification implements HttpClientSupport {
         def response = http('/codecTest/encodeMd5?input=password123')
 
         then: "MD5 hash should be 32 characters (hex)"
-        response.expectStatus(200)
+        response.assertStatus(200)
         with(response.json()) {
             input == 'password123'
             hashLength == 32
@@ -147,7 +147,7 @@ class SecurityCodecsSpec extends Specification implements HttpClientSupport {
         def response = http('/codecTest/encodeMd5Bytes?input=password123')
 
         then: "MD5 bytes should be 16 bytes"
-        response.expectStatus(200)
+        response.assertStatus(200)
         with(response.json()) {
             bytesLength == 16
             md5Bytes.size() == 16
@@ -161,7 +161,7 @@ class SecurityCodecsSpec extends Specification implements HttpClientSupport {
         def response = http('/codecTest/encodeSha1?input=password123')
 
         then: "SHA1 hash should be 40 characters (hex)"
-        response.expectStatus(200)
+        response.assertStatus(200)
         with(response.json()) {
             hashLength == 40
             sha1Hash ==~ /^[a-f0-9]{40}$/
@@ -173,7 +173,7 @@ class SecurityCodecsSpec extends Specification implements HttpClientSupport {
         def response = http('/codecTest/encodeSha1Bytes?input=password123')
 
         then: "SHA1 bytes should be 20 bytes"
-        response.expectJsonContains(200, [bytesLength: 20])
+        response.assertJsonContains(200, [bytesLength: 20])
     }
 
     // ========== SHA256 Hash Tests ==========
@@ -183,7 +183,7 @@ class SecurityCodecsSpec extends Specification implements HttpClientSupport {
         def response = http('/codecTest/encodeSha256?input=password123')
 
         then: "SHA256 hash should be 64 characters (hex)"
-        response.expectStatus(200)
+        response.assertStatus(200)
         with(response.json()) {
             hashLength == 64
             sha256Hash ==~ /^[a-f0-9]{64}$/
@@ -195,7 +195,7 @@ class SecurityCodecsSpec extends Specification implements HttpClientSupport {
         def response = http('/codecTest/encodeSha256Bytes?input=password123')
 
         then: "SHA256 bytes should be 32 bytes"
-        response.expectJsonContains(200, [bytesLength: 32])
+        response.assertJsonContains(200, [bytesLength: 32])
     }
 
     // ========== Hex Encoding Tests ==========
@@ -205,7 +205,7 @@ class SecurityCodecsSpec extends Specification implements HttpClientSupport {
         def response = http('/codecTest/encodeHex?input=Hello')
 
         then: "text should be Hex encoded and decodable"
-        response.expectJson(200, [
+        response.assertJson(200, [
                 input: 'Hello',
                 hexEncoded: '48656c6c6f', // "Hello" in hex
                 decodedBack: 'Hello'
@@ -219,7 +219,7 @@ class SecurityCodecsSpec extends Specification implements HttpClientSupport {
         def response = http('/codecTest/encodeJavaScript')
 
         then: "JavaScript special chars should be escaped"
-        response.expectStatus(200)
+        response.assertStatus(200)
         with(response.json()) {
             input.contains("'")
             input.contains('"')
@@ -236,7 +236,7 @@ class SecurityCodecsSpec extends Specification implements HttpClientSupport {
         def response = http('/codecTest/encodeRaw')
 
         then: "raw content should be preserved"
-        response.expectJson(200, [
+        response.assertJson(200, [
                 input: '<b>Bold</b>',
                 raw: '<b>Bold</b>',
                 rawClass: 'java.lang.String'
@@ -250,7 +250,7 @@ class SecurityCodecsSpec extends Specification implements HttpClientSupport {
         def response = http('/codecTest/multipleEncodings')
 
         then: "multiple encodings should be reversible"
-        response.expectStatus(200)
+        response.assertStatus(200)
         with(response.json()) {
             input == '<script>alert(1)</script>'
             htmlEncoded.contains('&lt;')
@@ -267,7 +267,7 @@ class SecurityCodecsSpec extends Specification implements HttpClientSupport {
         )
 
         then: "special characters should be properly encoded"
-        response.expectStatus(200)
+        response.assertStatus(200)
         with(response.json()) {
             input.contains('日本語')
             htmlEncoded.contains('&lt;tag&gt;')
@@ -283,7 +283,7 @@ class SecurityCodecsSpec extends Specification implements HttpClientSupport {
         def response = http('/codecTest/encodeNull')
 
         then: "null values should be handled gracefully"
-        response.expectStatus(200)
+        response.assertStatus(200)
         with(response.json()) {
             nullBase64 == null
             nullMd5 == null
@@ -298,7 +298,7 @@ class SecurityCodecsSpec extends Specification implements HttpClientSupport {
         def response = http('/codecTest/encodeEmpty')
 
         then: "empty strings should be encoded without errors"
-        response.expectStatus(200)
+        response.assertStatus(200)
         with(response.json()) {
             input == ''
             // Empty string Base64 is empty
@@ -318,7 +318,7 @@ class SecurityCodecsSpec extends Specification implements HttpClientSupport {
         def response = http('/codecTest/hashConsistency?input=test-consistency')
 
         then: "same input should always produce same hash"
-        response.expectJsonContains(200, [
+        response.assertJsonContains(200, [
                 md5Consistent: true,
                 sha1Consistent: true,
                 sha256Consistent: true
@@ -331,8 +331,8 @@ class SecurityCodecsSpec extends Specification implements HttpClientSupport {
         def response2 = http('/codecTest/hashConsistency?input=input2')
 
         then: "different inputs should produce different hashes"
-        response1.expectStatus(200)
-        response2.expectStatus(200)
+        response1.assertStatus(200)
+        response2.assertStatus(200)
         def json1 = response1.json()
         def json2 = response2.json()
         json1.md5Hash != json2.md5Hash
@@ -347,7 +347,7 @@ class SecurityCodecsSpec extends Specification implements HttpClientSupport {
         def response = http('/codecTest/encodeMd5?input=hello')
 
         then: "MD5 of 'hello' should match known value"
-        response.expectJsonContains(200, [
+        response.assertJsonContains(200, [
                 md5Hash: '5d41402abc4b2a76b9719d911017c592'
         ])
     }
@@ -357,7 +357,7 @@ class SecurityCodecsSpec extends Specification implements HttpClientSupport {
         def response = http('/codecTest/encodeSha1?input=hello')
 
         then: "SHA1 of 'hello' should match known value"
-        response.expectJsonContains(200, [
+        response.assertJsonContains(200, [
                 sha1Hash: 'aaf4c61ddcc5e8a2dabede0f3b482cd9aea9434d'
         ])
     }
@@ -367,7 +367,7 @@ class SecurityCodecsSpec extends Specification implements HttpClientSupport {
         def response = http('/codecTest/encodeSha256?input=hello')
 
         then: "SHA256 of 'hello' should match known value"
-        response.expectJsonContains(200, [
+        response.assertJsonContains(200, [
                 sha256Hash: '2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824'
         ])
     }

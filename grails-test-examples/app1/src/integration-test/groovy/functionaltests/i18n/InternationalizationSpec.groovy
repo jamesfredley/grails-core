@@ -46,7 +46,7 @@ class InternationalizationSpec extends Specification implements HttpClientSuppor
         def response = http('/i18nTest/getMessage?code=app.welcome&lang=en')
 
         then:
-        response.expectJson(200, [
+        response.assertJson(200, [
                 code: 'app.welcome',
                 locale: 'en',
                 message: 'Welcome to the Application'
@@ -59,7 +59,7 @@ class InternationalizationSpec extends Specification implements HttpClientSuppor
         def response = http('/i18nTest/getMessage?code=app.welcome&lang=de')
 
         then:
-        response.expectJson(200, [
+        response.assertJson(200, [
                 code: 'app.welcome',
                 locale: 'de',
                 message: 'Willkommen in der Anwendung'
@@ -71,7 +71,7 @@ class InternationalizationSpec extends Specification implements HttpClientSuppor
         def response = http('/i18nTest/getMessage?code=app.welcome&lang=fr')
 
         then:
-        response.expectJson(200, [
+        response.assertJson(200, [
                 code: 'app.welcome',
                 locale: 'fr',
                 message: "Bienvenue dans l'application"
@@ -85,7 +85,7 @@ class InternationalizationSpec extends Specification implements HttpClientSuppor
         def response = http('/i18nTest/getMessageWithArgs?code=app.greeting&arg=John&lang=en')
 
         then:
-        response.expectJsonContains(200, [message: 'Hello, John!'])
+        response.assertJsonContains(200, [message: 'Hello, John!'])
     }
 
     def "test message with argument in German"() {
@@ -93,7 +93,7 @@ class InternationalizationSpec extends Specification implements HttpClientSuppor
         def response = http('/i18nTest/getMessageWithArgs?code=app.greeting&arg=Johann&lang=de')
 
         then:
-        response.expectJsonContains(200, [message: 'Hallo, Johann!'])
+        response.assertJsonContains(200, [message: 'Hallo, Johann!'])
     }
 
     def "test farewell message with argument"() {
@@ -101,7 +101,7 @@ class InternationalizationSpec extends Specification implements HttpClientSuppor
         def response = http('/i18nTest/getMessageWithArgs?code=app.farewell&arg=Alice&lang=en')
 
         then:
-        response.expectJsonContains(200, [message: 'Goodbye, Alice. See you soon!'])
+        response.assertJsonContains(200, [message: 'Goodbye, Alice. See you soon!'])
     }
 
     // ========== Pluralization Tests (Choice Format) ==========
@@ -111,7 +111,7 @@ class InternationalizationSpec extends Specification implements HttpClientSuppor
         def response = http('/i18nTest/getChoiceMessage?count=0&lang=en')
 
         then:
-        response.expectJsonContains(200, [
+        response.assertJsonContains(200, [
                 count: 0,
                 message: 'You have no items.'
         ])
@@ -122,7 +122,7 @@ class InternationalizationSpec extends Specification implements HttpClientSuppor
         def response = http('/i18nTest/getChoiceMessage?count=1&lang=en')
 
         then:
-        response.expectJsonContains(200, [
+        response.assertJsonContains(200, [
                 count: 1,
                 message: 'You have one item.'
         ])
@@ -133,7 +133,7 @@ class InternationalizationSpec extends Specification implements HttpClientSuppor
         def response = http('/i18nTest/getChoiceMessage?count=5&lang=en')
 
         then:
-        response.expectJsonContains(200, [
+        response.assertJsonContains(200, [
                 count: 5,
                 message: 'You have 5 items.'
         ])
@@ -144,7 +144,7 @@ class InternationalizationSpec extends Specification implements HttpClientSuppor
         def response = http('/i18nTest/getChoiceMessage?count=0&lang=de')
 
         then:
-        response.expectJsonContains(200, [message: 'Sie haben keine Artikel.'])
+        response.assertJsonContains(200, [message: 'Sie haben keine Artikel.'])
     }
 
     def "test choice format - one item in German"() {
@@ -152,7 +152,7 @@ class InternationalizationSpec extends Specification implements HttpClientSuppor
         def response = http('/i18nTest/getChoiceMessage?count=1&lang=de')
 
         then:
-        response.expectJsonContains(200, [message: 'Sie haben einen Artikel.'])
+        response.assertJsonContains(200, [message: 'Sie haben einen Artikel.'])
     }
 
     // ========== Date Formatting Tests ==========
@@ -162,7 +162,7 @@ class InternationalizationSpec extends Specification implements HttpClientSuppor
         def response = http('/i18nTest/getDateMessage?lang=en')
 
         then:
-        response.expectStatus(200)
+        response.assertStatus(200)
         with(response.json()) {
             message.startsWith('Today is ')
             // English format: "Today is January 25, 2026."
@@ -175,7 +175,7 @@ class InternationalizationSpec extends Specification implements HttpClientSuppor
         def response = http('/i18nTest/getDateMessage?lang=de')
 
         then:
-        response.expectStatus(200)
+        response.assertStatus(200)
         response.json().message.startsWith('Heute ist der ')
         // German format: "Heute ist der 25. Januar 2026."
     }
@@ -187,7 +187,7 @@ class InternationalizationSpec extends Specification implements HttpClientSuppor
         def response = http('/i18nTest/getCurrencyMessage?amount=1234.56&lang=en_US')
 
         then:
-        response.expectStatus(200)
+        response.assertStatus(200)
         def json = response.json()
         json.message.contains('$') || json.message.contains('1,234.56')
     }
@@ -197,7 +197,7 @@ class InternationalizationSpec extends Specification implements HttpClientSuppor
         def response = http('/i18nTest/getCurrencyMessage?amount=1234.56&lang=de_DE')
 
         then:
-        response.expectStatus(200)
+        response.assertStatus(200)
         // German format uses € and different number formatting
         response.json().message != null
     }
@@ -209,7 +209,7 @@ class InternationalizationSpec extends Specification implements HttpClientSuppor
         def response = http('/i18nTest/getPercentMessage?value=0.75&lang=en')
 
         then:
-        response.expectStatus(200)
+        response.assertStatus(200)
         with(response.json()) {
             message.contains('75')
             message.contains('%')
@@ -225,7 +225,7 @@ class InternationalizationSpec extends Specification implements HttpClientSuppor
         )
 
         then:
-        response.expectJsonContains(200, [message: 'Fallback Message'])
+        response.assertJsonContains(200, [message: 'Fallback Message'])
     }
 
     // ========== Validation Messages Tests ==========
@@ -235,7 +235,7 @@ class InternationalizationSpec extends Specification implements HttpClientSuppor
         def response = http('/i18nTest/getValidationMessages?lang=en')
 
         then:
-        response.expectStatus(200)
+        response.assertStatus(200)
         with(response.json()) {
             messages.blank.contains('cannot be blank')
             messages.nullable.contains('cannot be null')
@@ -249,7 +249,7 @@ class InternationalizationSpec extends Specification implements HttpClientSuppor
         def response = http('/i18nTest/getValidationMessages?lang=de')
 
         then:
-        response.expectJsonContains(200, [
+        response.assertJsonContains(200, [
             messages: [
                     paginate_prev: 'Vorherige',
                     paginate_next: 'Nächste'
@@ -262,7 +262,7 @@ class InternationalizationSpec extends Specification implements HttpClientSuppor
         def response = http('/i18nTest/getValidationMessages?lang=fr')
 
         then:
-        response.expectJsonContains(200, [
+        response.assertJsonContains(200, [
                 messages: [
                         paginate_prev: 'Précédent',
                         paginate_next: 'Suivant'
@@ -277,7 +277,7 @@ class InternationalizationSpec extends Specification implements HttpClientSuppor
         def response = http('/i18nTest/getMultipleMessages?lang=en')
 
         then:
-        response.expectJsonContains(200, [
+        response.assertJsonContains(200, [
                 messages: [
                         welcome: 'Welcome to the Application',
                         greeting: 'Hello, User!',
@@ -291,7 +291,7 @@ class InternationalizationSpec extends Specification implements HttpClientSuppor
         def response = http('/i18nTest/getMultipleMessages?lang=de')
 
         then:
-        response.expectJsonContains(200, [
+        response.assertJsonContains(200, [
                 messages: [
                         welcome: 'Willkommen in der Anwendung',
                         greeting: 'Hallo, User!',
@@ -307,7 +307,7 @@ class InternationalizationSpec extends Specification implements HttpClientSuppor
         def response = http('/i18nTest/getCurrentLocale?lang=de_DE')
 
         then:
-        response.expectJsonContains(200, [
+        response.assertJsonContains(200, [
                 language: 'de',
                 country: 'DE'
         ])
@@ -320,7 +320,7 @@ class InternationalizationSpec extends Specification implements HttpClientSuppor
         def response = http('/i18nTest/getLocaleFromHeader', 'Accept-Language': 'de-DE')
 
         then:
-        response.expectStatus(200)
+        response.assertStatus(200)
         // The request locale should reflect the Accept-Language header
         with(response.json()) {
             requestLocale?.startsWith('de') || contextLocale?.startsWith('de')
@@ -332,7 +332,7 @@ class InternationalizationSpec extends Specification implements HttpClientSuppor
         def response = http('/i18nTest/getLocaleFromHeader','Accept-Language': 'fr-FR')
 
         then:
-        response.expectStatus(200)
+        response.assertStatus(200)
         with(response.json()) {
             requestLocale?.startsWith('fr') || contextLocale?.startsWith('fr')
         }
@@ -345,7 +345,7 @@ class InternationalizationSpec extends Specification implements HttpClientSuppor
         def response = http('/i18nTest/useControllerMessage?code=app.welcome&lang=en')
 
         then:
-        response.expectJsonContains(200, [message: 'Welcome to the Application'])
+        response.assertJsonContains(200, [message: 'Welcome to the Application'])
     }
 
     // ========== Edge Cases ==========
@@ -355,7 +355,7 @@ class InternationalizationSpec extends Specification implements HttpClientSuppor
         def response = http('/i18nTest/getMessage?code=app.welcome&lang=xyz')
 
         then: "should fall back to default (English) message"
-        response.expectStatus(200)
+        response.assertStatus(200)
         // Will either get the message or fall back
         response.json().message != null
     }
@@ -367,7 +367,7 @@ class InternationalizationSpec extends Specification implements HttpClientSuppor
         )
 
         then: "special characters should be handled correctly"
-        response.expectJsonContains(200, [
+        response.assertJsonContains(200, [
                 arg: 'élève',
                 message: 'Hello, élève!'
         ])

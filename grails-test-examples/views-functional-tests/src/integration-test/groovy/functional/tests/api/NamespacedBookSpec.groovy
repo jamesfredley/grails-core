@@ -32,7 +32,7 @@ class NamespacedBookSpec extends Specification implements HttpClientSupport {
         def response = http('/api/book')
 
         then: 'The response is correct'
-        response.expectJson(200, 'Content-Type': 'application/json;charset=UTF-8', [
+        response.assertJson(200, 'Content-Type': 'application/json;charset=UTF-8', [
                 api: 'version 1.0 (Namespaced)',
                 title: 'API - The Shining'
         ])
@@ -43,7 +43,7 @@ class NamespacedBookSpec extends Specification implements HttpClientSupport {
         def response = http('/api/book/nested')
 
         then: 'The response contains the child template'
-        response.expectJson(200, 'Content-Type': 'application/json;charset=UTF-8', [
+        response.assertJson(200, 'Content-Type': 'application/json;charset=UTF-8', [
                 foo: 'bar'
         ])
     }
@@ -53,7 +53,7 @@ class NamespacedBookSpec extends Specification implements HttpClientSupport {
         def response = http('/api/book')
 
         then: 'The response contains the child template'
-        response.expectJson(200, 'Content-Type': 'application/json;charset=UTF-8', [
+        response.assertJson(200, 'Content-Type': 'application/json;charset=UTF-8', [
                 api: 'version 1.0 (Namespaced)',
                 title: 'API - The Shining'
         ])
@@ -64,7 +64,7 @@ class NamespacedBookSpec extends Specification implements HttpClientSupport {
         def response = http('/api/book', 'Accept': 'application/hal+json')
 
         then: 'The response contains the child template'
-        response.expectJsonContains(200, 'Content-Type': 'application/hal+json;charset=UTF-8', [
+        response.assertJsonContains(200, 'Content-Type': 'application/hal+json;charset=UTF-8', [
                 api: 'version 1.0 (Namespaced HAL)',
                 title: 'API - The Shining',
         ])
@@ -76,7 +76,7 @@ class NamespacedBookSpec extends Specification implements HttpClientSupport {
         def response = http('/api/book/testRender')
 
         then: 'The response is correct'
-        response.expectJson(200, 'Content-Type': 'application/json;charset=UTF-8', [
+        response.assertJson(200, 'Content-Type': 'application/json;charset=UTF-8', [
                 api: 'version 1.0 (Namespaced)',
                 title: 'API - The Shining'
         ])
@@ -87,7 +87,7 @@ class NamespacedBookSpec extends Specification implements HttpClientSupport {
         def response = http('/api/book/testRespond')
 
         then: 'The response is correct'
-        response.expectJson(200, 'Content-Type': 'application/json;charset=UTF-8', [
+        response.assertJson(200, 'Content-Type': 'application/json;charset=UTF-8', [
                 api: 'version 1.0 (Namespaced)',
                 title: 'API - The Shining'
 
@@ -99,7 +99,7 @@ class NamespacedBookSpec extends Specification implements HttpClientSupport {
         def response = http('/api/book/testRespondOutsideNamespace')
 
         then: 'The response is correct'
-        response.expectJson(200, 'Content-Type': 'application/json;charset=UTF-8', [
+        response.assertJson(200, 'Content-Type': 'application/json;charset=UTF-8', [
                 api: 'version 1.0 (Non-Namespaced)',
                 title: 'API - The Shining'
         ])
@@ -111,7 +111,7 @@ class NamespacedBookSpec extends Specification implements HttpClientSupport {
         def response = http('/api/book/message')
 
         then: 'The response is correct'
-        response.expectJson(200, 'Content-Type': 'application/json;charset=UTF-8', [
+        response.assertJson(200, 'Content-Type': 'application/json;charset=UTF-8', [
                 message: 'Controller says Hello API'
         ])
     }

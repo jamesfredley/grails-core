@@ -50,7 +50,7 @@ class InterceptorOrderingSpec extends Specification implements HttpClientSupport
         def response = http('/interceptorTest/testOrder')
 
         then: "interceptors should run in order: first(10), second(20), third(30)"
-        response.expectStatus(200)
+        response.assertStatus(200)
         def order = response.json().executionOrder
         
         // Before interceptors run in ascending order
@@ -75,7 +75,7 @@ class InterceptorOrderingSpec extends Specification implements HttpClientSupport
         def response = http('/interceptorTest/index')
 
         then:
-        response.expectStatus(200)
+        response.assertStatus(200)
         def order = response.json().executionOrder
         
         // All before interceptors should run before controller
@@ -89,7 +89,7 @@ class InterceptorOrderingSpec extends Specification implements HttpClientSupport
         def response = http('/interceptorTest/index')
 
         then:
-        response.expectStatus(200)
+        response.assertStatus(200)
         def order = response.json().executionOrder
         
         // All after interceptors should run after controller
@@ -105,7 +105,7 @@ class InterceptorOrderingSpec extends Specification implements HttpClientSupport
         def response = http('/interceptorTest/blocked?block=true&reason=testing')
 
         then: "controller action should not execute"
-        response.expectJson(200, [
+        response.assertJson(200, [
                 blocked: true,
                 message: 'Request blocked by interceptor',
                 reason: 'testing'
@@ -117,7 +117,7 @@ class InterceptorOrderingSpec extends Specification implements HttpClientSupport
         def response = http('/interceptorTest/blocked?block=false')
 
         then: "controller action should execute"
-        response.expectJson(200, [
+        response.assertJson(200, [
                 action: 'blocked',
                 message: 'This should not be seen if blocked'
         ])
@@ -130,7 +130,7 @@ class InterceptorOrderingSpec extends Specification implements HttpClientSupport
         def response = http('/interceptorTest/checkAttributes')
 
         then:
-        response.expectStatus(200)
+        response.assertStatus(200)
         with(response.json()) {
             fromBefore == true
             interceptorSet != null
@@ -143,7 +143,7 @@ class InterceptorOrderingSpec extends Specification implements HttpClientSupport
         def response = http('/interceptorTest/checkAttributes')
 
         then:
-        response.expectHeaders(200, 'X-Interceptor-Header': 'set-by-interceptor')
+        response.assertHeaders(200, 'X-Interceptor-Header': 'set-by-interceptor')
     }
 
     // ========== Session Tests ==========
@@ -153,7 +153,7 @@ class InterceptorOrderingSpec extends Specification implements HttpClientSupport
         def response = http('/interceptorTest/checkSession')
 
         then:
-        response.expectStatus(200)
+        response.assertStatus(200)
         with(response.json()) {
             sessionData != null
             sessionData.message == 'Session data from interceptor'
@@ -167,7 +167,7 @@ class InterceptorOrderingSpec extends Specification implements HttpClientSupport
         def response = http('/interceptorTest/conditionalAction?match=yes')
 
         then:
-        response.expectStatus(200)
+        response.assertStatus(200)
 
         when:
         def orderResponse = http('/interceptorTest/getOrder')
@@ -181,7 +181,7 @@ class InterceptorOrderingSpec extends Specification implements HttpClientSupport
         def response = http('/interceptorTest/conditionalAction?match=no')
 
         then:
-        response.expectStatus(200)
+        response.assertStatus(200)
 
         when:
         def orderResponse = http('/interceptorTest/getOrder')
@@ -197,7 +197,7 @@ class InterceptorOrderingSpec extends Specification implements HttpClientSupport
         def response = http('/interceptorTest/slowAction?delay=50')
 
         then:
-        response.expectJson(200, [
+        response.assertJson(200, [
             action: 'slowAction',
             delay: 50
         ])
@@ -220,8 +220,8 @@ class InterceptorOrderingSpec extends Specification implements HttpClientSupport
         def response2 = http('/interceptorTest/index')
 
         then: "each request should have clean interceptor execution"
-        response1.expectStatus(200)
-        response2.expectStatus(200)
+        response1.assertStatus(200)
+        response2.assertStatus(200)
         
         // Both should have similar execution patterns
         response1.json().executionOrder.contains('first:before')
@@ -235,7 +235,7 @@ class InterceptorOrderingSpec extends Specification implements HttpClientSupport
         def response = http('/interceptorTest/dataAction?data=testValue')
 
         then:
-        response.expectJson(200, [
+        response.assertJson(200, [
                 data: 'testValue',
                 interceptorModified: false
         ])
@@ -248,7 +248,7 @@ class InterceptorOrderingSpec extends Specification implements HttpClientSupport
         def response = http('/interceptorTest/index')
 
         then:
-        response.expectStatus(200)
+        response.assertStatus(200)
         def order = response.json().executionOrder
         
         // Verify the complete sequence

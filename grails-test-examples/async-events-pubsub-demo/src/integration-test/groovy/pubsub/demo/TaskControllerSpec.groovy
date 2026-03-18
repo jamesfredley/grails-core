@@ -31,6 +31,6 @@ class TaskControllerSpec extends Specification implements HttpClientSupport {
         def response = http('/task/error')
 
         then: 'the response is as expected'
-        response.expect(500, 'error occurred')
+        response.assertEquals(500, 'error occurred')
     }
 }

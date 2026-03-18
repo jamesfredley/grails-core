@@ -21,8 +21,10 @@ package org.apache.grails.testing.http.client.utils
 import java.net.http.HttpResponse
 
 import groovy.json.JsonOutput
+import groovy.json.JsonParserType
 import groovy.json.JsonSlurper
 import groovy.transform.CompileStatic
+import groovy.transform.Immutable
 
 import org.opentest4j.AssertionFailedError
 
@@ -42,10 +44,16 @@ import org.opentest4j.AssertionFailedError
  *
  * <p>Failures include canonicalized JSON representations to make diffs easier to read.</p>
  *
- * @since 7.0.9
+ * @since 7.0.10
  */
 @CompileStatic
 class JsonUtils {
+
+    static Object parseText(CharSequence json, SlurperConfig jsonSlurperConfig = null) {
+        resolvedJsonSlurperConfig(jsonSlurperConfig)
+                .newSlurper()
+                .parseText(json?.toString() ?: '')
+    }
 
     /**
      * Verifies that the response JSON is structurally equal to the expected object tree.
@@ -57,7 +65,11 @@ class JsonUtils {
      * @throws AssertionFailedError if the JSON trees differ
      */
     static void verifyJsonTree(HttpResponse<?> response, Object expected) {
-        compareJsonTree(new JsonSlurper().parseText(response.body() as String), expected)
+        verifyJsonTree(response, expected, null)
+    }
+
+    static void verifyJsonTree(HttpResponse<?> response, Object expected, SlurperConfig jsonSlurperConfig) {
+        compareJsonTree(parseText(response.body() as String, jsonSlurperConfig), expected)
     }
 
     /**
@@ -70,8 +82,12 @@ class JsonUtils {
      * @throws AssertionFailedError if the JSON trees differ
      */
     static void verifyJsonTree(HttpResponse<?> response, CharSequence expectedJson) {
-        def actual = prettyCanonicalJsonSorted(response.body() as String)
-        def expected = prettyCanonicalJsonSorted(expectedJson)
+        verifyJsonTree(response, expectedJson, null)
+    }
+
+    static void verifyJsonTree(HttpResponse<?> response, CharSequence expectedJson, SlurperConfig jsonSlurperConfig) {
+        def actual = prettyCanonicalJsonSorted(response.body() as String, jsonSlurperConfig)
+        def expected = prettyCanonicalJsonSorted(expectedJson, jsonSlurperConfig)
         if (actual != expected) {
             throw new AssertionFailedError('JSON tree differs', expected, actual)
         }
@@ -92,7 +108,11 @@ class JsonUtils {
      * @throws AssertionError if the response does not contain the expected subset
      */
     static void verifyJsonTreeContains(HttpResponse<?> response, Object expected) {
-        def actual = new JsonSlurper().parseText(response.body()?.toString() ?: '')
+        verifyJsonTreeContains(response, expected, null)
+    }
+
+    static void verifyJsonTreeContains(HttpResponse<?> response, Object expected, SlurperConfig jsonSlurperConfig) {
+        def actual = parseText(response.body()?.toString() ?: '', jsonSlurperConfig)
         verifyJsonTreeContainsParsed(actual, expected)
     }
 
@@ -104,8 +124,12 @@ class JsonUtils {
      * @throws AssertionError if the response does not contain the expected subset
      */
     static void verifyJsonTreeContains(HttpResponse<?> response, CharSequence expectedJson) {
-        def actual = new JsonSlurper().parseText(response.body()?.toString() ?: '')
-        def expected = new JsonSlurper().parseText(expectedJson?.toString() ?: '')
+        verifyJsonTreeContains(response, expectedJson, null)
+    }
+
+    static void verifyJsonTreeContains(HttpResponse<?> response, CharSequence expectedJson, SlurperConfig jsonSlurperConfig) {
+        def actual = parseText(response.body()?.toString() ?: '', jsonSlurperConfig)
+        def expected = parseText(expectedJson?.toString() ?: '', jsonSlurperConfig)
         verifyJsonTreeContainsParsed(actual, expected)
     }
 
@@ -135,10 +159,14 @@ Mismatches:
         }
     }
 
-    private static String prettyCanonicalJsonSorted(CharSequence json) {
-        def tree = new JsonSlurper().parseText(json.toString())
+    private static String prettyCanonicalJsonSorted(CharSequence json, SlurperConfig jsonSlurperConfig) {
+        def tree = parseText(json, jsonSlurperConfig)
         def sortedTree = deepSortJson(tree)
         JsonOutput.prettyPrint(JsonOutput.toJson(sortedTree))
+    }
+
+    private static SlurperConfig resolvedJsonSlurperConfig(SlurperConfig jsonSlurperConfig) {
+        jsonSlurperConfig ?: new SlurperConfig()
     }
 
     private static void verifyJsonContains(Object actual, Object expected, String path, List<String> errors) {
@@ -208,5 +236,41 @@ Mismatches:
 
     private static String repr(Object value) {
         value == null ? 'null' : value.toString()
+    }
+
+    /**
+     * Optional configuration for JSON parsing backed by {@link JsonSlurper}.
+     */
+    @Immutable
+    @CompileStatic
+    static class SlurperConfig {
+
+        JsonParserType parserType
+
+        Boolean checkDates
+        Boolean chop
+        Boolean lazyChop
+
+        Integer maxSizeForInMemory
+
+        JsonSlurper newSlurper() {
+            def slurper = new JsonSlurper()
+            if (parserType) {
+                slurper.type = parserType
+            }
+            if (checkDates != null) {
+                slurper.checkDates = checkDates
+            }
+            if (chop != null) {
+                slurper.chop = chop
+            }
+            if (lazyChop != null) {
+                slurper.lazyChop = lazyChop
+            }
+            if (maxSizeForInMemory != null) {
+                slurper.maxSizeForInMemory = maxSizeForInMemory
+            }
+            slurper
+        }
     }
 }

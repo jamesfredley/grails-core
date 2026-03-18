@@ -23,6 +23,7 @@ import java.net.http.HttpRequest
 import java.net.http.HttpResponse
 import java.time.Duration
 
+import groovy.json.JsonGenerator
 import groovy.json.JsonOutput
 import groovy.transform.CompileStatic
 import groovy.xml.MarkupBuilder
@@ -64,15 +65,15 @@ import org.apache.grails.testing.http.client.utils.XmlUtils
  *         def response = http('/health')
  *
  *         then:
- *         response.expectStatus(200)
+ *         response.assertStatus(200)
  *     }
  * }
  * </pre>
  * <p>
  * Implementing tests must provide {@code local.server.port} (in Grails typically via {@code @Integration}),
- * or otherwise override {@code getBaseUrl()}.
+ * or otherwise override {@link #getHttpBaseUrl}.
  *
- * @since 7.0.9
+ * @since 7.0.10
  */
 @CompileStatic
 trait HttpClientSupport {
@@ -97,8 +98,14 @@ trait HttpClientSupport {
     private static final Map<String, String> EMPTY = Collections.emptyMap()
     private static final String APPLICATION_JSON = 'application/json'
     private static final String APPLICATION_XML = 'application/xml'
+    private static final String CONTENT_TYPE = 'Content-Type'
     private static final String HTTP = 'http://'
     private static final String HTTPS = 'https://'
+
+    private static final String HEAD = 'HEAD'
+    private static final String OPTIONS = 'OPTIONS'
+    private static final String PATCH = 'PATCH'
+    private static final String TRACE = 'TRACE'
 
     /**
      * @return the shared singleton JDK Http client instance, creating it on first access.
@@ -117,7 +124,7 @@ trait HttpClientSupport {
         client
     }
 
-    String getResolvedBaseUrl() {
+    private String getResolvedBaseUrl() {
         resolvedBaseUrl ?: resolveBaseUrl()
     }
 
@@ -156,15 +163,11 @@ trait HttpClientSupport {
         http(EMPTY, pathOrUrl, null)
     }
 
-    TestHttpResponse http(Map<String, String> headers, CharSequence pathOrUrl) {
-        http(headers, pathOrUrl, null)
-    }
-
     /**
-     * GET with an explicit client and no custom headers.
+     * GET request.
      *
      * @param pathOrUrl relative path or absolute URL
-     * @param client client to execute request with
+     * @param client optional {@link HttpClient}; falls back to default client
      * @return response with String body
      */
     TestHttpResponse http(CharSequence pathOrUrl, HttpClient client) {
@@ -172,11 +175,22 @@ trait HttpClientSupport {
     }
 
     /**
-     * GET with explicit client and headers.
+     * GET request.
      *
      * @param headers optional request headers
      * @param pathOrUrl relative path or absolute URL
-     * @param client optional explicit client; if null, falls back to {@link #getHttpClient()}
+     * @return response with String body
+     */
+    TestHttpResponse http(Map<String, String> headers, CharSequence pathOrUrl) {
+        http(headers, pathOrUrl, null)
+    }
+
+    /**
+     * GET request.
+     *
+     * @param headers optional request headers
+     * @param pathOrUrl relative path or absolute URL
+     * @param client optional {@link HttpClient}; falls back to default client
      * @return response with String body
      */
     TestHttpResponse http(Map<String, String> headers, CharSequence pathOrUrl, HttpClient client) {
@@ -187,38 +201,25 @@ trait HttpClientSupport {
     // region POST HELPERS
 
     /**
-     * POST request with explicit content type using the shared default client.
+     * POST request.
      *
+     * @param headers optional request headers
      * @param pathOrUrl relative path or absolute URL
      * @param body request payload
      * @param contentType request {@code Content-Type}
+     * @param client optional client; if null, falls back to {@link #getHttpClient()}
      * @return response with String body
      */
-    TestHttpResponse httpPost(CharSequence pathOrUrl, CharSequence body, CharSequence contentType) {
-        httpPost(EMPTY, pathOrUrl, body, contentType, null)
-    }
-
-    /**
-     * POST request with explicit content type and explicit client.
-     */
-    TestHttpResponse httpPost(CharSequence pathOrUrl, CharSequence body, CharSequence contentType, HttpClient client) {
-        httpPost(EMPTY, pathOrUrl, body, contentType, client)
-    }
-
-    /**
-     * POST request with headers and explicit content type using the shared default client.
-     */
-    TestHttpResponse httpPost(Map<String, String> headers, CharSequence pathOrUrl, CharSequence body, CharSequence contentType) {
-        httpPost(headers, pathOrUrl, body, contentType, null)
-    }
-
-    /**
-     * POST request with headers, explicit content type, and explicit client.
-     */
-    TestHttpResponse httpPost(Map<String, String> headers, CharSequence pathOrUrl, CharSequence body, CharSequence contentType, HttpClient client) {
+    TestHttpResponse httpPost(
+            Map<String, String> headers = EMPTY,
+            CharSequence pathOrUrl,
+            CharSequence body,
+            CharSequence contentType,
+            HttpClient client = null
+    ) {
         send(client, headers,
                 requestBuilder(pathOrUrl)
-                        .header('Content-Type', contentType.toString())
+                        .header(CONTENT_TYPE, contentType.toString())
                         .POST(HttpRequest.BodyPublishers.ofString(body?.toString() ?: ''))
         )
     }
@@ -226,96 +227,186 @@ trait HttpClientSupport {
     // region POST JSON
 
     /**
-     * POST JSON string payload with shared default client.
+     * POST JSON string payload.
+     *
+     * @param headers optional request headers
+     * @param pathOrUrl relative path or absolute URL
+     * @param body request payload
+     * @param client optional client; if null, falls back to {@link #getHttpClient()}
+     * @return response with String body
      */
-    TestHttpResponse httpPostJson(CharSequence pathOrUrl, CharSequence body) {
-        httpPost(EMPTY, pathOrUrl, body, APPLICATION_JSON, null)
-    }
-
-    /**
-     * POST JSON string payload with explicit client.
-     */
-    TestHttpResponse httpPostJson(CharSequence pathOrUrl, CharSequence body, HttpClient client) {
-        httpPost(EMPTY, pathOrUrl, body, APPLICATION_JSON, client)
-    }
-
-    /**
-     * POST JSON string payload with custom headers.
-     */
-    TestHttpResponse httpPostJson(Map<String, String> headers, CharSequence pathOrUrl, CharSequence body) {
-        httpPost(headers, pathOrUrl, body, APPLICATION_JSON, null)
-    }
-
-    /**
-     * POST JSON string payload with custom headers and explicit client.
-     */
-    TestHttpResponse httpPostJson(Map<String, String> headers, CharSequence pathOrUrl, CharSequence body, HttpClient client) {
+    TestHttpResponse httpPostJson(
+            Map<String, String> headers = EMPTY,
+            CharSequence pathOrUrl,
+            CharSequence body,
+            HttpClient client = null
+    ) {
         httpPost(headers, pathOrUrl, body, APPLICATION_JSON, client)
     }
 
     /**
-     * POST JSON object payload (serialized with {@link JsonOutput#toJson(Object)}).
+     * POST JSON payload from {@link Map}.
+     *
+     * @param pathOrUrl relative path or absolute URL
+     * @param jsonGenerator optional {@link groovy.json.JsonGenerator} for custom formatting
+     * @param body request payload
+     * @return response with String body
      */
-    TestHttpResponse httpPostJson(CharSequence pathOrUrl, Map<String, Object> body) {
-        httpPost(EMPTY, pathOrUrl, JsonOutput.toJson(body), APPLICATION_JSON, null)
+    TestHttpResponse httpPostJson(
+            CharSequence pathOrUrl,
+            JsonGenerator jsonGenerator = null,
+            Map<String, Object> body
+    ) {
+        httpPostJson(EMPTY, pathOrUrl, jsonGenerator, body, null)
     }
 
     /**
-     * POST JSON object payload (serialized with {@link JsonOutput#toJson(Object)}) and explicit client.
+     * POST JSON payload from {@link Map}.
+     *
+     * @param pathOrUrl relative path or absolute URL
+     * @param jsonGenerator optional {@link groovy.json.JsonGenerator} for custom formatting
+     * @param body request payload
+     * @param client {@link HttpClient} instance to use
+     * @return response with String body
      */
-    TestHttpResponse httpPostJson(CharSequence pathOrUrl, Map<String, Object> body, HttpClient client) {
-        httpPost(EMPTY, pathOrUrl, JsonOutput.toJson(body), APPLICATION_JSON, client)
+    TestHttpResponse httpPostJson(
+            CharSequence pathOrUrl,
+            JsonGenerator jsonGenerator = null,
+            Map<String, Object> body,
+            HttpClient client
+    ) {
+        httpPostJson(EMPTY, pathOrUrl, jsonGenerator, body, client)
     }
 
     /**
-     * POST JSON object payload with custom headers.
+     * POST JSON payload from {@link Map}.
+     *
+     * @param headers optional request headers
+     * @param pathOrUrl relative path or absolute URL
+     * @param jsonGenerator optional {@link groovy.json.JsonGenerator} for custom formatting
+     * @param body request payload
+     * @return response with String body
      */
-    TestHttpResponse httpPostJson(Map<String, String> headers, CharSequence pathOrUrl, Map<String, Object> body) {
-        httpPost(headers, pathOrUrl, JsonOutput.toJson(body), APPLICATION_JSON, null)
+    TestHttpResponse httpPostJson(
+            Map<String, String> headers,
+            CharSequence pathOrUrl,
+            JsonGenerator jsonGenerator = null,
+            Map<String, Object> body
+    ) {
+        httpPostJson(headers, pathOrUrl, jsonGenerator, body, null)
     }
 
     /**
-     * POST JSON object payload with custom headers and explicit client.
+     * POST JSON payload from {@link Map}.
+     *
+     * @param headers optional request headers
+     * @param pathOrUrl relative path or absolute URL
+     * @param body request payload
+     * @param client {@link HttpClient} instance to use
+     * @return response with String body
      */
-    TestHttpResponse httpPostJson(Map<String, String> headers, CharSequence pathOrUrl, Map<String, Object> body, HttpClient client) {
-        httpPost(headers, pathOrUrl, JsonOutput.toJson(body), APPLICATION_JSON, client)
+    TestHttpResponse httpPostJson(
+            Map<String, String> headers,
+            CharSequence pathOrUrl,
+            JsonGenerator jsonGenerator = null,
+            Map<String, Object> body,
+            HttpClient client
+    ) {
+        def json = jsonGenerator ? jsonGenerator.toJson(body) : JsonOutput.toJson(body)
+        httpPost(headers, pathOrUrl, json, APPLICATION_JSON, client)
     }
 
     // endregion
     // region POST XML
 
     /**
-     * POST XML generated by the provided markup DSL closure.
+     * POST XML string payload.
+     *
+     * @param headers optional request headers
+     * @param pathOrUrl relative path or absolute URL
+     * @param body request payload
+     * @param client optional {@link HttpClient}; falls back to default client
+     * @return response with String body
+     */
+    TestHttpResponse httpPostXml(
+            Map<String, String> headers = EMPTY,
+            CharSequence pathOrUrl,
+            CharSequence body,
+            HttpClient client = null
+    ) {
+        httpPost(headers, pathOrUrl, body, APPLICATION_XML, client)
+    }
+
+    /**
+     * POST XML generated by the provided {@link MarkupBuilder} DSL closure.
+     *
+     * @param pathOrUrl relative path or absolute URL
+     * @param format optional xml format configuration
+     * @param body {@link MarkupBuilder} DSL closure
+     * @return response with String body
      */
     TestHttpResponse httpPostXml(
             CharSequence pathOrUrl,
-            @DelegatesTo(strategy = Closure.DELEGATE_FIRST, value = MarkupBuilder) Closure<?> body) {
-        httpPost(EMPTY, pathOrUrl, XmlUtils.toXml(body), APPLICATION_XML, null)
-    }
-
-    TestHttpResponse httpPostXml(
-            CharSequence pathOrUrl,
-            @DelegatesTo(strategy = Closure.DELEGATE_FIRST, value = MarkupBuilder) Closure<?> body,
-            HttpClient client
-    ) {
-        httpPost(EMPTY, pathOrUrl, XmlUtils.toXml(body), APPLICATION_XML, client)
-    }
-
-    TestHttpResponse httpPostXml(
-            Map<String, String> headers,
-            CharSequence pathOrUrl,
+            XmlUtils.Format format = null,
             @DelegatesTo(strategy = Closure.DELEGATE_FIRST, value = MarkupBuilder) Closure<?> body
     ) {
-        httpPost(headers, pathOrUrl, XmlUtils.toXml(body), APPLICATION_XML, null)
+        httpPostXml(EMPTY, pathOrUrl, format, body, null)
     }
 
+    /**
+     * POST XML generated by the provided {@link MarkupBuilder} DSL closure.
+     *
+     * @param pathOrUrl relative path or absolute URL
+     * @param format optional xml format configuration
+     * @param body {@link MarkupBuilder} DSL closure
+     * @param client {@link HttpClient} instance to use
+     * @return response with String body
+     */
     TestHttpResponse httpPostXml(
-            Map<String, String> headers,
             CharSequence pathOrUrl,
+            XmlUtils.Format format = null,
             @DelegatesTo(strategy = Closure.DELEGATE_FIRST, value = MarkupBuilder) Closure<?> body,
             HttpClient client
     ) {
-        httpPost(headers, pathOrUrl, XmlUtils.toXml(body), APPLICATION_XML, client)
+        httpPostXml(EMPTY, pathOrUrl, format, body, client)
+    }
+
+    /**
+     * POST XML generated by the provided {@link MarkupBuilder} DSL closure.
+     *
+     * @param headers optional request headers
+     * @param pathOrUrl relative path or absolute URL
+     * @param format optional xml format configuration
+     * @param body {@link MarkupBuilder} DSL closure
+     * @return response with String body
+     */
+    TestHttpResponse httpPostXml(
+            Map<String, String> headers,
+            CharSequence pathOrUrl,
+            XmlUtils.Format format = null,
+            @DelegatesTo(strategy = Closure.DELEGATE_FIRST, value = MarkupBuilder) Closure<?> body
+    ) {
+        httpPostXml(headers, pathOrUrl, format, body, null)
+    }
+
+    /**
+     * POST XML generated by the provided {@link MarkupBuilder} DSL closure.
+     *
+     * @param headers optional request headers
+     * @param pathOrUrl relative path or absolute URL
+     * @param format optional xml format configuration
+     * @param body {@link MarkupBuilder} DSL closure
+     * @param client {@link HttpClient} instance to use
+     * @return response with String body
+     */
+    TestHttpResponse httpPostXml(
+            Map<String, String> headers,
+            CharSequence pathOrUrl,
+            XmlUtils.Format format = null,
+            @DelegatesTo(strategy = Closure.DELEGATE_FIRST, value = MarkupBuilder) Closure<?> body,
+            HttpClient client
+    ) {
+        httpPost(headers, pathOrUrl, XmlUtils.toXml(format, body), APPLICATION_XML, client)
     }
 
     // endregion
@@ -325,19 +416,8 @@ trait HttpClientSupport {
      * POST multipart payload.
      *
      * @param pathOrUrl relative path or absolute URL
-     * @param body prebuilt multipart payload
-     * @return response with String body
-     */
-    TestHttpResponse httpPostMultipart(CharSequence pathOrUrl, MultipartBody body) {
-        httpPostMultipart(EMPTY, pathOrUrl, body, null)
-    }
-
-    /**
-     * POST multipart payload.
-     *
-     * @param pathOrUrl relative path or absolute URL
-     * @param body prebuilt multipart payload
-     * @param client explicit client; if null, falls back to {@link #getHttpClient()}
+     * @param body prebuilt {@link MultipartBody} payload
+     * @param client {@link HttpClient} instance to use
      * @return response with String body
      */
     TestHttpResponse httpPostMultipart(CharSequence pathOrUrl, MultipartBody body, HttpClient client) {
@@ -349,26 +429,19 @@ trait HttpClientSupport {
      *
      * @param headers optional extra request headers
      * @param pathOrUrl relative path or absolute URL
-     * @param body prebuilt multipart payload
+     * @param body prebuilt {@link MultipartBody} payload
+     * @param client optional {@link HttpClient} instance; falls back default client
      * @return response with String body
      */
-    TestHttpResponse httpPostMultipart(Map<String, String> headers, CharSequence pathOrUrl, MultipartBody body) {
-        httpPostMultipart(headers, pathOrUrl, body, null)
-    }
-
-    /**
-     * POST multipart payload.
-     *
-     * @param headers optional extra request headers
-     * @param pathOrUrl relative path or absolute URL
-     * @param body prebuilt multipart payload
-     * @param client explicit client; if null, falls back to {@link #getHttpClient()}
-     * @return response with String body
-     */
-    TestHttpResponse httpPostMultipart(Map<String, String> headers, CharSequence pathOrUrl, MultipartBody body, HttpClient client) {
+    TestHttpResponse httpPostMultipart(
+            Map<String, String> headers = EMPTY,
+            CharSequence pathOrUrl,
+            MultipartBody body,
+            HttpClient client = null
+    ) {
         send(client, headers,
                 requestBuilder(pathOrUrl)
-                        .header('Content-Type', body.contentType)
+                        .header(CONTENT_TYPE, body.contentType)
                         .POST(HttpRequest.BodyPublishers.ofByteArray(body.bytes))
         )
     }
@@ -378,33 +451,25 @@ trait HttpClientSupport {
     // region PUT HELPERS
 
     /**
-     * PUT request with explicit content type using the shared default client.
+     * PUT request.
+     *
+     * @param headers optional request headers
+     * @param pathOrUrl relative path or absolute URL
+     * @param body request payload
+     * @param contentType request {@code Content-Type}
+     * @param client optional {@link HttpClient} instance; falls back default client
+     * @return response with String body
      */
-    TestHttpResponse httpPut(CharSequence pathOrUrl, CharSequence body, CharSequence contentType) {
-        httpPut(EMPTY, pathOrUrl, body, contentType, null)
-    }
-
-    /**
-     * PUT request with explicit content type and explicit client.
-     */
-    TestHttpResponse httpPut(CharSequence pathOrUrl, CharSequence body, CharSequence contentType, HttpClient client) {
-        httpPut(EMPTY, pathOrUrl, body, contentType, client)
-    }
-
-    /**
-     * PUT request with headers and explicit content type using the shared default client.
-     */
-    TestHttpResponse httpPut(Map<String, String> headers, CharSequence pathOrUrl, CharSequence body, CharSequence contentType) {
-        httpPut(headers, pathOrUrl, body, contentType, null)
-    }
-
-    /**
-     * PUT request with headers, explicit content type, and explicit client.
-     */
-    TestHttpResponse httpPut(Map<String, String> headers, CharSequence pathOrUrl, CharSequence body, CharSequence contentType, HttpClient client) {
+    TestHttpResponse httpPut(
+            Map<String, String> headers = EMPTY,
+            CharSequence pathOrUrl,
+            CharSequence body,
+            CharSequence contentType,
+            HttpClient client = null
+    ) {
         send(client, headers,
                 requestBuilder(pathOrUrl)
-                        .header('Content-Type', contentType.toString())
+                        .header(CONTENT_TYPE, contentType.toString())
                         .PUT(HttpRequest.BodyPublishers.ofString(body?.toString() ?: ''))
         )
     }
@@ -412,75 +477,169 @@ trait HttpClientSupport {
     // region PUT JSON
 
     /**
-     * PUT JSON string payload with shared default client.
+     * PUT JSON string payload.
+     *
+     * @param headers optional request headers
+     * @param pathOrUrl relative path or absolute URL
+     * @param body request payload
+     * @param client optional {@link HttpClient} instance; falls back to default client
+     * @return response with String body
      */
-    TestHttpResponse httpPutJson(CharSequence pathOrUrl, CharSequence body) {
-        httpPut(EMPTY, pathOrUrl, body, APPLICATION_JSON, null)
-    }
-
-    TestHttpResponse httpPutJson(CharSequence pathOrUrl, CharSequence body, HttpClient client) {
-        httpPut(EMPTY, pathOrUrl, body, APPLICATION_JSON, client)
-    }
-
-    TestHttpResponse httpPutJson(Map<String, String> headers, CharSequence pathOrUrl, CharSequence body) {
-        httpPut(headers, pathOrUrl, body, APPLICATION_JSON, null)
-    }
-
-    TestHttpResponse httpPutJson(Map<String, String> headers, CharSequence pathOrUrl, CharSequence body, HttpClient client) {
+    TestHttpResponse httpPutJson(
+            Map<String, String> headers = EMPTY,
+            CharSequence pathOrUrl,
+            CharSequence body,
+            HttpClient client = null
+    ) {
         httpPut(headers, pathOrUrl, body, APPLICATION_JSON, client)
     }
 
-    TestHttpResponse httpPutJson(CharSequence pathOrUrl, Map<String, Object> body) {
-        httpPut(EMPTY, pathOrUrl, JsonOutput.toJson(body), APPLICATION_JSON, null)
+    /**
+     * PUT JSON payload from {@link Map}.
+     *
+     * @param pathOrUrl relative path or absolute URL
+     * @param jsonGenerator optional {@link JsonGenerator} for custom formatting
+     * @param body request payload
+     * @return response with String body
+     */
+    TestHttpResponse httpPutJson(
+            CharSequence pathOrUrl,
+            JsonGenerator jsonGenerator = null,
+            Map<String, Object> body
+    ) {
+        httpPutJson(EMPTY, pathOrUrl, jsonGenerator, body, null)
     }
 
-    TestHttpResponse httpPutJson(CharSequence pathOrUrl, Map<String, Object> body, HttpClient client) {
-        httpPut(EMPTY, pathOrUrl, JsonOutput.toJson(body), APPLICATION_JSON, client)
+    /**
+     * PUT JSON payload from {@link Map}.
+     *
+     * @param pathOrUrl relative path or absolute URL
+     * @param jsonGenerator optional {@link JsonGenerator} for custom formatting
+     * @param body request payload
+     * @param client {@link HttpClient} instance to use
+     * @return response with String body
+     */
+    TestHttpResponse httpPutJson(
+            CharSequence pathOrUrl,
+            JsonGenerator jsonGenerator = null,
+            Map<String, Object> body,
+            HttpClient client
+    ) {
+        httpPutJson(EMPTY, pathOrUrl, jsonGenerator, body, client)
     }
 
-    TestHttpResponse httpPutJson(Map<String, String> headers, CharSequence pathOrUrl, Map<String, Object> body) {
-        httpPut(headers, pathOrUrl, JsonOutput.toJson(body), APPLICATION_JSON, null)
+    /**
+     * PUT JSON payload from {@link Map}.
+     *
+     * @param headers optional request headers
+     * @param pathOrUrl relative path or absolute URL
+     * @param jsonGenerator optional {@link JsonGenerator} for custom formatting
+     * @param body request payload
+     * @return response with String body
+     */
+    TestHttpResponse httpPutJson(
+            Map<String, String> headers,
+            CharSequence pathOrUrl,
+            JsonGenerator jsonGenerator = null,
+            Map<String, Object> body
+    ) {
+        httpPutJson(headers, pathOrUrl, jsonGenerator, body, null)
     }
 
-    TestHttpResponse httpPutJson(Map<String, String> headers, CharSequence pathOrUrl, Map<String, Object> body, HttpClient client) {
-        httpPut(headers, pathOrUrl, JsonOutput.toJson(body), APPLICATION_JSON, client)
+    /**
+     * PUT JSON payload from {@link Map}.
+     *
+     * @param headers optional request headers
+     * @param pathOrUrl relative path or absolute URL
+     * @param jsonGenerator optional {@link JsonGenerator} for custom formatting
+     * @param body request payload
+     * @param client optional {@link HttpClient} instance; falls back to default client
+     * @return response with String body
+     */
+    TestHttpResponse httpPutJson(
+            Map<String, String> headers,
+            CharSequence pathOrUrl,
+            JsonGenerator jsonGenerator = null,
+            Map<String, Object> body,
+            HttpClient client
+    ) {
+        def json = jsonGenerator ? jsonGenerator.toJson(body) : JsonOutput.toJson(body)
+        httpPutJson(headers, pathOrUrl, json, client)
     }
 
     // endregion
     // region PUT XML
 
     /**
-     * PUT XML generated by the provided markup DSL closure.
+     * PUT XML generated by the provided {@link MarkupBuilder} DSL closure.
+     *
+     * @param pathOrUrl relative path or absolute URL
+     * @param format optional xml format configuration
+     * @param body {@link MarkupBuilder} DSL closure
+     * @return response with String body
      */
     TestHttpResponse httpPutXml(
             CharSequence pathOrUrl,
-            @DelegatesTo(strategy = Closure.DELEGATE_FIRST, value = MarkupBuilder) Closure<?> body) {
-        httpPut(EMPTY, pathOrUrl, XmlUtils.toXml(body), APPLICATION_XML, null)
-    }
-
-    TestHttpResponse httpPutXml(
-            CharSequence pathOrUrl,
-            @DelegatesTo(strategy = Closure.DELEGATE_FIRST, value = MarkupBuilder) Closure<?> body,
-            HttpClient client
-    ) {
-        httpPut(EMPTY, pathOrUrl, XmlUtils.toXml(body), APPLICATION_XML, client)
-    }
-
-    TestHttpResponse httpPutXml(
-            Map<String, String> headers,
-            CharSequence pathOrUrl,
+            XmlUtils.Format format = null,
             @DelegatesTo(strategy = Closure.DELEGATE_FIRST, value = MarkupBuilder) Closure<?> body
     ) {
-        httpPut(headers, pathOrUrl, XmlUtils.toXml(body), APPLICATION_XML, null)
+        httpPutXml(EMPTY, pathOrUrl, format, body, null)
     }
 
+    /**
+     * PUT XML generated by the provided {@link MarkupBuilder} DSL closure.
+     *
+     * @param pathOrUrl relative path or absolute URL
+     * @param format optional xml format configuration
+     * @param body {@link MarkupBuilder} DSL closure
+     * @param client {@link HttpClient} instance to use
+     * @return response with String body
+     */
     TestHttpResponse httpPutXml(
-            Map<String, String> headers,
             CharSequence pathOrUrl,
+            XmlUtils.Format format = null,
             @DelegatesTo(strategy = Closure.DELEGATE_FIRST, value = MarkupBuilder) Closure<?> body,
             HttpClient client
     ) {
-        httpPut(headers, pathOrUrl, XmlUtils.toXml(body), APPLICATION_XML, client)
+        httpPutXml(EMPTY, pathOrUrl, format, body, client)
+    }
+
+    /**
+     * PUT XML generated by the provided {@link MarkupBuilder} DSL closure.
+     *
+     * @param headers optional request headers
+     * @param pathOrUrl relative path or absolute URL
+     * @param format optional xml format configuration
+     * @param body {@link MarkupBuilder} DSL closure
+     * @return response with String body
+     */
+    TestHttpResponse httpPutXml(
+            Map<String, String> headers,
+            CharSequence pathOrUrl,
+            XmlUtils.Format format = null,
+            @DelegatesTo(strategy = Closure.DELEGATE_FIRST, value = MarkupBuilder) Closure<?> body
+    ) {
+        httpPutXml(headers, pathOrUrl, format, body, null)
+    }
+
+    /**
+     * PUT XML generated by the provided {@link MarkupBuilder} DSL closure.
+     *
+     * @param headers optional request headers
+     * @param pathOrUrl relative path or absolute URL
+     * @param format optional xml format configuration
+     * @param body {@link MarkupBuilder} DSL closure
+     * @param client {@link HttpClient} instance to use
+     * @return response with String body
+     */
+    TestHttpResponse httpPutXml(
+            Map<String, String> headers,
+            CharSequence pathOrUrl,
+            XmlUtils.Format format = null,
+            @DelegatesTo(strategy = Closure.DELEGATE_FIRST, value = MarkupBuilder) Closure<?> body,
+            HttpClient client
+    ) {
+        httpPut(headers, pathOrUrl, XmlUtils.toXml(format, body), APPLICATION_XML, client)
     }
 
     // endregion
@@ -488,152 +647,334 @@ trait HttpClientSupport {
     // region PATCH HELPERS
 
     /**
-     * PATCH request with explicit content type using the shared default client.
+     * PATCH request.
+     *
+     * @param headers optional request headers
+     * @param pathOrUrl relative path or absolute URL
+     * @param body request payload
+     * @param contentType request {@code Content-Type}
+     * @param client optional {@link HttpClient} instance; falls back default client
+     * @return response with String body
      */
-    TestHttpResponse httpPatch(CharSequence pathOrUrl, CharSequence body, CharSequence contentType) {
-        httpPatch(EMPTY, pathOrUrl, body, contentType, null)
-    }
-
-    /**
-     * PATCH request with explicit content type and explicit client.
-     */
-    TestHttpResponse httpPatch(CharSequence pathOrUrl, CharSequence body, CharSequence contentType, HttpClient client) {
-        httpPatch(EMPTY, pathOrUrl, body, contentType, client)
-    }
-
-    /**
-     * PATCH request with headers and explicit content type using the shared default client.
-     */
-    TestHttpResponse httpPatch(Map<String, String> headers, CharSequence pathOrUrl, CharSequence body, CharSequence contentType) {
-        httpPatch(headers, pathOrUrl, body, contentType, null)
-    }
-
-    /**
-     * PATCH request with headers, explicit content type, and explicit client.
-     */
-    TestHttpResponse httpPatch(Map<String, String> headers, CharSequence pathOrUrl, CharSequence body, CharSequence contentType, HttpClient client) {
+    TestHttpResponse httpPatch(
+            Map<String, String> headers = EMPTY,
+            CharSequence pathOrUrl,
+            CharSequence body,
+            CharSequence contentType,
+            HttpClient client = null
+    ) {
         send(client, headers,
                 requestBuilder(pathOrUrl)
-                        .header('Content-Type', contentType.toString())
-                        .method('PATCH', HttpRequest.BodyPublishers.ofString(body?.toString() ?: ''))
+                        .header(CONTENT_TYPE, contentType.toString())
+                        .method(PATCH, HttpRequest.BodyPublishers.ofString(body?.toString() ?: ''))
         )
     }
 
     // region PATCH JSON
 
     /**
-     * PATCH JSON object payload (serialized with {@link JsonOutput#toJson(Object)}).
+     * PATCH JSON string payload.
+     *
+     * @param headers optional request headers
+     * @param pathOrUrl relative path or absolute URL
+     * @param body request payload
+     * @param client optional {@link HttpClient} instance; falls back to default client
+     * @return response with String body
      */
-    TestHttpResponse httpPatchJson(CharSequence pathOrUrl, Map<String, Object> body) {
-        httpPatch(EMPTY, pathOrUrl, JsonOutput.toJson(body), APPLICATION_JSON, null)
-    }
-
-    /**
-     * PATCH JSON object payload (serialized with {@link JsonOutput#toJson(Object)}) and explicit client.
-     */
-    TestHttpResponse httpPatchJson(CharSequence pathOrUrl, Map<String, Object> body, HttpClient client) {
-        httpPatch(EMPTY, pathOrUrl, JsonOutput.toJson(body), APPLICATION_JSON, client)
-    }
-
-    /**
-     * PATCH JSON object payload with custom headers using the shared default client.
-     */
-    TestHttpResponse httpPatchJson(Map<String, String> headers, CharSequence pathOrUrl, Map<String, Object> body) {
-        httpPatch(headers, pathOrUrl, JsonOutput.toJson(body), APPLICATION_JSON, null)
-    }
-
-    /**
-     * PATCH JSON object payload with custom headers and explicit client.
-     */
-    TestHttpResponse httpPatchJson(Map<String, String> headers, CharSequence pathOrUrl, Map<String, Object> body, HttpClient client) {
-        httpPatch(headers, pathOrUrl, JsonOutput.toJson(body), APPLICATION_JSON, client)
-    }
-
-    // region PATCH JSON
-
-    /**
-     * PATCH JSON string payload with shared default client.
-     */
-    TestHttpResponse httpPatchJson(CharSequence pathOrUrl, CharSequence body) {
-        httpPatch(EMPTY, pathOrUrl, body, APPLICATION_JSON, null)
-    }
-
-    TestHttpResponse httpPatchJson(CharSequence pathOrUrl, CharSequence body, HttpClient client) {
-        httpPatch(EMPTY, pathOrUrl, body, APPLICATION_JSON, client)
-    }
-
-    TestHttpResponse httpPatchJson(Map<String, String> headers, CharSequence pathOrUrl, CharSequence body) {
-        httpPatch(headers, pathOrUrl, body, APPLICATION_JSON, null)
-    }
-
-    TestHttpResponse httpPatchJson(Map<String, String> headers, CharSequence pathOrUrl, CharSequence body, HttpClient client) {
+    TestHttpResponse httpPatchJson(
+            Map<String, String> headers = EMPTY,
+            CharSequence pathOrUrl,
+            CharSequence body,
+            HttpClient client = null
+    ) {
         httpPatch(headers, pathOrUrl, body, APPLICATION_JSON, client)
+    }
+
+    /**
+     * PATCH JSON payload from {@link Map}.
+     *
+     * @param pathOrUrl relative path or absolute URL
+     * @param jsonGenerator optional {@link JsonGenerator} for custom formatting
+     * @param body request payload
+     * @return response with String body
+     */
+    TestHttpResponse httpPatchJson(
+            CharSequence pathOrUrl,
+            JsonGenerator jsonGenerator = null,
+            Map<String, Object> body
+    ) {
+        httpPatchJson(EMPTY, pathOrUrl, jsonGenerator, body, null)
+    }
+
+    /**
+     * PATCH JSON payload from {@link Map}.
+     *
+     * @param pathOrUrl relative path or absolute URL
+     * @param jsonGenerator optional {@link JsonGenerator} for custom formatting
+     * @param body request payload
+     * @param client {@link HttpClient} instance to use
+     * @return response with String body
+     */
+    TestHttpResponse httpPatchJson(
+            CharSequence pathOrUrl,
+            JsonGenerator jsonGenerator = null,
+            Map<String, Object> body,
+            HttpClient client
+    ) {
+        httpPatchJson(EMPTY, pathOrUrl, jsonGenerator, body, client)
+    }
+
+    /**
+     * PATCH JSON payload from {@link Map}.
+     *
+     * @param headers optional request headers
+     * @param pathOrUrl relative path or absolute URL
+     * @param jsonGenerator optional {@link JsonGenerator} for custom formatting
+     * @param body request payload
+     * @return response with String body
+     */
+    TestHttpResponse httpPatchJson(
+            Map<String, String> headers,
+            CharSequence pathOrUrl,
+            JsonGenerator jsonGenerator = null,
+            Map<String, Object> body
+    ) {
+        httpPatchJson(headers, pathOrUrl, jsonGenerator, body, null)
+    }
+
+    /**
+     * PATCH JSON payload from {@link Map}.
+     *
+     * @param headers optional request headers
+     * @param pathOrUrl relative path or absolute URL
+     * @param jsonGenerator optional {@link JsonGenerator} for custom formatting
+     * @param body request payload
+     * @param client optional {@link HttpClient} instance; falls back to default client
+     * @return response with String body
+     */
+    TestHttpResponse httpPatchJson(
+            Map<String, String> headers,
+            CharSequence pathOrUrl,
+            JsonGenerator jsonGenerator = null,
+            Map<String, Object> body,
+            HttpClient client
+    ) {
+        def json = jsonGenerator ? jsonGenerator.toJson(body) : JsonOutput.toJson(body)
+        httpPatchJson(headers, pathOrUrl, json, client)
     }
 
     // endregion
     // region PATCH XML
 
     /**
-     * PATCH XML generated by the provided markup DSL closure.
+     * PATCH XML generated by the provided {@link MarkupBuilder} DSL closure.
+     *
+     * @param pathOrUrl relative path or absolute URL
+     * @param format optional xml format configuration
+     * @param body {@link MarkupBuilder} DSL closure
+     * @return response with String body
      */
     TestHttpResponse httpPatchXml(
             CharSequence pathOrUrl,
-            @DelegatesTo(strategy = Closure.DELEGATE_FIRST, value = MarkupBuilder) Closure<?> body) {
-        httpPatch(EMPTY, pathOrUrl, XmlUtils.toXml(body), APPLICATION_XML, null)
-    }
-
-    TestHttpResponse httpPatchXml(
-            CharSequence pathOrUrl,
-            @DelegatesTo(strategy = Closure.DELEGATE_FIRST, value = MarkupBuilder) Closure<?> body,
-            HttpClient client
-    ) {
-        httpPatch(EMPTY, pathOrUrl, XmlUtils.toXml(body), APPLICATION_XML, client)
-    }
-
-    TestHttpResponse httpPatchXml(
-            Map<String, String> headers,
-            CharSequence pathOrUrl,
+            XmlUtils.Format format = null,
             @DelegatesTo(strategy = Closure.DELEGATE_FIRST, value = MarkupBuilder) Closure<?> body
     ) {
-        httpPatch(headers, pathOrUrl, XmlUtils.toXml(body), APPLICATION_XML, null)
+        httpPatchXml(EMPTY, pathOrUrl, format, body, null)
     }
 
+    /**
+     * PATCH XML generated by the provided {@link MarkupBuilder} DSL closure.
+     *
+     * @param pathOrUrl relative path or absolute URL
+     * @param format optional xml format configuration
+     * @param body {@link MarkupBuilder} DSL closure
+     * @param client {@link HttpClient} instance to use
+     * @return response with String body
+     */
     TestHttpResponse httpPatchXml(
-            Map<String, String> headers,
             CharSequence pathOrUrl,
+            XmlUtils.Format format = null,
             @DelegatesTo(strategy = Closure.DELEGATE_FIRST, value = MarkupBuilder) Closure<?> body,
             HttpClient client
     ) {
-        httpPatch(headers, pathOrUrl, XmlUtils.toXml(body), APPLICATION_XML, client)
+        httpPatchXml(EMPTY, pathOrUrl, format, body, client)
+    }
+
+    /**
+     * PATCH XML generated by the provided {@link MarkupBuilder} DSL closure.
+     *
+     * @param headers optional request headers
+     * @param pathOrUrl relative path or absolute URL
+     * @param format optional xml format configuration
+     * @param body {@link MarkupBuilder} DSL closure
+     * @return response with String body
+     */
+    TestHttpResponse httpPatchXml(
+            Map<String, String> headers,
+            CharSequence pathOrUrl,
+            XmlUtils.Format format = null,
+            @DelegatesTo(strategy = Closure.DELEGATE_FIRST, value = MarkupBuilder) Closure<?> body
+    ) {
+        httpPatchXml(headers, pathOrUrl, format, body, null)
+    }
+
+    /**
+     * PATCH XML generated by the provided {@link MarkupBuilder} DSL closure.
+     *
+     * @param headers optional request headers
+     * @param pathOrUrl relative path or absolute URL
+     * @param format optional xml format configuration
+     * @param body {@link MarkupBuilder} DSL closure
+     * @param client {@link HttpClient} instance to use
+     * @return response with String body
+     */
+    TestHttpResponse httpPatchXml(
+            Map<String, String> headers,
+            CharSequence pathOrUrl,
+            XmlUtils.Format format = null,
+            @DelegatesTo(strategy = Closure.DELEGATE_FIRST, value = MarkupBuilder) Closure<?> body,
+            HttpClient client
+    ) {
+        httpPatch(headers, pathOrUrl, XmlUtils.toXml(format, body), APPLICATION_XML, client)
     }
 
     // endregion
+    // endregion
+    // region TRACE HELPERS
+
+    /**
+     * TRACE request.
+     *
+     * @param pathOrUrl relative path or absolute URL
+     * @return response with String body
+     */
+    TestHttpResponse httpTrace(CharSequence pathOrUrl) {
+        httpTrace(EMPTY, pathOrUrl, null)
+    }
+
+    /**
+     * TRACE request.
+     *
+     * @param pathOrUrl relative path or absolute URL
+     * @param client {@link HttpClient} instance to use
+     * @return response with String body
+     */
+    TestHttpResponse httpTrace(CharSequence pathOrUrl, HttpClient client) {
+        httpTrace(EMPTY, pathOrUrl, client)
+    }
+
+    /**
+     * TRACE request.
+     *
+     * @param headers optional request headers
+     * @param pathOrUrl relative path or absolute URL
+     * @return response with String body
+     */
+    TestHttpResponse httpTrace(Map<String, String> headers, CharSequence pathOrUrl) {
+        httpTrace(headers, pathOrUrl, null)
+    }
+
+    /**
+     * TRACE request.
+     *
+     * @param headers optional request headers
+     * @param pathOrUrl relative path or absolute URL
+     * @param client {@link HttpClient} instance to use
+     * @return response with String body
+     */
+    TestHttpResponse httpTrace(Map<String, String> headers, CharSequence pathOrUrl, HttpClient client) {
+        send(client, headers, requestBuilder(pathOrUrl).method(TRACE, HttpRequest.BodyPublishers.noBody()))
+    }
+
+    // endregion
+    // region HEAD HELPERS
+
+    /**
+     * HEAD request.
+     *
+     * @param pathOrUrl relative path or absolute URL
+     * @return response with String body (typically empty for HEAD responses)
+     */
+    TestHttpResponse httpHead(CharSequence pathOrUrl) {
+        httpHead(EMPTY, pathOrUrl, null)
+    }
+
+    /**
+     * HEAD request.
+     *
+     * @param pathOrUrl relative path or absolute URL
+     * @param client {@link HttpClient} instance to use
+     * @return response with String body (typically empty for HEAD responses)
+     */
+    TestHttpResponse httpHead(CharSequence pathOrUrl, HttpClient client) {
+        httpHead(EMPTY, pathOrUrl, client)
+    }
+
+    /**
+     * HEAD request.
+     *
+     * @param headers optional request headers
+     * @param pathOrUrl relative path or absolute URL
+     * @return response with String body (typically empty for HEAD responses)
+     */
+    TestHttpResponse httpHead(Map<String, String> headers, CharSequence pathOrUrl) {
+        httpHead(headers, pathOrUrl, null)
+    }
+
+    /**
+     * HEAD request.
+     *
+     * @param headers optional request headers
+     * @param pathOrUrl relative path or absolute URL
+     * @param client {@link HttpClient} instance to use
+     * @return response with String body (typically empty for HEAD responses)
+     */
+    TestHttpResponse httpHead(Map<String, String> headers, CharSequence pathOrUrl, HttpClient client) {
+        send(client, headers, requestBuilder(pathOrUrl).method(HEAD, HttpRequest.BodyPublishers.noBody()))
+    }
+
     // endregion
     // region DELETE HELPERS
 
     /**
-     * DELETE request using the shared default client.
+     * DELETE request.
+     *
+     * @param pathOrUrl relative path or absolute URL
+     * @return response with String body
      */
     TestHttpResponse httpDelete(CharSequence pathOrUrl) {
         httpDelete(EMPTY, pathOrUrl, null)
     }
 
     /**
-     * DELETE request with explicit client.
+     * DELETE request.
+     *
+     * @param pathOrUrl relative path or absolute URL
+     * @param client {@link HttpClient} instance to use
+     * @return response with String body
      */
     TestHttpResponse httpDelete(CharSequence pathOrUrl, HttpClient client) {
         httpDelete(EMPTY, pathOrUrl, client)
     }
 
     /**
-     * DELETE request with custom headers using the shared default client.
+     * DELETE request.
+     *
+     * @param headers optional request headers
+     * @param pathOrUrl relative path or absolute URL
+     * @return response with String body
      */
     TestHttpResponse httpDelete(Map<String, String> headers, CharSequence pathOrUrl) {
         httpDelete(headers, pathOrUrl, null)
     }
 
     /**
-     * DELETE request with custom headers and explicit client.
+     * DELETE request.
+     *
+     * @param headers optional request headers
+     * @param pathOrUrl relative path or absolute URL
+     * @param client {@link HttpClient} instance to use
+     * @return response with String body
      */
     TestHttpResponse httpDelete(Map<String, String> headers, CharSequence pathOrUrl, HttpClient client) {
         send(client, headers, requestBuilder(pathOrUrl).DELETE())
@@ -643,31 +984,47 @@ trait HttpClientSupport {
     // region OPTIONS HELPERS
 
     /**
-     * OPTIONS request using the shared default client.
+     * OPTIONS request.
+     *
+     * @param pathOrUrl relative path or absolute URL
+     * @return response with String body
      */
     TestHttpResponse httpOptions(CharSequence pathOrUrl) {
         httpOptions(EMPTY, pathOrUrl, null)
     }
 
     /**
-     * OPTIONS request with explicit client.
+     * OPTIONS request.
+     *
+     * @param pathOrUrl relative path or absolute URL
+     * @param client {@link HttpClient} instance to use
+     * @return response with String body
      */
     TestHttpResponse httpOptions(CharSequence pathOrUrl, HttpClient client) {
         httpOptions(EMPTY, pathOrUrl, client)
     }
 
     /**
-     * OPTIONS request with custom headers using the shared default client.
+     * OPTIONS request.
+     *
+     * @param headers optional request headers
+     * @param pathOrUrl relative path or absolute URL
+     * @return response with String body
      */
     TestHttpResponse httpOptions(Map<String, String> headers, CharSequence pathOrUrl) {
         httpOptions(headers, pathOrUrl, null)
     }
 
     /**
-     * OPTIONS request with custom headers and explicit client.
+     * OPTIONS request.
+     *
+     * @param headers optional request headers
+     * @param pathOrUrl relative path or absolute URL
+     * @param client {@link HttpClient} instance to use
+     * @return response with String body
      */
     TestHttpResponse httpOptions(Map<String, String> headers, CharSequence pathOrUrl, HttpClient client) {
-        send(client, headers, requestBuilder(pathOrUrl).method('OPTIONS', HttpRequest.BodyPublishers.noBody()))
+        send(client, headers, requestBuilder(pathOrUrl).method(OPTIONS, HttpRequest.BodyPublishers.noBody()))
     }
 
     // endregion
@@ -683,9 +1040,9 @@ trait HttpClientSupport {
     TestHttpResponse sendHttpRequest(HttpRequest request, HttpClient client = null) {
         if (!request.timeout().isPresent()) {
             warn(
-                    "Sending HttpRequest to [${request.uri()}] without timeout set.",
+                    "Sending HttpRequest to [${request.uri()}] without configured timeout.",
                     "Offending class is [${getClass().name}].",
-                    'Consider using requestWith() or setting timeout(...) on your custom request.'
+                    'Consider using newHttpRequestWith() or setting timeout(...) on your custom request.'
             )
         }
         send(client, request)
@@ -697,9 +1054,8 @@ trait HttpClientSupport {
      * @param configurer optional http builder configurer closure
      * @return built client
      */
-    HttpClient httpClientWith(
-            @DelegatesTo(strategy = Closure.DELEGATE_FIRST, value = HttpClient.Builder)
-                    Closure<?> configurer = null
+    HttpClient newHttpClientWith(
+            @DelegatesTo(strategy = Closure.DELEGATE_FIRST, value = HttpClient.Builder) Closure<?> configurer = null
     ) {
         def builder = initClientBuilder()
         if (configurer) {
@@ -720,10 +1076,9 @@ trait HttpClientSupport {
      * @param configurer optional request builder configurer closure
      * @return built request
      */
-    HttpRequest httpRequestWith(
+    HttpRequest newHttpRequestWith(
             CharSequence pathOrUrl,
-            @DelegatesTo(strategy = Closure.DELEGATE_FIRST, value = HttpRequest.Builder)
-                    Closure<?> configurer = null
+            @DelegatesTo(strategy = Closure.DELEGATE_FIRST, value = HttpRequest.Builder) Closure<?> configurer = null
     ) {
         def builder = requestBuilder(pathOrUrl)
         if (configurer) {
@@ -745,9 +1100,9 @@ trait HttpClientSupport {
     private TestHttpResponse send(HttpClient client, HttpRequest request) {
         if (client && !client.connectTimeout().isPresent()) {
             warn(
-                    "Using HttpClient without connect timeout set when connecting to [${request.uri()}].",
+                    "Using HttpClient without configured connect timeout when connecting to [${request.uri()}].",
                     "Offending class is [${getClass().name}].",
-                    'Consider using newClientWith() or setting connectTimeout(...) on your custom client.'
+                    'Consider using newHttpClientWith() or setting connectTimeout(...) on your custom client.'
             )
         }
         def response = (client ?: httpClient).send(request, HttpResponse.BodyHandlers.ofString())

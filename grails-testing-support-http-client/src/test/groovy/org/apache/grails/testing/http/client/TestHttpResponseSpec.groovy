@@ -22,11 +22,17 @@ import java.net.http.HttpClient
 import java.net.http.HttpHeaders
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse
+import java.nio.file.Files
 import java.util.regex.Pattern
 
 import javax.net.ssl.SSLSession
 
+import groovy.json.JsonException
+import groovy.json.JsonParserType
+import groovy.xml.XmlSlurper
+
 import org.opentest4j.AssertionFailedError
+import org.xml.sax.SAXParseException
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -37,17 +43,17 @@ class TestHttpResponseSpec extends Specification {
         def response = mockResponse(200, 'ok')
 
         expect:
-        response.expectStatus(200).is(response)
-        response.expectNotStatus(404).is(response)
+        response.assertStatus(200).is(response)
+        response.assertNotStatus(404).is(response)
 
         when:
-        response.expectStatus(404)
+        response.assertStatus(404)
 
         then:
         thrown(AssertionFailedError)
 
         when:
-        response.expectNotStatus(200)
+        response.assertNotStatus(200)
 
         then:
         thrown(AssertionFailedError)
@@ -58,17 +64,17 @@ class TestHttpResponseSpec extends Specification {
         def response = mockResponse(200, 'alpha beta gamma')
 
         expect:
-        response.expect('alpha beta gamma').is(response)
-        response.expectNotBody('other').is(response)
+        response.assertEquals('alpha beta gamma').is(response)
+        response.assertNotEquals('other').is(response)
 
         when:
-        response.expect('alpha')
+        response.assertEquals('alpha')
 
         then:
         thrown(AssertionFailedError)
 
         when:
-        response.expectNotBody('alpha beta gamma')
+        response.assertNotEquals('alpha beta gamma')
 
         then:
         thrown(AssertionFailedError)
@@ -79,17 +85,17 @@ class TestHttpResponseSpec extends Specification {
         def response = mockResponse(200, 'hello world')
 
         expect:
-        response.expectContains('world').is(response)
-        response.expectNotBodyContains('missing').is(response)
+        response.assertContains('world').is(response)
+        response.assertNotContains('missing').is(response)
 
         when:
-        response.expectContains('mars')
+        response.assertContains('mars')
 
         then:
         thrown(AssertionFailedError)
 
         when:
-        response.expectNotBodyContains('world')
+        response.assertNotContains('world')
 
         then:
         thrown(AssertionFailedError)
@@ -100,16 +106,16 @@ class TestHttpResponseSpec extends Specification {
         def response = mockResponse(200, 'prefix 2026-03-05 suffix')
 
         expect:
-        response.expectContainsMatches(~/\d{4}-\d{2}-\d{2}/).is(response)
+        response.assertContainsMatches(~/\d{4}-\d{2}-\d{2}/).is(response)
 
         when:
-        response.expectMatches(~/\d{4}-\d{2}-\d{2}/)
+        response.assertMatches(~/\d{4}-\d{2}-\d{2}/)
 
         then:
         thrown(AssertionFailedError)
 
         and:
-        response.expectMatches(~/prefix \d{4}-\d{2}-\d{2} suffix/).is(response)
+        response.assertMatches(~/prefix \d{4}-\d{2}-\d{2} suffix/).is(response)
     }
 
     void 'expectNotMatches variants invert regex semantics'() {
@@ -117,17 +123,17 @@ class TestHttpResponseSpec extends Specification {
         def response = mockResponse(200, 'abc-123')
 
         expect:
-        response.expectNotBodyContainsMatches(~/zzz/).is(response)
-        response.expectNotBodyMatches(~/\d+/).is(response)
+        response.assertNotContainsMatches(~/zzz/).is(response)
+        response.assertNotMatches(~/\d+/).is(response)
 
         when:
-        response.expectNotBodyContainsMatches(~/\d+/)
+        response.assertNotContainsMatches(~/\d+/)
 
         then:
         thrown(AssertionFailedError)
 
         when:
-        response.expectNotBodyMatches(~/abc-123/)
+        response.assertNotMatches(~/abc-123/)
 
         then:
         thrown(AssertionFailedError)
@@ -144,13 +150,37 @@ class TestHttpResponseSpec extends Specification {
         expect:
         response.hasHeaderValueIgnoreCase('content-type', 'application/json; charset=utf-8')
         response.hasHeaderValueIgnoreCase('X-REQUEST-ID', 'abc-123')
-        response.expectHeadersIgnoreCase(
+        response.assertHeadersIgnoreCase(
                 'content-type': 'application/json; charset=utf-8',
                 'x-request-id': 'abc-123'
         ).is(response)
 
         when:
-        response.expectHeadersIgnoreCase('x-request-id': 'different')
+        response.assertHeadersIgnoreCase('x-request-id': 'different')
+
+        then:
+        thrown(AssertionFailedError)
+    }
+
+    void 'negative and case insensitive header overloads validate status and mismatches'() {
+        given:
+        def response = mockResponse(202, 'accepted', [
+                'X-Request-Id': ['ABC-123'],
+                'X-Mode'      : ['strict']
+        ])
+
+        expect:
+        response.assertHeadersIgnoreCase(['x-request-id': 'abc-123'], 202).is(response)
+        response.assertNotHeaders('X-Request-Id': 'different').is(response)
+
+        when:
+        response.assertHeadersIgnoreCase(['x-request-id': 'abc-123'], 200)
+
+        then:
+        thrown(AssertionFailedError)
+
+        when:
+        response.assertNotHeaders('X-Mode': 'strict')
 
         then:
         thrown(AssertionFailedError)
@@ -167,6 +197,151 @@ class TestHttpResponseSpec extends Specification {
         jsonResponse.json().b == 'two'
         listResponse.jsonList() == [1, 2, 3]
         xmlResponse.xml().item.text() == 'value'
+    }
+
+    void 'xml uses a secure default slurper that does not resolve external entities'() {
+        given:
+        def secretFile = Files.createTempFile('test-http-response-xml', '.txt')
+        Files.writeString(secretFile, 'top-secret-token')
+        def uri = secretFile.toUri().toASCIIString()
+        def response = mockResponse(200, """<!DOCTYPE root [
+<!ENTITY ext SYSTEM '${uri}'>
+]>
+<root>&ext;</root>""")
+
+        when:
+        response.xml()
+
+        then:
+        def e = thrown(SAXParseException)
+        e.message.contains('External Entity')
+
+        cleanup:
+        Files.deleteIfExists(secretFile)
+    }
+
+    void 'xml secure default still allows inline doctype declarations with internal entities'() {
+        given:
+        def response = mockResponse(200, '''<!DOCTYPE root [
+<!ENTITY msg "safe">
+]>
+<root>&msg;</root>''')
+
+        expect:
+        response.xml().text() == 'safe'
+    }
+
+    void 'withXmlSlurper allows overriding the parser without mutating the original wrapper'() {
+        given:
+        def response = mockResponse(200, '<root><item>value</item></root>')
+        int factoryCalls = 0
+
+        when:
+        def configured = response.withXmlSlurper(factory: {
+            factoryCalls++
+            new XmlSlurper()
+        })
+
+        then:
+        response.xml().item.text() == 'value'
+        factoryCalls == 0
+
+        when:
+        def parsed = configured.xml()
+
+        then:
+        parsed.item.text() == 'value'
+        factoryCalls == 1
+    }
+
+    void 'previousResponse preserves custom xml slurper configuration'() {
+        given:
+        int factoryCalls = 0
+        def previous = rawResponse(301, '<root><item>previous</item></root>')
+        def response = TestHttpResponse.wrap(rawResponse(
+                200,
+                '<root><item>current</item></root>',
+                Collections.emptyMap(),
+                Optional.of(previous)
+        )).withXmlSlurper(factory: {
+            factoryCalls++
+            new XmlSlurper()
+        })
+
+        when:
+        def current = response.xml()
+        def previousResponse = (TestHttpResponse) response.previousResponse().orElseThrow()
+        def previousXml = previousResponse.xml()
+
+        then:
+        current.item.text() == 'current'
+        previousXml.item.text() == 'previous'
+        factoryCalls == 2
+    }
+
+    void 'json accessors throw ClassCastException for mismatched JSON shapes'() {
+        given:
+        def objectResponse = mockResponse(200, '{"a":1}')
+        def listResponse = mockResponse(200, '[1,2,3]')
+
+        when:
+        objectResponse.jsonList()
+
+        then:
+        thrown(ClassCastException)
+
+        when:
+        listResponse.json()
+
+        then:
+        thrown(ClassCastException)
+    }
+
+    void 'withJsonSlurper allows opt-in lax parsing for json access and assertions'() {
+        given:
+        def body = "{name:'Widget', nested:{ok:true}}"
+        def response = mockResponse(200, body, ['Content-Type': ['application/json']])
+        def laxResponse = response.withJsonSlurper(parserType: JsonParserType.LAX)
+
+        when: 'using the default parser'
+        response.json()
+
+        then:
+        thrown(JsonException)
+
+        when: 'using an opt-in lax parser'
+        def parsed = laxResponse.json()
+
+        then:
+        parsed.name == 'Widget'
+        parsed.nested.ok
+        laxResponse.assertJson(body).is(laxResponse)
+        laxResponse.assertJsonContains('{nested:{ok:true}}').is(laxResponse)
+
+        when: 'the original wrapper remains unchanged'
+        response.assertJson(body)
+
+        then:
+        thrown(JsonException)
+    }
+
+    void 'withJsonSlurper accepts additional JsonSlurper options'() {
+        given:
+        def body = "{name:'Widget'}"
+        def strictBody = '{"name":"Widget"}'
+        def response = mockResponse(200, body, ['Content-Type': ['application/json']])
+        def configuredResponse = response.withJsonSlurper(
+                parserType: JsonParserType.LAX,
+                checkDates: true,
+                chop: true,
+                lazyChop: true,
+                maxSizeForInMemory: 64
+        )
+
+        expect:
+        configuredResponse.json().name == 'Widget'
+        configuredResponse.assertJson(body).is(configuredResponse)
+        configuredResponse.assertJson(strictBody).is(configuredResponse)
     }
 
     void 'header helper methods resolve values and presence'() {
@@ -207,18 +382,18 @@ class TestHttpResponseSpec extends Specification {
         def response = mockResponse(201, 'created', ['X-Request-Id': ['abc-123']])
 
         expect:
-        response.expectHeaders('X-Request-Id': 'abc-123').is(response)
-        response.expectHeaders('X-Request-Id': 'abc-123', 201).is(response)
-        response.expectStatus('X-Request-Id': 'abc-123', 201).is(response)
+        response.assertHeaders('X-Request-Id': 'abc-123').is(response)
+        response.assertHeaders('X-Request-Id': 'abc-123', 201).is(response)
+        response.assertStatus('X-Request-Id': 'abc-123', 201).is(response)
 
         when:
-        response.expectHeaders('X-Request-Id': 'different')
+        response.assertHeaders('X-Request-Id': 'different')
 
         then:
         thrown(AssertionFailedError)
 
         when:
-        response.expectStatus('X-Request-Id': 'abc-123', 200)
+        response.assertStatus('X-Request-Id': 'abc-123', 200)
 
         then:
         thrown(AssertionFailedError)
@@ -230,13 +405,13 @@ class TestHttpResponseSpec extends Specification {
         def response = mockResponse(200, body, ['Content-Type': ['application/json']])
 
         expect:
-        response.expectJson(body).is(response)
-        response.expectJson([a: 1, nested: [ok: true]]).is(response)
-        response.expectJson(200, 'Content-Type': 'application/json', body).is(response)
-        response.expectJson('Content-Type': 'application/json', 200, [a: 1, nested: [ok: true]]).is(response)
+        response.assertJson(body).is(response)
+        response.assertJson([a: 1, nested: [ok: true]]).is(response)
+        response.assertJson(200, 'Content-Type': 'application/json', body).is(response)
+        response.assertJson('Content-Type': 'application/json', 200, [a: 1, nested: [ok: true]]).is(response)
 
         when:
-        response.expectJson([a: 2])
+        response.assertJson([a: 2])
 
         then:
         thrown(AssertionFailedError)
@@ -247,24 +422,66 @@ class TestHttpResponseSpec extends Specification {
         def response = mockResponse(200, '{"first":"first","second":null,"n":1}', ['X-Env': ['dev']])
 
         expect:
-        response.expectJsonContains(200, [first: 'first']).is(response)
-        response.expectJsonContains(200, [first: 'first', second: null]).is(response)
-        response.expectJsonContains('X-Env': 'dev', [second: null]).is(response)
-        response.expectJsonContains(['X-Env': 'dev'], 200, [n: 1]).is(response)
-        response.expectJsonContains('{"first":"first"}').is(response)
-        response.expectJsonContains(200, '{"second":null}').is(response)
+        response.assertJsonContains(200, [first: 'first']).is(response)
+        response.assertJsonContains(200, [first: 'first', second: null]).is(response)
+        response.assertJsonContains('X-Env': 'dev', [second: null]).is(response)
+        response.assertJsonContains(['X-Env': 'dev'], 200, [n: 1]).is(response)
+        response.assertJsonContains('{"first":"first"}').is(response)
+        response.assertJsonContains(200, '{"second":null}').is(response)
 
         when:
-        response.expectJsonContains(200, [missing: true])
+        response.assertJsonContains(200, [missing: true])
 
         then:
         thrown(AssertionError)
 
         when:
-        response.expectJsonContains('{"missing":true}')
+        response.assertJsonContains('{"missing":true}')
 
         then:
         thrown(AssertionError)
+    }
+
+    void 'status bearing negative text and regex overloads are exercised explicitly'() {
+        given:
+        def response = mockResponse(200, 'prefix 2026-03-05 suffix', ['X-Env': ['dev']])
+
+        expect:
+        response.assertMatches(200, ~/prefix \d{4}-\d{2}-\d{2} suffix/).is(response)
+        response.assertNotEquals(200, 'something else').is(response)
+        response.assertNotContains(200, 'missing').is(response)
+        response.assertNotContainsMatches(200, ~/zzz/).is(response)
+        response.assertNotMatches(200, ~/\d{4}-\d{2}-\d{2}/).is(response)
+
+        when:
+        response.assertMatches(200, ~/\d{4}-\d{2}-\d{2}/)
+
+        then:
+        thrown(AssertionFailedError)
+
+        when:
+        response.assertNotEquals(200, 'prefix 2026-03-05 suffix')
+
+        then:
+        thrown(AssertionFailedError)
+
+        when:
+        response.assertNotContains(200, '2026-03-05')
+
+        then:
+        thrown(AssertionFailedError)
+
+        when:
+        response.assertNotContainsMatches(200, ~/\d{4}-\d{2}-\d{2}/)
+
+        then:
+        thrown(AssertionFailedError)
+
+        when:
+        response.assertNotMatches(200, ~/prefix \d{4}-\d{2}-\d{2} suffix/)
+
+        then:
+        thrown(AssertionFailedError)
     }
 
     void 'regex helpers reject null patterns'() {
@@ -272,25 +489,25 @@ class TestHttpResponseSpec extends Specification {
         def response = mockResponse(200, 'text')
 
         when:
-        response.expectMatches((Pattern) null)
+        response.assertMatches((Pattern) null)
 
         then:
         thrown(IllegalArgumentException)
 
         when:
-        response.expectContainsMatches((Pattern) null)
+        response.assertContainsMatches((Pattern) null)
 
         then:
         thrown(IllegalArgumentException)
 
         when:
-        response.expectNotBodyMatches((Pattern) null)
+        response.assertNotMatches((Pattern) null)
 
         then:
         thrown(IllegalArgumentException)
 
         when:
-        response.expectNotBodyContainsMatches((Pattern) null)
+        response.assertNotContainsMatches((Pattern) null)
 
         then:
         thrown(IllegalArgumentException)
@@ -301,16 +518,25 @@ class TestHttpResponseSpec extends Specification {
             String bodyText,
             Map<String, List<String>> headerValues = Collections.emptyMap()
     ) {
+        TestHttpResponse.wrap(rawResponse(status, bodyText, headerValues))
+    }
+
+    private static HttpResponse<String> rawResponse(
+            int status,
+            String bodyText,
+            Map<String, List<String>> headerValues = Collections.emptyMap(),
+            Optional<HttpResponse<String>> previousResponse = Optional.empty()
+    ) {
         HttpHeaders httpHeaders = HttpHeaders.of(headerValues, { n, v -> true })
-        TestHttpResponse.wrap([
+        [
                 statusCode: { -> status },
                 body: { -> bodyText },
                 headers: { -> httpHeaders },
                 request: { -> null as HttpRequest },
-                previousResponse: { -> Optional.empty() as Optional<HttpResponse<String>> },
+                previousResponse: { -> previousResponse },
                 sslSession: { -> Optional.empty() as Optional<SSLSession> },
                 uri: { -> URI.create('http://localhost') },
                 version: { -> HttpClient.Version.HTTP_1_1 }
-        ] as HttpResponse<String>)
+        ] as HttpResponse<String>
     }
 }

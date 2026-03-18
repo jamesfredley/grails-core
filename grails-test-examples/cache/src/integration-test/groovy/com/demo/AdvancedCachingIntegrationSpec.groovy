@@ -64,8 +64,8 @@ class AdvancedCachingIntegrationSpec extends Specification implements HttpClient
         def response2 = http('/advancedCaching/listData?category=books')
 
         then: "both calls return same data (cached)"
-        response1.expectStatus(200)
-        response2.expectStatus(200)
+        response1.assertStatus(200)
+        response2.assertStatus(200)
         def json1 = response1.json()
         def json2 = response2.json()
         json1.data == json2.data
@@ -79,8 +79,8 @@ class AdvancedCachingIntegrationSpec extends Specification implements HttpClient
         def response2 = http('/advancedCaching/mapData?key=mykey')
 
         then: "both calls return same data (cached)"
-        response1.expectStatus(200)
-        response2.expectStatus(200)
+        response1.assertStatus(200)
+        response2.assertStatus(200)
         def json1 = response1.json()
         def json2 = response2.json()
         json1.data == json2.data
@@ -95,8 +95,8 @@ class AdvancedCachingIntegrationSpec extends Specification implements HttpClient
         def moviesResponse = http('/advancedCaching/listData?category=movies')
 
         then: "different categories return different data"
-        booksResponse.expectStatus(200)
-        moviesResponse.expectStatus(200)
+        booksResponse.assertStatus(200)
+        moviesResponse.assertStatus(200)
         def books = booksResponse.json()
         def movies = moviesResponse.json()
         books.data != movies.data
@@ -111,7 +111,7 @@ class AdvancedCachingIntegrationSpec extends Specification implements HttpClient
         def response = http('/advancedCaching/dataOrThrow?input=error')
 
         then: "exception results in error response"
-        response.expectStatus(500)
+        response.assertStatus(500)
     }
 
     def "successful calls are cached even after exceptions via HTTP"() {
@@ -120,8 +120,8 @@ class AdvancedCachingIntegrationSpec extends Specification implements HttpClient
         def response2 = http('/advancedCaching/dataOrThrow?input=normal')
 
         then: "second call returns cached result"
-        response1.expectStatus(200)
-        response2.expectStatus(200)
+        response1.assertStatus(200)
+        response2.assertStatus(200)
         def json1 = response1.json()
         def json2 = response2.json()
         json1.data == json2.data
@@ -167,8 +167,8 @@ class AdvancedCachingIntegrationSpec extends Specification implements HttpClient
         def response2 = http('/advancedCaching/getDataByKey?key=testkey')
 
         then: "second call returns cached result"
-        response1.expectStatus(200)
-        response2.expectStatus(200)
+        response1.assertStatus(200)
+        response2.assertStatus(200)
         response1.json().data == response2.json().data
     }
 

@@ -31,7 +31,7 @@ class JsonControllerSpec extends Specification implements HttpClientSupport {
         def response = http('/json/index', Accept: 'application/json')
 
         then:
-        response.expect('{"foo":"bar"}')
+        response.assertEquals('{"foo":"bar"}')
     }
 
     void "test a html view is rendered"() {
@@ -39,6 +39,6 @@ class JsonControllerSpec extends Specification implements HttpClientSupport {
         def response = http('json/index')
 
         then:
-        response.expectContains('<html><head><title></title></head><body>Testing</body></html>')
+        response.assertContains('<html><head><title></title></head><body>Testing</body></html>')
     }
 }

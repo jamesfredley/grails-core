@@ -31,7 +31,7 @@ class VehicleSpec extends Specification implements HttpClientSupport {
         def response = http('/vehicle/list')
 
         then: "The correct response is returned"
-        response.expectJson(200, '''
+        response.assertJson(200, '''
             [
                 {
                     "id": 1,
@@ -54,7 +54,7 @@ class VehicleSpec extends Specification implements HttpClientSupport {
         def response = http('/vehicle/garage')
 
         then: "The correct response is returned"
-        def json = response.expectStatus(200).json()
+        def json = response.assertStatus(200).json()
         json.id == 1
         json.owner == 'Jay Leno'
         json.vehicles.find { it.id == 1 }.maxPassengers == 30

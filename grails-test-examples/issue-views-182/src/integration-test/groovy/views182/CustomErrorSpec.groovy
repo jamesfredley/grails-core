@@ -31,6 +31,6 @@ class CustomErrorSpec extends Specification implements HttpClientSupport {
         def response = http('/customError')
 
         then:
-        response.expectJson(500, '{"message":"My custom exception handler","error":500}')
+        response.assertJson(500, '{"message":"My custom exception handler","error":500}')
     }
 }

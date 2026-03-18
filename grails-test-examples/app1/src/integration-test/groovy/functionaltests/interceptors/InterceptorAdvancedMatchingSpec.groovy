@@ -48,7 +48,7 @@ class InterceptorAdvancedMatchingSpec extends Specification implements HttpClien
         def response = http('/api/advancedMatching/index')
 
         then:
-        response.expectStatus(200)
+        response.assertStatus(200)
         with(response.json()) {
             namespace == 'api'
             interceptors.contains('namespace:api')
@@ -60,7 +60,7 @@ class InterceptorAdvancedMatchingSpec extends Specification implements HttpClien
         def response = http('/api/advancedMatching/list')
 
         then:
-        response.expectStatus(200)
+        response.assertStatus(200)
         with(response.json()) {
             action == 'list'
             interceptors.contains('namespace:api')
@@ -74,7 +74,7 @@ class InterceptorAdvancedMatchingSpec extends Specification implements HttpClien
         def response = httpPostJson('/api/advancedMatching/save', [:])
 
         then:
-        response.expectStatus(200)
+        response.assertStatus(200)
         with(response.json()) {
             method == 'POST'
             interceptors.contains('method:POST')
@@ -86,7 +86,7 @@ class InterceptorAdvancedMatchingSpec extends Specification implements HttpClien
         def response = http('/api/advancedMatching/list')
 
         then:
-        response.expectStatus(200)
+        response.assertStatus(200)
         !response.json().interceptors.contains('method:POST')
     }
 
@@ -95,7 +95,7 @@ class InterceptorAdvancedMatchingSpec extends Specification implements HttpClien
         def response = httpPutJson('/api/advancedMatching/update', [:])
 
         then:
-        response.expectStatus(200)
+        response.assertStatus(200)
         // PUT is not POST, so interceptor should not match
         !response.json().interceptors.contains('method:POST')
     }
@@ -107,7 +107,7 @@ class InterceptorAdvancedMatchingSpec extends Specification implements HttpClien
         def response = http('/api/advancedMatching/index')
 
         then:
-        response.expectStatus(200)
+        response.assertStatus(200)
         with(response.json()) {
             action == 'index'
             !interceptors.contains('excludes:index,reset')
@@ -119,7 +119,7 @@ class InterceptorAdvancedMatchingSpec extends Specification implements HttpClien
         def response = http('/api/advancedMatching/list')
 
         then:
-        response.expectStatus(200)
+        response.assertStatus(200)
         with(response.json()) {
             action == 'list'
             interceptors.contains('excludes:index,reset')
@@ -131,7 +131,7 @@ class InterceptorAdvancedMatchingSpec extends Specification implements HttpClien
         def response = http('/api/advancedMatching/show/123')
 
         then:
-        response.expectStatus(200)
+        response.assertStatus(200)
         with(response.json()) {
             action == 'show'
             interceptors.contains('excludes:index,reset')
@@ -145,7 +145,7 @@ class InterceptorAdvancedMatchingSpec extends Specification implements HttpClien
         def response = http('/api/advancedMatching/show/1')
 
         then:
-        response.expectStatus(200)
+        response.assertStatus(200)
         with(response.json()) {
             action == 'show'
             interceptors.contains('multiRule:show|list')
@@ -157,7 +157,7 @@ class InterceptorAdvancedMatchingSpec extends Specification implements HttpClien
         def response = http('/api/advancedMatching/list')
 
         then:
-        response.expectStatus(200)
+        response.assertStatus(200)
         with(response.json()) {
             action == 'list'
             interceptors.contains('multiRule:show|list')
@@ -169,7 +169,7 @@ class InterceptorAdvancedMatchingSpec extends Specification implements HttpClien
         def response = http('/api/advancedMatching/create')
 
         then:
-        response.expectStatus(200)
+        response.assertStatus(200)
         with(response.json()) {
             action == 'create'
             !interceptors.contains('multiRule:show|list')
@@ -183,7 +183,7 @@ class InterceptorAdvancedMatchingSpec extends Specification implements HttpClien
         def response = http('/api/advancedMatching/list')
 
         then: "namespace, excludes, and multiRule interceptors all match"
-        response.expectStatus(200)
+        response.assertStatus(200)
         with(response.json()) {
             interceptors.contains('namespace:api')
             interceptors.contains('excludes:index,reset')
@@ -196,7 +196,7 @@ class InterceptorAdvancedMatchingSpec extends Specification implements HttpClien
         def response = httpPostJson('/api/advancedMatching/save', [:])
 
         then:
-        response.expectStatus(200)
+        response.assertStatus(200)
         with(response.json()) {
             interceptors.contains('namespace:api')
             interceptors.contains('method:POST')
@@ -211,7 +211,7 @@ class InterceptorAdvancedMatchingSpec extends Specification implements HttpClien
         def response = http('/api/advancedMatching/index')
 
         then: "only namespace interceptor matches (others exclude index)"
-        response.expectStatus(200)
+        response.assertStatus(200)
         with(response.json()) {
             interceptors.contains('namespace:api')
             !interceptors.contains('excludes:index,reset')
@@ -227,7 +227,7 @@ class InterceptorAdvancedMatchingSpec extends Specification implements HttpClien
         def response = http('/api/advancedMatching/list')
 
         then: "interceptors ordered by their order property"
-        response.expectStatus(200)
+        response.assertStatus(200)
         def interceptors = response.json().interceptors
 
         // namespace (100) < excludes (300) < multiRule (400)

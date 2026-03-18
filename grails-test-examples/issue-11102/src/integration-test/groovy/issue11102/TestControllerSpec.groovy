@@ -31,12 +31,12 @@ class TestControllerSpec extends Specification implements HttpClientSupport {
         def response = http('/get1')
 
         then: 'it is executed correctly'
-        response.expect(200, 'GET1')
+        response.assertEquals(200, 'GET1')
 
         when: 'executing an action with a forward to the other one'
         def response2 = http('/get2')
 
         then: 'the request is forwarded'
-        response2.expect(200, 'GET1')
+        response2.assertEquals(200, 'GET1')
     }
 }

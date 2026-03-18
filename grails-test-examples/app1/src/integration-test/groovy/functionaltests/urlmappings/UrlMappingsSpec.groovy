@@ -44,7 +44,7 @@ class UrlMappingsSpec extends Specification implements HttpClientSupport {
         def response = http('/api/test')
 
         then: "routes to index action"
-        response.expectJsonContains(200, [
+        response.assertJsonContains(200, [
                 controller: 'urlMappingsTest',
                 action: 'index'
         ])
@@ -57,7 +57,7 @@ class UrlMappingsSpec extends Specification implements HttpClientSupport {
         def response = http('/api/items/123')
 
         then: "variable is captured"
-        response.expectJsonContains(200, [
+        response.assertJsonContains(200, [
                 action: 'show',
                 id: '123'
 
@@ -69,7 +69,7 @@ class UrlMappingsSpec extends Specification implements HttpClientSupport {
         def response = http('/api/items/abc-123')
 
         then: "variable is captured correctly"
-        response.expectJsonContains(200, [id: 'abc-123'])
+        response.assertJsonContains(200, [id: 'abc-123'])
     }
 
     def "multiple path variables are captured"() {
@@ -77,7 +77,7 @@ class UrlMappingsSpec extends Specification implements HttpClientSupport {
         def response = http('/api/archive/2024/03/15')
 
         then: "all variables are captured"
-        response.expectJsonContains(200, [
+        response.assertJsonContains(200, [
                 action: 'pathVars',
                 year: '2024',
                 month: '03',
@@ -92,7 +92,7 @@ class UrlMappingsSpec extends Specification implements HttpClientSupport {
         def response = http('/api/named/test-name')
 
         then: "routes to correct action with variable"
-        response.expectJsonContains(200, [
+        response.assertJsonContains(200, [
                 action: 'named',
                 name: 'test-name'
         ])
@@ -105,7 +105,7 @@ class UrlMappingsSpec extends Specification implements HttpClientSupport {
         def response = http('/api/codes/ABC')
 
         then: "request succeeds"
-        response.expectJsonContains(200, [
+        response.assertJsonContains(200, [
                 action: 'constrained',
                 code: 'ABC'
         ])
@@ -116,7 +116,7 @@ class UrlMappingsSpec extends Specification implements HttpClientSupport {
         def response = http('/api/codes/abc')
 
         then: "request is rejected with 404"
-        response.expectStatus(404)
+        response.assertStatus(404)
     }
 
     def "constrained path rejects numeric values"() {
@@ -124,7 +124,7 @@ class UrlMappingsSpec extends Specification implements HttpClientSupport {
         def response = http('/api/codes/123')
 
         then: "request is rejected with 404"
-        response.expectStatus(404)
+        response.assertStatus(404)
     }
 
     // ========== HTTP Method Mappings ==========
@@ -134,7 +134,7 @@ class UrlMappingsSpec extends Specification implements HttpClientSupport {
         def response = http('/api/resources')
 
         then: "routes to list action"
-        response.expectJsonContains(200, [action: 'list'])
+        response.assertJsonContains(200, [action: 'list'])
     }
 
     def "POST request routes to save action"() {
@@ -142,7 +142,7 @@ class UrlMappingsSpec extends Specification implements HttpClientSupport {
         def response = httpPostJson('/api/resources', '{}')
 
         then: "routes to save action"
-        response.expectJsonContains(200, [
+        response.assertJsonContains(200, [
                 action: 'save',
                 method: 'POST'
         ])
@@ -153,7 +153,7 @@ class UrlMappingsSpec extends Specification implements HttpClientSupport {
         def response = httpPutJson('/api/resources/42', '{}')
 
         then: "routes to update action"
-        response.expectJsonContains(200, [
+        response.assertJsonContains(200, [
                 action: 'update',
                 id: '42',
                 method: 'PUT'
@@ -165,7 +165,7 @@ class UrlMappingsSpec extends Specification implements HttpClientSupport {
         def response = httpDelete('/api/resources/42')
 
         then: "routes to delete action"
-        response.expectJsonContains(200, [
+        response.assertJsonContains(200, [
                 action: 'delete',
                 id: '42',
                 method: 'DELETE'
@@ -179,7 +179,7 @@ class UrlMappingsSpec extends Specification implements HttpClientSupport {
         def response = http('/api/optional/required-value/optional-value')
 
         then: "both values captured"
-        response.expectJsonContains(200, [
+        response.assertJsonContains(200, [
                 required: 'required-value',
                 optional: 'optional-value'
         ])
@@ -190,7 +190,7 @@ class UrlMappingsSpec extends Specification implements HttpClientSupport {
         def response = http('/api/optional/required-value')
 
         then: "required captured, optional uses default"
-        response.expectJsonContains(200, [
+        response.assertJsonContains(200, [
                 required: 'required-value',
                 optional: 'default'
         ])
@@ -203,7 +203,7 @@ class UrlMappingsSpec extends Specification implements HttpClientSupport {
         def response = http('/api/old-endpoint', 'Accept': '*/*')
 
         then: "redirect is performed and final response received"
-        response.expectJsonContains(200, [action: 'index'])
+        response.assertJsonContains(200, [action: 'index'])
     }
 
     // ========== Default Controller/Action Mapping ==========
@@ -213,7 +213,7 @@ class UrlMappingsSpec extends Specification implements HttpClientSupport {
         def response = http('/urlMappingsTest/show/99')
 
         then: "routes correctly"
-        response.expectJson(200, [
+        response.assertJson(200, [
                 controller: 'urlMappingsTest',
                 action: 'show',
                 id: '99'
@@ -225,7 +225,7 @@ class UrlMappingsSpec extends Specification implements HttpClientSupport {
         def response = http('/urlMappingsTest/list.json')
 
         then: "routes correctly with format"
-        response.expectJsonContains(200, [action: 'list'])
+        response.assertJsonContains(200, [action: 'list'])
     }
 
     // ========== Query Parameter Handling ==========
@@ -235,7 +235,7 @@ class UrlMappingsSpec extends Specification implements HttpClientSupport {
         def response = http('/api/test?param1=value1&param2=value2')
 
         then: "query params are accessible"
-        response.expectJsonContains(200, [
+        response.assertJsonContains(200, [
                 params: [
                         param1: 'value1',
                         param2: 'value2'
@@ -250,7 +250,7 @@ class UrlMappingsSpec extends Specification implements HttpClientSupport {
         def response = http('/api/method-test')
 
         then: "method is correctly detected"
-        response.expectJsonContains(200, [method: 'GET'])
+        response.assertJsonContains(200, [method: 'GET'])
     }
 
     // ========== 404 Not Found ==========
@@ -260,6 +260,6 @@ class UrlMappingsSpec extends Specification implements HttpClientSupport {
         def response = http('/api/does-not-exist')
 
         then: "returns 404"
-        response.expectStatus(404)
+        response.assertStatus(404)
     }
 }

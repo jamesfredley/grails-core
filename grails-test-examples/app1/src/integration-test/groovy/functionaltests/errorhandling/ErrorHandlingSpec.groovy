@@ -40,7 +40,7 @@ class ErrorHandlingSpec extends Specification implements HttpClientSupport {
         def response = http("/errorHandlingTest/$action")
 
         then:
-        response.expectStatus(statusCode)
+        response.assertStatus(statusCode)
 
         where:
         action                      | statusCode | statusMsg
@@ -65,7 +65,7 @@ class ErrorHandlingSpec extends Specification implements HttpClientSupport {
         def response = http("/errorHandlingTest/$action", 'Accept': 'application/json')
 
         then:
-        response.expectStatus(statusCode)
+        response.assertStatus(statusCode)
 
         where:
         action                | statusCode | assertion
@@ -86,7 +86,7 @@ class ErrorHandlingSpec extends Specification implements HttpClientSupport {
         )
 
         then:
-        response.expectStatus(statusCode)
+        response.assertStatus(statusCode)
 
         where:
         condition     | statusCode
@@ -103,7 +103,7 @@ class ErrorHandlingSpec extends Specification implements HttpClientSupport {
         )
 
         then:
-        response.expectJson(200, [
+        response.assertJson(200, [
                 status: 'ok',
                 condition: 'normal'
         ])
@@ -116,7 +116,7 @@ class ErrorHandlingSpec extends Specification implements HttpClientSupport {
         def response = http('/errorHandlingTest/errorWithHeaders', 'Accept': 'application/json')
 
         then:
-        response.expectHeaders(429,
+        response.assertHeaders(429,
                 'Retry-After': '60',
                 'X-RateLimit-Limit': '100',
                 'X-RateLimit-Remaining': '0'
@@ -131,7 +131,7 @@ class ErrorHandlingSpec extends Specification implements HttpClientSupport {
         def response = http('/errorHandlingTest/notFoundWithHints', 'Accept': 'application/json')
 
         then: "suggestion header is present"
-        response.expectHeaders(404, 'X-Suggested-Resource': '/api/items')
+        response.assertHeaders(404, 'X-Suggested-Resource': '/api/items')
     }
 
     // ========== Success Comparison Tests ==========
@@ -141,7 +141,7 @@ class ErrorHandlingSpec extends Specification implements HttpClientSupport {
         def response = http('/errorHandlingTest/success', 'Accept': 'application/json')
 
         then:
-        response.expectJson(200, [
+        response.assertJson(200, [
                 status: 'ok',
                 message: 'Operation successful'
         ])
@@ -152,7 +152,7 @@ class ErrorHandlingSpec extends Specification implements HttpClientSupport {
         def response = http('/errorHandlingTest/successWithData', 'Accept': 'application/json')
 
         then:
-        response.expectJsonContains(200, [
+        response.assertJsonContains(200, [
                 status: 'ok',
                 data: [
                         id: 1,

@@ -38,7 +38,7 @@ class ModelInterceptorIntSpec extends Specification implements HttpClientSupport
         def response = http("/$controller")
 
         expect:
-        response.expectStatus(200)
+        response.assertStatus(200)
         modelInterceptor.latestModel != null
 
         where:

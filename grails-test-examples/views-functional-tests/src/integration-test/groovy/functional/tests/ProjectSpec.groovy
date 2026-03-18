@@ -31,7 +31,7 @@ class ProjectSpec extends Specification implements HttpClientSupport {
         def response = http('/project')
 
         then:
-        response.expectStatus(200)
+        response.assertStatus(200)
 
         when:
         def project = response.json()

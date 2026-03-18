@@ -31,7 +31,7 @@ class GsonViewRespondSpec extends Specification implements HttpClientSupport {
         def response = http('/app/errorView?foo=Too+Short', Accept: 'application/json')
 
         then:
-        response.expectJson(422, '''
+        response.assertJson(422, '''
             {
               "error": {
                 "errors": [
@@ -51,7 +51,7 @@ class GsonViewRespondSpec extends Specification implements HttpClientSupport {
         def response = http('/app/normalView?foo=Testing+normal+view', Accept: 'application/json')
 
         then:
-        response.expectJson('''{
+        response.assertJson('''{
               "normal": {
                 "foo": "Testing normal view"
               } 
@@ -64,7 +64,7 @@ class GsonViewRespondSpec extends Specification implements HttpClientSupport {
         def response = http('/app/typeView?foo=Testing+type+view', Accept: 'application/json')
 
         then:
-        response.expectJson('''{
+        response.assertJson('''{
               "type": {
                 "foo": "Testing type view"
               } 

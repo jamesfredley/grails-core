@@ -31,7 +31,7 @@ class CustomerSpec extends Specification implements HttpClientSupport {
         def response = http('/customer')
 
         then: "The correct response is returned"
-        response.expectStatus(200)
+        response.assertStatus(200)
         with(response.json()) {
             id == 1
             name == 'Nokia'

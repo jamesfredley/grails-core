@@ -45,7 +45,7 @@ class AsyncPromiseSpec extends Specification implements HttpClientSupport {
         def response = http('/asyncTest/simpleTask')
 
         then: "task completes with success status"
-        response.expectJson(200, [
+        response.assertJson(200, [
                 status: 'completed',
                 message: 'Task finished'
         ])
@@ -59,7 +59,7 @@ class AsyncPromiseSpec extends Specification implements HttpClientSupport {
         def response = http("/asyncTest/computeTask?value=${value}")
 
         then: "computed result is correct"
-        response.expectJson(200, [
+        response.assertJson(200, [
                 input: value,
                 result: value * value
         ])
@@ -70,7 +70,7 @@ class AsyncPromiseSpec extends Specification implements HttpClientSupport {
         def response = http('/asyncTest/parallelTasks')
 
         then: "all tasks complete"
-        response.expectJson(200, [
+        response.assertJson(200, [
                 status: 'completed',
                 results: [
                         'Task 1 result',
@@ -88,7 +88,7 @@ class AsyncPromiseSpec extends Specification implements HttpClientSupport {
         def response = http("/asyncTest/chainedTasks?input=${input}")
 
         then: "data is processed through all stages"
-        response.expectJson(200, [
+        response.assertJson(200, [
                 original: input,
                 final: input.toUpperCase().reverse()
         ])
@@ -101,7 +101,7 @@ class AsyncPromiseSpec extends Specification implements HttpClientSupport {
         def response = http('/asyncTest/taskWithError?fail=false')
 
         then: "success response returned"
-        response.expectJson(200, [
+        response.assertJson(200, [
                 status: 'success',
                 result: 'Success'
         ])
@@ -113,7 +113,7 @@ class AsyncPromiseSpec extends Specification implements HttpClientSupport {
         def response = http("/asyncTest/taskWithTimeout?delay=$delay&timeout=$timeout")
 
         then: "task completes as expected"
-        response.expectStatus(200)
+        response.assertStatus(200)
         with(response.json()) {
             it.status == status
             it.result.startsWith(result)
@@ -136,7 +136,7 @@ class AsyncPromiseSpec extends Specification implements HttpClientSupport {
         def response = http("/asyncTest/useAsyncService?input=${input}")
 
         then: "service processes input correctly"
-        response.expectJson(200, [
+        response.assertJson(200, [
                 input: input,
                 result: "Processed: ${input.toUpperCase()}"
         ])
@@ -150,7 +150,7 @@ class AsyncPromiseSpec extends Specification implements HttpClientSupport {
         def response = http("/asyncTest/asyncCalculation?value=${value}")
 
         then: "calculation is correct"
-        response.expectJson(200, [
+        response.assertJson(200, [
                 input: value,
                 squared: value * value
         ])
@@ -161,7 +161,7 @@ class AsyncPromiseSpec extends Specification implements HttpClientSupport {
         def response = http('/asyncTest/asyncBatch')
 
         then: "all items are reversed"
-        response.expectStatus(200)
+        response.assertStatus(200)
         def json = response.json()
         def original = json['original'] as List<String>
         def processed = json['processed'] as List<String>
@@ -179,7 +179,7 @@ class AsyncPromiseSpec extends Specification implements HttpClientSupport {
         def response = http("/asyncTest/longRunning?taskId=${taskId}")
 
         then: "operation completes with expected info"
-        response.expectStatus(200)
+        response.assertStatus(200)
         with(response.json()) {
             it.taskId == taskId
             status == 'completed'
@@ -197,7 +197,7 @@ class AsyncPromiseSpec extends Specification implements HttpClientSupport {
         def response = http("/asyncTest/composeFutures?v1=${v1}&v2=${v2}")
 
         then: "both futures are combined correctly"
-        response.expectJson(200, [
+        response.assertJson(200, [
                 value1Squared: v1 * v1,  // 9
                 value2Squared: v2 * v2,  // 16
                 sum: (v1 * v1) + (v2 * v2)  // 25
@@ -214,7 +214,7 @@ class AsyncPromiseSpec extends Specification implements HttpClientSupport {
         def response = httpPostJson('/asyncTest/processRequestData', body)
 
         then: "data is processed correctly"
-        response.expectJson(200, [
+        response.assertJson(200, [
                 original: [
                         name: 'test',
                         value: 'hello'
@@ -231,7 +231,7 @@ class AsyncPromiseSpec extends Specification implements HttpClientSupport {
         def response = http('/asyncTest/multiStageProcess')
 
         then: "all stages are reported"
-        response.expectJsonContains(200, [
+        response.assertJsonContains(200, [
                 status: 'completed',
                 totalStages: 3,
                 stages: [
@@ -247,7 +247,7 @@ class AsyncPromiseSpec extends Specification implements HttpClientSupport {
         def response = http('/asyncTest/multiStageProcess')
 
         then: "stages have increasing timestamps"
-        response.expectStatus(200)
+        response.assertStatus(200)
         def times = response.json().stages.collect { it['time'] as Long }
         times[0] <= times[1]
         times[1] <= times[2]
@@ -263,7 +263,7 @@ class AsyncPromiseSpec extends Specification implements HttpClientSupport {
         def response = http("/asyncTest/conditionalAsync?async=true&input=${input}")
 
         then: "async mode is used"
-        response.expectJson(200, [
+        response.assertJson(200, [
                 mode: 'async',
                 result: "Async: ${input.toUpperCase()}"
         ])
@@ -277,7 +277,7 @@ class AsyncPromiseSpec extends Specification implements HttpClientSupport {
         def response = http("/asyncTest/conditionalAsync?async=false&input=${input}")
 
         then: "sync mode is used"
-        response.expectJson(200, [
+        response.assertJson(200, [
                 mode: 'sync',
                 result: "Sync: ${input.toUpperCase()}"
         ])

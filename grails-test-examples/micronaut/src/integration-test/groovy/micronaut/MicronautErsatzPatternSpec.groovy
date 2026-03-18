@@ -392,7 +392,7 @@ class MicronautErsatzPatternSpec extends Specification implements HttpClientSupp
         )
 
         then: 'the response contains the ersatz-mocked async data'
-        response.expectContains(200, 'roundtrip-data')
+        response.assertContains(200, 'roundtrip-data')
 
         and: 'ersatz verifies the call'
         ersatz.verify()
@@ -414,7 +414,7 @@ class MicronautErsatzPatternSpec extends Specification implements HttpClientSupp
         def response = http('/external-api/path/88', 'Accept': 'application/json')
 
         then: 'the response contains the ersatz-mocked path data'
-        response.expectContains(200, 'path-roundtrip')
+        response.assertContains(200, 'path-roundtrip')
 
         and: 'ersatz verifies the call'
         ersatz.verify()
@@ -437,7 +437,7 @@ class MicronautErsatzPatternSpec extends Specification implements HttpClientSupp
         def response = http('/external-api/filtered', 'Accept': 'application/json')
 
         then: 'the response contains the filtered data'
-        response.expectContains(200, 'roundtrip-data')
+        response.assertContains(200, 'roundtrip-data')
 
         and: 'ersatz verifies the header was auto-injected'
         ersatz.verify()

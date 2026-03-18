@@ -34,7 +34,7 @@ class ConfigLoadingSpec extends Specification implements HttpClientSupport {
         def response = http('/app')
 
         then: 'The value from the plugin is found'
-        response.expectContains(expectedResponseValue)
+        response.assertContains(expectedResponseValue)
 
         where:
         beanType                  || expectedResponseValue

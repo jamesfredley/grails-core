@@ -33,6 +33,6 @@ class TestControllerSpec extends Specification implements HttpClientSupport {
         def response = http('/test/triggerUnauthorized')
 
         then: 'the response is correct'
-        response.expect(401, '{"message":"Unauthorized GSON"}')
+        response.assertEquals(401, '{"message":"Unauthorized GSON"}')
     }
 }

@@ -53,7 +53,7 @@ class AdvancedDataBindingSpec extends Specification implements HttpClientSupport
         )
 
         then:
-        response.expectJsonContains(200, [
+        response.assertJsonContains(200, [
                 firstName: 'John',
                 lastName: 'Doe',
                 salary: 50000
@@ -67,7 +67,7 @@ class AdvancedDataBindingSpec extends Specification implements HttpClientSupport
         )
 
         then:
-        response.expectStatus(200)
+        response.assertStatus(200)
         with(response.json()) {
             firstName == 'Jane'
             homeAddress != null
@@ -86,7 +86,7 @@ class AdvancedDataBindingSpec extends Specification implements HttpClientSupport
         )
 
         then:
-        response.expectJson(200, [
+        response.assertJson(200, [
                 email: 'john.doe@example.com',
                 originalEmail: 'John.Doe@Example.COM'
         ])
@@ -99,7 +99,7 @@ class AdvancedDataBindingSpec extends Specification implements HttpClientSupport
         )
 
         then:
-        response.expectJsonContains(200, [email: 'test.user@domain.org'])
+        response.assertJsonContains(200, [email: 'test.user@domain.org'])
     }
 
     // ========== @BindingFormat Annotation Tests ==========
@@ -109,7 +109,7 @@ class AdvancedDataBindingSpec extends Specification implements HttpClientSupport
         def response = http('/advancedDataBinding/bindWithDateFormat?hireDate=01152020')
 
         then:
-        response.expectJsonContains(200, [
+        response.assertJsonContains(200, [
                 hireDate: '2020-01-15',
                 hireDateInput: '01152020'
         ])
@@ -122,7 +122,7 @@ class AdvancedDataBindingSpec extends Specification implements HttpClientSupport
         )
 
         then:
-        response.expectJsonContains(200, [
+        response.assertJsonContains(200, [
                 birthDate: '1990-05-20',
                 birthDateInput: '1990-05-20'
         ])
@@ -135,7 +135,7 @@ class AdvancedDataBindingSpec extends Specification implements HttpClientSupport
         )
 
         then:
-        response.expectJsonContains(200, [
+        response.assertJsonContains(200, [
                 hireDate: '2021-03-01',
                 birthDate: '1985-12-25'
         ])
@@ -150,7 +150,7 @@ class AdvancedDataBindingSpec extends Specification implements HttpClientSupport
         )
 
         then:
-        response.expectStatus(200)
+        response.assertStatus(200)
         with(response.json()) {
             name == 'Engineering'
             members.size() == 2
@@ -168,7 +168,7 @@ class AdvancedDataBindingSpec extends Specification implements HttpClientSupport
         )
 
         then: "only non-null members are returned"
-        response.expectStatus(200)
+        response.assertStatus(200)
         with(response.json()) {
             name == 'QA'
             // Members with gaps in indices - we only get non-null entries
@@ -187,7 +187,7 @@ class AdvancedDataBindingSpec extends Specification implements HttpClientSupport
         )
 
         then:
-        response.expectStatus(200)
+        response.assertStatus(200)
         with(response.json()) {
             name == 'GrailsCore'
             contributors.lead.name == 'John'
@@ -206,7 +206,7 @@ class AdvancedDataBindingSpec extends Specification implements HttpClientSupport
         )
 
         then:
-        response.expectJson(200, [
+        response.assertJson(200, [
                 givenName: 'Robert',
                 familyName: 'Smith',
                 age: 30
@@ -222,7 +222,7 @@ class AdvancedDataBindingSpec extends Specification implements HttpClientSupport
         )
 
         then:
-        response.expectStatus(200)
+        response.assertStatus(200)
         with(response.json()) {
             firstName == 'Test'
             lastName == 'User'
@@ -240,7 +240,7 @@ class AdvancedDataBindingSpec extends Specification implements HttpClientSupport
         )
 
         then:
-        response.expectStatus(200)
+        response.assertStatus(200)
         with(response.json()) {
             firstName == 'Selective'
             lastName == 'Test'
@@ -258,7 +258,7 @@ class AdvancedDataBindingSpec extends Specification implements HttpClientSupport
         )
 
         then:
-        response.expectJson(200, [
+        response.assertJson(200, [
                 firstName: 'Direct',
                 lastName: 'Binder',
                 // Email should be lowercased due to @BindUsing
@@ -275,7 +275,7 @@ class AdvancedDataBindingSpec extends Specification implements HttpClientSupport
         )
 
         then:
-        response.expectStatus(200)
+        response.assertStatus(200)
         with(response.json()) {
             firstName == 'Valid'
             lastName == 'User'
@@ -292,7 +292,7 @@ class AdvancedDataBindingSpec extends Specification implements HttpClientSupport
         )
 
         then:
-        response.expectStatus(200)
+        response.assertStatus(200)
         with(response.json()) {
             valid == false
             errors.contains('firstName')
@@ -307,7 +307,7 @@ class AdvancedDataBindingSpec extends Specification implements HttpClientSupport
         )
 
         then:
-        response.expectJsonContains(200, [
+        response.assertJsonContains(200, [
                 name: 'Contact Person',
                 address: [
                         street: '456 Oak Ave',
@@ -328,7 +328,7 @@ class AdvancedDataBindingSpec extends Specification implements HttpClientSupport
         )
 
         then:
-        response.expectJson(200, [
+        response.assertJson(200, [
             firstName: 'JsonFirst',
             lastName: 'JsonLast',
             email: 'json@test.com',
@@ -345,7 +345,7 @@ class AdvancedDataBindingSpec extends Specification implements HttpClientSupport
         )
 
         then:
-        response.expectJson(200, [
+        response.assertJson(200, [
                 employee: [
                         firstName: 'Multi',
                         lastName: 'Test'
@@ -366,7 +366,7 @@ class AdvancedDataBindingSpec extends Specification implements HttpClientSupport
         )
 
         then:
-        response.expectJsonContains(200, [
+        response.assertJsonContains(200, [
                 firstNameIsNull: true,
                 lastName: 'HasValue',
                 lastNameIsNull: false
@@ -382,7 +382,7 @@ class AdvancedDataBindingSpec extends Specification implements HttpClientSupport
         )
 
         then:
-        response.expectJsonContains(200, [
+        response.assertJsonContains(200, [
                 firstName: 'Trimmed',
                 firstNameLength: 7
         ])
@@ -397,7 +397,7 @@ class AdvancedDataBindingSpec extends Specification implements HttpClientSupport
         )
 
         then:
-        response.expectJsonContains(200, [
+        response.assertJsonContains(200, [
                 salary: 75000,
                 firstName: 'TypeTest'
         ])
@@ -412,7 +412,7 @@ class AdvancedDataBindingSpec extends Specification implements HttpClientSupport
         )
 
         then:
-        response.expectJsonContains(200, [
+        response.assertJsonContains(200, [
                 firstName: "O'Brien",
                 lastName: 'Müller'
         ])
@@ -425,7 +425,7 @@ class AdvancedDataBindingSpec extends Specification implements HttpClientSupport
         )
 
         then:
-        response.expectJsonContains(200, [firstName: '日本語'])
+        response.assertJsonContains(200, [firstName: '日本語'])
     }
 
     def "test binding with null parameter values"() {
@@ -435,7 +435,7 @@ class AdvancedDataBindingSpec extends Specification implements HttpClientSupport
         )
 
         then:
-        response.expectStatus(200)
+        response.assertStatus(200)
         with(response.json()) {
             firstName == 'TestNull'
             lastName == null

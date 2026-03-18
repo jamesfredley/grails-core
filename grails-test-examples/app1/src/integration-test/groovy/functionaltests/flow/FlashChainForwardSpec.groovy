@@ -44,7 +44,7 @@ class FlashChainForwardSpec extends Specification implements HttpClientSupport {
     HttpClient noRedirectClient
 
     void setup() {
-        noRedirectClient = noRedirectClient ?: httpClientWith {
+        noRedirectClient = noRedirectClient ?: newHttpClientWith {
             followRedirects(HttpClient.Redirect.NEVER)
         }
     }
@@ -123,7 +123,7 @@ class FlashChainForwardSpec extends Specification implements HttpClientSupport {
         def response = followRedirectWithSession('/flow/setFlashAndRedirect')
 
         then: "flash values are available after redirect"
-        response.expectJsonContains([
+        response.assertJsonContains([
                 message: 'This is a flash message',
                 type: 'success'
         ])
@@ -148,7 +148,7 @@ class FlashChainForwardSpec extends Specification implements HttpClientSupport {
         def response = http('/flow/flashNow')
 
         then: "both immediate and persisted values available in same request"
-        response.expectJson(200, [
+        response.assertJson(200, [
                 immediate: 'This is immediate',
                 persisted: 'This persists'
         ])
@@ -188,7 +188,7 @@ class FlashChainForwardSpec extends Specification implements HttpClientSupport {
         def response = followChainWithSession('/flow/chainFirst')
 
         then: "all model values accumulated"
-        response.expectJsonContains([
+        response.assertJsonContains([
                 first: 'value1',
                 second: 'value2',
                 third: 'value3',
@@ -201,7 +201,7 @@ class FlashChainForwardSpec extends Specification implements HttpClientSupport {
         def response = followChainWithSession('/flow/chainWithParams?id=123&name=test')
 
         then: "both chainModel and params available"
-        response.expectJsonContains([
+        response.assertJsonContains([
                 fromChain: true,
                 extraParam: 'extra'
         ])
@@ -212,7 +212,7 @@ class FlashChainForwardSpec extends Specification implements HttpClientSupport {
         def response = followChainWithSession('/flow/chainToOtherController')
 
         then: "chain model available in target controller"
-        response.expectJsonContains([
+        response.assertJsonContains([
                 controller: 'flowTarget',
                 source: 'flowController'
         ])
@@ -225,7 +225,7 @@ class FlashChainForwardSpec extends Specification implements HttpClientSupport {
         def response = http('/flow/forwardToAction')
 
         then: "request attributes preserved"
-        response.expectJsonContains(200, [
+        response.assertJsonContains(200, [
                 forwardedFrom: 'forwardToAction',
                 sameRequest: true
         ])
@@ -236,7 +236,7 @@ class FlashChainForwardSpec extends Specification implements HttpClientSupport {
         def response = http('/flow/forwardWithParams?id=original')
 
         then: "both original and forwarded params available"
-        response.expectJsonContains(200, [
+        response.assertJsonContains(200, [
                 forwarded: 'yes',
                 value: '123'
         ])
@@ -247,7 +247,7 @@ class FlashChainForwardSpec extends Specification implements HttpClientSupport {
         def response = http('/flow/forwardToOtherController')
 
         then: "forward reaches target controller"
-        response.expectJsonContains(200, [
+        response.assertJsonContains(200, [
                 controller: 'flowTarget',
                 sourceController: 'flow'
         ])
@@ -260,7 +260,7 @@ class FlashChainForwardSpec extends Specification implements HttpClientSupport {
         def response = http('/flow/redirectWithAllParams?foo=bar&num=42')
 
         then: "params preserved after redirect"
-        response.expectJson(200, [
+        response.assertJson(200, [
                 params: [
                         foo: 'bar',
                         num: '42'
@@ -273,7 +273,7 @@ class FlashChainForwardSpec extends Specification implements HttpClientSupport {
         def response = http('/flow/redirectToUri')
 
         then: "redirected to correct URI"
-        response.expectJsonContains(200, [
+        response.assertJsonContains(200, [
                 fromRedirect: 'true'
         ])
     }
@@ -283,7 +283,7 @@ class FlashChainForwardSpec extends Specification implements HttpClientSupport {
         def response = http('/flow/permanentRedirect')
 
         then: "reaches target action"
-        response.expectJson(200, [
+        response.assertJson(200, [
                 action: 'redirectTarget'
         ])
     }
@@ -295,7 +295,7 @@ class FlashChainForwardSpec extends Specification implements HttpClientSupport {
         def response = http('/flow/chainThird')
 
         then: "chainModel is empty/null"
-        response.expectStatus(200)
+        response.assertStatus(200)
         with(response.json()) {
             first == null
             second == null

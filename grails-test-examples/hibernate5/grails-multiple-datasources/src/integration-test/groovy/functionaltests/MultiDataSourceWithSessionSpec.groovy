@@ -35,7 +35,7 @@ class MultiDataSourceWithSessionSpec extends Specification implements HttpClient
         def response = http('/secondaryBook/withSessionTest')
 
         then:
-        response.expectContains('sessionObtained:true')
+        response.assertContains('sessionObtained:true')
     }
 
     @Issue('https://github.com/apache/grails-core/issues/14333')
@@ -44,7 +44,7 @@ class MultiDataSourceWithSessionSpec extends Specification implements HttpClient
         def response = http('/secondaryBook/crudViaWithSession')
 
         then:
-        response.expectContains('count:1')
+        response.assertContains('count:1')
 
         cleanup:
         http('/secondaryBook/cleanup')
@@ -56,8 +56,8 @@ class MultiDataSourceWithSessionSpec extends Specification implements HttpClient
         def response = http('/secondaryBook/validateCommandObject')
 
         then:
-        response.expectContains('validated:true')
-                .expectContains('hasErrors:true')
+        response.assertContains('validated:true')
+                .assertContains('hasErrors:true')
     }
 
     @Issue('https://github.com/apache/grails-core/issues/14333')
@@ -66,7 +66,7 @@ class MultiDataSourceWithSessionSpec extends Specification implements HttpClient
         def response = http('/secondaryBook/sessionAfterExecuteUpdate')
 
         then:
-        response.expectContains('title:After Update')
+        response.assertContains('title:After Update')
 
         cleanup:
         http('/secondaryBook/cleanup')

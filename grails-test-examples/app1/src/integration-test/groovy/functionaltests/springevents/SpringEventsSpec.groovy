@@ -148,7 +148,7 @@ class SpringEventsSpec extends Specification implements HttpClientSupport {
         def response = http('/springEvent/publishCustom?message=HTTP+Event')
 
         then: "event is published successfully"
-        response.expectJsonContains(200, [
+        response.assertJsonContains(200, [
                 published: true,
                 message: 'HTTP Event'
         ])
@@ -159,7 +159,7 @@ class SpringEventsSpec extends Specification implements HttpClientSupport {
         def response = http('/springEvent/publishUserAction?userId=web-user&userAction=CLICK')
 
         then: "event is published"
-        response.expectJson(200, [
+        response.assertJson(200, [
                 published: true,
                 userId: 'web-user',
                 userAction: 'CLICK'
@@ -171,7 +171,7 @@ class SpringEventsSpec extends Specification implements HttpClientSupport {
         def response = http('/springEvent/publishPriority?data=http-test')
 
         then: "ordered results are returned"
-        response.expectStatus(200)
+        response.assertStatus(200)
         with(response.json()) {
             orderedResults.size() == 3
             orderedResults[0] == 'first-http-test'
@@ -183,7 +183,7 @@ class SpringEventsSpec extends Specification implements HttpClientSupport {
         def response = http('/springEvent/publishMultiple?count=3')
 
         then: "all events are received"
-        response.expectJsonContains(200, [
+        response.assertJsonContains(200, [
                 count: 3,
                 receivedCount: 3
         ])
@@ -194,7 +194,7 @@ class SpringEventsSpec extends Specification implements HttpClientSupport {
         def response = http('/springEvent/publishConditional?important=true')
 
         then: "conditional handler triggers"
-        response.expectStatus(200)
+        response.assertStatus(200)
         response.json().conditionalResults.any { it.startsWith('CONDITIONAL:') }
     }
 
@@ -203,7 +203,7 @@ class SpringEventsSpec extends Specification implements HttpClientSupport {
         def response = http('/springEvent/publishConditional?important=false')
 
         then: "conditional handler does not trigger"
-        response.expectStatus(200)
+        response.assertStatus(200)
         !response.json().conditionalResults.any { it.toString().startsWith('CONDITIONAL:') }
     }
 
@@ -221,7 +221,7 @@ class SpringEventsSpec extends Specification implements HttpClientSupport {
         )
 
         then: "stats are returned"
-        response.expectJson(200, [
+        response.assertJson(200, [
                 totalEvents: 3,
                 customEvents: 2,
                 userActionEvents: 1
@@ -240,7 +240,7 @@ class SpringEventsSpec extends Specification implements HttpClientSupport {
         )
 
         then: "events are cleared"
-        response.expectStatus(200)
+        response.assertStatus(200)
         eventListenerService.eventCount == 0
     }
 
@@ -251,7 +251,7 @@ class SpringEventsSpec extends Specification implements HttpClientSupport {
         def response = http('/springEvent/publishTransactional?message=tx-test')
 
         then: "event is published"
-        response.expectJsonContains(200, [
+        response.assertJsonContains(200, [
                 published: true
         ])
 

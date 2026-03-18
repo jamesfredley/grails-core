@@ -31,7 +31,7 @@ class ProductSpec extends Specification implements HttpClientSupport {
         def response = http('/products')
 
         then: 'The values returned are there'
-        response.expectJsonContains(200, 'Content-Type': 'application/hal+json;charset=UTF-8', [
+        response.assertJsonContains(200, 'Content-Type': 'application/hal+json;charset=UTF-8', [
                 count: 0,
                 max: 10,
                 offset: 0,
@@ -57,14 +57,14 @@ class ProductSpec extends Specification implements HttpClientSupport {
         ])
 
         then:
-        createResponse.expectStatus(201)
+        createResponse.assertStatus(201)
         def createBody = createResponse.json()
 
         when: 'We get the products'
         def response = http('/products')
 
         then: 'The values returned are there'
-        response.expectJsonContains(200, 'Content-Type': 'application/hal+json;charset=UTF-8', [
+        response.assertJsonContains(200, 'Content-Type': 'application/hal+json;charset=UTF-8', [
                 count: 1,
                 max: 10,
                 offset: 0,
@@ -103,7 +103,7 @@ class ProductSpec extends Specification implements HttpClientSupport {
         def response = http('/products')
 
         then:
-        response.expectHeaders(200, 'Content-Type': 'application/hal+json;charset=UTF-8')
+        response.assertHeaders(200, 'Content-Type': 'application/hal+json;charset=UTF-8')
 
         and: 'The values returned are there'
         def body = response.json()
@@ -148,7 +148,7 @@ class ProductSpec extends Specification implements HttpClientSupport {
         def response = http('/products?offset=10')
 
         then: 'The values returned are there'
-        response.expectJsonContains(200, 'Content-Type': 'application/hal+json;charset=UTF-8', [
+        response.assertJsonContains(200, 'Content-Type': 'application/hal+json;charset=UTF-8', [
                 count: 30,
                 max: 10,
                 offset: 10,

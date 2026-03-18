@@ -32,7 +32,7 @@ class TeamSpec extends Specification implements HttpClientSupport {
         def response = http('/teams/1')
 
         then: 'The response is correct'
-        response.expectJson(200, 'Content-Type': 'application/json;charset=UTF-8', '''
+        response.assertJson(200, 'Content-Type': 'application/json;charset=UTF-8', '''
             {
                 "id": 1,
                 "name": "Barcelona",
@@ -51,7 +51,7 @@ class TeamSpec extends Specification implements HttpClientSupport {
         def response = http('/teams/deep/1')
 
         then: 'The response is correct'
-        response.expectJson(200, 'Content-Type': 'application/json;charset=UTF-8', '''
+        response.assertJson(200, 'Content-Type': 'application/json;charset=UTF-8', '''
             {
                 "id": 1,
                 "name": "Barcelona",
@@ -72,7 +72,7 @@ class TeamSpec extends Specification implements HttpClientSupport {
         def lang = "${System.properties.getProperty('user.language')}_${System.properties.getProperty('user.country')}"
 
         then: 'The response is correct'
-        response.expectJson(200, 'Content-Type': 'application/hal+json;charset=UTF-8', """
+        response.assertJson(200, 'Content-Type': 'application/hal+json;charset=UTF-8', """
             {
                 \"_embedded\": {
                     \"players\": [
@@ -140,7 +140,7 @@ class TeamSpec extends Specification implements HttpClientSupport {
         def response = http('/team/composite')
 
         then: 'The response is correct'
-        response.expectJson(200, 'Content-Type': 'application/json;charset=UTF-8', '''
+        response.assertJson(200, 'Content-Type': 'application/json;charset=UTF-8', '''
             {
                 "player": {
                     "id": 2,

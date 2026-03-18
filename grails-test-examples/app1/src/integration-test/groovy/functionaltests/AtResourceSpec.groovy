@@ -31,6 +31,6 @@ class AtResourceSpec extends Specification implements HttpClientSupport {
         def response = http('/stuffs')
 
         then:
-        response.expectStatus(200)
+        response.assertStatus(200)
     }
 }

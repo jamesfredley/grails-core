@@ -31,7 +31,7 @@ class BookRestfulControllerSpec extends Specification implements HttpClientSuppo
         def response = http('/bookRestful')
 
         then:
-        response.expectStatus(200)
+        response.assertStatus(200)
 
         and: 'the book persisted in BootStrap is retrieved'
         def list = response.jsonList()

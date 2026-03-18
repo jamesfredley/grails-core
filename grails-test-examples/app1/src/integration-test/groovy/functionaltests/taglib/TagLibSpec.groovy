@@ -38,7 +38,7 @@ class TagLibSpec extends Specification implements HttpClientSupport {
         def response = http('/tagLibTest/testHelloTag?name=Grails')
 
         then: "greeting is rendered with the name"
-        response.expectContains(200, 'Hello, Grails!')
+        response.assertContains(200, 'Hello, Grails!')
     }
 
     def "custom:hello tag uses default name when not provided"() {
@@ -46,7 +46,7 @@ class TagLibSpec extends Specification implements HttpClientSupport {
         def response = http('/tagLibTest/testHelloTag')
 
         then: "greeting is rendered with default name"
-        response.expectContains(200, 'Hello, World!')
+        response.assertContains(200, 'Hello, World!')
     }
 
     // ========== Custom Tag: wrapper ==========
@@ -58,9 +58,9 @@ class TagLibSpec extends Specification implements HttpClientSupport {
         )
 
         then: "wrapper with title and content is rendered"
-        response.expectContains(200, '<div class="wrapper">')
-                .expectContains('<h2>My Section</h2>')
-                .expectContains('Section content')
+        response.assertContains(200, '<div class="wrapper">')
+                .assertContains('<h2>My Section</h2>')
+                .assertContains('Section content')
     }
 
     def "custom:wrapper tag applies custom CSS class"() {
@@ -70,7 +70,7 @@ class TagLibSpec extends Specification implements HttpClientSupport {
         )
 
         then: "custom CSS class is applied"
-        response.expectContains(200, '<div class="custom-wrapper">')
+        response.assertContains(200, '<div class="custom-wrapper">')
     }
 
     // ========== Custom Tag: iterate ==========
@@ -80,9 +80,9 @@ class TagLibSpec extends Specification implements HttpClientSupport {
         def response = http('/tagLibTest/testIterateTag?items=A,B,C')
 
         then: "all items are rendered"
-        response.expectContains(200, 'Item: A')
-                .expectContains('Item: B')
-                .expectContains('Item: C')
+        response.assertContains(200, 'Item: A')
+                .assertContains('Item: B')
+                .assertContains('Item: C')
     }
 
     def "custom:iterate tag uses separator between items"() {
@@ -90,7 +90,7 @@ class TagLibSpec extends Specification implements HttpClientSupport {
         def response = http('/tagLibTest/testIterateTag?items=X,Y,Z&separator=-')
 
         then: "items are separated by the specified separator"
-        response.expectContains(200, 'Item: X-Item: Y-Item: Z')
+        response.assertContains(200, 'Item: X-Item: Y-Item: Z')
     }
 
     // ========== Custom Tag: showIf/hideIf ==========
@@ -100,8 +100,8 @@ class TagLibSpec extends Specification implements HttpClientSupport {
         def response = http('/tagLibTest/testConditionalTags?condition=true')
 
         then: "showIf content is visible, hideIf content is hidden"
-        response.expectContains(200, 'id="showIf-result">VISIBLE')
-                .expectNotBodyContains('id="hideIf-result">HIDDEN')
+        response.assertContains(200, 'id="showIf-result">VISIBLE')
+                .assertNotContains('id="hideIf-result">HIDDEN')
     }
 
     def "custom:hideIf tag shows content when condition is false"() {
@@ -109,8 +109,8 @@ class TagLibSpec extends Specification implements HttpClientSupport {
         def response = http('/tagLibTest/testConditionalTags?condition=false')
 
         then: "showIf content is hidden, hideIf content is visible"
-        response.expectContains(200, 'id="hideIf-result">HIDDEN')
-                .expectNotBodyContains('id="showIf-result">VISIBLE')
+        response.assertContains(200, 'id="hideIf-result">HIDDEN')
+                .assertNotContains('id="showIf-result">VISIBLE')
     }
 
     // ========== Custom Tag: formatted ==========
@@ -123,7 +123,7 @@ class TagLibSpec extends Specification implements HttpClientSupport {
         )
 
         then: "value is formatted correctly"
-        response.expectContains(200, expected)
+        response.assertContains(200, expected)
 
         where:
         value    | format       | decimals | expected
@@ -139,11 +139,11 @@ class TagLibSpec extends Specification implements HttpClientSupport {
         def response = http('/tagLibTest/testListTag?items=Apple,Banana,Cherry')
 
         then: "unordered list is rendered"
-        response.expectContains(200, '<ul>')
-                .expectContains('<li>Apple</li>')
-                .expectContains('<li>Banana</li>')
-                .expectContains('<li>Cherry</li>')
-                .expectContains('</ul>')
+        response.assertContains(200, '<ul>')
+                .assertContains('<li>Apple</li>')
+                .assertContains('<li>Banana</li>')
+                .assertContains('<li>Cherry</li>')
+                .assertContains('</ul>')
     }
 
     def "custom:list tag renders ordered list when type is ordered"() {
@@ -151,8 +151,8 @@ class TagLibSpec extends Specification implements HttpClientSupport {
         def response = http('/tagLibTest/testListTag?items=First,Second,Third&type=ordered')
 
         then: "ordered list is rendered"
-        response.expectContains(200, '<ol>')
-                .expectContains('</ol>')
+        response.assertContains(200, '<ol>')
+                .assertContains('</ol>')
     }
 
     // ========== Custom Tag: panel ==========
@@ -164,11 +164,11 @@ class TagLibSpec extends Specification implements HttpClientSupport {
         )
 
         then: "panel is rendered correctly"
-        response.expectContains(200, 'class="panel panel-info"')
-                .expectContains('class="panel-header"')
-                .expectContains('<h3>Info Panel</h3>')
-                .expectContains('class="panel-body"')
-                .expectContains('Panel content')
+        response.assertContains(200, 'class="panel panel-info"')
+                .assertContains('class="panel-header"')
+                .assertContains('<h3>Info Panel</h3>')
+                .assertContains('class="panel-body"')
+                .assertContains('Panel content')
     }
 
     def "custom:panel tag renders collapse button when collapsible"() {
@@ -178,7 +178,7 @@ class TagLibSpec extends Specification implements HttpClientSupport {
         )
 
         then: "collapse button is rendered"
-        response.expectContains(200, 'class="collapse-btn"')
+        response.assertContains(200, 'class="collapse-btn"')
     }
 
     // ========== Custom Tag: badge ==========
@@ -191,9 +191,9 @@ class TagLibSpec extends Specification implements HttpClientSupport {
         )
 
         then: "badge is rendered with correct classes"
-        response.expectContains(200, "badge-${type}")
-                .expectContains("badge-${size}")
-                .expectContains(">${content}<")
+        response.assertContains(200, "badge-${type}")
+                .assertContains("badge-${size}")
+                .assertContains(">${content}<")
 
         where:
         type      | size    | content
@@ -209,10 +209,10 @@ class TagLibSpec extends Specification implements HttpClientSupport {
         def response = http('/tagLibTest/testProgressTag?value=75&max=100')
 
         then: "progress bar is rendered"
-        response.expectContains(200, 'class="progress"')
-                .expectContains('class="progress-bar"')
-                .expectContains('style="width: 75%"')
-                .expectContains('75%')
+        response.assertContains(200, 'class="progress"')
+                .assertContains('class="progress-bar"')
+                .assertContains('style="width: 75%"')
+                .assertContains('75%')
     }
 
     def "custom:progress tag hides label when showLabel is false"() {
@@ -220,8 +220,8 @@ class TagLibSpec extends Specification implements HttpClientSupport {
         def response = http('/tagLibTest/testProgressTag?value=50&max=100&showLabel=false')
 
         then: "progress bar is rendered without label text"
-        response.expectContains(200, 'class="progress-bar"')
-                .expectNotBodyContains('>50%<')
+        response.assertContains(200, 'class="progress-bar"')
+                .assertNotContains('>50%<')
     }
 
     // ========== Custom Tag: repeat ==========
@@ -231,9 +231,9 @@ class TagLibSpec extends Specification implements HttpClientSupport {
         def response = http('/tagLibTest/testRepeatTag?times=3')
 
         then: "content is repeated"
-        response.expectContains(200, 'Repeat #1')
-                .expectContains('Repeat #2')
-                .expectContains('Repeat #3')
+        response.assertContains(200, 'Repeat #1')
+                .assertContains('Repeat #2')
+                .assertContains('Repeat #3')
     }
 
     def "custom:repeat tag uses separator between repetitions"() {
@@ -241,7 +241,7 @@ class TagLibSpec extends Specification implements HttpClientSupport {
         def response = http('/tagLibTest/testRepeatTag?times=2&separator=%20-%20')
 
         then: "repetitions are separated"
-        response.expectContains(200, 'Repeat #1 - Repeat #2')
+        response.assertContains(200, 'Repeat #1 - Repeat #2')
     }
 
     // ========== Custom Tag: raw ==========
@@ -251,7 +251,7 @@ class TagLibSpec extends Specification implements HttpClientSupport {
         def response = http('/tagLibTest/testRawTag')
 
         then: "HTML content is not escaped"
-        response.expectContains(200, '<strong>Bold Text</strong>')
+        response.assertContains(200, '<strong>Bold Text</strong>')
     }
 
     // ========== Custom Tag: definitionList ==========
@@ -261,12 +261,12 @@ class TagLibSpec extends Specification implements HttpClientSupport {
         def response = http('/tagLibTest/testDefinitionListTag')
 
         then: "definition list is rendered"
-        response.expectContains(200, '<dl>')
-                .expectContains('<dt>name</dt>')
-                .expectContains('<dd>John Doe</dd>')
-                .expectContains('<dt>age</dt>')
-                .expectContains('<dd>30</dd>')
-                .expectContains('</dl>')
+        response.assertContains(200, '<dl>')
+                .assertContains('<dt>name</dt>')
+                .assertContains('<dd>John Doe</dd>')
+                .assertContains('<dt>age</dt>')
+                .assertContains('<dd>30</dd>')
+                .assertContains('</dl>')
     }
 
     // ========== Custom Tag: requestInfo ==========
@@ -276,7 +276,7 @@ class TagLibSpec extends Specification implements HttpClientSupport {
         def response = http('/tagLibTest/testRequestInfoTag?attr=method')
 
         then: "request attribute is output"
-        response.expectContains(200, 'GET')
+        response.assertContains(200, 'GET')
     }
 
     // ========== Custom Tag: sessionValue ==========
@@ -288,7 +288,7 @@ class TagLibSpec extends Specification implements HttpClientSupport {
         )
 
         then: "default value is displayed"
-        response.expectContains(200, 'DefaultUser')
+        response.assertContains(200, 'DefaultUser')
     }
 
     // ========== Custom Tag: setVar ==========
@@ -300,7 +300,7 @@ class TagLibSpec extends Specification implements HttpClientSupport {
         )
 
         then: "variable is set and accessible"
-        response.expectContains(200, 'Variable testVar = TestValue')
+        response.assertContains(200, 'Variable testVar = TestValue')
     }
 
     // ========== Custom Tag: alert ==========
@@ -313,8 +313,8 @@ class TagLibSpec extends Specification implements HttpClientSupport {
         )
 
         then: "alert is rendered"
-        response.expectContains(200, "alert-${type}")
-                .expectContains(message)
+        response.assertContains(200, "alert-${type}")
+                .assertContains(message)
 
         where:
         type      | message
@@ -329,8 +329,8 @@ class TagLibSpec extends Specification implements HttpClientSupport {
         def response = http('/tagLibTest/testAlertTag?type=info&dismissible=true')
 
         then: "close button is rendered"
-        response.expectContains(200, 'alert-dismissible')
-                .expectContains('class="close"')
+        response.assertContains(200, 'alert-dismissible')
+                .assertContains('class="close"')
     }
 
     // ========== Custom Tag: join ==========
@@ -342,7 +342,7 @@ class TagLibSpec extends Specification implements HttpClientSupport {
         )
 
         then: "items are joined with separator"
-        response.expectContains(200, 'red-green-blue')
+        response.assertContains(200, 'red-green-blue')
     }
 
     // ========== Custom Tag: cssClass ==========
@@ -354,10 +354,10 @@ class TagLibSpec extends Specification implements HttpClientSupport {
         )
 
         then: "class string is built correctly"
-        response.expectContains(200, 'btn')
-                .expectContains('active')
-                .expectContains('highlighted')
-                .expectNotBodyContains('disabled')
+        response.assertContains(200, 'btn')
+                .assertContains('active')
+                .assertContains('highlighted')
+                .assertNotContains('disabled')
     }
 
     // ========== Built-in Tag: g:if ==========
@@ -367,8 +367,8 @@ class TagLibSpec extends Specification implements HttpClientSupport {
         def response = http('/tagLibTest/testBuiltInIf?value=10')
 
         then: "if condition content is shown"
-        response.expectContains(200, 'Greater than 5')
-                .expectNotBodyContains('Less than 5')
+        response.assertContains(200, 'Greater than 5')
+                .assertNotContains('Less than 5')
     }
 
     def "g:elseif and g:else work correctly"() {
@@ -376,7 +376,7 @@ class TagLibSpec extends Specification implements HttpClientSupport {
         def response = http('/tagLibTest/testBuiltInIf?value=30')
 
         then: "elseif content is shown"
-        response.expectContains(200, 'Over 20')
+        response.assertContains(200, 'Over 20')
     }
 
     // ========== Built-in Tag: g:each ==========
@@ -386,9 +386,9 @@ class TagLibSpec extends Specification implements HttpClientSupport {
         def response = http('/tagLibTest/testBuiltInEach?items=A,B,C')
 
         then: "each item is rendered"
-        response.expectContains(200, '[A]')
-                .expectContains('[B]')
-                .expectContains('[C]')
+        response.assertContains(200, '[A]')
+                .assertContains('[B]')
+                .assertContains('[C]')
     }
 
     def "g:each tag provides status variable"() {
@@ -396,9 +396,9 @@ class TagLibSpec extends Specification implements HttpClientSupport {
         def response = http('/tagLibTest/testBuiltInEach?items=X,Y,Z')
 
         then: "status index is available"
-        response.expectContains(200, '0:X')
-                .expectContains('1:Y')
-                .expectContains('2:Z')
+        response.assertContains(200, '0:X')
+                .assertContains('1:Y')
+                .assertContains('2:Z')
     }
 
     // ========== Built-in Tag: g:collect ==========
@@ -408,8 +408,8 @@ class TagLibSpec extends Specification implements HttpClientSupport {
         def response = http('/tagLibTest/testBuiltInCollect?items=apple,banana')
 
         then: "items are transformed"
-        response.expectContains(200, 'APPLE')
-                .expectContains('BANANA')
+        response.assertContains(200, 'APPLE')
+                .assertContains('BANANA')
     }
 
     // ========== Built-in Tag: g:findAll ==========
@@ -419,10 +419,10 @@ class TagLibSpec extends Specification implements HttpClientSupport {
         def response = http('/tagLibTest/testBuiltInFindAll?threshold=7')
 
         then: "only matching items are rendered"
-        response.expectContains(200, '8')
-                .expectContains('9')
-                .expectContains('10')
-                .expectNotBodyContains('7 ')
+        response.assertContains(200, '8')
+                .assertContains('9')
+                .assertContains('10')
+                .assertNotContains('7 ')
     }
 
     // ========== Built-in Tag: g:link ==========
@@ -434,9 +434,9 @@ class TagLibSpec extends Specification implements HttpClientSupport {
         )
 
         then: "link is rendered"
-        response.expectContains(200, '<a href=')
-                .expectContains('/book/show/42')
-                .expectContains('>View</a>')
+        response.assertContains(200, '<a href=')
+                .assertContains('/book/show/42')
+                .assertContains('>View</a>')
     }
 
     // ========== Built-in Tag: g:createLink ==========
@@ -448,7 +448,7 @@ class TagLibSpec extends Specification implements HttpClientSupport {
         )
 
         then: "URL is rendered"
-        response.expectContains(200, '/book/list')
+        response.assertContains(200, '/book/list')
     }
 
     // ========== Built-in Tag: g:form ==========
@@ -460,10 +460,10 @@ class TagLibSpec extends Specification implements HttpClientSupport {
         )
 
         then: "form is rendered"
-        response.expectContains(200, '<form')
-                .expectContains('action=')
-                .expectContains('/book/save')
-                .expectContains('method="post"')
+        response.assertContains(200, '<form')
+                .assertContains('action=')
+                .assertContains('/book/save')
+                .assertContains('method="post"')
     }
 
     // ========== Built-in Tag: g:message ==========
@@ -475,7 +475,7 @@ class TagLibSpec extends Specification implements HttpClientSupport {
         )
 
         then: "default message is rendered"
-        response.expectContains(200, 'Default Message')
+        response.assertContains(200, 'Default Message')
     }
 
     // ========== Built-in Tag: g:formatDate ==========
@@ -486,7 +486,7 @@ class TagLibSpec extends Specification implements HttpClientSupport {
 
         then: "date is formatted"
         // Just verify it rendered something in date format
-        response.expectContainsMatches(200, ~/\d{4}-\d{2}-\d{2}/)
+        response.assertContainsMatches(200, ~/\d{4}-\d{2}-\d{2}/)
     }
 
     // ========== Built-in Tag: g:formatNumber ==========
@@ -497,7 +497,7 @@ class TagLibSpec extends Specification implements HttpClientSupport {
 
         then: "number is formatted"
         // Should contain formatted number (locale-dependent)
-        response.expectContainsMatches(200, ~/1.*234.*567/)
+        response.assertContainsMatches(200, ~/1.*234.*567/)
     }
 
     // ========== Built-in Tag: g:set ==========
@@ -509,8 +509,8 @@ class TagLibSpec extends Specification implements HttpClientSupport {
         )
 
         then: "variable values are correct"
-        response.expectContains(200, 'id="set-initial">First')
-                .expectContains('id="set-updated">Second')
+        response.assertContains(200, 'id="set-initial">First')
+                .assertContains('id="set-updated">Second')
     }
 
     // ========== Built-in Tag: g:join ==========
@@ -522,7 +522,7 @@ class TagLibSpec extends Specification implements HttpClientSupport {
         )
 
         then: "items are joined"
-        response.expectContains(200, 'red - green - blue')
+        response.assertContains(200, 'red - green - blue')
     }
 
     // ========== Built-in Tag: g:include ==========
@@ -532,7 +532,7 @@ class TagLibSpec extends Specification implements HttpClientSupport {
         def response = http('/tagLibTest/testBuiltInInclude?message=Test%20Message')
 
         then: "included content is rendered"
-        response.expectContains(200, 'Included content: Test Message')
+        response.assertContains(200, 'Included content: Test Message')
     }
 
     // ========== Built-in Tag: g:render ==========
@@ -542,7 +542,7 @@ class TagLibSpec extends Specification implements HttpClientSupport {
         def response = http('/tagLibTest/testBuiltInRender?text=Hello%20Template')
 
         then: "template is rendered"
-        response.expectContains(200, 'Template content: Hello Template')
+        response.assertContains(200, 'Template content: Hello Template')
     }
 
     // ========== Built-in Tag: g:while ==========
@@ -552,10 +552,10 @@ class TagLibSpec extends Specification implements HttpClientSupport {
         def response = http('/tagLibTest/testBuiltInWhile?count=3')
 
         then: "loop executes correct number of times"
-        response.expectContains(200, 'Count: 1')
-                .expectContains('Count: 2')
-                .expectContains('Count: 3')
-                .expectNotBodyContains('Count: 4')
+        response.assertContains(200, 'Count: 1')
+                .assertContains('Count: 2')
+                .assertContains('Count: 3')
+                .assertNotContains('Count: 4')
     }
 
     // ========== Built-in Tag: g:uploadForm ==========
@@ -565,8 +565,8 @@ class TagLibSpec extends Specification implements HttpClientSupport {
         def response = http('/tagLibTest/testBuiltInUploadForm')
 
         then: "multipart form is rendered"
-        response.expectContains(200, '<form')
-                .expectContains('enctype="multipart/form-data"')
+        response.assertContains(200, '<form')
+                .assertContains('enctype="multipart/form-data"')
     }
 
     // ========== Built-in Tag: g:select ==========
@@ -576,9 +576,9 @@ class TagLibSpec extends Specification implements HttpClientSupport {
         def response = http('/tagLibTest/testBuiltInSelect?selected=2')
 
         then: "select with options is rendered"
-        response.expectContains(200, '<select')
-                .expectContains('<option')
-                .expectContains('value="2" selected')
+        response.assertContains(200, '<select')
+                .assertContains('<option')
+                .assertContains('value="2" selected')
     }
 
     // ========== Built-in Tag: g:radio ==========
@@ -588,8 +588,8 @@ class TagLibSpec extends Specification implements HttpClientSupport {
         def response = http('/tagLibTest/testBuiltInRadio?selected=Option%20B')
 
         then: "radio buttons are rendered"
-        response.expectContains(200, 'type="radio"')
-                .expectContains('checked="checked"')
+        response.assertContains(200, 'type="radio"')
+                .assertContains('checked="checked"')
     }
 
     // ========== Built-in Tag: g:checkBox ==========
@@ -599,8 +599,8 @@ class TagLibSpec extends Specification implements HttpClientSupport {
         def response = http('/tagLibTest/testBuiltInCheckBox?checked=true')
 
         then: "checkbox is rendered"
-        response.expectContains(200, 'type="checkbox"')
-                .expectContains('checked="checked"')
+        response.assertContains(200, 'type="checkbox"')
+                .assertContains('checked="checked"')
     }
 
     // ========== Built-in Tag: g:textArea ==========
@@ -612,10 +612,10 @@ class TagLibSpec extends Specification implements HttpClientSupport {
         )
 
         then: "textarea is rendered"
-        response.expectContains(200, '<textarea')
-                .expectContains('rows="5"')
-                .expectContains('cols="40"')
-                .expectContains('Test Content')
+        response.assertContains(200, '<textarea')
+                .assertContains('rows="5"')
+                .assertContains('cols="40"')
+                .assertContains('Test Content')
     }
 
     // ========== Built-in Tag: g:textField ==========
@@ -625,9 +625,9 @@ class TagLibSpec extends Specification implements HttpClientSupport {
         def response = http('/tagLibTest/testBuiltInTextField?value=Test%20Value&maxlength=50')
 
         then: "text field is rendered"
-        response.expectContains(200, 'type="text"')
-                .expectContains('value="Test Value"')
-                .expectContains('maxlength="50"')
+        response.assertContains(200, 'type="text"')
+                .assertContains('value="Test Value"')
+                .assertContains('maxlength="50"')
     }
 
     // ========== Built-in Tag: g:passwordField ==========
@@ -637,7 +637,7 @@ class TagLibSpec extends Specification implements HttpClientSupport {
         def response = http('/tagLibTest/testBuiltInPasswordField')
 
         then: "password field is rendered"
-        response.expectContains(200, 'type="password"')
+        response.assertContains(200, 'type="password"')
     }
 
     // ========== Built-in Tag: g:hiddenField ==========
@@ -647,8 +647,8 @@ class TagLibSpec extends Specification implements HttpClientSupport {
         def response = http('/tagLibTest/testBuiltInHiddenField?value=secret-value')
 
         then: "hidden field is rendered"
-        response.expectContains(200, 'type="hidden"')
-                .expectContains('value="secret-value"')
+        response.assertContains(200, 'type="hidden"')
+                .assertContains('value="secret-value"')
     }
 
     // ========== Built-in Tag: g:fieldValue ==========
@@ -658,7 +658,7 @@ class TagLibSpec extends Specification implements HttpClientSupport {
         def response = http('/tagLibTest/testBuiltInFieldValue?field=title')
 
         then: "field value is extracted"
-        response.expectContains(200, 'Grails in Action')
+        response.assertContains(200, 'Grails in Action')
     }
 
     // ========== Built-in Tag: g:sortableColumn ==========
@@ -668,9 +668,9 @@ class TagLibSpec extends Specification implements HttpClientSupport {
         def response = http('/tagLibTest/testBuiltInSortableColumn')
 
         then: "sortable columns are rendered"
-        response.expectContains(200, '<th')
-                .expectContains('Title')
-                .expectContains('Author')
+        response.assertContains(200, '<th')
+                .assertContains('Title')
+                .assertContains('Author')
     }
 
     // ========== Built-in Tag: g:paginate ==========
@@ -681,7 +681,7 @@ class TagLibSpec extends Specification implements HttpClientSupport {
 
         then: "pagination links are rendered"
         // Pagination should contain some links
-        response.expectContains(200, 'class=')
+        response.assertContains(200, 'class=')
     }
 
     // ========== Complex/Combined Tests ==========
@@ -691,8 +691,8 @@ class TagLibSpec extends Specification implements HttpClientSupport {
         def response = http('/tagLibTest/testNestedTags')
 
         then: "nested tags are rendered"
-        response.expectContains(200, '<ul>')
-                .expectContains('class="badge')
+        response.assertContains(200, '<ul>')
+                .assertContains('class="badge')
     }
 
     def "tags work with complex model data"() {
@@ -700,13 +700,13 @@ class TagLibSpec extends Specification implements HttpClientSupport {
         def response = http('/tagLibTest/testTagsWithModel')
 
         then: "model data is processed correctly"
-        response.expectContains(200, 'panel-success')  // Alice is active
-                .expectContains('panel-default')  // Charlie is not active
-                .expectContains('Alice')
-                .expectContains('Bob')
-                .expectContains('Charlie')
-                .expectContains('Admin')
-                .expectContains('User')
+        response.assertContains(200, 'panel-success')  // Alice is active
+                .assertContains('panel-default')  // Charlie is not active
+                .assertContains('Alice')
+                .assertContains('Bob')
+                .assertContains('Charlie')
+                .assertContains('Admin')
+                .assertContains('User')
     }
 
     def "encoding tags properly escape content"() {
@@ -714,7 +714,7 @@ class TagLibSpec extends Specification implements HttpClientSupport {
         def response = http('/tagLibTest/testEncodingTags')
 
         then: "content is properly encoded"
-        response.expectContains(200, '&lt;script&gt;') // HTML encoded content should have escaped tags
-                .expectContains('id="raw-content">') // Raw content should preserve HTML
+        response.assertContains(200, '&lt;script&gt;') // HTML encoded content should have escaped tags
+                .assertContains('id="raw-content">') // Raw content should preserve HTML
     }
 }

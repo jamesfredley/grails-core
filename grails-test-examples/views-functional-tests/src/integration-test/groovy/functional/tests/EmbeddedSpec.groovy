@@ -32,7 +32,7 @@ class EmbeddedSpec extends Specification implements HttpClientSupport {
         def response = http('/embedded')
 
         then: 'The response is correct'
-        response.expectJson(200, 'Content-Type': 'application/json;charset=UTF-8', '''
+        response.assertJson(200, 'Content-Type': 'application/json;charset=UTF-8', '''
             {
                 "id": 1,
                 "customClass": {
@@ -51,7 +51,7 @@ class EmbeddedSpec extends Specification implements HttpClientSupport {
         def response = http('/embedded/jsonapi')
 
         then: 'The response is correct'
-        response.expectJson(200, 'Content-Type': 'application/json;charset=UTF-8', '''
+        response.assertJson(200, 'Content-Type': 'application/json;charset=UTF-8', '''
             {
                 "data": {
                     "type": "embedded",
@@ -79,7 +79,7 @@ class EmbeddedSpec extends Specification implements HttpClientSupport {
         def response = http('/embedded/embeddedWithIncludes')
 
         then: 'the response is correct'
-        response.expectJson(200, 'Content-Type': 'application/json;charset=UTF-8', '''
+        response.assertJson(200, 'Content-Type': 'application/json;charset=UTF-8', '''
             {
                 "customClass": {
                     "name": "Bar3"
@@ -95,7 +95,7 @@ class EmbeddedSpec extends Specification implements HttpClientSupport {
         def response = http('/embedded/embeddedWithIncludesJsonapi')
 
         then: 'the response is correct'
-        response.expectJson(200, 'Content-Type': 'application/json;charset=UTF-8', '''
+        response.assertJson(200, 'Content-Type': 'application/json;charset=UTF-8', '''
             {
                 "data": {
                     "type": "embedded",
