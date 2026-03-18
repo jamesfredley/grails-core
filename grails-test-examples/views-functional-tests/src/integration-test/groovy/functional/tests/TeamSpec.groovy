@@ -18,7 +18,6 @@
  */
 package functional.tests
 
-import spock.lang.IgnoreIf
 import spock.lang.Specification
 
 import grails.testing.mixin.integration.Integration
@@ -65,22 +64,19 @@ class TeamSpec extends Specification implements HttpClientSupport {
         ''')
     }
 
-    @IgnoreIf({ System.getenv('GITHUB_REF') })
     void 'Test HAL rendering'() {
         when:
         def response = http('/teams/hal/1')
-        def lang = "${System.properties.getProperty('user.language')}_${System.properties.getProperty('user.country')}"
 
         then: 'The response is correct'
-        response.assertJson(200, 'Content-Type': 'application/hal+json;charset=UTF-8', """
+        response.assertJsonContains(200, 'Content-Type': 'application/hal+json;charset=UTF-8', """
             {
                 \"_embedded\": {
                     \"players\": [
                         {
                             \"_links\": {
                                 \"self\": {
-                                    \"href\": \"http://localhost:$serverPort/player/show/1\",
-                                    \"hreflang\": \"$lang\",
+                                    \"href\": \"$httpBaseUrl/player/show/1\",
                                     \"type\": \"application/hal+json\"
                                 }
                             },
@@ -90,8 +86,7 @@ class TeamSpec extends Specification implements HttpClientSupport {
                         {
                             \"_links\": {
                                 \"self\": {
-                                    \"href\": \"http://localhost:$serverPort/player/show/2\",
-                                    \"hreflang\": \"$lang\",
+                                    \"href\": \"$httpBaseUrl/player/show/2\",
                                     \"type\": \"application/hal+json\"
                                 }
                             },
@@ -102,8 +97,7 @@ class TeamSpec extends Specification implements HttpClientSupport {
                     \"captain\": {
                         \"_links\": {
                             \"self\": {
-                                \"href\": \"http://localhost:$serverPort/player/show/1\",
-                                \"hreflang\": \"$lang\",
+                                \"href\": \"$httpBaseUrl/player/show/1\",
                                 \"type\": \"application/hal+json\"
                             }
                         },
@@ -113,8 +107,7 @@ class TeamSpec extends Specification implements HttpClientSupport {
                 },
                 \"_links\": {
                         \"self\": {
-                            \"href\": \"http://localhost:$serverPort/teams/1\",
-                            \"hreflang\": \"$lang\",
+                            \"href\": \"$httpBaseUrl/teams/1\",
                             \"type\": \"application/hal+json\"
                         }
                 },
