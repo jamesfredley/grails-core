@@ -18,7 +18,6 @@
  */
 package org.grails.plugins.databinding
 
-
 import grails.plugins.Plugin
 import grails.util.GrailsUtil
 
