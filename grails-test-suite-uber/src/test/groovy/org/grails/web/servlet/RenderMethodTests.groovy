@@ -24,7 +24,6 @@ import org.grails.plugins.testing.GrailsMockHttpServletRequest
 import org.grails.plugins.testing.GrailsMockHttpServletResponse
 import org.grails.web.servlet.mvc.exceptions.ControllerExecutionException
 import grails.artefact.Artefact
-import spock.lang.PendingFeature
 import spock.lang.Specification
 
 /**
@@ -34,10 +33,6 @@ import spock.lang.Specification
  */
 class RenderMethodTests extends Specification implements ControllerUnitTest<RenderController> {
 
-    // TODO: Spring Framework 7 changed MockHttpServletResponse behavior - reset() now calls getWriter() which
-    // throws IllegalStateException if getOutputStream() was already called. Need to update
-    // AbstractGrailsMockHttpServletResponse.reset() to handle this case properly.
-    @PendingFeature
     void testRenderFile() {
         when:
         controller.render file:"hello".bytes, contentType:"text/plain"
