@@ -131,6 +131,7 @@ class SbomPlugin implements Plugin<Project> {
         )
 
         configureSbomTask(project, sbomOutputLocation)
+        configureNormalization(project)
         ensureLicensesValidated(project)
 
         // sboms are only published to Grails jar files at this time
@@ -263,6 +264,14 @@ class SbomPlugin implements Plugin<Project> {
                     sbomOutputLocation.get().with { rewriteSbom(it.asFile) }
                 }
 
+            }
+        }
+    }
+
+    private static void configureNormalization(Project project) {
+        project.normalization { handler ->
+            handler.runtimeClasspath {
+                it.ignore("META-INF/sbom.json")
             }
         }
     }
