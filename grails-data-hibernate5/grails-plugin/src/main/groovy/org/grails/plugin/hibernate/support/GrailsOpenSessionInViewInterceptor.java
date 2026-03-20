@@ -35,6 +35,7 @@ import org.grails.datastore.mapping.core.connections.ConnectionSource;
 import org.grails.orm.hibernate.AbstractHibernateDatastore;
 import org.grails.orm.hibernate.HibernateDatastore;
 import org.grails.orm.hibernate.connections.HibernateConnectionSourceSettings;
+import org.grails.orm.hibernate.support.hibernate5.SessionFactoryUtils;
 import org.grails.orm.hibernate.support.hibernate5.SessionHolder;
 import org.grails.orm.hibernate.support.hibernate5.support.OpenSessionInViewInterceptor;
 
