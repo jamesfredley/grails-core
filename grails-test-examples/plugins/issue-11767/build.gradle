@@ -40,3 +40,29 @@ apply {
     from rootProject.layout.projectDirectory.file('gradle/functional-test-config.gradle')
     from rootProject.layout.projectDirectory.file('gradle/grails-extension-gradle-config.gradle')
 }
+
+// Both compileJava and compileGroovy run the Micronaut annotation processor, each generating
+// spring-configuration-metadata.json for their respective beans. The jar task uses
+// DuplicatesStrategy.FAIL, so we merge the Java-generated metadata into the Groovy-generated
+// file (which the jar picks up) and remove the Java copy to avoid duplicates.
+tasks.named('jar') {
+    doFirst {
+        def metadataFileName = 'spring-configuration-metadata.json'
+        def javaFile = layout.buildDirectory.file("classes/java/main/META-INF/$metadataFileName").get().asFile
+        def groovyFile = layout.buildDirectory.file("classes/groovy/main/META-INF/$metadataFileName").get().asFile
+
+        if (javaFile.exists() && groovyFile.exists()) {
+            def slurper = new groovy.json.JsonSlurper()
+            def javaJson = slurper.parse(javaFile)
+            def groovyJson = slurper.parse(groovyFile)
+
+            def merged = [
+                groups    : (groovyJson.groups ?: []) + (javaJson.groups ?: []),
+                properties: (groovyJson.properties ?: []) + (javaJson.properties ?: [])
+            ]
+
+            groovyFile.text = groovy.json.JsonOutput.toJson(merged)
+            javaFile.delete()
+        }
+    }
+}
