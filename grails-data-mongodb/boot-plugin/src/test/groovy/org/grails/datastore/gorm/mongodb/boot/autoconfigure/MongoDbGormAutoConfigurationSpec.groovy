@@ -32,6 +32,7 @@ import org.apache.grails.testing.mongo.AutoStartedMongoSpec
 /**
  * Tests for MongoDB autoconfigure
  */
+@RestoreSystemProperties
 class MongoDbGormAutoConfigurationSpec extends AutoStartedMongoSpec {
 
     protected AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();

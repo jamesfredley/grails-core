@@ -35,6 +35,7 @@ import org.apache.grails.testing.mongo.AutoStartedMongoSpec
 /**
  * Created by graemerocher on 20/03/14.
  */
+@RestoreSystemProperties
 class MongoDbGormAutoConfigureWithGeoSpacialSpec extends AutoStartedMongoSpec {
 
     protected AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
