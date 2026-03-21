@@ -28,6 +28,7 @@ import org.springframework.context.annotation.Import
 import grails.gorm.annotation.Entity
 import org.apache.grails.testing.mongo.AbstractMongoGrailsExtension
 import org.apache.grails.testing.mongo.AutoStartedMongoSpec
+import spock.util.environment.RestoreSystemProperties
 
 /**
  * Tests for MongoDB autoconfigure

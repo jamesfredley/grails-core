@@ -31,6 +31,7 @@ import grails.gorm.annotation.Entity
 import grails.mongodb.geo.Point
 import org.apache.grails.testing.mongo.AbstractMongoGrailsExtension
 import org.apache.grails.testing.mongo.AutoStartedMongoSpec
+import spock.util.environment.RestoreSystemProperties
 
 /**
  * Created by graemerocher on 20/03/14.

@@ -45,16 +45,12 @@ import org.springframework.core.io.Resource
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver
 import org.springframework.mock.web.MockHttpServletResponse
 import org.springframework.mock.web.MockServletContext
-import org.springframework.ui.context.Theme
-import org.springframework.ui.context.ThemeSource
-import org.springframework.ui.context.support.SimpleTheme
 import org.springframework.web.context.WebApplicationContext
 import org.springframework.web.context.request.RequestContextHolder
 import org.springframework.web.context.support.GenericWebApplicationContext
 import org.springframework.web.servlet.DispatcherServlet
 import org.springframework.web.servlet.i18n.AcceptHeaderLocaleResolver
 import org.springframework.web.servlet.support.JstlUtils
-import org.springframework.web.servlet.theme.SessionThemeResolver
 
 import grails.build.support.MetaClassRegistryCleaner
 import grails.core.DefaultGrailsApplication
@@ -373,9 +369,7 @@ abstract class AbstractGrailsTagTests {
     }
 
     private void initThemeSource(request, MessageSource messageSource) {
-        // Theme support was removed in Spring Framework 7.0 - using copied theme classes
-        request.setAttribute(THEME_SOURCE_ATTRIBUTE, new MockThemeSource(messageSource))
-        request.setAttribute(THEME_RESOLVER_ATTRIBUTE, new SessionThemeResolver())
+        // Theme support was removed in Spring Framework 7.0 - no-op
     }
 
     @AfterEach
@@ -577,15 +571,4 @@ abstract class AbstractGrailsTagTests {
     protected final void assertXPathNotExists(Document doc, String expr) {
         assertFalse xpath.evaluate(expr, doc, XPathConstants.BOOLEAN)
     }
-}
-
-class MockThemeSource implements ThemeSource {
-
-    private messageSource
-
-    MockThemeSource(MessageSource messageSource) {
-        this.messageSource = messageSource
-    }
-
-    Theme getTheme(String themeName) { new SimpleTheme(themeName, messageSource) }
 }
