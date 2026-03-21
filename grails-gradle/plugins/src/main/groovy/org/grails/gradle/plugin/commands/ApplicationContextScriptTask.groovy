@@ -21,10 +21,12 @@ package org.grails.gradle.plugin.commands
 import groovy.transform.CompileStatic
 
 import org.gradle.api.tasks.JavaExec
+import org.gradle.work.DisableCachingByDefault
 
 import javax.inject.Inject
 
 @CompileStatic
+@DisableCachingByDefault(because = 'Application script tasks produce no cacheable output')
 abstract class ApplicationContextScriptTask extends JavaExec {
 
     @Inject
