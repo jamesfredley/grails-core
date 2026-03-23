@@ -136,8 +136,8 @@ abstract class AbstractGrailsControllerUrlMappings implements UrlMappings {
 
     @Override
     UrlMappingInfo match(String uri) {
-        def infos = matchAll(uri)
-        return infos?.length > 0 ? infos[0] : null
+        def info = urlMappingsHolderDelegate.match(uri)
+        return collectControllerMapping(info)
     }
 
     @Override
