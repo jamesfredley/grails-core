@@ -16,12 +16,12 @@
  */
 package org.grails.commons
 
-import grails.core.GrailsApplication
+
 import grails.plugins.GrailsPlugin
-import grails.plugins.GrailsPluginManager
+import org.apache.grails.core.plugins.DefaultPluginDiscovery
 import org.grails.commons.test.AbstractGrailsMockTests
 import grails.plugins.DefaultGrailsPluginManager
-import org.grails.web.servlet.context.support.WebRuntimeSpringConfiguration
+
 import org.springframework.beans.factory.support.RootBeanDefinition
 import org.springframework.beans.propertyeditors.ClassEditor
 import org.springframework.context.ApplicationContext
@@ -83,7 +83,9 @@ hibernate {
 //    }
 
     void testNoSelfObserving() {
-        def manager = new DefaultGrailsPluginManager([AnotherGrailsPlugin,ObservingAllGrailsPlugin] as Class[], ga)
+        def discovery = new DefaultPluginDiscovery()
+        discovery.init(new StandardEnvironment())
+        def manager = new DefaultGrailsPluginManager(ga, discovery)
 
         manager.loadPlugins()
 
@@ -106,7 +108,9 @@ hibernate {
     }
 
     void testDisabledPlugin() {
-        def manager = new DefaultGrailsPluginManager([MyGrailsPlugin,AnotherGrailsPlugin,DisabledGrailsPlugin] as Class[], ga)
+        def discovery = new DefaultPluginDiscovery()
+        discovery.init(new StandardEnvironment())
+        def manager = new DefaultGrailsPluginManager(ga, discovery)
 
         manager.loadPlugins()
 
@@ -116,12 +120,16 @@ hibernate {
     }
 
     void testDefaultGrailsPluginManager() {
-        DefaultGrailsPluginManager manager = new DefaultGrailsPluginManager(RESOURCE_PATH,ga)
-        assertEquals(1, manager.getPluginResources().length)
+        def discovery = new DefaultPluginDiscovery(RESOURCE_PATH)
+        discovery.init(new StandardEnvironment())
+        new DefaultGrailsPluginManager(ga, discovery)
+        assertEquals(1, discovery.getPluginResources().length)
     }
 
     void testLoadPlugins() {
-        GrailsPluginManager manager = new DefaultGrailsPluginManager(RESOURCE_PATH,ga)
+        def discovery = new DefaultPluginDiscovery()
+        discovery.init(new StandardEnvironment())
+        def manager = new DefaultGrailsPluginManager(ga, discovery)
         manager.loadPlugins()
 
         GrailsPlugin plugin = manager.getGrailsPlugin("classEditor")
@@ -137,25 +145,33 @@ hibernate {
     }
 
     void testWithLoadLastPlugin() {
-        def manager = new DefaultGrailsPluginManager([MyGrailsPlugin,AnotherGrailsPlugin,ShouldLoadLastGrailsPlugin] as Class[], ga)
+        def discovery = new DefaultPluginDiscovery()
+        discovery.init(new StandardEnvironment())
+        def manager = new DefaultGrailsPluginManager(ga, discovery)
         manager.loadPlugins()
     }
 
     void testDependencyResolutionFailure() {
-        def manager = new DefaultGrailsPluginManager([MyGrailsPlugin] as Class[], ga)
+        def discovery = new DefaultPluginDiscovery()
+        discovery.init(new StandardEnvironment())
+        def manager = new DefaultGrailsPluginManager(ga, discovery)
 
         manager.loadPlugins()
         assert !manager.hasGrailsPlugin("my")
     }
 
     void testDependencyResolutionSuccess() {
-        def manager = new DefaultGrailsPluginManager([MyGrailsPlugin,AnotherGrailsPlugin, SomeOtherGrailsPlugin] as Class[], ga)
+        def discovery = new DefaultPluginDiscovery()
+        discovery.init(new StandardEnvironment())
+        def manager = new DefaultGrailsPluginManager(ga, discovery)
 
         manager.loadPlugins()
     }
 
     void testEviction() {
-        def manager = new DefaultGrailsPluginManager([MyGrailsPlugin,AnotherGrailsPlugin,SomeOtherGrailsPlugin,ShouldEvictSomeOtherGrailsPlugin] as Class[], ga)
+        def discovery = new DefaultPluginDiscovery()
+        discovery.init(new StandardEnvironment())
+        def manager = new DefaultGrailsPluginManager(ga, discovery)
 
         manager.loadPlugins()
 
@@ -166,7 +182,9 @@ hibernate {
     }
 
     void testShutdownCalled() {
-        def manager = new DefaultGrailsPluginManager([MyGrailsPlugin,AnotherGrailsPlugin] as Class[], ga)
+        def discovery = new DefaultPluginDiscovery()
+        discovery.init(new StandardEnvironment())
+        def manager = new DefaultGrailsPluginManager(ga, discovery)
         manager.applicationContext = [getBeansOfType: { Class c -> [:] }, getEnvironment: {-> new StandardEnvironment() } ] as ApplicationContext
 
         manager.loadPlugins()
