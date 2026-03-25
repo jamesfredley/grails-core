@@ -71,6 +71,7 @@ public class DefaultPluginDiscovery implements PluginDiscovery {
     protected boolean loadClasspathPlugins = true;
     protected boolean requireClasspathPlugin = true;
     protected final PluginFilterRetriever filterRetriever;
+    private boolean initialized = false;
 
     public DefaultPluginDiscovery() {
         this(new PluginFilterRetriever());
@@ -153,7 +154,7 @@ public class DefaultPluginDiscovery implements PluginDiscovery {
     }
 
     public void init(Environment environment) {
-        if (plugins == null) {
+        if (!initialized) {
             if (environment == null) {
                 throw new IllegalArgumentException("Environment must be provided to determine plugin order");
             }
@@ -162,7 +163,7 @@ public class DefaultPluginDiscovery implements PluginDiscovery {
     }
 
     private void validateInitialized() {
-        if (plugins == null) {
+        if (!initialized) {
             throw new IllegalStateException("init() must be called prior to fetching the plugin order.");
         }
     }
@@ -312,6 +313,7 @@ public class DefaultPluginDiscovery implements PluginDiscovery {
                 PluginInfo::getLoadAfterNames,
                 PluginInfo::getLoadBeforeNames
         );
+        initialized = true;
     }
 
     private void processDelayedEvictions() {
@@ -547,6 +549,7 @@ public class DefaultPluginDiscovery implements PluginDiscovery {
 
     @Override
     public void reset() {
+        initialized = false;
         plugins = new LinkedHashMap<>();
         loadOrderedPlugins = new ArrayList<>();
         pluginToObserverMap = new HashMap<>();
