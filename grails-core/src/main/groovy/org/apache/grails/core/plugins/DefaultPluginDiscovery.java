@@ -291,10 +291,10 @@ public class DefaultPluginDiscovery implements PluginDiscovery {
         List<PluginInfo> filteredPlugins = filterPlugins(allPlugins, environment);
 
         reset();
+        initialized = true;
 
         if (filteredPlugins.isEmpty()) {
             LOG.debug("All plugins were excluded by plugin filtering");
-            initialized = true;
             return;
         }
 
@@ -314,7 +314,6 @@ public class DefaultPluginDiscovery implements PluginDiscovery {
                 PluginInfo::getLoadAfterNames,
                 PluginInfo::getLoadBeforeNames
         );
-        initialized = true;
     }
 
     private void processDelayedEvictions() {
