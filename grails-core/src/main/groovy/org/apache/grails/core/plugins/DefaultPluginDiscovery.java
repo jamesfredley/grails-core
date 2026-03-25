@@ -71,7 +71,7 @@ public class DefaultPluginDiscovery implements PluginDiscovery {
     protected boolean loadClasspathPlugins = true;
     protected boolean requireClasspathPlugin = true;
     protected final PluginFilterRetriever filterRetriever;
-    private boolean initialized = false;
+    protected boolean initialized = false;
 
     public DefaultPluginDiscovery() {
         this(new PluginFilterRetriever());

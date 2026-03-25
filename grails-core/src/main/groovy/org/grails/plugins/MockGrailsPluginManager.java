@@ -76,7 +76,6 @@ public class MockGrailsPluginManager extends AbstractGrailsPluginManager {
             return;
         }
 
-        // Note: the environment is null here since the plugins should have always been populated in the bootstrap phase
         pluginDiscovery.getPluginsInLoadOrder().forEach(pluginInfo -> {
             GrailsPlugin plugin;
             if (pluginInfo.isDynamic()) {

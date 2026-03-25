@@ -27,7 +27,7 @@ public class MockGrailsPluginDiscovery extends DefaultPluginDiscovery {
 
     public MockGrailsPluginDiscovery() {
         super();
-        reset(); // do not search on the classpath by default
+        reset();
     }
 
     public MockGrailsPluginDiscovery(Class<?>[] pluginClasses) {
@@ -54,5 +54,11 @@ public class MockGrailsPluginDiscovery extends DefaultPluginDiscovery {
         if (plugins == null) {
             reset();
         }
+    }
+
+    @Override
+    public void reset() {
+        super.reset();
+        initialized = true; // do not search on the classpath by default
     }
 }
