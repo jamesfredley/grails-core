@@ -19,6 +19,7 @@
 package org.apache.grails.core.plugins;
 
 import java.util.Collection;
+import java.util.List;
 
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.Resource;
@@ -85,12 +86,12 @@ public interface PluginDiscovery {
     /**
      * @return plugins ordered by a topographical sort.
      */
-    Collection<PluginInfo> getPluginsInTopologicalOrder();
+    List<PluginInfo> getPluginsInTopologicalOrder();
 
     /**
      * @return the order the plugins were loaded in.
      */
-    Collection<PluginInfo> getPluginsInLoadOrder();
+    List<PluginInfo> getPluginsInLoadOrder();
 
     /**
      * @param name the name of the plugin - it may not be normalized

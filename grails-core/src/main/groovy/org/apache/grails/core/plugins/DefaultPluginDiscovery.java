@@ -216,13 +216,13 @@ public class DefaultPluginDiscovery implements PluginDiscovery {
     }
 
     @Override
-    public Collection<PluginInfo> getPluginsInTopologicalOrder() {
+    public List<PluginInfo> getPluginsInTopologicalOrder() {
         validateInitialized();
         return Collections.unmodifiableList(orderedPlugins);
     }
 
     @Override
-    public Collection<PluginInfo> getPluginsInLoadOrder() {
+    public List<PluginInfo> getPluginsInLoadOrder() {
         validateInitialized();
         return Collections.unmodifiableList(loadOrderedPlugins);
     }

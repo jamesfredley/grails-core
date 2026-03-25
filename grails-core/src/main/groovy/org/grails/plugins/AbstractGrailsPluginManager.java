@@ -298,7 +298,7 @@ public abstract class AbstractGrailsPluginManager implements GrailsPluginManager
     }
 
     protected List<GrailsPlugin> getOrderedPlugins() {
-        Collection<PluginInfo> orderedPluginInfos = pluginDiscovery.getPluginsInTopologicalOrder();
+        List<PluginInfo> orderedPluginInfos = pluginDiscovery.getPluginsInTopologicalOrder();
         if (orderedPluginInfos == null) {
             return new ArrayList<>();
         }
