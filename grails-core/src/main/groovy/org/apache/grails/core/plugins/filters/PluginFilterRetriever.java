@@ -20,7 +20,6 @@ package org.apache.grails.core.plugins.filters;
 
 import java.util.Collection;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Set;
 
 import org.springframework.boot.context.properties.bind.Bindable;
