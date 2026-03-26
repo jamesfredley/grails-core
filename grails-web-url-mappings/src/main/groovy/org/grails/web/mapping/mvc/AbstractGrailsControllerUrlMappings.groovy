@@ -59,8 +59,8 @@ abstract class AbstractGrailsControllerUrlMappings implements UrlMappings {
     AbstractGrailsControllerUrlMappings(GrailsApplication grailsApplication, UrlMappings urlMappingsHolderDelegate, UrlConverter urlConverter = null) {
         this.urlMappingsHolderDelegate = urlMappingsHolderDelegate
         this.urlConverter = urlConverter
-        this.validateWildcardMappings = grailsApplication?.config?.getProperty(
-                Settings.WEB_URL_MAPPING_VALIDATE_WILDCARDS, Boolean, true) ?: true
+        this.validateWildcardMappings = grailsApplication.config.getProperty(
+                Settings.WEB_URL_MAPPING_VALIDATE_WILDCARDS, Boolean, true)
         def controllerArtefacts = grailsApplication.getArtefacts(ControllerArtefactHandler.TYPE)
         for (GrailsClass gc in controllerArtefacts) {
             registerController((GrailsControllerClass) gc)
