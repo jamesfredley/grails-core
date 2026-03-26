@@ -46,8 +46,8 @@ class RenderMethodTests extends Specification implements ControllerUnitTest<Rend
         controller.render file:"hello".bytes
        
         then:
-        // Spring 7.0: rendering file without contentType is not allowed
-        thrown(Exception)
+        def e = thrown(ControllerExecutionException)
+        e.message == 'Argument [file] of render method specified without valid [contentType] argument'
     }
 
     void testRenderFileFromInputStream() {
