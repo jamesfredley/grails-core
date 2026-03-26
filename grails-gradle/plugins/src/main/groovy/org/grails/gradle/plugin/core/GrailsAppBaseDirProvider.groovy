@@ -20,23 +20,26 @@ package org.grails.gradle.plugin.core
 
 import groovy.transform.CompileStatic
 
-import org.gradle.api.tasks.InputDirectory
-import org.gradle.api.tasks.PathSensitive
-import org.gradle.api.tasks.PathSensitivity
+import org.gradle.api.tasks.Internal
 import org.gradle.process.CommandLineArgumentProvider
 
 import grails.util.BuildSettings
 
 /**
- * Provides the {@code -Dgrails.build.base.dir} system property to forked JVM tasks
- * while using {@link PathSensitivity#RELATIVE} so that the absolute project directory
- * path does not break build cache relocatability.
+ * Provides the {@code -Dgrails.build.base.dir} system property to forked JVM tasks.
+ *
+ * The directory is marked {@link Internal} rather than {@code @InputDirectory} because
+ * the project directory encompasses task output directories (e.g. {@code build/}).
+ * Declaring it as {@code @InputDirectory} causes Gradle to report implicit dependency
+ * violations between the consuming task (e.g. {@code test}) and every task that writes
+ * into the project directory (e.g. {@code compileIntegrationTestGroovy}, {@code jar}).
+ * The actual inputs that matter for caching (classpath, source sets) are already tracked
+ * by their respective tasks.
  */
 @CompileStatic
 class GrailsAppBaseDirProvider implements CommandLineArgumentProvider {
 
-    @InputDirectory
-    @PathSensitive(PathSensitivity.RELATIVE)
+    @Internal
     final File appBaseDir
 
     GrailsAppBaseDirProvider(File appBaseDir) {
