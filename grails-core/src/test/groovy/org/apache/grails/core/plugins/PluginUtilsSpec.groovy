@@ -24,9 +24,9 @@ import spock.lang.Unroll
 import org.grails.plugins.DefaultGrailsPlugin
 
 /**
- * Test suite for GrailsPluginUtils utility methods
+ * Test suite for PluginUtils utility methods
  */
-class GrailsPluginUtilsSpec extends Specification {
+class PluginUtilsSpec extends Specification {
 
     @Unroll
     def "isPluginVersionCompatible checks that plugin with grailsVersion=#pluginGrailsVersion is compatible with grails #grailsVersion"() {
