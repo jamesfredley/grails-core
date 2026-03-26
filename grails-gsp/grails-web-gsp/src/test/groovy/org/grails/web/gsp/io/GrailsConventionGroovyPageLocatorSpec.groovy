@@ -34,7 +34,7 @@ import org.grails.gsp.io.GroovyPageCompiledScriptSource
 import org.grails.gsp.io.GroovyPageResourceScriptSource
 import org.grails.plugins.BinaryGrailsPlugin
 import org.grails.plugins.CoreGrailsPlugin
-import org.grails.plugins.MockGrailsPluginDiscovery
+import org.grails.plugins.MockPluginDiscovery
 import org.grails.plugins.MockGrailsPluginManager
 import org.grails.web.util.GrailsApplicationAttributes
 import org.springframework.core.io.ByteArrayResource
@@ -252,7 +252,7 @@ class GrailsConventionGroovyPageLocatorSpec extends Specification {
 
         binaryPlugin.@precompiledViewMap["/WEB-INF/grails-app/views/test/binaryView.gsp"] = new GroovyClassLoader().parseClass(sw.toString())
 
-        def discovery = new MockGrailsPluginDiscovery([CoreGrailsPlugin] as Class[])
+        def discovery = new MockPluginDiscovery([CoreGrailsPlugin] as Class[])
         discovery.loadPluginsFromClasspath = false
         discovery.pluginFilter = new NoOpPluginFilter()
         discovery.init(new StandardEnvironment())

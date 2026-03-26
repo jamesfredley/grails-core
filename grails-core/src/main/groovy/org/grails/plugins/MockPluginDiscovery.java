@@ -23,14 +23,14 @@ import org.apache.grails.core.plugins.DefaultPluginDiscovery;
 import org.apache.grails.core.plugins.PluginInfo;
 import org.apache.grails.core.plugins.PluginUtils;
 
-public class MockGrailsPluginDiscovery extends DefaultPluginDiscovery {
+public class MockPluginDiscovery extends DefaultPluginDiscovery {
 
-    public MockGrailsPluginDiscovery() {
+    public MockPluginDiscovery() {
         super();
         reset();
     }
 
-    public MockGrailsPluginDiscovery(Class<?>[] pluginClasses) {
+    public MockPluginDiscovery(Class<?>[] pluginClasses) {
         super(pluginClasses);
     }
 

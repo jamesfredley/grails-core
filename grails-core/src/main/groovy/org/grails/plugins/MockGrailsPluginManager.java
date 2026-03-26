@@ -36,7 +36,7 @@ import org.apache.grails.core.plugins.PluginDiscovery;
  */
 public class MockGrailsPluginManager extends AbstractGrailsPluginManager {
     public MockGrailsPluginManager(GrailsApplication application) {
-        this(application, new MockGrailsPluginDiscovery());
+        this(application, new MockPluginDiscovery());
     }
 
     public MockGrailsPluginManager(GrailsApplication application, PluginDiscovery pluginDiscovery) {
@@ -64,7 +64,7 @@ public class MockGrailsPluginManager extends AbstractGrailsPluginManager {
 
     public void registerMockPlugin(GrailsPlugin plugin) {
         plugins.put(plugin.getName(), plugin);
-        ((MockGrailsPluginDiscovery) pluginDiscovery).registerMockPlugin(plugin);
+        ((MockPluginDiscovery) pluginDiscovery).registerMockPlugin(plugin);
     }
 
     public GrailsPlugin[] getUserPlugins() {
