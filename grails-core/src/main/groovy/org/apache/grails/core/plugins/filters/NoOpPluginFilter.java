@@ -23,13 +23,20 @@ import java.util.List;
 import org.apache.grails.core.plugins.PluginMetadata;
 
 /**
- * No-op implementation of <code>PluginFilter</code>.
+ * A {@link PluginFilter} implementation that performs no filtering.
+ *
+ * <p>This filter returns the original plugin metadata list unchanged and is useful when no include or
+ * exclude rules are configured.</p>
  */
 public class NoOpPluginFilter implements PluginFilter {
 
     /**
-     * Simply returns original list reference.
+     * Returns the original plugin metadata list unchanged.
+     *
+     * @param original the original plugin metadata list
+     * @return the same {@code original} list reference, without modification
      */
+    @Override
     public List<PluginMetadata> filterPluginList(List<PluginMetadata> original) {
         return original;
     }

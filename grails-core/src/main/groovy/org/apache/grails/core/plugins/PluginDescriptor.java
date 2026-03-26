@@ -24,8 +24,10 @@ import java.util.Objects;
 import org.springframework.core.io.Resource;
 
 /**
- * Holds a reference to the parsed grails-plugin.xml descriptor or the resource file that represents the plugin for the
- * given plugin classes
+ * Represents a parsed Grails plugin descriptor discovered on the classpath.
+ *
+ * <p>A descriptor captures the source {@link Resource} together with the plugin implementation classes declared by
+ * the descriptor and any additional provided class names contributed by the plugin.</p>
  */
 public class PluginDescriptor {
 
@@ -33,6 +35,13 @@ public class PluginDescriptor {
     private final List<String> providedPlugins;
     private final List<String> providedClasses;
 
+    /**
+     * Creates a plugin descriptor.
+     *
+     * @param resource the source resource from which the descriptor was read
+     * @param providedPlugins the fully qualified plugin implementation class names declared by the descriptor
+     * @param providedClasses the fully qualified provided class names declared by the descriptor
+     */
     public PluginDescriptor(
             Resource resource,
             List<String> providedPlugins,
@@ -42,18 +51,40 @@ public class PluginDescriptor {
         this.providedClasses = providedClasses;
     }
 
+    /**
+     * Returns the source resource for this descriptor.
+     *
+     * @return the descriptor resource
+     */
     public Resource getResource() {
         return resource;
     }
 
+    /**
+     * Returns the plugin implementation classes declared by this descriptor.
+     *
+     * @return the declared plugin implementation class names
+     */
     public List<String> getProvidedPlugins() {
         return providedPlugins;
     }
 
+    /**
+     * Returns the non-plugin classes contributed by this descriptor.
+     *
+     * @return the declared provided class names
+     */
     public List<String> getProvidedClasses() {
         return providedClasses;
     }
 
+    /**
+     * Compares this descriptor with another descriptor using the resource, provided plugin classes, and provided
+     * class names.
+     *
+     * @param o the other object to compare
+     * @return {@code true} if the descriptors describe the same resource and declared classes
+     */
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

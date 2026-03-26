@@ -23,15 +23,15 @@ import java.util.List;
 import org.apache.grails.core.plugins.PluginMetadata;
 
 /**
- * Defines interface for getting a sublist of <code>PluginMetadata</code> instances
- * based on an original supplied list of <code>PluginMetadata</code> instances.
+ * Defines a strategy for filtering a list of {@link PluginMetadata}.
  */
 public interface PluginFilter {
 
     /**
-     * Returns a filtered list of plugins.
-     * @param original the original supplied set of <code>GrailsPlugin</code> instances
-     * @return a sublist of these items
+     * Filters the supplied plugin metadata.
+     *
+     * @param original the original plugin metadata list to filter
+     * @return the filtered plugin metadata list
      */
     List<PluginMetadata> filterPluginList(List<PluginMetadata> original);
 }

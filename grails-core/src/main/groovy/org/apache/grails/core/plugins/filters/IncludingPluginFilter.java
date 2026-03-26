@@ -25,28 +25,54 @@ import java.util.Set;
 import org.apache.grails.core.plugins.PluginMetadata;
 
 /**
- * Implementation of <code>PluginFilter</code> which ensures that only the supplied
- * plugins (identified by name) as well as their dependencies are included in the filtered plugin list.
+ * A {@link PluginFilter} implementation that retains explicitly named plugins and any plugins they
+ * transitively depend on.
  */
 public class IncludingPluginFilter extends BasePluginFilter {
 
+    /**
+     * Creates a filter that includes the supplied plugin names.
+     *
+     * @param included the plugin names to include
+     */
     public IncludingPluginFilter(Set<String> included) {
         super(included);
     }
 
+    /**
+     * Creates a filter that includes the supplied plugin names.
+     *
+     * @param included the plugin names to include; each value is trimmed before use
+     */
     public IncludingPluginFilter(String... included) {
         super(included);
     }
 
+    /**
+     * Returns only the explicitly included plugins and the dependencies discovered from them.
+     *
+     * @param original the original plugin list supplied to the filter
+     * @param pluginList the explicitly named and dependency-derived plugins collected by the base algorithm
+     * @return a new list containing only the included plugins
+     */
     @Override
     protected List<PluginMetadata> getPluginList(List<PluginMetadata> original, List<PluginMetadata> pluginList) {
         return new ArrayList<>(pluginList);
     }
 
+    /**
+     * Adds the direct dependencies declared by the supplied plugin, so they are included as well.
+     *
+     * <p>Each dependency is registered through {@link #registerDependency(List, PluginMetadata)} so that
+     * recursive traversal and deduplication are handled consistently by the base class.</p>
+     *
+     * @param additionalList the list collecting plugins that should also be included
+     * @param plugin the plugin whose dependencies should be included
+     */
     @Override
     protected void addPluginDependencies(List<PluginMetadata> additionalList, PluginMetadata plugin) {
-        String[] dependencyNames = plugin.getDependsOnNames();
-        for (String name : dependencyNames) {
+        var dependencyNames = plugin.getDependsOnNames();
+        for (var name : dependencyNames) {
             registerDependency(additionalList, getNamedPlugin(name));
         }
     }

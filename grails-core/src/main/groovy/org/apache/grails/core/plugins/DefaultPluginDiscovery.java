@@ -50,6 +50,19 @@ import org.apache.grails.core.plugins.filters.PluginFilter;
 import org.apache.grails.core.plugins.filters.PluginFilterRetriever;
 import org.grails.core.io.CachingPathMatchingResourcePatternResolver;
 
+/**
+ * Default {@link PluginDiscovery} implementation used during Grails bootstrap.
+ *
+ * <p>This class discovers plugins from two sources:</p>
+ * <ul>
+ *     <li>classpath plugin descriptors discovered via {@link ClasspathPluginFinder}</li>
+ *     <li>dynamically supplied plugin classes or Groovy resources configured through the setter methods</li>
+ * </ul>
+ *
+ * <p>When {@link #init(Environment)} is invoked, the discovery process loads candidate plugins, applies the
+ * configured {@link PluginFilter}, resolves load ordering and delayed dependencies, and exposes both the
+ * load order and the topologically sorted order required by later bootstrap components.</p>
+ */
 public class DefaultPluginDiscovery implements PluginDiscovery {
 
     private static final Logger LOG = LoggerFactory.getLogger(DefaultPluginDiscovery.class);
@@ -222,6 +235,11 @@ public class DefaultPluginDiscovery implements PluginDiscovery {
         }
     }
 
+    /**
+     * Resets all derived discovery state so plugin discovery can be performed again.
+     *
+     * <p>This is primarily intended for controlled scenarios such as tests.</p>
+     */
     @Override
     public void reset() {
         initialized = false;
@@ -254,6 +272,16 @@ public class DefaultPluginDiscovery implements PluginDiscovery {
         return failedPlugins.containsKey(PluginUtils.normalizePluginName(name));
     }
 
+    /**
+     * Applies the configured plugin filter to the discovered plugins.
+     *
+     * <p>If no explicit filter has been set, the filter is resolved from the supplied environment through
+     * {@link PluginFilterRetriever}.</p>
+     *
+     * @param plugins the discovered plugins to filter
+     * @param environment the environment used to resolve a filter when necessary
+     * @return the filtered plugins in their original encounter order
+     */
     List<PluginInfo> filterPlugins(List<PluginInfo> plugins, Environment environment) {
         if (pluginFilter == null) {
             pluginFilter = filterRetriever.getPluginFilter(environment);
@@ -270,6 +298,15 @@ public class DefaultPluginDiscovery implements PluginDiscovery {
                 .toList();
     }
 
+    /**
+     * Discovers, filters, and orders plugins for the current environment.
+     *
+     * <p>This method discovers classpath plugins, collects any dynamically supplied plugins, applies the
+     * configured filter, resets previous discovery state, and then registers plugins immediately or defers
+     * them until their dependencies can be satisfied.</p>
+     *
+     * @param environment the environment used to determine plugin filtering and load order
+     */
     void populatePlugins(Environment environment) {
         var classLoader = resolveClassLoader();
         List<PluginInfo> classpathPlugins;
@@ -351,7 +388,11 @@ public class DefaultPluginDiscovery implements PluginDiscovery {
     }
 
     /**
-     * This method will attempt to load plugins that not loaded in the first pass
+     * Attempts to register plugins that could not be loaded during the first registration pass.
+     *
+     * <p>Plugins remain delayed until their dependencies are available and any declared {@code loadAfter}
+     * relationships can be satisfied. Plugins whose dependencies can never be resolved are moved to the
+     * failed plugin collection.</p>
      */
     private void loadDelayedPlugins() {
         while (!delayedLoadPlugins.isEmpty()) {
@@ -390,9 +431,9 @@ public class DefaultPluginDiscovery implements PluginDiscovery {
     /**
      * Checks whether the first plugin is dependent on the second plugin.
      *
-     * @param plugin     The plugin to check
-     * @param dependency The plugin which the first argument may be dependent on
-     * @return true if it is
+     * @param plugin the plugin to check
+     * @param dependency the plugin that may satisfy one of {@code plugin}'s declared dependencies
+     * @return {@code true} if {@code plugin} depends on {@code dependency}
      */
     private boolean isDependentOn(PluginInfo plugin, PluginInfo dependency) {
         for (var name : plugin.getDependsOnNames()) {
@@ -439,6 +480,14 @@ public class DefaultPluginDiscovery implements PluginDiscovery {
         }
     }
 
+    /**
+     * Registers a plugin that is eligible to be loaded.
+     *
+     * <p>This method skips disabled plugins, records eviction and observer relationships, and appends the
+     * plugin to the discovered load order.</p>
+     *
+     * @param plugin the plugin to register
+     */
     private void registerPlugin(PluginInfo plugin) {
         if (!plugin.getMetadata().canRegisterPlugin()) {
             if (LOG.isInfoEnabled()) {
@@ -472,8 +521,8 @@ public class DefaultPluginDiscovery implements PluginDiscovery {
     /**
      * Returns true if there are no plugins left that should, if possible, be loaded before this plugin.
      *
-     * @param plugin The plugin
-     * @return true if there are
+     * @param plugin the plugin to check
+     * @return {@code true} if every declared {@code loadAfter} plugin has already been registered
      */
     private boolean areNoneToLoadBefore(PluginInfo plugin) {
         for (var name : plugin.getLoadAfterNames()) {
@@ -497,6 +546,15 @@ public class DefaultPluginDiscovery implements PluginDiscovery {
         return findPlugin(name, version) != null;
     }
 
+    /**
+     * Discovers dynamically supplied plugins from configured Groovy resources and explicit plugin classes.
+     *
+     * <p>Resource-based plugins are compiled with a {@link GroovyClassLoader}, while pre-supplied plugin
+     * classes are converted directly into {@link PluginInfo} instances.</p>
+     *
+     * @param classLoader the base class loader used to discover and compile dynamic plugins
+     * @return the dynamically discovered plugins
+     */
     private List<PluginInfo> findDynamicPlugins(ClassLoader classLoader) {
         var discoveredPlugins = new ArrayList<PluginInfo>();
         var pluginResourceClassLoader = resolvePluginResourceClassLoader(classLoader);
@@ -544,6 +602,11 @@ public class DefaultPluginDiscovery implements PluginDiscovery {
         }
     }
 
+    /**
+     * Resolves the base class loader for plugin discovery.
+     *
+     * @return the thread context class loader, or this class's loader if the thread context loader is not set
+     */
     private ClassLoader resolveClassLoader() {
         var classLoader = Thread.currentThread().getContextClassLoader();
         if (classLoader == null) {
@@ -552,6 +615,12 @@ public class DefaultPluginDiscovery implements PluginDiscovery {
         return classLoader;
     }
 
+    /**
+     * Resolves a {@link GroovyClassLoader} for compiling plugin resources expressed as Groovy source files.
+     *
+     * @param classLoader the base class loader for plugin discovery
+     * @return a Groovy-capable class loader backed by the supplied class loader
+     */
     private GroovyClassLoader resolvePluginResourceClassLoader(ClassLoader classLoader) {
         if (classLoader instanceof GroovyClassLoader) {
             return (GroovyClassLoader) classLoader;
@@ -562,6 +631,14 @@ public class DefaultPluginDiscovery implements PluginDiscovery {
         return new GroovyClassLoader(classLoader);
     }
 
+    /**
+     * Compiles a plugin class from a Groovy resource.
+     *
+     * @param cl the Groovy class loader used to compile the resource
+     * @param r the plugin resource to compile
+     * @return the compiled plugin class
+     * @throws PluginException if the resource cannot be read or compiled
+     */
     private Class<?> loadPluginClass(GroovyClassLoader cl, Resource r) {
         try {
             if (LOG.isInfoEnabled()) {

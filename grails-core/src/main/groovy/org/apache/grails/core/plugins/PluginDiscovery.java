@@ -27,129 +27,173 @@ import org.springframework.core.io.Resource;
 import org.apache.grails.core.plugins.filters.PluginFilter;
 
 /**
- * This class is responsible for locating Grails Plugins that should be loaded.
+ * Defines a strategy for discovering the Grails plugins that should participate in application bootstrap.
+ *
+ * <p>A {@code PluginDiscovery} implementation is initialized early in the application lifecycle, typically from
+ * {@link grails.boot.config.GrailsEnvironmentPostProcessor}, and later reused by the plugin manager and other
+ * bootstrap components. Implementations are expected to discover candidate plugins, apply filtering, resolve
+ * ordering, and expose the resulting plugin metadata through the methods in this interface.</p>
  *
  * @since 7.1
  */
 public interface PluginDiscovery {
 
     /**
-     * After the bootstrap process, the name of the bean that this plugin discovery will be promoted with
+     * The bean name used when the bootstrap {@code PluginDiscovery} is promoted into the application context.
      */
     String BEAN_NAME = "grailsPluginDiscovery";
 
     /**
-     * Initializes the plugin discovery mechanism. This method is called during the {@link grails.boot.config.GrailsEnvironmentPostProcessor}
+     * Initializes plugin discovery for the supplied environment.
      *
-     * @param environment the environment to check for plugin exclusions
+     * <p>This method is typically invoked during
+     * {@link grails.boot.config.GrailsEnvironmentPostProcessor} so filtering and ordering are available before
+     * the main application context finishes bootstrapping.</p>
+     *
+     * @param environment the environment used to determine plugin filtering and ordering
      */
     void init(Environment environment);
 
     /**
-     * This method is typically only used in testing, specifically unit tests.
+     * Returns plugins supplied dynamically instead of being discovered from classpath descriptors.
      *
-     * @return Plugins that were defined dynamically outside of the classpath
+     * <p>This is most commonly used by tests that configure plugin classes or resources directly.</p>
+     *
+     * @return dynamically configured plugins discovered outside the standard classpath descriptor scan
      */
     Collection<PluginInfo> getDynamicPlugins();
 
     /**
-     * @param name the name of the plugin
-     * @return true if the plugin failed to load
+     * Determines whether a plugin failed during discovery or dependency resolution.
+     *
+     * @param name the name of the plugin; implementations may normalize the name before lookup
+     * @return {@code true} if the named plugin could not be loaded successfully
      */
     boolean hasFailedPlugin(String name);
 
     /**
-     * @param name the name of the plugin
-     * @return the plugin if it failed to load
+     * Returns a plugin that failed during discovery or dependency resolution.
+     *
+     * @param name the name of the plugin; implementations may normalize the name before lookup
+     * @return the failed plugin, or {@code null} if no matching failed plugin exists
      */
     PluginInfo getFailedPlugin(String name);
 
     /**
-     * @return Plugins that failed to load during the discovery process
+     * Returns every plugin that failed during discovery or dependency resolution.
+     *
+     * @return the plugins that could not be loaded successfully
      */
     Collection<PluginInfo> getFailedPlugins();
 
     /**
-     * @param pluginName a plugin name to search for, the name may not be normalized
-     * @return the plugin information if found
+     * Finds a discovered plugin by name.
+     *
+     * @param pluginName a plugin name to search for; implementations may normalize the name before lookup
+     * @return the plugin information if found, otherwise {@code null}
      */
     PluginInfo findPlugin(String pluginName);
 
     /**
+     * Finds a discovered plugin by name and required version.
      *
-     * @param pluginName a plugin name to search for, the name may not be normalized
+     * @param pluginName a plugin name to search for; implementations may normalize the name before lookup
      * @param version the required version of the plugin
-     * @return if a plugin was found, and it meets the required version it will be returned, otherwise null
+     * @return the matching plugin if it satisfies the required version, otherwise {@code null}
      */
     PluginInfo findPlugin(String pluginName, Object version);
 
     /**
-     * @return plugins ordered by a topographical sort.
+     * Returns the discovered plugins in topological order.
+     *
+     * @return plugins ordered by dependency and declared load-before/load-after relationships
      */
     List<PluginInfo> getPluginsInTopologicalOrder();
 
     /**
-     * @return the order the plugins were loaded in.
+     * Returns the discovered plugins in their effective load order.
+     *
+     * @return the order in which plugins should be loaded
      */
     List<PluginInfo> getPluginsInLoadOrder();
 
     /**
-     * @param name the name of the plugin - it may not be normalized
-     * @return true if a plugin with the given name exists, false otherwise
+     * Determines whether a plugin with the given name has been discovered.
+     *
+     * @param name the name of the plugin; implementations may normalize the name before lookup
+     * @return {@code true} if a plugin with the given name exists, otherwise {@code false}
      */
     boolean hasPlugin(String name);
 
     /**
+     * Finds plugins that observe the supplied plugin.
+     *
      * @param plugin the plugin to get the observers for
-     * @return the plugins that are observing the given plugin, empty if none
+     * @return the plugins observing the given plugin, or an empty collection if there are none
      */
     Collection<PluginInfo> findPluginObservers(PluginInfo plugin);
 
     /**
+     * Enables or disables discovery of plugins from classpath descriptors.
+     *
      * @param loadClasspathPlugins true if plugins should be loaded from the classpath,
      *                             otherwise no classpath plugins will be searched
      */
     void setLoadPluginsFromClasspath(boolean loadClasspathPlugins);
 
     /**
+     * Controls whether at least one classpath plugin is required.
+     *
      * @param requireClasspathPlugin if true, classpath plugins will be required to be present
      */
     void setClasspathPluginsRequired(boolean requireClasspathPlugin);
 
     /**
+     * Overrides the plugin filter used during discovery.
+     *
      * @param filter an override to filter plugins that are found during the discovery process
      */
     void setPluginFilter(PluginFilter filter);
 
     /**
-     * Use the given resources to find dynamically defined plugins
+     * Configures Groovy plugin resources to be treated as dynamic plugins.
+     *
+     * @param pluginResources the resources containing dynamically defined plugin classes
      */
     void setPluginResources(Resource[] pluginResources);
 
     /**
-     * Use the given resources to find dynamically defined plugins
+     * Configures resource locations to search for dynamically defined plugins.
+     *
+     * @param pluginResources the resource location patterns containing dynamically defined plugins
      */
     void setPluginResources(String[] pluginResources);
 
     /**
-     * Use the given resources to find dynamically defined plugins
+     * Configures a single resource location to search for dynamically defined plugins.
+     *
+     * @param resourcePath the resource location containing dynamically defined plugins
      */
     void setPluginResources(String resourcePath);
 
     /**
-     * Use the given classes to find dynamically defined plugins
+     * Configures explicit plugin classes to be treated as dynamic plugins.
+     *
+     * @param pluginClasses the dynamically supplied plugin classes
      */
     void setPluginClasses(Class<?>[] pluginClasses);
 
     /**
-     * @return any dynamic configured plugin resources specified at construction
+     * Returns the configured dynamic plugin resources.
+     *
+     * @return the dynamic plugin resources currently configured for discovery
      */
     Resource[] getPluginResources();
 
     /**
-     * Reset the state of the plugin discovery mechanism so it can be rediscovered
+     * Resets the discovery state so plugins can be discovered again.
      *
-     * WARNING: This should only be done in controlled environments, usually during testing
+     * <p><strong>Warning:</strong> This should only be done in controlled environments, usually during testing.</p>
      */
     void reset();
 }
