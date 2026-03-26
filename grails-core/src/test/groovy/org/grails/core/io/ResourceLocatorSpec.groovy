@@ -18,18 +18,19 @@
  */
 package org.grails.core.io
 
+import spock.lang.Specification
+
 import org.springframework.context.support.GenericApplicationContext
+import org.springframework.core.io.ByteArrayResource
+import org.springframework.core.io.ResourceLoader
 
 import grails.core.DefaultGrailsApplication
 import grails.plugins.GrailsPlugin
 import grails.plugins.GrailsPluginManager
-import groovy.xml.XmlSlurper
-
 import org.apache.grails.core.plugins.PluginDescriptor
-import org.grails.plugins.*
-import org.springframework.core.io.ByteArrayResource
-import org.springframework.core.io.ResourceLoader
-import spock.lang.Specification
+import org.grails.plugins.BinaryGrailsPlugin
+import org.grails.plugins.MockBinaryPluginResource
+import org.grails.plugins.TestBinaryGrailsPlugin
 
 class ResourceLocatorSpec extends Specification {
 
@@ -77,8 +78,6 @@ class ResourceLocatorSpec extends Specification {
       <class>org.grails.plugins.TestBinaryGrailsPlugin</class>
     </plugin>
     '''
-
-        new XmlSlurper().parseText(str)
 
         def resource = new MockBinaryPluginResource(str.bytes)
         def descriptor = new PluginDescriptor(resource, ['org.grails.plugins.TestBinaryGrailsPlugin'], [])
