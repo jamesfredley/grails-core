@@ -23,9 +23,6 @@ class UrlMappings {
 
     static mappings = {
         "/viewBooks"(redirect: '/book/index')
-        '/wildcard-disabled/show-action'(controller: 'wildcardValidation', action: 'show')
-        '/wildcard-disabled/$action'(controller: 'wildcardValidation')
-        '/wildcard-disabled/$id'(controller: 'wildcardValidation', action: 'show')
         "/$controller/$action?/$id?(.$format)?"{
             constraints {
                 // apply constraints here

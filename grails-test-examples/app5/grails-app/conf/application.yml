@@ -15,36 +15,24 @@
 
 ---
 grails:
-  profile: web
-  codegen:
-    defaultPackage: functionaltests
+    profile: web
+    codegen:
+        defaultPackage: app4
+    web:
+        url:
+            mapping:
+                validateWildcards: false
 info:
     app:
         name: '@info.app.name@'
         version: '@info.app.version@'
         grailsVersion: '@info.app.grailsVersion@'
 spring:
-  groovy:
-    template:
-      check-template-location: false
+    groovy:
+        template:
+            check-template-location: false
 
 ---
-grails11951:
-    prop3: Prop Three Defined By app1 Application
-foo:
-    bar: '${REPLACE_ME}'    
----
-reactor:
-  dispatchers:
-    default: threadPool
-    threadPool:
-      type: threadPoolExecutor
-      size: 5
-      backlog: 1024
-    dispatcherGroup:
-      type: dispatcherGroup
-      size: 0
-      backlog: 1024
 grails:
     mime:
         disable:
@@ -98,10 +86,6 @@ grails:
                 scriptlets: html
                 taglib: none
                 staticparts: none
-    cors:
-        enabled: true
-        mappings:
-            '[/api/**]': default
 
 ---
 dataSource:
@@ -125,20 +109,21 @@ environments:
             dbCreate: create-drop
             url: jdbc:h2:./prodDb;LOCK_TIMEOUT=10000;DB_CLOSE_ON_EXIT=FALSE
             properties:
-               jmxEnabled: true
-               initialSize: 5
-               maxActive: 50
-               minIdle: 5
-               maxIdle: 25
-               maxWait: 10000
-               maxAge: 600000
-               timeBetweenEvictionRunsMillis: 5000
-               minEvictableIdleTimeMillis: 60000
-               validationQuery: SELECT 1
-               validationQueryTimeout: 3
-               validationInterval: 15000
-               testOnBorrow: true
-               testWhileIdle: true
-               testOnReturn: false
-               jdbcInterceptors: ConnectionState
-               defaultTransactionIsolation: 2
+                jmxEnabled: true
+                initialSize: 5
+                maxActive: 50
+                minIdle: 5
+                maxIdle: 25
+                maxWait: 10000
+                maxAge: 600000
+                timeBetweenEvictionRunsMillis: 5000
+                minEvictableIdleTimeMillis: 60000
+                validationQuery: SELECT 1
+                validationQueryTimeout: 3
+                validationInterval: 15000
+                testOnBorrow: true
+                testWhileIdle: true
+                testOnReturn: false
+                jdbcInterceptors: ConnectionState
+                defaultTransactionIsolation: 2
+

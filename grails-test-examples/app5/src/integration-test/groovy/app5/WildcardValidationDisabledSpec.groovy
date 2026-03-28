@@ -16,11 +16,12 @@
  *  specific language governing permissions and limitations
  *  under the License.
  */
-package functionaltests.urlmappings
+package app5
+
+import spock.lang.Specification
 
 import grails.testing.mixin.integration.Integration
 import org.apache.grails.testing.http.client.HttpClientSupport
-import spock.lang.Specification
 
 @Integration
 class WildcardValidationDisabledSpec extends Specification implements HttpClientSupport {
@@ -44,7 +45,3 @@ class WildcardValidationDisabledSpec extends Specification implements HttpClient
         ])
     }
 }
-
-
-
-
