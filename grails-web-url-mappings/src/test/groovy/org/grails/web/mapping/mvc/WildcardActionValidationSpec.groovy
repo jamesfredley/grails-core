@@ -185,6 +185,31 @@ class WildcardActionValidationSpec extends AbstractUrlMappingsSpec {
         info.actionName == 'show'
     }
 
+    void "literal path mapping beats wildcard controller match"() {
+        given:
+        def grailsApplication = new DefaultGrailsApplication(TopicController, CommunityController)
+        grailsApplication.initialise()
+        def holder = getUrlMappingsHolder {
+            "/community"(controller: 'topic', action: 'home')
+            "/$controller/$action?"()
+        }
+        holder = new GrailsControllerUrlMappings(grailsApplication, holder)
+
+        when: "requesting /community which matches both the literal mapping and the wildcard controller"
+        def webRequest = GrailsWebMockUtil.bindMockWebRequest()
+        webRequest.renderView = true
+        def request = webRequest.request
+        request.setRequestURI("/community")
+        def handler = new UrlMappingsHandlerMapping(holder)
+        def handlerChain = handler.getHandler(request)
+
+        then: "the literal path mapping wins"
+        handlerChain != null
+        handlerChain.handler instanceof GrailsControllerUrlMappingInfo
+        (handlerChain.handler as GrailsControllerUrlMappingInfo).info.controllerName == 'topic'
+        (handlerChain.handler as GrailsControllerUrlMappingInfo).info.actionName == 'home'
+    }
+
     void "explicit method-specific mapping beats wildcard optional action match"() {
         given:
         def grailsApplication = new DefaultGrailsApplication(InviteController)
@@ -232,7 +257,21 @@ class InviteController {
 }
 
 @Artefact('Controller')
+class CommunityController {
+
+    @Action
+    def index() {
+        [view: 'index']
+    }
+}
+
+@Artefact('Controller')
 class TopicController {
+
+    @Action
+    def home() {
+        [view: 'home']
+    }
 
     @Action
     def gallery() {

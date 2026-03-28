@@ -206,11 +206,13 @@ abstract class AbstractGrailsControllerUrlMappings implements UrlMappings {
         }
     }
 
+    private static final Set<String> ROUTING_PARAMS = ['controller', 'action', 'namespace', 'plugin', 'format', 'id', 'version'] as Set
+
     protected UrlMappingInfo[] collectControllerMappings(UrlMappingInfo[] infos) {
         def webRequest = GrailsWebRequest.lookup()
         List<UrlMappingInfo> wildcardActionMatches = []
         List<UrlMappingInfo> otherMatches = []
-        Set<String> explicitControllers = new HashSet<>()
+        boolean hasLiteralControllerMatch = false
         for (UrlMappingInfo info : infos) {
             if (info.redirectInfo) {
                 otherMatches.add(info)
@@ -228,18 +230,25 @@ abstract class AbstractGrailsControllerUrlMappings implements UrlMappings {
                     wildcardActionMatches.add(wrapped)
                 } else {
                     otherMatches.add(wrapped)
-                    explicitControllers.add(info.controllerName)
+                    if (!hasLiteralControllerMatch) {
+                        // A literal match has no URL-captured parameters beyond standard routing params
+                        def params = info.parameters
+                        hasLiteralControllerMatch = params == null || params.keySet().every { it in ROUTING_PARAMS }
+                    }
                 }
             } else if (!validateWildcardMappings || !info.hasWildcardCaptures()) {
                 otherMatches.add(info)
             }
             // else: wildcard-captured values didn't match a registered controller/action — skip
         }
-        // Wildcard-resolved matches take priority over non-controller matches,
-        // but not over explicit mappings that already target the same controller
-        List<UrlMappingInfo> promoted = wildcardActionMatches.findAll { !(it.controllerName in explicitControllers) }
-        List<UrlMappingInfo> demoted = wildcardActionMatches.findAll { it.controllerName in explicitControllers }
-        (promoted + otherMatches + demoted) as UrlMappingInfo[]
+        // Wildcard-resolved matches take priority over parameterized catch-all matches
+        // (e.g., $controller=feed beats $communitySlug=feed), but NOT over literal path
+        // matches (e.g., /community or post /invites) which are always more specific
+        if (hasLiteralControllerMatch) {
+            (otherMatches + wildcardActionMatches) as UrlMappingInfo[]
+        } else {
+            (wildcardActionMatches + otherMatches) as UrlMappingInfo[]
+        }
     }
 
     protected UrlMappingInfo collectControllerMapping(UrlMappingInfo info) {
