@@ -21,11 +21,14 @@ package org.grails.plugins.metadata
 import spock.lang.Shared
 import spock.lang.Specification
 
+import org.springframework.core.env.StandardEnvironment
+
 import grails.core.DefaultGrailsApplication
 import grails.plugins.DefaultGrailsPluginManager
 import grails.plugins.GrailsPluginManager
 import grails.plugins.metadata.GrailsPlugin
 import grails.util.GrailsUtil
+import org.apache.grails.core.plugins.DefaultPluginDiscovery
 
 class GrailsPluginMetadataTests extends Specification {
 
@@ -33,8 +36,12 @@ class GrailsPluginMetadataTests extends Specification {
 
     void setupSpec() {
         def app = new DefaultGrailsApplication([Test1, Test2, Test3] as Class[], getClass().classLoader)
-        pluginManager = new DefaultGrailsPluginManager([] as Class[], app)
-        pluginManager.loadPlugins()
+        def discovery = new DefaultPluginDiscovery().tap {
+            init(new StandardEnvironment())
+        }
+        pluginManager = new DefaultGrailsPluginManager(app, discovery).tap {
+            loadPlugins()
+        }
     }
 
     void 'returns plugins for instances'(Object instance, String name) {
