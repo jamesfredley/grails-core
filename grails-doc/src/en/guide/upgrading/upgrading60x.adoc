@@ -201,8 +201,6 @@ Grails 6 is updated to use Micronaut for Spring 4.5.1. For more information, che
 
 Micronaut for Spring 4.5.1 provides seamless integration between Micronaut and Spring, allowing you to leverage the strengths of both frameworks in your Grails project.
 
-For full details, see the link:{guidePath}scaffolding.html[Scaffolding] documentation.
-
 ==== 13. Upgrading the Spring Security Plugin
 
 If your application uses the Grails Spring Security plugin, please consult the https://apache.github.io/grails-spring-security/snapshot/guide/index.html#upgrading-from-previous-versions[Upgrading from Previous Versions] section of the Spring Security plugin documentation for specific upgrade instructions related to Grails 7.

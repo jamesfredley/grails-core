@@ -681,3 +681,46 @@ grails generate-scaffold-all Book
 These commands support options like `--extends` to specify a custom class to extend, `--namespace` for controller namespacing, and `--service` to use `RestfulServiceController`.
 
 For full details, see the link:{guidePath}scaffolding.html[Scaffolding] documentation.
+
+===== 2.8 URL Mapping Group Defaults
+
+The `group` method in URL mappings now accepts default parameters that are inherited by all child mappings:
+
+[source,groovy]
+----
+group "/api", namespace: 'api', controller: 'resource', {
+    "/list"(action: 'list')    // inherits namespace and controller
+    "/show"(action: 'show')    // inherits namespace and controller
+}
+----
+
+Nested groups merge defaults — inner groups inherit and can extend or override outer group defaults. Child mappings can override any default explicitly. This is a new additive feature and does not affect existing URL mappings.
+
+For full details, see the link:{guidePath}theWebLayer/urlmappings/mappingToControllersAndActions.html#_group_defaults[Group Defaults] documentation.
+
+===== 2.9 URL Mapping Wildcard Validation
+
+Grails now validates wildcard-captured URL mapping variables (`$controller`, `$action`, `$namespace`) against registered controller artefacts at request time. When a captured value does not match a registered artefact, the mapping is skipped and the next mapping is tried.
+
+This is a new behavior that is **enabled by default**. It allows patterns like:
+
+[source,groovy]
+----
+group "/topics", {
+    "/$action"(controller: 'topic')    // tried first — only matches real actions
+    "/$id"(controller: 'topic', action: 'show')  // fallback for non-action values
+}
+----
+
+Hardcoded controller/action values in mappings are not affected — only wildcard-captured values are validated.
+
+If this causes issues with existing URL mappings, you can disable it in `application.yml`:
+
+[source,yaml]
+----
+grails:
+    web:
+        url:
+            mapping:
+                validateWildcards: false
+----
