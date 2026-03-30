@@ -53,7 +53,9 @@ import grails.plugins.GrailsPluginManager
 import grails.spring.BeanBuilder
 import grails.util.Holders
 import org.grails.core.support.GrailsApplicationDiscoveryStrategy
-import org.grails.plugins.IncludingPluginFilter
+import org.apache.grails.core.plugins.DefaultPluginDiscovery
+import org.apache.grails.core.plugins.filters.IncludingPluginFilter
+import org.apache.grails.core.plugins.PluginDiscovery
 import org.grails.spring.context.support.GrailsPlaceholderConfigurer
 import org.grails.spring.context.support.MapBasedSmartPropertyOverrideConfigurer
 import org.grails.transaction.TransactionManagerPostProcessor
@@ -122,7 +124,7 @@ class GrailsApplicationBuilder {
 
         grailsApplication = mainContext.getBean('grailsApplication') as GrailsApplication
 
-        if (!grailsApplication.isInitialised()) {
+        if (!grailsApplication.initialised) {
             grailsApplication.initialise()
         }
 
@@ -135,7 +137,7 @@ class GrailsApplicationBuilder {
 
         if (isServletApiPresent) {
             context = ClassUtils.forName('org.springframework.mock.web.MockServletContext').getDeclaredConstructor().newInstance()
-            Holders.setServletContext(context)
+            Holders.servletContext = context
         }
 
         return context
@@ -191,9 +193,19 @@ class GrailsApplicationBuilder {
     }
 
     protected void prepareContext(ConfigurableApplicationContext applicationContext, ConfigurableBeanFactory beanFactory) {
-        registerGrailsAppPostProcessorBean(beanFactory)
+        def discovery = registerPluginDiscoveryBean(applicationContext, beanFactory)
+        registerGrailsAppPostProcessorBean(beanFactory, discovery)
         AnnotationConfigUtils.registerAnnotationConfigProcessors((BeanDefinitionRegistry) beanFactory)
         new ConfigDataApplicationContextInitializer().initialize(applicationContext)
+    }
+
+    protected PluginDiscovery registerPluginDiscoveryBean(ConfigurableApplicationContext applicationContext, ConfigurableBeanFactory beanFactory) {
+        def discovery = new DefaultPluginDiscovery()
+        // we must load the classpath since the plugin manager needs to find the default plugins
+        discovery.pluginFilter = new IncludingPluginFilter(includePlugins ?: DEFAULT_INCLUDED_PLUGINS)
+        discovery.init(applicationContext.getEnvironment())
+        beanFactory.registerSingleton(PluginDiscovery.BEAN_NAME, discovery)
+        discovery
     }
 
     void executeDoWithSpringCallback(GrailsApplication grailsApplication) {
@@ -207,11 +219,11 @@ class GrailsApplicationBuilder {
 
     void defineBeans(GrailsApplication grailsApplication, Closure callable) {
         def binding = new Binding()
-        def bb = new BeanBuilder(null, null, grailsApplication.getClassLoader())
+        def bb = new BeanBuilder(null, null, grailsApplication.classLoader)
         binding.setVariable('application', grailsApplication)
-        bb.setBinding(binding)
+        bb.binding = binding
         bb.beans(callable)
-        bb.registerBeans((BeanDefinitionRegistry) grailsApplication.getMainContext())
+        bb.registerBeans((BeanDefinitionRegistry) grailsApplication.mainContext)
     }
 
     @CompileDynamic
@@ -236,7 +248,7 @@ class GrailsApplicationBuilder {
         }
     }
 
-    protected void registerGrailsAppPostProcessorBean(ConfigurableBeanFactory beanFactory) {
+    protected void registerGrailsAppPostProcessorBean(ConfigurableBeanFactory beanFactory, PluginDiscovery pluginDiscovery) {
 
         GrailsApplication grailsApp
 
@@ -257,7 +269,7 @@ class GrailsApplicationBuilder {
 
         def constructorArgumentValues = new ConstructorArgumentValues()
         constructorArgumentValues.addIndexedArgumentValue(0, doWithSpringClosure)
-        constructorArgumentValues.addIndexedArgumentValue(1, includePlugins ?: DEFAULT_INCLUDED_PLUGINS)
+        constructorArgumentValues.addIndexedArgumentValue(1, pluginDiscovery)
 
         def values = new MutablePropertyValues()
         values.add('localOverride', localOverride)
@@ -265,26 +277,19 @@ class GrailsApplicationBuilder {
         values.add('customizeGrailsApplicationClosure', customizeGrailsApplicationClosure)
 
         def beanDef = new RootBeanDefinition(TestRuntimeGrailsApplicationPostProcessor, constructorArgumentValues, values)
-        beanDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE)
+        beanDef.role = BeanDefinition.ROLE_INFRASTRUCTURE
         (beanFactory as BeanDefinitionRegistry).registerBeanDefinition('grailsApplicationPostProcessor', beanDef)
     }
 
     static class TestRuntimeGrailsApplicationPostProcessor extends GrailsApplicationPostProcessor {
 
         Closure customizeGrailsApplicationClosure
-        Set includedPlugins
         boolean localOverride = false
 
-        TestRuntimeGrailsApplicationPostProcessor(Closure doWithSpringClosure, Set includedPlugins) {
-            super([doWithSpring: { -> doWithSpringClosure }] as GrailsApplicationLifeCycle, null, null)
+        TestRuntimeGrailsApplicationPostProcessor(Closure doWithSpringClosure, PluginDiscovery pluginDiscovery) {
+            super([doWithSpring: { -> doWithSpringClosure }] as GrailsApplicationLifeCycle, null, pluginDiscovery)
             loadExternalBeans = false
             reloadingEnabled = false
-            this.includedPlugins = includedPlugins
-        }
-
-        @Override
-        protected void customizePluginManager(GrailsPluginManager grailsApplication) {
-            pluginManager.pluginFilter = new IncludingPluginFilter(includedPlugins)
         }
 
         @Override
@@ -297,7 +302,7 @@ class GrailsApplicationBuilder {
             super.postProcessBeanDefinitionRegistry(registry)
             PropertySourcesPlaceholderConfigurer propertySourcePlaceholderConfigurer  = (PropertySourcesPlaceholderConfigurer) grailsApplication.mainContext.getBean('grailsPlaceholderConfigurer')
             propertySourcePlaceholderConfigurer.order = Ordered.HIGHEST_PRECEDENCE
-            propertySourcePlaceholderConfigurer.setLocalOverride(localOverride)
+            propertySourcePlaceholderConfigurer.localOverride = localOverride
         }
     }
 }
