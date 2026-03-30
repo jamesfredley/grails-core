@@ -51,31 +51,9 @@ import org.grails.spring.DefaultRuntimeSpringConfiguration;
 import org.grails.spring.RuntimeSpringConfiguration;
 
 /**
- * <p>Handles the loading and management of plug-ins in the Grails system.
- * A plugin is just like a normal Grails application except that it contains a file ending
- * in *Plugin.groovy in the root of the directory.
- * <p>A Plugin class is a Groovy class that has a version and optionally closures
- * called doWithSpring, doWithContext and doWithWebDescriptor
- * <p>The doWithSpring closure uses the BeanBuilder syntax (@see grails.spring.BeanBuilder) to
- * provide runtime configuration of Grails via Spring
- * <p>The doWithContext closure is called after the Spring ApplicationContext is built and accepts
- * a single argument (the ApplicationContext)
- * <p>The doWithWebDescriptor uses mark-up building to provide additional functionality to the web.xml
- * file
- * <p> Example:
- * <pre>
- * class ClassEditorGrailsPlugin {
- *      def version = '1.1'
- *      def doWithSpring = { application ->
- *          classEditor(org.springframework.beans.propertyeditors.ClassEditor, application.classLoader)
- *      }
- * }
- * </pre>
- * <p>A plugin can also define "dependsOn" and "evict" properties that specify what plugins the plugin
- * depends on and which ones it is incompatible with and should evict
- *
  * @author Graeme Rocher
  * @since 0.4
+ * @see GrailsPluginManager
  */
 public class DefaultGrailsPluginManager extends AbstractGrailsPluginManager {
 
