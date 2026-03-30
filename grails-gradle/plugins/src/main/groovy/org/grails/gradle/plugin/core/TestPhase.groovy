@@ -29,7 +29,7 @@ import grails.util.GrailsNameUtils
  * are derived from the phase {@code name} so that users only need to declare the
  * phase by name in most cases.</p>
  *
- * @since 2025.0
+ * @since 7.1
  */
 @CompileStatic
 class TestPhase {

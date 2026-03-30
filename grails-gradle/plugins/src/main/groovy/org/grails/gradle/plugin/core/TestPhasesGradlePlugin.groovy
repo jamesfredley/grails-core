@@ -52,7 +52,7 @@ import static org.gradle.api.tasks.SourceSet.TEST_SOURCE_SET_NAME
  * source set, dependency configurations, {@link Test} task, and merged test
  * report contribution.</p>
  *
- * @since 2025.0
+ * @since 7.1
  */
 @CompileStatic
 class TestPhasesGradlePlugin implements Plugin<Project> {
