@@ -67,7 +67,7 @@ class TestPhasesGradlePlugin implements Plugin<Project> {
         testPhases = project.container(TestPhase)
         project.extensions.add(EXTENSION_NAME, testPhases)
 
-        testPhases.all { TestPhase phase ->
+        testPhases.configureEach { TestPhase phase ->
             configureTestPhase(project, phase)
         }
     }
