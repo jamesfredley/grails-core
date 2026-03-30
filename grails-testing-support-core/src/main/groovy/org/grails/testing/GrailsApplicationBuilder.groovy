@@ -21,6 +21,7 @@ package org.grails.testing
 
 import groovy.transform.CompileDynamic
 import groovy.transform.CompileStatic
+import org.codehaus.groovy.runtime.InvokerHelper
 
 import jakarta.servlet.ServletContext
 
@@ -51,6 +52,7 @@ import grails.core.support.proxy.DefaultProxyHandler
 import grails.plugins.GrailsPluginManager
 import grails.spring.BeanBuilder
 import grails.util.Holders
+import org.grails.core.support.GrailsApplicationDiscoveryStrategy
 import org.grails.plugins.IncludingPluginFilter
 import org.grails.spring.context.support.GrailsPlaceholderConfigurer
 import org.grails.spring.context.support.MapBasedSmartPropertyOverrideConfigurer
@@ -62,7 +64,10 @@ import org.grails.transaction.TransactionManagerPostProcessor
 @CompileStatic
 class GrailsApplicationBuilder {
 
-    public static final boolean isServletApiPresent = ClassUtils.isPresent('jakarta.servlet.ServletContext', GrailsApplicationBuilder.classLoader)
+    public static final boolean isServletApiPresent = ClassUtils.isPresent(
+            'jakarta.servlet.ServletContext',
+            GrailsApplicationBuilder.classLoader
+    )
 
     static final Set DEFAULT_INCLUDED_PLUGINS = ['core', 'eventBus'] as Set
 
@@ -75,7 +80,6 @@ class GrailsApplicationBuilder {
     GrailsApplication grailsApplication
     Object servletContext
 
-    @CompileDynamic
     GrailsApplicationBuilder build() {
 
         servletContext = createServletContext()
@@ -88,14 +92,30 @@ class GrailsApplicationBuilder {
             // be removed so rather than implement a real solution, this hack will
             // do for now to keep the build healthy.
             try {
-                def segads = Class.forName('org.grails.web.context.ServletEnvironmentGrailsApplicationDiscoveryStrategy')
-                Holders.addApplicationDiscoveryStrategy(segads.newInstance(servletContext))
+                def appDiscoveryStrategyClass = Class.forName(
+                        'org.grails.web.context.ServletEnvironmentGrailsApplicationDiscoveryStrategy'
+                )
+                def appDiscoveryStrategy = appDiscoveryStrategyClass
+                        .getDeclaredConstructor(ServletContext)
+                        .newInstance(servletContext)
+                Holders.addApplicationDiscoveryStrategy(
+                        (GrailsApplicationDiscoveryStrategy) appDiscoveryStrategy
+                )
             }
             catch (Throwable ignored) {}
 
             try {
                 def gcu = Class.forName('org.grails.web.servlet.context.GrailsConfigUtils')
-                gcu.configureServletContextAttributes(servletContext, grailsApplication, mainContext.getBean(GrailsPluginManager.BEAN_NAME, GrailsPluginManager), mainContext)
+                InvokerHelper.invokeStaticMethod(
+                        gcu,
+                        'configureServletContextAttributes',
+                        [
+                                servletContext,
+                                grailsApplication,
+                                mainContext.getBean(GrailsPluginManager.BEAN_NAME, GrailsPluginManager),
+                                mainContext
+                        ] as Object[]
+                )
             }
             catch (Throwable ignored) {}
         }
@@ -121,17 +141,18 @@ class GrailsApplicationBuilder {
         return context
     }
 
-    @CompileDynamic
     protected ConfigurableApplicationContext createMainContext(Object servletContext) {
         ConfigurableApplicationContext context
         if (isServletApiPresent && servletContext != null) {
             // Spring Boot 4.0/Spring 7.0: Use GenericWebApplicationContext with manual annotation support
             // instead of removed AnnotationConfigServletWebApplicationContext
-            context = (ConfigurableApplicationContext) ClassUtils.forName('org.springframework.web.context.support.GenericWebApplicationContext').getDeclaredConstructor().newInstance()
-            context.setServletContext((ServletContext) servletContext)
-            
+            context = (ConfigurableApplicationContext) ClassUtils
+                    .forName('org.springframework.web.context.support.GenericWebApplicationContext')
+                    .getDeclaredConstructor(ServletContext)
+                    .newInstance((ServletContext) servletContext)
+
             // Register annotation config processors manually
-            def beanFactory = context.getBeanFactory()
+            def beanFactory = context.beanFactory
             AnnotationConfigUtils.registerAnnotationConfigProcessors((BeanDefinitionRegistry) beanFactory)
             
             // Register auto-configuration classes
@@ -145,7 +166,10 @@ class GrailsApplicationBuilder {
                 ((BeanDefinitionRegistry) beanFactory).registerBeanDefinition(it, beanDef)
             }
         } else {
-            context = (ConfigurableApplicationContext) ClassUtils.forName('org.springframework.context.annotation.AnnotationConfigApplicationContext').getDeclaredConstructor().newInstance()
+            context = (ConfigurableApplicationContext) ClassUtils
+                    .forName('org.springframework.context.annotation.AnnotationConfigApplicationContext')
+                    .getDeclaredConstructor()
+                    .newInstance()
             
             def classLoader = this.class.classLoader
             ImportCandidates.load(AutoConfiguration, classLoader).asList().findAll {
@@ -156,10 +180,9 @@ class GrailsApplicationBuilder {
             }
         }
 
-        def beanFactory = context.getBeanFactory()
-        (beanFactory as DefaultListableBeanFactory).with {
-            setAllowBeanDefinitionOverriding(true)
-            setAllowCircularReferences(true)
+        def beanFactory = (context.beanFactory as DefaultListableBeanFactory).tap {
+            allowBeanDefinitionOverriding = true
+            allowCircularReferences = true
         }
         prepareContext(context, beanFactory)
         context.refresh()
