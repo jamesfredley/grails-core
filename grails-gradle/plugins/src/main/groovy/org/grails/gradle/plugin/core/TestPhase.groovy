@@ -20,6 +20,10 @@ package org.grails.gradle.plugin.core
 
 import groovy.transform.CompileStatic
 
+import org.gradle.api.provider.Property
+
+import javax.inject.Inject
+
 import grails.util.GrailsNameUtils
 
 /**
@@ -32,20 +36,22 @@ import grails.util.GrailsNameUtils
  * @since 7.1
  */
 @CompileStatic
-class TestPhase {
+abstract class TestPhase {
 
     final String name
 
-    String sourceFolderName
+    abstract Property<String> getSourceFolderName()
 
-    String systemPropertyName
+    abstract Property<String> getSystemPropertyName()
 
-    boolean ideaIntegration = true
+    abstract Property<Boolean> getIdeaIntegration()
 
+    @Inject
     TestPhase(String name) {
         this.name = name
-        this.sourceFolderName = "src/${GrailsNameUtils.getScriptName(name)}"
         String naturalPart = name.replaceAll(/Test$/, '')
-        this.systemPropertyName = "is.grails.${GrailsNameUtils.getScriptName(naturalPart)}.test"
+        sourceFolderName.convention("src/${GrailsNameUtils.getScriptName(name)}".toString())
+        systemPropertyName.convention("is.grails.${GrailsNameUtils.getScriptName(naturalPart)}.test".toString())
+        ideaIntegration.convention(true)
     }
 }

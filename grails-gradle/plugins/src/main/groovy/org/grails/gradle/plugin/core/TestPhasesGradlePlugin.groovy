@@ -64,7 +64,9 @@ class TestPhasesGradlePlugin implements Plugin<Project> {
 
     @Override
     void apply(Project project) {
-        testPhases = project.container(TestPhase)
+        testPhases = project.container(TestPhase) { String name ->
+            project.objects.newInstance(TestPhase, name)
+        }
         project.extensions.add(EXTENSION_NAME, testPhases)
 
         registerMergeTestReports(project)
@@ -124,7 +126,7 @@ class TestPhasesGradlePlugin implements Plugin<Project> {
             it.testLogging {
                 events('passed')
             }
-            it.systemProperty(phase.systemPropertyName, true)
+            it.systemProperty(phase.systemPropertyName.get(), true)
         }
         tasks.named('check').configure {
             it.dependsOn(testTask)
@@ -132,7 +134,7 @@ class TestPhasesGradlePlugin implements Plugin<Project> {
 
         addPhaseToMergeTestReports(project, phaseName)
 
-        if (phase.ideaIntegration) {
+        if (phase.ideaIntegration.get()) {
             final File[] files = acceptedSourceDirs.toArray(new File[acceptedSourceDirs.size()])
             integrateIdea(project, files)
         }
@@ -172,6 +174,6 @@ class TestPhasesGradlePlugin implements Plugin<Project> {
     }
 
     File[] findTestPhaseSources(Project project, TestPhase phase) {
-        project.file(phase.sourceFolderName).listFiles({ File file -> file.isDirectory() && !file.name.contains('.') } as FileFilter)
+        project.file(phase.sourceFolderName.get()).listFiles({ File file -> file.isDirectory() && !file.name.contains('.') } as FileFilter)
     }
 }
