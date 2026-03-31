@@ -63,7 +63,7 @@ class IntegrationTestGradlePlugin implements Plugin<Project> {
     void apply(Project project) {
         project.pluginManager.apply(TestPhasesGradlePlugin)
 
-        NamedDomainObjectContainer<TestPhase> testPhases = (NamedDomainObjectContainer<TestPhase>) project.extensions.getByName(TestPhasesGradlePlugin.EXTENSION_NAME)
+        def testPhases = project.extensions.getByName(TestPhasesGradlePlugin.EXTENSION_NAME) as NamedDomainObjectContainer<TestPhase>
         testPhases.create(INTEGRATION_TEST_SOURCE_SET_NAME) { TestPhase phase ->
             phase.sourceFolderName.set(sourceFolderName)
             phase.ideaIntegration.set(ideaIntegration)

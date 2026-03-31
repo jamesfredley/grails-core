@@ -29,7 +29,7 @@ class GreetingControllerFunctionalSpec extends ContainerGebSpec {
         go('/greeting/index')
 
         then: 'the page contains the greeting message'
-        driver.pageSource.contains('Hello')
+        pageSource.contains('Hello')
     }
 
 }

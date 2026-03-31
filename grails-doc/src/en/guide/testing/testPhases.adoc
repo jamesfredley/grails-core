@@ -17,7 +17,7 @@ specific language governing permissions and limitations
 under the License.
 ////
 
-A Grails application has two test phases by default: `unit` (the standard `test` source set) and `integration` (added automatically by the Grails Gradle plugin). You can define additional test phases - such as `functionalTest`, `smokeTest`, or `performanceTest` - using the `testPhases` extension in your `build.gradle`.
+A Grails application has two test phases by default: `unit` (the standard `test` source set) and `integration` (added automatically by the Grails Gradle plugin). You can define additional test phases – such as `functional`, `smoke`, or `performance` – by using the `testPhases` extension in your `build.gradle`.
 
 ==== How Test Phases Work
 
@@ -77,7 +77,7 @@ class HomeFunctionalSpec extends ContainerGebSpec {
         go('/')
 
         then:
-        driver.pageSource.contains('Welcome')
+        pageSource.contains('Welcome')
     }
 }
 ----

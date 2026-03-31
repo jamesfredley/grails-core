@@ -97,16 +97,16 @@ class AbstractGroovyTemplatePlugin implements Plugin<Project> {
             }
         }
         project.plugins.withType(TestPhasesGradlePlugin).configureEach {
-            NamedDomainObjectContainer<TestPhase> testPhases = (NamedDomainObjectContainer<TestPhase>) project.extensions.getByName(TestPhasesGradlePlugin.EXTENSION_NAME)
+            def testPhases = project.extensions.getByName(TestPhasesGradlePlugin.EXTENSION_NAME) as NamedDomainObjectContainer<TestPhase>
             testPhases.configureEach { TestPhase phase ->
                 String compileTaskName = "compile${phase.name.capitalize()}Groovy"
                 if (tasks.names.contains(compileTaskName)) {
-                    tasks.named(compileTaskName).configure { Task task ->
+                    tasks.named(compileTaskName) { Task task ->
                         task.dependsOn(templateCompileTask)
                     }
                 }
                 if (tasks.names.contains(phase.name)) {
-                    tasks.named(phase.name).configure { Task task ->
+                    tasks.named(phase.name) { Task task ->
                         task.dependsOn(templateCompileTask)
                     }
                 }

@@ -18,6 +18,9 @@
  */
 package testphases
 
+import grails.compiler.GrailsCompileStatic
+
+@GrailsCompileStatic
 class GreetingController {
 
     GreetingService greetingService

@@ -25,12 +25,9 @@ import org.gradle.api.NamedDomainObjectContainer
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.artifacts.ConfigurationContainer
-import org.gradle.api.artifacts.dsl.DependencyHandler
 import org.gradle.api.tasks.SourceSet
 import org.gradle.api.tasks.SourceSetContainer
 import org.gradle.api.tasks.SourceSetOutput
-import org.gradle.api.tasks.TaskContainer
-import org.gradle.api.tasks.TaskProvider
 import org.gradle.api.tasks.testing.Test
 import org.gradle.api.tasks.testing.TestReport
 import org.gradle.language.base.plugins.LifecycleBasePlugin
@@ -81,7 +78,7 @@ class TestPhasesGradlePlugin implements Plugin<Project> {
         String implConfigName = "${phaseName}Implementation"
         String runtimeOnlyConfigName = "${phaseName}RuntimeOnly"
 
-        File[] sourceDirs = findTestPhaseSources(project, phase)
+        def sourceDirs = findTestPhaseSources(project, phase)
         List<File> acceptedSourceDirs = []
 
         final SourceSetContainer sourceSets = SourceSets.findSourceSets(project)
@@ -98,23 +95,23 @@ class TestPhasesGradlePlugin implements Plugin<Project> {
             }
         }
 
-        final File resources = new File(project.projectDir, 'grails-app/conf')
+        def resources = new File(project.projectDir, 'grails-app/conf')
         phaseSourceSet.resources.srcDir(resources)
 
-        final DependencyHandler dependencies = project.dependencies
+        def dependencies = project.dependencies
         dependencies.add(implConfigName, mainSourceSetOutput)
         dependencies.add(implConfigName, testSourceSetOutput)
 
         final ConfigurationContainer configurations = project.configurations
-        configurations.named(implConfigName).configure {
+        configurations.named(implConfigName) {
             it.extendsFrom(configurations.named(TEST_IMPLEMENTATION_CONFIGURATION_NAME).get())
         }
-        configurations.named(runtimeOnlyConfigName).configure {
+        configurations.named(runtimeOnlyConfigName) {
             it.extendsFrom(configurations.named(TEST_RUNTIME_ONLY_CONFIGURATION_NAME).get())
         }
 
-        final TaskContainer tasks = project.tasks
-        final TaskProvider<Test> testTask = tasks.register(phaseName, Test)
+        def tasks = project.tasks
+        def testTask = tasks.register(phaseName, Test)
         testTask.configure {
             it.group = LifecycleBasePlugin.VERIFICATION_GROUP
             it.testClassesDirs = phaseSourceSet.output.classesDirs
@@ -128,19 +125,19 @@ class TestPhasesGradlePlugin implements Plugin<Project> {
             }
             it.systemProperty(phase.systemPropertyName.get(), true)
         }
-        tasks.named('check').configure {
+        tasks.named('check') {
             it.dependsOn(testTask)
         }
 
         addPhaseToMergeTestReports(project, phaseName)
 
         if (phase.ideaIntegration.get()) {
-            final File[] files = acceptedSourceDirs.toArray(new File[acceptedSourceDirs.size()])
+            File[] files = acceptedSourceDirs.toArray(new File[acceptedSourceDirs.size()])
             integrateIdea(project, files)
         }
     }
 
-    private void registerMergeTestReports(Project project) {
+    private static void registerMergeTestReports(Project project) {
         project.tasks.register(MERGE_TEST_REPORTS_TASK_NAME, TestReport) {
             it.mustRunAfter(project.tasks.withType(Test).toArray())
             it.destinationDirectory.set(project.layout.buildDirectory.dir('reports/tests'))
@@ -150,8 +147,8 @@ class TestPhasesGradlePlugin implements Plugin<Project> {
         }
     }
 
-    private void addPhaseToMergeTestReports(Project project, String phaseName) {
-        project.tasks.named(MERGE_TEST_REPORTS_TASK_NAME, TestReport).configure {
+    private static void addPhaseToMergeTestReports(Project project, String phaseName) {
+        project.tasks.named(MERGE_TEST_REPORTS_TASK_NAME, TestReport) {
             it.testResults.from(
                     project.files(project.layout.buildDirectory.dir("test-results/${phaseName}/binary"))
             )
@@ -159,21 +156,21 @@ class TestPhasesGradlePlugin implements Plugin<Project> {
     }
 
     @CompileDynamic
-    private void registerSourceDir(SourceSet sourceSet, File srcDir) {
+    private static void registerSourceDir(SourceSet sourceSet, File srcDir) {
         sourceSet."${srcDir.name}".srcDir(srcDir)
     }
 
     @CompileDynamic
-    private void integrateIdea(Project project, File[] acceptedSourceDirs) {
+    private static void integrateIdea(Project project, File[] acceptedSourceDirs) {
         project.pluginManager.withPlugin('idea') { ->
-            def ideaExtension = project.getExtensions().getByType(IdeaModel)
+            def ideaExtension = project.extensions.getByType(IdeaModel)
             ideaExtension.module { IdeaModule it ->
                 it.testSources.from(acceptedSourceDirs)
             }
         }
     }
 
-    File[] findTestPhaseSources(Project project, TestPhase phase) {
+    static File[] findTestPhaseSources(Project project, TestPhase phase) {
         project.file(phase.sourceFolderName.get()).listFiles({ File file -> file.isDirectory() && !file.name.contains('.') } as FileFilter)
     }
 }
