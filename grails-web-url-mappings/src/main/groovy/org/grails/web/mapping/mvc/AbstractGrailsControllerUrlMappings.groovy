@@ -229,13 +229,19 @@ abstract class AbstractGrailsControllerUrlMappings implements UrlMappings {
             }
             // else: wildcard-captured values didn't match a registered controller/action — skip
         }
-        // Sort by specificity only when wildcard status differs between matches.
-        // When both have the same hasWildcardCaptures() status, the URL matcher's
-        // original order is preserved (stable sort) — critical for patterns like
-        // /$sku=v$variant vs /$sku where more captures doesn't mean less specific.
-        matches.sort(true) { a, b ->
-            if (a.hasWildcardCaptures() == b.hasWildcardCaptures()) return 0
-            nonRoutingParamCount(a) <=> nonRoutingParamCount(b)
+        // When wildcard validation is enabled, promote validated wildcard matches
+        // (e.g., $action? resolving to a real action) only when they have strictly fewer
+        // non-routing URL captures — meaning they matched a more specific URL pattern.
+        // Same wildcard status: preserve URL matcher's original order (stable sort).
+        // When validation is disabled, preserve original URL matcher order entirely.
+        if (validateWildcardMappings) {
+            matches.sort(true) { a, b ->
+                if (a.hasWildcardCaptures() == b.hasWildcardCaptures()) return 0
+                int diff = nonRoutingParamCount(a) - nonRoutingParamCount(b)
+                if (a.hasWildcardCaptures() && diff < 0) return -1
+                if (b.hasWildcardCaptures() && diff < 0) return 1
+                0  // preserve original order
+            }
         }
         matches as UrlMappingInfo[]
     }
