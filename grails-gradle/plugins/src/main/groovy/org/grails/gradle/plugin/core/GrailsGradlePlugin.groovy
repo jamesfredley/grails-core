@@ -229,12 +229,12 @@ class GrailsGradlePlugin implements Plugin<Project> {
         GrailsExtension grailsExtension = project.extensions.findByType(GrailsExtension)
         project.afterEvaluate {
             boolean indyEnabled = grailsExtension.indy?.getOrElse(false) ?: false
-            boolean preserveParameterNames = grailsExtension.preserveParameterNames?.getOrElse(true)
+            Boolean preserveParameterNames = grailsExtension.preserveParameterNames?.getOrNull()
 
             project.tasks.withType(GroovyCompile).configureEach { GroovyCompile c ->
                 c.groovyOptions.optimizationOptions.indy = indyEnabled
 
-                if (preserveParameterNames) {
+                if (preserveParameterNames != null) {
                     c.groovyOptions.parameters = preserveParameterNames
                 }
             }
