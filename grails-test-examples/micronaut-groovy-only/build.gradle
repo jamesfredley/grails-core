@@ -34,6 +34,10 @@ java {
     }
 }
 
+tasks.withType(Groovydoc).configureEach {
+    enabled = false
+}
+
 // This module intentionally has NO annotationProcessor dependencies.
 // It validates that a Groovy-only Grails application works with
 // grails-micronaut without explicit Java annotation processor configuration.

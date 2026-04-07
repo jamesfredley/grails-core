@@ -42,6 +42,10 @@ java {
     }
 }
 
+tasks.withType(Groovydoc).configureEach {
+    enabled = false
+}
+
 dependencies {
     compileOnlyApi platform("io.micronaut.platform:micronaut-platform:$micronautPlatformVersion")
     compileOnlyApi 'io.micronaut:micronaut-inject-groovy'
