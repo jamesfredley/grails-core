@@ -202,12 +202,8 @@ public class DefaultUrlMappingInfo extends AbstractUrlMappingInfo {
     }
 
     public String getActionName() {
-        GrailsWebRequest webRequest = (GrailsWebRequest) RequestContextHolder.getRequestAttributes();
-
-        String name = webRequest == null ? null : checkDispatchAction(webRequest.getCurrentRequest());
-        if (name == null) {
-            name = evaluateNameForValue(actionName, webRequest);
-        }
+        var webRequest = (GrailsWebRequest) RequestContextHolder.getRequestAttributes();
+        var name = evaluateNameForValue(actionName, webRequest);
         return urlConverter.toUrlElement(name);
     }
 
@@ -224,40 +220,6 @@ public class DefaultUrlMappingInfo extends AbstractUrlMappingInfo {
 
     public String getId() {
         return evaluateNameForValue(id);
-    }
-
-    /**
-     * @deprecated
-     * This method will be removed in a future grails version since the associated g:submitAction is being removed.
-     * Grails will no longer support redirecting to a different action name by adding a parameter with the prefix
-     * '_action'
-     */
-    @Deprecated(since = "7.0.0", forRemoval = true)
-    private String checkDispatchAction(HttpServletRequest request) {
-        if (request.getAttribute(WebUtils.EXCEPTION_ATTRIBUTE) != null || WebUtils.isForwardOrInclude(request)) {
-            return null;
-        }
-
-        String dispatchActionName = null;
-        Enumeration<String> paramNames = tryMultipartParams(request, request.getParameterNames());
-
-        while (paramNames.hasMoreElements()) {
-            String name = paramNames.nextElement();
-            if (name.startsWith(WebUtils.DISPATCH_ACTION_PARAMETER)) {
-                // remove .x suffix in case of submit image
-                if (name.endsWith(".x") || name.endsWith(".y")) {
-                    name = name.substring(0, name.length() - 2);
-                }
-                dispatchActionName = GrailsNameUtils.getPropertyNameRepresentation(name.substring((WebUtils.DISPATCH_ACTION_PARAMETER).length()));
-                break;
-            }
-        }
-
-        if (LOG.isWarnEnabled() && dispatchActionName != null) {
-            LOG.warn(String.format("Dispatch Action [%s] detected; Dispatch Actions will be removed in a future version of Grails. Use g: formActionSubmit instead.", dispatchActionName));
-        }
-
-        return dispatchActionName;
     }
 
     private Enumeration<String> tryMultipartParams(HttpServletRequest request, Enumeration<String> originalParams) {
