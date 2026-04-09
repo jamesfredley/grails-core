@@ -22,7 +22,13 @@ under the License.
 To ensure compatibility with Grails {version}, please review the following upgrade instructions carefully.
 This guide outlines the necessary steps and warnings to upgrade your Grails project from Grails 7.x to Grails 8.
 
-==== 1. Spring Boot 4.0.x
+==== 1. Java 21 Minimum Requirement
+
+Grails 8 requires a minimum of Java 21 to both build and run Grails applications.
+This is an increase from Grails 7, which required Java 17.
+Update your project's toolchain, CI pipelines, and deployment environments to use JDK 21 or later.
+
+==== 2. Spring Boot 4.0.x
 
 Grails 8 upgrades from Spring Boot 3.5.x to Spring Boot 4.0.x.
 This is a major upgrade that brings Spring Framework 7.0.x, new module structure, and several breaking changes.
@@ -32,7 +38,7 @@ For full details, consult:
 1. https://github.com/spring-projects/spring-boot/wiki/Spring-Boot-4.0-Release-Notes[Spring Boot 4.0 Release Notes]
 2. https://github.com/spring-projects/spring-framework/wiki/Upgrading-to-Spring-Framework-7.x[Upgrading to Spring Framework 7]
 
-==== 2. Spring Boot Autoconfigure Modularization
+==== 3. Spring Boot Autoconfigure Modularization
 
 Spring Boot 4 split the monolithic `spring-boot-autoconfigure` module into domain-specific modules.
 Auto-configuration classes have moved to new packages.
@@ -55,7 +61,7 @@ import org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration
 import org.springframework.boot.mongodb.autoconfigure.MongoAutoConfiguration
 ----
 
-==== 3. MongoDB Configuration Property Changes
+==== 4. MongoDB Configuration Property Changes
 
 Spring Boot 4 renamed the MongoDB configuration property namespace for Spring Boot's own auto-configuration.
 If your `application.yml` or `application.groovy` uses `spring.data.mongodb.*` properties for Spring Boot auto-configuration, you must rename them to `spring.mongodb.*`.
@@ -82,7 +88,7 @@ spring:
         database: mydb
 ----
 
-==== 4. Hibernate ORM Package Relocations
+==== 5. Hibernate ORM Package Relocations
 
 Spring Framework 7 removed the `org.springframework.orm.hibernate5` package entirely.
 Grails 8 vendors these classes from Spring Framework 6.2.x into a new module (`grails-data-hibernate5-spring-orm`) under the package `org.grails.orm.hibernate.support.hibernate5`.
@@ -119,7 +125,7 @@ However, if your application directly imports any of the following classes, you 
 
 All other classes from `org.springframework.orm.hibernate5` follow the same pattern - replace the `org.springframework.orm.hibernate5` prefix with `org.grails.orm.hibernate.support.hibernate5`.
 
-==== 5. HttpStatus.MOVED_TEMPORARILY Removed
+==== 6. HttpStatus.MOVED_TEMPORARILY Removed
 
 Spring Framework 7 removed the deprecated `HttpStatus.MOVED_TEMPORARILY` constant.
 Use `HttpStatus.FOUND` instead - both represent HTTP 302 with no behavioral change.
@@ -137,7 +143,7 @@ import org.springframework.http.HttpStatus
 response.status = HttpStatus.FOUND.value()
 ----
 
-==== 6. Micronaut Integration - CLASSIC Boot Loader Removed
+==== 7. Micronaut Integration - CLASSIC Boot Loader Removed
 
 Spring Boot 4 removed the `CLASSIC` loader implementation (`LoaderImplementation.CLASSIC`).
 In Grails 7, the Grails Gradle Plugin automatically configured `bootJar` and `bootWar` tasks to use the `CLASSIC` loader when the `grails-micronaut` plugin was detected.
@@ -161,7 +167,7 @@ tasks.withType(BootArchive).configureEach {
 * The `grails-micronaut` plugin continues to work with Spring Boot 4's default loader.
 If you experience issues running your Micronaut-enabled Grails application via `java -jar`, please report them to the https://github.com/apache/grails-core/issues[Grails issue tracker].
 
-==== 7. Enum Serialization Default Changed
+==== 8. Enum Serialization Default Changed
 
 As announced in the Grails 7.0.2 deprecation notice, the `SimpleEnumMarshaller` is now the default for JSON and XML enum serialization in Grails 8.
 Enums are serialized as simple string values (e.g., `"SUBMIT"`) instead of the verbose legacy format with type metadata.
@@ -183,7 +189,7 @@ grails:
 
 If you need to restore the legacy behavior temporarily, the deprecated marshallers remain available but will be removed in a future release.
 
-==== 8. Theme Support Removed
+==== 9. Theme Support Removed
 
 Spring Framework 7 removed the theme infrastructure entirely.
 The following theme-specific classes and interfaces no longer exist:
@@ -200,7 +206,7 @@ This was deprecated in Spring Framework 6.0 and fully removed in 7.0.
 
 GSP layouts and views that relied on theme resolution will need to use alternative approaches such as configuration properties or session-based preferences managed in application code.
 
-==== 9. Embedded Server Module Relocations
+==== 10. Embedded Server Module Relocations
 
 Spring Boot 4 reorganized embedded server classes into separate modules.
 If your application or tests reference these classes directly, update the imports:
@@ -229,13 +235,13 @@ If your application or tests reference these classes directly, update the import
 Applications using embedded Tomcat, Jetty, or Undertow should check for any direct class references and update accordingly.
 The `spring-boot-tomcat` module must now be an explicit dependency if you reference Tomcat classes directly.
 
-==== 10. HandlerAdapter.getLastModified Removed
+==== 11. HandlerAdapter.getLastModified Removed
 
 Spring Framework 7 removed the deprecated `getLastModified` method from the `HandlerAdapter` interface.
 If your application implements `HandlerAdapter` directly and overrides this method, remove the override.
 The framework no longer calls this method for Last-Modified header management.
 
-==== 11. Spring Security Filter Ordering
+==== 12. Spring Security Filter Ordering
 
 Spring Boot 4 removed the `SecurityProperties.DEFAULT_FILTER_ORDER` constant.
 Spring Security is moving toward the fluent `HttpSecurity` configuration API for filter chain management, rather than explicit filter ordering via constants.
@@ -243,7 +249,7 @@ Spring Security is moving toward the fluent `HttpSecurity` configuration API for
 If your application references `DEFAULT_FILTER_ORDER` for custom filter positioning, replace it with the concrete value `-100` (computed as `OrderedFilter.REQUEST_WRAPPER_FILTER_MAX_ORDER - 100`).
 Longer term, consider migrating to the fluent `HttpSecurity` API for filter chain configuration.
 
-==== 12. Known Plugin Incompatibilities
+==== 13. Known Plugin Incompatibilities
 
 Some third-party plugins have not yet been updated for Spring Boot 4 / Spring Framework 7 compatibility.
 The following are known blockers at this time:
