@@ -97,6 +97,8 @@ class JSONConverterTests extends Specification implements ControllerUnitTest<JSO
         controller.testEnum()
 
         then:
+        // Since Grails 8 the JSON converter doesn't know how to convert a single enum to JSON,
+        // so it will throw an exception. This test is maintained as a reminder of this change in behavior.
         def e = thrown(ConverterException)
         e.message == 'org.grails.web.json.JSONException: Value out of sequence: expected mode to be ' +
                 'OBJECT or ARRAY when writing \'\' but was INIT'
