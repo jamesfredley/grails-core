@@ -120,7 +120,6 @@ include(
 
         // events
         'grails-events-core',
-        'grails-events-compat',
         'grails-events-transforms',
         'grails-events-gpars',
         'grails-events-spring',
@@ -189,7 +188,6 @@ include(
 // Instead of using : to separate nested projects, fix the project directories by setting the projectDir explicitly
 // (Preserve the parent directory name as part of the nested project name)
 project(':grails-events-core').projectDir = file('grails-events/core')
-project(':grails-events-compat').projectDir = file('grails-events/compat')
 project(':grails-events-transforms').projectDir = file('grails-events/transforms')
 project(':grails-events-gpars').projectDir = file('grails-events/gpars')
 project(':grails-events-spring').projectDir = file('grails-events/spring')
