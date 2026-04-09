@@ -386,18 +386,6 @@ public abstract class AbstractGrailsPluginManager implements GrailsPluginManager
         return shutdown;
     }
 
-    /**
-     * Resets and reinitializes plugin discovery if an application context is available.
-     * When called before the application context is set (the typical pre-startup case),
-     * the forwarded settings will be picked up during normal lifecycle initialization.
-     */
-    private void reinitializeDiscovery() {
-        if (applicationContext != null) {
-            pluginDiscovery.reset();
-            pluginDiscovery.init(applicationContext.getEnvironment());
-        }
-    }
-
     public void informOfClassChange(Class<?> aClass) {
         if (aClass == null || application == null) {
             return;
