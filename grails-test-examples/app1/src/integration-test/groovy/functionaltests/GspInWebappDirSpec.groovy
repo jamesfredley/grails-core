@@ -16,31 +16,23 @@
  *  specific language governing permissions and limitations
  *  under the License.
  */
+package functionaltests
 
-package views182
-
-import grails.testing.spock.OnceBefore
-import io.micronaut.http.client.HttpClient
-import spock.lang.AutoCleanup
-import spock.lang.Shared
 import spock.lang.Specification
+import spock.lang.Tag
 
-class HttpClientCommonSpec extends Specification {
+import grails.testing.mixin.integration.Integration
+import org.apache.grails.testing.http.client.HttpClientSupport
 
-    @Shared
-    @AutoCleanup
-    HttpClient client
+@Integration
+@Tag('http-client')
+class GspInWebappDirSpec extends Specification implements HttpClientSupport {
 
-    @Shared
-    String baseUrl
+    def 'GSP in src/main/webapp renders'() {
+        when:
+        def response = http('/gsp-in-webapp-dir.gsp')
 
-    /**
-     * Move this to the subclass as after Spock 2.0-M3-groovy-3.0, {code}OnceBefore{/code} does not
-     * run when present in the super class.
-     */
-    /*@OnceBefore
-    void init() {
-        this.baseUrl = "http://localhost:$serverPort"
-        this.client = HttpClient.create(new URL(baseUrl))
-    }*/
+        then:
+        response.assertContains(200, 'Hello from GSP in src/main/webapp')
+    }
 }
