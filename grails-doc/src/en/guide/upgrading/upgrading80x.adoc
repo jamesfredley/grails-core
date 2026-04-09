@@ -244,7 +244,62 @@ grails:
 
 If you need to restore the legacy behavior temporarily, the deprecated marshallers remain available but will be removed in a future release.
 
-==== 9. Theme Support Removed
+==== 9. Jackson 3 is the New Default
+
+Spring Boot 4 ships Jackson 3 (`tools.jackson.*`) and auto-configures a `JsonMapper` bean instead of the Jackson 2 `ObjectMapper`.
+Grails 8 follows that change: any Grails module that previously declared `com.fasterxml.jackson.core:jackson-databind` (Jackson 2) now declares `tools.jackson.core:jackson-databind` (Jackson 3, currently 3.1.0 via the Spring Boot 4 BOM).
+
+**What stayed the same:**
+
+* **Jackson annotations.** All `@JsonProperty`, `@JsonCreator`, `@JsonIgnore`, `@JsonInclude`, `@JsonIgnoreProperties`, etc. remain at `com.fasterxml.jackson.annotation.*`.
+The Spring Boot 4 BOM explicitly permits the `jackson-annotations` 2.x artifact alongside the Jackson 3 BOM, so existing annotated DTOs and domain classes do **not** need to change.
+* The `readTree(String)`, `writeValueAsString(...)`, and `readValue(...)` method names on the mapper are unchanged.
+
+**What changed (and what you need to do if your code touches Jackson directly):**
+
+[cols="1,2,2",options="header"]
+|===
+| Concern | Jackson 2 | Jackson 3
+
+| Package
+| `com.fasterxml.jackson.databind.*`
+| `tools.jackson.databind.*`
+
+| Default mapper type
+| `ObjectMapper`
+| `tools.jackson.databind.json.JsonMapper`
+
+| Construction
+| `new ObjectMapper()`
+| `JsonMapper.builder().build()` (immutable; configuration locked after `build()`)
+
+| Exceptions
+| `JsonProcessingException` / `IOException` (checked)
+| `JacksonException` extends `RuntimeException` (unchecked)
+
+| Default date format
+| Numeric timestamps
+| ISO-8601 strings
+|===
+
+**If you inject the auto-configured mapper:**
+Spring Boot 4 provides a `tools.jackson.databind.json.JsonMapper` bean instead of `com.fasterxml.jackson.databind.ObjectMapper`.
+Update injection points to expect `JsonMapper`.
+
+**If you must stay on Jackson 2 temporarily:**
+Spring Boot 4 still manages the Jackson 2 BOM (currently 2.21.2) and provides an opt-in toggle so the auto-configured mapper preserves Jackson 2 defaults:
+
+[source,yaml]
+.application.yml
+----
+spring:
+    jackson:
+        use-jackson2-defaults: true
+----
+
+This is intended as a migration aid only; new code should target Jackson 3.
+
+==== 10. Theme Support Removed
 
 Spring Framework 7 removed the theme infrastructure entirely.
 The following theme-specific classes and interfaces no longer exist:
@@ -261,7 +316,7 @@ This was deprecated in Spring Framework 6.0 and fully removed in 7.0.
 
 GSP layouts and views that relied on theme resolution will need to use alternative approaches such as configuration properties or session-based preferences managed in application code.
 
-==== 10. Embedded Server Module Relocations
+==== 11. Embedded Server Module Relocations
 
 Spring Boot 4 reorganized embedded server classes into separate modules.
 If your application or tests reference these classes directly, update the imports:
@@ -290,13 +345,13 @@ If your application or tests reference these classes directly, update the import
 Applications using embedded Tomcat, Jetty, or Undertow should check for any direct class references and update accordingly.
 The `spring-boot-tomcat` module must now be an explicit dependency if you reference Tomcat classes directly.
 
-==== 11. HandlerAdapter.getLastModified Removed
+==== 12. HandlerAdapter.getLastModified Removed
 
 Spring Framework 7 removed the deprecated `getLastModified` method from the `HandlerAdapter` interface.
 If your application implements `HandlerAdapter` directly and overrides this method, remove the override.
 The framework no longer calls this method for Last-Modified header management.
 
-==== 12. Spring Security Filter Ordering
+==== 13. Spring Security Filter Ordering
 
 Spring Boot 4 removed the `SecurityProperties.DEFAULT_FILTER_ORDER` constant.
 Spring Security is moving toward the fluent `HttpSecurity` configuration API for filter chain management, rather than explicit filter ordering via constants.
@@ -304,7 +359,7 @@ Spring Security is moving toward the fluent `HttpSecurity` configuration API for
 If your application references `DEFAULT_FILTER_ORDER` for custom filter positioning, replace it with the concrete value `-100` (computed as `OrderedFilter.REQUEST_WRAPPER_FILTER_MAX_ORDER - 100`).
 Longer term, consider migrating to the fluent `HttpSecurity` API for filter chain configuration.
 
-==== 13. Known Plugin Incompatibilities
+==== 14. Known Plugin Incompatibilities
 
 Some third-party plugins have not yet been updated for Spring Boot 4 / Spring Framework 7 compatibility.
 The following are known blockers at this time:
