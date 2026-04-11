@@ -1,0 +1,88 @@
+////
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+https://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+////
+
+When a request-handling exception reaches `GrailsExceptionResolver`, Grails emits a single log record to the
+`org.grails.web.errors.GrailsExceptionResolver` logger at `ERROR` level. That record contains the HTTP method and
+request URI alongside a _filtered_ stack trace — framework internals such as `java.lang.reflect`, `jakarta.servlet`,
+`org.codehaus.groovy.runtime`, and similar dispatch/plumbing frames are trimmed out so that application code is the
+first thing visible on the trace.
+
+For most operational use the filtered trace is what you want: it surfaces the application frames that actually matter
+and keeps the log readable. For cases that need the untrimmed trace — routing the raw frames to a separate audit
+file, correlating with an APM tool, or debugging dispatcher internals — Grails exposes an opt-in:
+
+[source, yaml]
+.grails-app/conf/application.yml
+----
+grails:
+    exceptionresolver:
+        logFullStackTrace: true
+----
+
+The setting defaults to `false`.
+
+When enabled, Grails emits an additional log record to a dedicated logger named `StackTrace`, containing the
+_unfiltered_ stack trace as it was captured at throw time. This record is written _before_ the filter step runs,
+so no frames are lost. Each request-handling exception therefore produces two log records:
+
+* A `StackTrace` logger record with the full, unfiltered trace (header `Full Stack Trace:`).
+* A `GrailsExceptionResolver` logger record with the filtered trace and the request-context headline
+(`<ExceptionType> occurred when processing request: [<METHOD>] <uri>`).
+
+The two records carry different trace content — that is the value of the opt-in. The `StackTrace` record includes
+every reflection, dispatch, and servlet frame; the `GrailsExceptionResolver` record shows only application code.
+
+==== Routing the StackTrace Logger To a Separate Appender
+
+Enabling `logFullStackTrace` alone will cause the unfiltered trace to appear on whatever appender the root logger
+is configured with — typically the console — in addition to the filtered trace from the resolver logger. If that is
+not what you want, pair the opt-in with a Logback configuration that routes the `StackTrace` logger to its own
+appender and disables additivity so it does not bubble up to the root:
+
+[source, xml]
+.grails-app/conf/logback.xml
+----
+<appender name="STACK_FILE" class="ch.qos.logback.core.FileAppender">
+    <file>logs/stacktraces.log</file>
+    <encoder>
+        <pattern>%date %msg%n%ex%n</pattern>
+    </encoder>
+</appender>
+
+<logger name="StackTrace" level="ERROR" additivity="false">
+    <appender-ref ref="STACK_FILE"/>
+</logger>
+----
+
+With this configuration the unfiltered trace is written only to `logs/stacktraces.log`, which you can rotate and
+retain independently. The console continues to show the concise, filtered resolver record as before.
+
+==== Suppressing the StackTrace Logger
+
+Setting the `StackTrace` logger level to `OFF` in Logback makes the opt-in a no-op, regardless of the
+`logFullStackTrace` property value:
+
+[source, xml]
+.grails-app/conf/logback.xml
+----
+<logger name="StackTrace" level="OFF"/>
+----
+
+This is useful if the property is enabled in a shared `application.yml` but a particular environment needs to
+silence the extra record.
