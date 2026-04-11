@@ -18,8 +18,11 @@
  */
 package org.grails.web.errors
 
+import grails.config.Config
+import grails.core.GrailsApplication
 import grails.web.mapping.UrlMappingsHolder
 import grails.web.mapping.exceptions.UrlMappingException
+import org.grails.exceptions.reporting.DefaultStackTraceFilterer
 import org.springframework.mock.web.MockHttpServletRequest
 import spock.lang.Specification
 
@@ -42,5 +45,99 @@ class GrailsExceptionResolverSpec extends Specification {
         then:
         noExceptionThrown()
         params.isEmpty()
+    }
+
+    void "logStackTrace emits only the resolver log"() {
+        given: "Captured System.err"
+            def originalErr = System.err
+            def baos = new ByteArrayOutputStream()
+            System.setErr(new PrintStream(baos, true))
+
+        and: "A resolver with no grailsApplication wired"
+            def resolver = new GrailsExceptionResolver()
+            def request = new MockHttpServletRequest('GET', '/test')
+            def exception = new RuntimeException('boom')
+
+        when:
+            resolver.logStackTrace(exception, request)
+
+        then: "Only the GrailsExceptionResolver logger emits; StackTrace logger is silent"
+            System.err.flush()
+            def captured = baos.toString()
+            captured.contains('o.g.web.errors.GrailsExceptionResolver') ||
+                captured.contains('org.grails.web.errors.GrailsExceptionResolver')
+            !captured.contains('ERROR StackTrace ')
+
+        cleanup:
+            System.setErr(originalErr)
+    }
+
+    void "logFullStackTraceIfEnabled is a no-op when the opt-in property is unset"() {
+        given: "Captured System.err"
+            def originalErr = System.err
+            def baos = new ByteArrayOutputStream()
+            System.setErr(new PrintStream(baos, true))
+
+        and: "A resolver with no grailsApplication wired"
+            def resolver = new GrailsExceptionResolver()
+            def exception = new RuntimeException('boom')
+
+        when:
+            resolver.logFullStackTraceIfEnabled(exception)
+
+        then: "No StackTrace log entry is emitted"
+            System.err.flush()
+            !baos.toString().contains('ERROR StackTrace ')
+
+        cleanup:
+            System.setErr(originalErr)
+    }
+
+    void "logFullStackTraceIfEnabled emits the unfiltered trace when opt-in is enabled, and filterStackTrace then removes internal frames so the resolver log only sees the filtered trace"() {
+        given: "Captured System.err"
+            def originalErr = System.err
+            def baos = new ByteArrayOutputStream()
+            System.setErr(new PrintStream(baos, true))
+
+        and: "A resolver whose config opts in to full stack trace logging"
+            def config = Mock(Config)
+            config.getProperty('grails.exceptionresolver.logFullStackTrace', Boolean, false) >> true
+            config.getProperty('grails.exceptionresolver.logRequestParameters', Boolean, _) >> false
+            config.getProperty('grails.logging.stackTraceFiltererClass', Class, _) >>
+                DefaultStackTraceFilterer
+            def grailsApp = Mock(GrailsApplication)
+            grailsApp.getConfig() >> config
+            def resolver = new GrailsExceptionResolver()
+            resolver.grailsApplication = grailsApp
+
+        and: "An exception with a mix of internal (filterable) and application frames"
+            def exception = new RuntimeException('boom')
+            exception.stackTrace = [
+                new StackTraceElement('java.lang.reflect.Method', 'invoke', 'Method.java', 580),
+                new StackTraceElement('com.example.MyController', 'show', 'MyController.groovy', 10),
+            ] as StackTraceElement[]
+            def request = new MockHttpServletRequest('GET', '/test')
+
+        when: "The real resolveException ordering runs: log full trace, filter, then log with request context"
+            resolver.logFullStackTraceIfEnabled(exception)
+            resolver.filterStackTrace(exception)
+            resolver.logStackTrace(exception, request)
+
+        then: "Both loggers emit"
+            System.err.flush()
+            def captured = baos.toString()
+            captured.contains('ERROR StackTrace ')
+            captured.contains('Full Stack Trace:')
+            captured.contains('o.g.web.errors.GrailsExceptionResolver') ||
+                captured.contains('org.grails.web.errors.GrailsExceptionResolver')
+
+        and: "The application frame appears in both log entries"
+            captured.count('com.example.MyController.show(MyController.groovy:10)') == 2
+
+        and: "The internal frame appears only once — in the unfiltered StackTrace entry, not in the filtered resolver entry"
+            captured.count('java.lang.reflect.Method.invoke(Method.java:580)') == 1
+
+        cleanup:
+            System.setErr(originalErr)
     }
 }

@@ -89,6 +89,8 @@ public class GrailsExceptionResolver extends SimpleMappingExceptionResolver impl
 
         ex = findWrappedException(ex);
 
+        logFullStackTraceIfEnabled(ex);
+
         filterStackTrace(ex);
 
         ModelAndView mv = super.resolveException(request, response, handler, ex);
@@ -259,6 +261,24 @@ public class GrailsExceptionResolver extends SimpleMappingExceptionResolver impl
 
     protected void logStackTrace(Exception e, HttpServletRequest request) {
         LOG.error(getRequestLogMessage(e, request), e);
+    }
+
+    /**
+     * When the {@code grails.exceptionresolver.logFullStackTrace} property is enabled,
+     * emits the unfiltered stack trace to the dedicated {@code StackTrace} logger.
+     * Must be invoked <em>before</em> {@link #filterStackTrace(Exception)} — once the
+     * filterer calls {@code setStackTrace(clean)}, the original frames are gone and
+     * this method can only log the already-trimmed trace.
+     */
+    protected void logFullStackTraceIfEnabled(Exception e) {
+        if (shouldLogFullStackTrace()) {
+            DefaultStackTraceFilterer.STACK_LOG.error(StackTraceFilterer.FULL_STACK_TRACE_MESSAGE, e);
+        }
+    }
+
+    protected boolean shouldLogFullStackTrace() {
+        Config config = grailsApplication != null ? grailsApplication.getConfig() : null;
+        return config != null && config.getProperty(Settings.SETTING_LOG_FULL_STACKTRACE, Boolean.class, false);
     }
 
     protected Exception findWrappedException(Exception e) {

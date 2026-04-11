@@ -237,6 +237,13 @@ interface Settings {
      */
     String SETTING_EXCEPTION_RESOLVER_PARAM_EXCLUDES = 'grails.exceptionresolver.params.exclude'
     /**
+     * Whether the exception resolver should also emit the exception on the separate
+     * {@code StackTrace} logger in addition to its own request-context log entry.
+     * Defaults to {@code false}; set to {@code true} to restore the historical two-logger
+     * behaviour, which allows routing the trace to a separate appender via logback config.
+     */
+    String SETTING_LOG_FULL_STACKTRACE = 'grails.exceptionresolver.logFullStackTrace'
+    /**
      * The class to use for stacktrace filtering. Should be an instanceof {@link org.grails.exceptions.reporting.StackTraceFilterer}
      */
     String SETTING_LOGGING_STACKTRACE_FILTER_CLASS = 'grails.logging.stackTraceFiltererClass'
