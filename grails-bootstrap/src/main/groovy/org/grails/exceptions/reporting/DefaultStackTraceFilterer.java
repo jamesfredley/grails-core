@@ -33,6 +33,14 @@ import org.apache.commons.logging.LogFactory;
  */
 public class DefaultStackTraceFilterer implements StackTraceFilterer {
     public static final String STACK_LOG_NAME = "StackTrace";
+    /**
+     * Dedicated logger for exception stack traces. The filterer itself no longer writes
+     * to it — exception logging is driven by {@code GrailsExceptionResolver}, which emits
+     * to this logger in addition to its own request-context log entry when
+     * {@code grails.exceptionresolver.logFullStackTrace} is enabled. Exposed as a public
+     * constant so that subclasses and logback configurations can reference the logger
+     * name symbolically.
+     */
     public static final Log STACK_LOG = LogFactory.getLog(STACK_LOG_NAME);
 
     private static final String[] DEFAULT_INTERNAL_PACKAGES = new String[] {
@@ -81,27 +89,17 @@ public class DefaultStackTraceFilterer implements StackTraceFilterer {
         if (recursive) {
             Throwable current = source;
             while (current != null) {
-                doFilter(current);
+                filter(current);
                 current = current.getCause();
             }
+            return source;
         }
         return filter(source);
     }
 
     public Throwable filter(Throwable source) {
-        if (shouldFilter) {
-            boolean modified = doFilter(source);
-            if (modified) {
-                // Log the full stack trace once for the top-level exception (includes causes)
-                STACK_LOG.error(FULL_STACK_TRACE_MESSAGE, source);
-            }
-        }
-        return source;
-    }
-
-    private boolean doFilter(Throwable source) {
         if (!shouldFilter) {
-            return false;
+            return source;
         }
         StackTraceElement[] trace = source.getStackTrace();
         List<StackTraceElement> newTrace = filterTraceWithCutOff(trace, cutOffPackage);
@@ -117,9 +115,8 @@ public class DefaultStackTraceFilterer implements StackTraceFilterer {
             StackTraceElement[] clean = new StackTraceElement[newTrace.size()];
             newTrace.toArray(clean);
             source.setStackTrace(clean);
-            return true;
         }
-        return false;
+        return source;
     }
 
     private List<StackTraceElement> filterTraceWithCutOff(StackTraceElement[] trace, String endPackage) {
