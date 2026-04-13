@@ -8,8 +8,6 @@ grails:
         defaultPackage: @grails.codegen.defaultPackage@
         profile: @grails.profile@
 spring:
-    jmx:
-        unique-names: true
     groovy:
         template:
             check-template-location: false
