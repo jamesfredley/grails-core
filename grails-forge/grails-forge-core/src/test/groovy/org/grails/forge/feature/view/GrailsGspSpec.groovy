@@ -73,7 +73,6 @@ class GrailsGspSpec extends ApplicationContextSpec implements CommandOutputFixtu
         final GeneratorContext ctx = buildGeneratorContext(["grails-gsp"])
 
         then:
-        ctx.getConfiguration().get("grails.mime.disable.accept.header.userAgents") == Arrays.asList("Gecko", "WebKit", "Presto", "Trident")
         ctx.getConfiguration().get("grails.mime.types.all") == "*/*"
         ctx.getConfiguration().get("grails.mime.types.atom") == "application/atom+xml"
         ctx.getConfiguration().get("grails.mime.types.css") == "text/css"
