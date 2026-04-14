@@ -1,13 +1,5 @@
 grails:
     mime:
-        disable:
-            accept:
-                header:
-                    userAgents:
-                        - Gecko
-                        - WebKit
-                        - Presto
-                        - Trident
         types:
             json:
               - application/json
