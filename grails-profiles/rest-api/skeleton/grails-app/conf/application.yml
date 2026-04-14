@@ -25,5 +25,3 @@ grails:
             rss: application/rss+xml
             text: text/plain
             all: '*/*'            
-    converters:
-        encoding: UTF-8

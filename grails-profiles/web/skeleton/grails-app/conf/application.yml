@@ -23,8 +23,6 @@ grails:
             xml:
               - text/xml
               - application/xml
-    converters:
-        encoding: UTF-8
     views:
         default:
             codec: html
