@@ -95,10 +95,7 @@ public class GrailsGsp implements DefaultFeature {
         config.put("grails.mime.types.xml", Arrays.asList("text/xml", "application/xml"));
         config.put("grails.views.gsp.encoding", "UTF-8");
         config.put("grails.views.gsp.htmlcodec", "xml");
-        config.put("grails.views.gsp.codecs.expression", "html");
         config.put("grails.views.gsp.codecs.scriptlet", "html");
-        config.put("grails.views.gsp.codecs.taglib", "none");
-        config.put("grails.views.gsp.codecs.staticparts", "none");
         generatorContext.addDependency(Dependency.builder()
                 .groupId("org.apache.grails")
                 .artifactId("grails-gsp")
