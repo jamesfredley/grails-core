@@ -7,16 +7,6 @@ grails:
     codegen:
         defaultPackage: @grails.codegen.defaultPackage@
         profile: @grails.profile@
-spring:
-    devtools:
-        restart:
-            additional-exclude:
-                - '*.gsp'
-                - '**/*.gsp'
-                - '*.gson'
-                - '**/*.gson'
-                - 'logback-spring.xml'
-                - '*.properties'
 environments:
     development:
         management:
