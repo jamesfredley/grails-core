@@ -73,7 +73,7 @@ class CandidateListCompletionHandlerSpec extends Specification {
         candidates*.value() == ["option1", "option2"]
     }
 
-    def "Handler updates buffer with common prefix when possible"() {
+    def "Handler populates candidates without manipulating buffer"() {
         given: "a delegate completer with a shared prefix"
         def delegate = new TestCompleter(["create-app", "create-plugin"])
         def handler = new CandidateListCompletionHandler(delegate)
@@ -82,15 +82,17 @@ class CandidateListCompletionHandlerSpec extends Specification {
             word() >> "cre"
         }
         def reader = Mock(LineReader)
-        def buffer = Mock(org.jline.reader.Buffer)
-        reader.getBuffer() >> buffer
 
         when: "completion is performed"
         handler.complete(reader, parsedLine, candidates)
 
-        then: "buffer is extended with common prefix"
-        1 * buffer.write("ate-")
-        1 * reader.callWidget(LineReader.REDRAW_LINE)
+        then: "candidates are populated by the delegate"
+        candidates.size() == 2
+        candidates*.value() == ["create-app", "create-plugin"]
+
+        and: "buffer is not directly manipulated - LineReader handles this"
+        0 * reader.getBuffer()
+        0 * reader.callWidget(_)
     }
 
     def "Handler does not alter buffer when prefix already matches"() {

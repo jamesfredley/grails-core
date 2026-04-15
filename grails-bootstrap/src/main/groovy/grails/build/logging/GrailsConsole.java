@@ -191,10 +191,14 @@ public class GrailsConsole implements ConsoleLogger {
         redirectSystemOutAndErr(true);
 
         if (isInteractiveEnabled()) {
-            terminal = createTerminal();
+            if (isActivateTerminal()) {
+                terminal = createTerminal();
+            }
             history = prepareHistory();
-            reader = createLineReader(terminal, history);
-            initializeHistory();
+            if (terminal != null) {
+                reader = createLineReader(terminal, history);
+                initializeHistory();
+            }
         } else if (isActivateTerminal()) {
             terminal = createTerminal();
         }

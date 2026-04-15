@@ -444,13 +444,14 @@ class GrailsCli {
         }
     }
 
+    private static final int KEYPRESS_ESC = 27
+
     private Boolean handleCommandWithCancellationSupport(GrailsConsole console, String commandLine, ExecutorService commandExecutor) {
         ExecutionContext executionContext = createExecutionContext(cliParser.parseString(commandLine))
         Future<?> commandFuture = commandExecutor.submit({ handleCommand(executionContext) } as Callable<Boolean>)
-        
+
         Terminal.SignalHandler previousHandler = null
         try {
-            // Use JLine 3's signal handling for CTRL+C instead of polling input
             if (console?.terminal) {
                 previousHandler = console.terminal.handle(Terminal.Signal.INT) { signal ->
                     executionContext.console.log('  ')
@@ -458,22 +459,30 @@ class GrailsCli {
                     executionContext.cancel()
                 }
             }
-            
-            // Wait for command completion
+
+            def terminalInput = console?.terminal?.input()
             while (!commandFuture.done) {
-                Thread.sleep(100)
+                if (terminalInput != null && terminalInput.available() > 0) {
+                    int ch = terminalInput.read()
+                    if (ch == KEYPRESS_ESC) {
+                        executionContext.console.log('  ')
+                        executionContext.console.updateStatus('Stopping build. Please wait...')
+                        executionContext.cancel()
+                    }
+                } else {
+                    Thread.sleep(100)
+                }
             }
         } catch (InterruptedException e) {
             executionContext.console.log('  ')
             executionContext.console.updateStatus('Stopping build. Please wait...')
             executionContext.cancel()
         } finally {
-            // Restore previous signal handler
             if (previousHandler != null && console?.terminal) {
                 console.terminal.handle(Terminal.Signal.INT, previousHandler)
             }
         }
-        
+
         if (!commandFuture.isCancelled()) {
             try {
                 return commandFuture.get()
@@ -629,28 +638,22 @@ class GrailsCli {
             return false
         }
 
-        // Get previous command from history
         def historyIterator = history.reverseIterator()
-        if (!historyIterator.hasNext()) {
+        String historicalCommand = null
+        while (historyIterator.hasNext()) {
+            String entry = historyIterator.next().line()
+            if (entry != '!' && !entry.startsWith('!')) {
+                historicalCommand = entry
+                break
+            }
+        }
+
+        if (historicalCommand == null) {
             console.error('! not valid. Can not repeat without history')
             return false
         }
 
-        // Skip the current '!' command
-        historyIterator.next()
-        
-        if (!historyIterator.hasNext()) {
-            console.error('! not valid. Can not repeat without history')
-            return false
-        }
-
-        String historicalCommand = historyIterator.next().line()
-        if (historicalCommand.startsWith('!')) {
-            console.error("Can not repeat command: $historicalCommand")
-        } else {
-            return handleCommand(cliParser.parseString(historicalCommand))
-        }
-        return false
+        return handleCommand(cliParser.parseString(historicalCommand))
     }
 
     private void exitInteractiveMode() {
