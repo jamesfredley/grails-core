@@ -24,7 +24,7 @@ import org.apache.tools.ant.taskdefs.condition.Os
 import org.gradle.api.Project
 import org.gradle.api.artifacts.dsl.DependencyHandler
 import org.gradle.api.provider.Property
-import org.gradle.util.internal.ConfigureUtil
+import org.gradle.api.internal.ClosureBackedAction
 
 import grails.util.Environment
 
@@ -122,7 +122,7 @@ class GrailsExtension {
             pluginDefiner = new PluginDefiner(project)
         }
         pluginDefiner.grailsRun = developmentRun
-        ConfigureUtil.configure(configureClosure, plugins)
+        new ClosureBackedAction<>(configureClosure).execute(plugins)
     }
 
     boolean isDevelopmentRun() {

@@ -29,6 +29,7 @@ ext {
             'byte-buddy.version'            : '1.17.8',
             'commons-text.version'          : '1.14.0',
             'directory-watcher.version'     : '0.19.1',
+            'gradle-groovy.version'         : '4.0.31',
             'gradle-spock.version'          : '2.3-groovy-4.0',
             'grails-publish-plugin.version' : '0.0.4',
             'jansi.version'                 : '1.18',
@@ -42,8 +43,9 @@ ext {
 
     // Note: the name of the dependency must be the prefix of the property name so properties in the pom are resolved correctly
     gradleBomPlatformDependencies = [
-            'spring-boot-bom' : "org.springframework.boot:spring-boot-dependencies:${gradleBomDependencyVersions['spring-boot.version']}",
-            'gradle-spock-bom': "org.spockframework:spock-bom:${gradleBomDependencyVersions['gradle-spock.version']}",
+            'spring-boot-bom'  : "org.springframework.boot:spring-boot-dependencies:${gradleBomDependencyVersions['spring-boot.version']}",
+            'gradle-groovy-bom': "org.apache.groovy:groovy-bom:${gradleBomDependencyVersions['gradle-groovy.version']}",
+            'gradle-spock-bom' : "org.spockframework:spock-bom:${gradleBomDependencyVersions['gradle-spock.version']}",
     ]
 
     // Note: the name of the dependency must be the prefix of the property name so properties in the pom are resolved correctly

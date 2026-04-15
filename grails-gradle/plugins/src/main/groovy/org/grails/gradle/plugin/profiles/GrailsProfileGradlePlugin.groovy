@@ -93,6 +93,25 @@ class GrailsProfileGradlePlugin implements Plugin<Project> {
         processProfileResourcesTask.configure { Sync task ->
             task.group = 'build'
 
+            // Declare explicit inputs with skipWhenEmpty so the task is skipped when directories are absent,
+            // preserving the same up-to-date behavior as the original doLast-based implementation.
+            task.inputs.dir(project.provider {
+                def directory = project.layout.projectDirectory.dir('commands')
+                directory.asFile.exists() ? directory : null
+            }).optional().skipWhenEmpty()
+            task.inputs.dir(project.provider {
+                def directory = project.layout.projectDirectory.dir('templates')
+                directory.asFile.exists() ? directory : null
+            }).optional().skipWhenEmpty()
+            task.inputs.dir(project.provider {
+                def directory = project.layout.projectDirectory.dir('features')
+                directory.asFile.exists() ? directory : null
+            }).optional().skipWhenEmpty()
+            task.inputs.dir(project.provider {
+                def directory = project.layout.projectDirectory.dir('skeleton')
+                directory.asFile.exists() ? directory : null
+            }).optional().skipWhenEmpty()
+
             task.from(project.layout.projectDirectory.dir('commands')) { CopySpec s ->
                 s.exclude('*.groovy')
                 s.into('commands')

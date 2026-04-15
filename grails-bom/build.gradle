@@ -107,6 +107,11 @@ configurations.register('bomDependencies').configure {
 }
 
 tasks.register('extractConstraints', ExtractDependenciesTask).configure { ExtractDependenciesTask it ->
+    // Capture project services at configuration time so the task avoids the deprecated Task.project at execution time
+    it.captureProjectServices(project.dependencies, project.configurations)
+    if (!project.pluginManager.hasPlugin('java-platform')) {
+        throw new GradleException("The 'java-platform' plugin must be applied to the project to use ExtractDependenciesTask.")
+    }
     it.configuration = configurations.named('bomDependencies')
     it.configurationName = 'bomDependencies'
     it.destination = project.layout.buildDirectory.file('grails-bom-constraints.adoc')

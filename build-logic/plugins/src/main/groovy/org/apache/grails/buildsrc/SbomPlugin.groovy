@@ -25,8 +25,8 @@ import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import groovy.transform.CompileDynamic
 import groovy.transform.CompileStatic
-import org.cyclonedx.gradle.CycloneDxPlugin
-import org.cyclonedx.gradle.CycloneDxTask
+import org.cyclonedx.gradle.CyclonedxPlugin
+import org.cyclonedx.gradle.CyclonedxDirectTask
 import org.cyclonedx.model.Component
 import org.cyclonedx.model.ExternalReference
 import org.cyclonedx.model.License
@@ -126,7 +126,7 @@ class SbomPlugin implements Plugin<Project> {
 
     @Override
     void apply(Project project) {
-        project.pluginManager.apply(CycloneDxPlugin)
+        project.pluginManager.apply(CyclonedxPlugin)
 
         def sbomOutputLocation = project.layout.buildDirectory.file(
                 project.provider {
@@ -145,13 +145,11 @@ class SbomPlugin implements Plugin<Project> {
     }
 
     private static void configureSbomTask(Project project, Provider<RegularFile> sbomOutputLocation) {
-        project.tasks.withType(CycloneDxTask).configureEach { CycloneDxTask task ->
+        project.tasks.withType(CyclonedxDirectTask).configureEach { CyclonedxDirectTask task ->
             task.with {
-                // the 2.x version of Cyclonedx uses a legacy syntax & helpers for setting inputs so the syntax below
-                // is required until the 3.x version is GA
-                projectType = Component.Type.valueOf(lookupProperty(project, 'sbomProjectType', 'FRAMEWORK'))
-                componentName = lookupProperty(project, 'pomArtifactId', project.name)
-                task.@organizationalEntity.set(new OrganizationalEntity(
+                projectType.set(Component.Type.valueOf(lookupProperty(project, 'sbomProjectType', 'FRAMEWORK').toString()))
+                componentName.set(lookupProperty(project, 'pomArtifactId', project.name).toString())
+                organizationalEntity.set(new OrganizationalEntity(
                         name: 'Apache Software Foundation',
                         urls: [
                                 'https://www.apache.org/',
@@ -164,7 +162,7 @@ class SbomPlugin implements Plugin<Project> {
                                 )
                         ]
                 ))
-                task.@licenseChoice.set(new LicenseChoice(
+                licenseChoice.set(new LicenseChoice(
                         licenses: [
                                 new License(
                                         name: 'Apache-2.0',
@@ -174,7 +172,7 @@ class SbomPlugin implements Plugin<Project> {
                 ))
 
                 def projectVersion = project.findProperty('projectVersion').toString()
-                def references = [
+                List<ExternalReference> references = [
                         new ExternalReference(
                                 url: 'https://grails.apache.org',
                                 type: ExternalReference.Type.WEBSITE
@@ -197,14 +195,13 @@ class SbomPlugin implements Plugin<Project> {
                             )
                     )
                 }
-                task.@externalReferences.set(references)
+                externalReferences.set(references)
 
                 // sboms are published for the purposes of vulnerability analysis so only include the runtime classpath
-                includeConfigs = ['runtimeClasspath']
-                skipConfigs = ['compileClasspath', 'testRuntimeClasspath']
+                includeConfigs.set(['runtimeClasspath'])
 
                 // turn off license text since it's base64 encoded & will inflate the jar sizes
-                includeLicenseText = false
+                includeLicenseText.set(false)
 
                 // disable xml output
                 xmlOutput.unsetConvention()
@@ -213,12 +210,13 @@ class SbomPlugin implements Plugin<Project> {
 
                 // cyclonedx does not support "choosing" the license placed in the sbom
                 // see: https://github.com/CycloneDX/cyclonedx-gradle-plugin/issues/16
-                // Capture project name at configuration time to avoid deprecated Task.project access at execution time
+                // Capture project name/path at configuration time to avoid deprecated Task.project access at execution time.
+                // isReproducibleBuild and buildDate are providers so they are evaluated lazily at execution time.
                 // See: https://docs.gradle.org/current/userguide/configuration_cache.html#config_cache:requirements:use_project_during_execution
                 def projectName = project.name
                 def projectPath = project.path
-                boolean isReproducibleBuild = lookupProperty(project, 'isReproducibleBuild')
-                ZonedDateTime buildDate = lookupProperty(project, 'buildDate')
+                Provider<Boolean> isReproducibleBuildProvider = project.provider { lookupProperty(project, 'isReproducibleBuild') as boolean }
+                Provider<ZonedDateTime> buildDateProvider = project.provider { lookupProperty(project, 'buildDate') as ZonedDateTime }
                 doLast {
                     // json schema is documented here: https://cyclonedx.org/docs/1.6/json/
                     def rewriteSbom = { File f ->
@@ -228,8 +226,8 @@ class SbomPlugin implements Plugin<Project> {
                         // Use a fixed epoch when SOURCE_DATE_EPOCH is not set so the SBOM is identical between
                         // builds. This prevents the non-reproducible timestamp from changing the jar checksum
                         // and cascading cache misses through the compile classpath of downstream projects.
-                        ZonedDateTime sbomTimestamp = isReproducibleBuild ?
-                                buildDate :
+                        ZonedDateTime sbomTimestamp = isReproducibleBuildProvider.get() ?
+                                buildDateProvider.get() :
                                 Instant.EPOCH.atZone(ZoneOffset.UTC)
                         bom['metadata']['timestamp'] = DateTimeFormatter.ISO_INSTANT.format(sbomTimestamp.truncatedTo(ChronoUnit.SECONDS))
 
@@ -349,11 +347,11 @@ class SbomPlugin implements Plugin<Project> {
     private static void ensureLicensesValidated(Project project) {
         def initialized = new AtomicBoolean(false)
         // platforms only have constraints, so validate is not performed at this time
-        ['java', 'java-library'].each {
+                ['java', 'java-library'].each {
             project.plugins.withId(it) {
                 if (initialized.compareAndSet(false, true)) {
                     project.tasks.named('build').configure {
-                        it.dependsOn('cyclonedxBom')
+                        it.dependsOn('cyclonedxDirectBom')
                     }
                 }
             }
@@ -368,7 +366,7 @@ class SbomPlugin implements Plugin<Project> {
                     project.afterEvaluate {
                         if (!project.findProperty('skipJavaComponent')) {
                             project.tasks.named('jar', Jar).configure { Jar jar ->
-                                jar.dependsOn('cyclonedxBom')
+                                jar.dependsOn('cyclonedxDirectBom')
                                 jar.from(sbomOutputLocation) { CopySpec spec ->
                                     spec.into('META-INF')
                                     spec.rename {

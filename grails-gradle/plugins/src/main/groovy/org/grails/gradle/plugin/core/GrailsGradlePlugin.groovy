@@ -388,12 +388,11 @@ ${importStatements}
     }
 
     @CompileDynamic
-    protected Task createBuildPropertiesTask(Project project) {
+    protected void createBuildPropertiesTask(Project project) {
         if (project.tasks.findByName('buildProperties') == null) {
             File resourcesDir = SourceSets.findMainSourceSet(project).output.resourcesDir
             File buildInfoFile = new File(resourcesDir, 'META-INF/grails.build.info')
 
-            Task buildPropertiesTask = project.tasks.create('buildProperties')
             Map<String, Object> buildPropertiesContents = [
                     'grails.env': Environment.isSystemSet() ? Environment.getCurrent().getName() : Environment.PRODUCTION.getName(),
                     'info.app.name': project.name,
@@ -401,24 +400,25 @@ ${importStatements}
                     'info.app.grailsVersion': project.properties.get('grailsVersion')
             ]
 
-            buildPropertiesTask.inputs.properties(buildPropertiesContents)
-            buildPropertiesTask.outputs.file(buildInfoFile)
-
             // Capture build directory at configuration time to avoid Task.project access at execution time
-            // See: https://docs.gradle.org/current/userguide/configuration_cache.html#config_cache:requirements:use_project_during_execution
             def buildDir = project.layout.buildDirectory.asFile.get()
 
-            buildPropertiesTask.doLast {
-                buildDir.mkdirs()
-                buildInfoFile.parentFile.mkdirs()
-                Properties props = new Properties()
-                buildPropertiesTask.inputs.properties.each { key, value ->
-                    props.setProperty(key as String, value as String)
+            TaskProvider<Task> buildPropertiesTask = project.tasks.register('buildProperties') { Task task ->
+                task.inputs.properties(buildPropertiesContents)
+                task.outputs.file(buildInfoFile)
+
+                task.doLast {
+                    buildDir.mkdirs()
+                    buildInfoFile.parentFile.mkdirs()
+                    Properties props = new Properties()
+                    task.inputs.properties.each { key, value ->
+                        props.setProperty(key as String, value as String)
+                    }
+                    buildInfoFile.withOutputStream { out ->
+                        props.store(out, null)
+                    }
+                    PropertyFileUtils.makePropertiesFileReproducible(buildInfoFile)
                 }
-                buildInfoFile.withOutputStream { out ->
-                    props.store(out, null)
-                }
-                PropertyFileUtils.makePropertiesFileReproducible(buildInfoFile)
             }
 
             TaskContainer tasks = project.tasks
