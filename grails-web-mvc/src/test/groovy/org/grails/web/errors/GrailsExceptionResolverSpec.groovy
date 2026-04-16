@@ -97,6 +97,7 @@ class GrailsExceptionResolverSpec extends Specification {
         given:
             def config = Mock(Config)
             config.getProperty('grails.exceptionresolver.logAuditor', Boolean, true) >> true
+            config.getProperty('grails.exceptionresolver.logRemoteAddr', Boolean, true) >> false
             config.getProperty('grails.exceptionresolver.logRequestParameters', Boolean, _) >> false
             def grailsApp = Mock(GrailsApplication)
             grailsApp.getConfig() >> config
@@ -119,6 +120,7 @@ class GrailsExceptionResolverSpec extends Specification {
         given:
             def config = Mock(Config)
             config.getProperty('grails.exceptionresolver.logAuditor', Boolean, true) >> false
+            config.getProperty('grails.exceptionresolver.logRemoteAddr', Boolean, true) >> false
             config.getProperty('grails.exceptionresolver.logRequestParameters', Boolean, _) >> false
             def grailsApp = Mock(GrailsApplication)
             grailsApp.getConfig() >> config
@@ -141,6 +143,7 @@ class GrailsExceptionResolverSpec extends Specification {
         given:
             def config = Mock(Config)
             config.getProperty('grails.exceptionresolver.logAuditor', Boolean, true) >> true
+            config.getProperty('grails.exceptionresolver.logRemoteAddr', Boolean, true) >> false
             config.getProperty('grails.exceptionresolver.logRequestParameters', Boolean, _) >> false
             def grailsApp = Mock(GrailsApplication)
             grailsApp.getConfig() >> config
@@ -157,6 +160,77 @@ class GrailsExceptionResolverSpec extends Specification {
 
         then:
             !msg.contains('(user:')
+    }
+
+    void "getRequestLogMessage appends remote address when logRemoteAddr is enabled"() {
+        given:
+            def config = Mock(Config)
+            config.getProperty('grails.exceptionresolver.logAuditor', Boolean, true) >> false
+            config.getProperty('grails.exceptionresolver.logRemoteAddr', Boolean, true) >> true
+            config.getProperty('grails.exceptionresolver.logRequestParameters', Boolean, _) >> false
+            def grailsApp = Mock(GrailsApplication)
+            grailsApp.getConfig() >> config
+            def resolver = new GrailsExceptionResolver()
+            resolver.grailsApplication = grailsApp
+            def request = new MockHttpServletRequest('GET', '/test')
+            request.remoteAddr = '198.51.100.42'
+
+        when:
+            def msg = resolver.getRequestLogMessage('RuntimeException', request, 'boom')
+
+        then:
+            msg.contains('(ip: 198.51.100.42)')
+            !msg.contains('user:')
+    }
+
+    void "getRequestLogMessage combines remote address and auditor into a single clause when both are enabled"() {
+        given:
+            def config = Mock(Config)
+            config.getProperty('grails.exceptionresolver.logAuditor', Boolean, true) >> true
+            config.getProperty('grails.exceptionresolver.logRemoteAddr', Boolean, true) >> true
+            config.getProperty('grails.exceptionresolver.logRequestParameters', Boolean, _) >> false
+            def grailsApp = Mock(GrailsApplication)
+            grailsApp.getConfig() >> config
+            def resolver = new GrailsExceptionResolver()
+            resolver.grailsApplication = grailsApp
+            resolver.auditorAwareLookup = new AuditorAwareLookup(null) {
+                @Override
+                Optional<?> getCurrentAuditor() { Optional.of(42L) }
+            }
+            def request = new MockHttpServletRequest('GET', '/test')
+            request.remoteAddr = '198.51.100.42'
+
+        when:
+            def msg = resolver.getRequestLogMessage('RuntimeException', request, 'boom')
+
+        then:
+            msg.contains('(ip: 198.51.100.42, user: 42)')
+    }
+
+    void "subclasses can override resolveRemoteAddr to supply a custom IP extraction"() {
+        given:
+            def config = Mock(Config)
+            config.getProperty('grails.exceptionresolver.logAuditor', Boolean, true) >> false
+            config.getProperty('grails.exceptionresolver.logRemoteAddr', Boolean, true) >> true
+            config.getProperty('grails.exceptionresolver.logRequestParameters', Boolean, _) >> false
+            def grailsApp = Mock(GrailsApplication)
+            grailsApp.getConfig() >> config
+            def resolver = new GrailsExceptionResolver() {
+                @Override
+                protected String resolveRemoteAddr(HttpServletRequest req) {
+                    req.getHeader('X-Forwarded-For') ?: req.remoteAddr
+                }
+            }
+            resolver.grailsApplication = grailsApp
+            def request = new MockHttpServletRequest('GET', '/test')
+            request.remoteAddr = '10.0.0.1'
+            request.addHeader('X-Forwarded-For', '203.0.113.7')
+
+        when:
+            def msg = resolver.getRequestLogMessage('RuntimeException', request, 'boom')
+
+        then:
+            msg.contains('(ip: 203.0.113.7)')
     }
 
     void "AuditorAwareLookup returns empty when no application context is provided"() {
@@ -177,6 +251,7 @@ class GrailsExceptionResolverSpec extends Specification {
             def config = Mock(Config)
             config.getProperty('grails.exceptionresolver.logFullStackTrace', Boolean, false) >> true
             config.getProperty('grails.exceptionresolver.logAuditor', Boolean, true) >> false
+            config.getProperty('grails.exceptionresolver.logRemoteAddr', Boolean, true) >> false
             config.getProperty('grails.exceptionresolver.logRequestParameters', Boolean, _) >> false
             config.getProperty('grails.logging.stackTraceFiltererClass', Class, _) >>
                 DefaultStackTraceFilterer

@@ -19,6 +19,7 @@
 package org.grails.web.errors;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -288,6 +289,47 @@ public class GrailsExceptionResolver extends SimpleMappingExceptionResolver impl
         return config != null && config.getProperty(Settings.SETTING_LOG_AUDITOR, Boolean.class, true);
     }
 
+    protected boolean shouldLogRemoteAddr() {
+        Config config = grailsApplication != null ? grailsApplication.getConfig() : null;
+        return config != null && config.getProperty(Settings.SETTING_LOG_REMOTE_ADDR, Boolean.class, true);
+    }
+
+    /**
+     * Resolves the client address to include in the exception log headline. The default
+     * returns {@link HttpServletRequest#getRemoteAddr()} — the container's view of the
+     * TCP peer, which reflects forwarded-header handling only when the servlet container
+     * is configured to trust a proxy chain (for example Spring Boot's
+     * {@code server.forward-headers-strategy}). Subclasses can override this to apply a
+     * different resolution strategy; the returned value (null or empty to omit) is
+     * appended verbatim as {@code ip: <value>}.
+     */
+    protected String resolveRemoteAddr(HttpServletRequest request) {
+        return request.getRemoteAddr();
+    }
+
+    /**
+     * Appends optional per-request context (remote address, current auditor) to the log
+     * headline as a single parenthesised clause — e.g. {@code (ip: 1.2.3.4, user: alice)}.
+     * Emits nothing when no tokens apply, so the baseline headline format is unchanged.
+     */
+    protected void appendRequestContext(StringBuilder sb, HttpServletRequest request) {
+        List<String> tokens = new ArrayList<>(2);
+        if (shouldLogRemoteAddr()) {
+            String remoteAddr = resolveRemoteAddr(request);
+            if (remoteAddr != null && !remoteAddr.isEmpty()) {
+                tokens.add("ip: " + remoteAddr);
+            }
+        }
+        if (shouldLogAuditor() && auditorAwareLookup != null) {
+            auditorAwareLookup.getCurrentAuditor().ifPresent(auditor ->
+                tokens.add("user: " + auditor)
+            );
+        }
+        if (!tokens.isEmpty()) {
+            sb.append(" (").append(String.join(", ", tokens)).append(")");
+        }
+    }
+
     protected Exception findWrappedException(Exception e) {
         if ((e instanceof InvokerInvocationException) || (e instanceof GrailsMVCException)) {
             Throwable t = getRootCause(e);
@@ -311,11 +353,7 @@ public class GrailsExceptionResolver extends SimpleMappingExceptionResolver impl
             sb.append(request.getRequestURI());
         }
 
-        if (shouldLogAuditor() && auditorAwareLookup != null) {
-            auditorAwareLookup.getCurrentAuditor().ifPresent(auditor ->
-                sb.append(" (user: ").append(auditor).append(")")
-            );
-        }
+        appendRequestContext(sb, request);
 
         Config config = grailsApplication != null ? grailsApplication.getConfig() : null;
         final boolean shouldLogRequestParameters = config != null ? config.getProperty(Settings.SETTING_LOG_REQUEST_PARAMETERS, Boolean.class, Environment.getCurrent() == Environment.DEVELOPMENT) : false;

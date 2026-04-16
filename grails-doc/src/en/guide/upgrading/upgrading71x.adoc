@@ -794,30 +794,34 @@ grails:
 
 See the {gspTagsRef}flashMessages.html[flashMessages] tag reference for full details.
 
-===== 2.12 Exception Log Line Includes the Current User
+===== 2.12 Exception Log Line Includes Per-Request Context
 
-When an application registers an `AuditorAware` bean (see section 2.4), `GrailsExceptionResolver` now appends
-the current auditor to its exception log headline:
+`GrailsExceptionResolver` now appends a parenthesised clause of per-request context — the remote client address
+and the current auditor — to its exception log headline:
 
 ----
-RuntimeException occurred when processing request: [GET] /admin/users/42 (user: alice)
+RuntimeException occurred when processing request: [GET] /admin/users/42 (ip: 198.51.100.42, user: alice)
 ----
 
-This reuses the same resolution that populates `@CreatedBy` / `@LastModifiedBy` so no second "current user" bean
-is needed. Applications that do not register an `AuditorAware` bean see no change.
+The auditor entry reuses the same `AuditorAware` resolution that populates `@CreatedBy` / `@LastModifiedBy`
+(see section 2.4), so no second "current user" bean is needed. The IP entry is
+`HttpServletRequest.getRemoteAddr()` — behind a reverse proxy, set `server.forward-headers-strategy: native` so
+the address reflects the real client.
 
 ====== Impact
 
 Any log parser, alert rule, or log-aggregation query that matches on the exact exception headline format will
-need to tolerate the optional ` (user: <value>)` suffix. The new behavior is enabled by default; opt out by
-setting:
+need to tolerate the optional ` (ip: <value>, user: <value>)` suffix. Both pieces of context are enabled by
+default. Opt out individually:
 
 [source, yaml]
 .grails-app/conf/application.yml
 ----
 grails:
     exceptionresolver:
-        logAuditor: false
+        logAuditor: false       # drop ' user: <value>'
+        logRemoteAddr: false    # drop ' ip: <value>'
 ----
 
-See the Logging Full Stack Traces section of the user guide for details.
+When neither applies to a given request — no `AuditorAware` bean registered and the IP suffix disabled — the
+headline collapses to its pre-7.1 form. See the Logging Full Stack Traces section of the user guide for details.

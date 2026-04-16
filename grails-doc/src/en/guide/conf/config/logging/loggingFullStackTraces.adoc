@@ -87,25 +87,33 @@ Setting the `StackTrace` logger level to `OFF` in Logback makes the opt-in a no-
 This is useful if the property is enabled in a shared `application.yml` but a particular environment needs to
 silence the extra record.
 
-==== Including the Current User in the Exception Log
+==== Including Per-Request Context in the Exception Log
 
-When the application has registered an `AuditorAware` bean (see the GORM audit timestamps section), the resolver
-calls `getCurrentAuditor()` on that bean and appends ` (user: <value>)` to the headline, reusing the same auditor
-resolution that populates `@CreatedBy` and `@LastModifiedBy` fields. This avoids registering a second "current
-user" bean purely for logging. An example headline:
+The resolver can append a small parenthesised clause of per-request context — the current user and the remote
+client address — to the exception headline:
 
 ----
-RuntimeException occurred when processing request: [GET] /admin/users/42 (user: alice)
+RuntimeException occurred when processing request: [GET] /admin/users/42 (ip: 198.51.100.42, user: alice)
 Stacktrace follows:
 ----
+
+When both pieces of context apply they share a single clause (`(ip: …, user: …)`); when only one applies the
+clause collapses to that one entry. When neither applies, the headline is unchanged.
+
+===== Current User
+
+When the application has registered an `AuditorAware` bean (see the GORM audit timestamps section), the resolver
+calls `getCurrentAuditor()` on that bean and includes ` user: <value>` in the clause, reusing the same auditor
+resolution that populates `@CreatedBy` and `@LastModifiedBy` fields. This avoids registering a second "current
+user" bean purely for logging.
 
 The appended value is the `toString()` of whatever the `AuditorAware` implementation returns — typically a
 username string or a numeric id, depending on the type parameter chosen for the bean. If no `AuditorAware` bean
 is registered, or if it returns `Optional.empty()` for the current request (for example, an unauthenticated
-request), the headline is emitted unchanged with no `user:` suffix.
+request), no `user:` entry is emitted.
 
-The behavior is enabled by default. To keep user identifiers out of exception logs — for example to satisfy a
-PII separation policy, or because downstream alerting keys off the legacy headline format — set:
+Enabled by default. To keep user identifiers out of exception logs — for example to satisfy a PII separation
+policy, or because downstream alerting keys off the legacy headline format — set:
 
 [source, yaml]
 .grails-app/conf/application.yml
@@ -114,3 +122,41 @@ grails:
     exceptionresolver:
         logAuditor: false
 ----
+
+===== Remote Client Address
+
+The resolver also includes the remote client address (`HttpServletRequest.getRemoteAddr()`) as ` ip: <value>`
+in the clause. Enabled by default. To keep client addresses out of exception logs, set:
+
+[source, yaml]
+.grails-app/conf/application.yml
+----
+grails:
+    exceptionresolver:
+        logRemoteAddr: false
+----
+
+When the application is behind a reverse proxy, `getRemoteAddr()` returns the proxy's address, not the real
+client's. To see the real client IP in the log, configure the servlet container to honour forwarded headers —
+for Spring Boot embedded Tomcat, set `server.forward-headers-strategy: native` in `application.yml`:
+
+[source, yaml]
+.grails-app/conf/application.yml
+----
+server:
+    forward-headers-strategy: native
+----
+
+With that in place, Tomcat's `RemoteIpValve` populates `remoteAddr` from the `X-Forwarded-For` header before
+the resolver reads it. The valve only honours the header when the immediate peer is in its trusted-proxy list
+(loopback and RFC 1918 ranges by default; configurable via `server.tomcat.remoteip.internal-proxies`), so
+spoofed headers on direct requests are ignored.
+
+====== Custom Address Resolution
+
+Applications that need a different strategy — for example, reading `X-Forwarded-For` without container-level
+forwarded-header handling — can override `GrailsExceptionResolver.resolveRemoteAddr(HttpServletRequest)` in a
+subclass and register that subclass as the active resolver bean. The override receives the raw request and
+returns a string that is appended verbatim as `ip: <value>`; returning `null` or an empty string omits the
+entry. Be aware that any strategy which trusts request headers without a proxy-trust check is open to header
+spoofing by clients that connect directly to the server.
