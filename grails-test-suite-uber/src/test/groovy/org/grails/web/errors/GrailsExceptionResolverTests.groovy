@@ -195,7 +195,7 @@ grails.exceptionresolver.params.exclude = ['jennysPhoneNumber']
         System.setProperty(Environment.KEY, Environment.DEVELOPMENT.name)
         def msg = new GrailsExceptionResolver(grailsApplication:new DefaultGrailsApplication(config:new PropertySourcesConfig().merge(config))).getRequestLogMessage(new RuntimeException("bad things happened"), request)
 
-        assertEquals '''RuntimeException occurred when processing request: [GET] /execute/me - parameters:
+        assertEquals '''RuntimeException occurred when processing request: [GET] /execute/me (ip: 127.0.0.1) - parameters:
 foo: bar
 one: two
 jennysPhoneNumber: ***
@@ -219,7 +219,7 @@ grails.exceptionresolver.params.exclude = ['jennysPhoneNumber']
         System.setProperty(Environment.KEY, Environment.DEVELOPMENT.name)
         def msg = new GrailsExceptionResolver(grailsApplication:new DefaultGrailsApplication(config:new PropertySourcesConfig().merge(config))).getRequestLogMessage(request)
 
-        assertEquals '''Exception occurred when processing request: [GET] /execute/me - parameters:
+        assertEquals '''Exception occurred when processing request: [GET] /execute/me (ip: 127.0.0.1) - parameters:
 foo: bar
 one: two
 jennysPhoneNumber: ***
@@ -237,11 +237,11 @@ Stacktrace follows:'''.replaceAll('[\n\r]', ''), msg.replaceAll('[\n\r]', '')
             request.addParameter "foo", "bar"
             request.addParameter "one", "two"
 
-            def msgWithParameters = '''Exception occurred when processing request: [GET] /execute/me - parameters:
+            def msgWithParameters = '''Exception occurred when processing request: [GET] /execute/me (ip: 127.0.0.1) - parameters:
 foo: bar
 one: two
 Stacktrace follows:'''.replaceAll('[\n\r]', '')
-            def msgWithoutParameters = '''Exception occurred when processing request: [GET] /execute/me
+            def msgWithoutParameters = '''Exception occurred when processing request: [GET] /execute/me (ip: 127.0.0.1)
 Stacktrace follows:'''.replaceAll('[\n\r]', '')
 
             System.setProperty(Environment.KEY, Environment.DEVELOPMENT.name)
