@@ -55,6 +55,8 @@ dependencies {
     testImplementation 'org.spockframework:spock-core'
     testImplementation 'org.springframework:spring-test'
     testImplementation project(':grails-testing-support-web')
+    testImplementation 'org.objenesis:objenesis'
+    testRuntimeOnly 'net.bytebuddy:byte-buddy'
     testRuntimeOnly 'org.slf4j:slf4j-nop'
 }
 

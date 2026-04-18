@@ -61,7 +61,7 @@ public class GrailsViewDispatchContext extends WebAppContext {
     }
 
     @Override
-    protected void dispatch(HttpServletRequest request, HttpServletResponse response, String path)
+    public void dispatch(HttpServletRequest request, HttpServletResponse response, String path)
             throws ServletException, IOException {
         View view;
         try {
