@@ -41,6 +41,25 @@ class IdentityEncoder implements PropertyEncoder<Identity> {
     void encode(BsonWriter writer, Identity property, Object id, EntityAccess parentAccess, EncoderContext encoderContext, CodecRegistry codecRegistry) {
         writer.writeName(getIdentifierName(property))
 
+        Class<?> storedAs = resolveStoredAs(property)
+        if (storedAs != null && id != null) {
+            if (ObjectId.class.isAssignableFrom(storedAs) && !(id instanceof ObjectId)) {
+                String hex = id.toString()
+                // Guard against natural-key strings accidentally paired with storedAs: ObjectId.
+                // new ObjectId(<non-hex>) throws IllegalArgumentException, which would surface
+                // deep inside the BSON write pipeline. Fall through to writeString for consistency
+                // with the converter-based paths (MongoCodecSession, MongoCodecEntityPersister).
+                if (ObjectId.isValid(hex)) {
+                    writer.writeObjectId(new ObjectId(hex))
+                    return
+                }
+            }
+            if (String.class.isAssignableFrom(storedAs) && !(id instanceof String)) {
+                writer.writeString(id.toString())
+                return
+            }
+        }
+
         if (id instanceof ObjectId) {
             writer.writeObjectId(id)
         } else if (id instanceof Number) {
@@ -49,6 +68,14 @@ class IdentityEncoder implements PropertyEncoder<Identity> {
             writer.writeString(id.toString())
         }
 
+    }
+
+    private static Class<?> resolveStoredAs(Identity property) {
+        try {
+            return property?.owner?.mapping?.identifier?.storedAs
+        } catch (Throwable ignored) {
+            return null
+        }
     }
 
     protected String getIdentifierName(Identity property) {

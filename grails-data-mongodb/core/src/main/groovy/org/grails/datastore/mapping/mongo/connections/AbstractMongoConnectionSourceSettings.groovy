@@ -88,6 +88,17 @@ abstract class AbstractMongoConnectionSourceSettings extends ConnectionSourceSet
     boolean decimalType = true
 
     /**
+     * Global default storage type for {@code String id} fields that don't declare an
+     * explicit {@code id storedAs: ...} in their mapping. Accepted values are
+     * {@code 'string'} (default, current behavior) or {@code 'objectid'}.
+     *
+     * <p>Corresponds to {@link org.grails.datastore.mapping.mongo.config.MongoSettings#SETTING_STRING_IDS_DEFAULT_STORED_AS}.
+     *
+     * @since 7.1.1
+     */
+    String stringIdsDefaultStoredAs
+
+    /**
      * The collection name to use to resolve connections when using {@link MongoConnectionSources}
      */
     String connectionsCollection = 'mongo.connections'

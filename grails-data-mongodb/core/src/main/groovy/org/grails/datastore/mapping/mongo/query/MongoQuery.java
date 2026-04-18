@@ -138,8 +138,63 @@ public class MongoQuery extends BsonQuery implements QueryArgumentsAware {
                 Object value = criterion.getValue();
                 MappingContext mappingContext = entity.getMappingContext();
                 PersistentProperty identity = entity.getIdentity();
-                Object converted = mappingContext.getConversionService().convert(value, identity.getType());
+                // Prefer the configured storage type ('storedAs' on the id mapping) so query BSON
+                // matches what's actually on disk. Falls back to the declared Java type otherwise.
+                Class<?> targetType = null;
+                try {
+                    if (entity.getMapping() != null && entity.getMapping().getIdentifier() != null) {
+                        targetType = entity.getMapping().getIdentifier().getStoredAs();
+                    }
+                } catch (Throwable ignored) {
+                    // defensive: some mapping implementations may not expose storedAs yet
+                }
+                if (targetType == null) {
+                    targetType = identity.getType();
+                }
+                Object converted = mappingContext.getConversionService().convert(value, targetType);
                 query.put(MongoEntityPersister.MONGO_ID_FIELD, converted);
+            }
+        });
+
+        // Override the In handler so that criteria targeting the identity (findAllByIdInList,
+        // Domain.createCriteria().list { 'in'('id', [...]) }, etc.) honor 'storedAs' the same way
+        // IdEquals does. Without this, a domain declaring storedAs: ObjectId would send BSON Strings
+        // in {_id: {$in: [...]}} and miss all stored ObjectId documents.
+        queryHandlers.put(In.class, new QueryHandler<In>() {
+            public void handle(EmbeddedQueryEncoder queryEncoder, In in, Document query, PersistentEntity entity) {
+                Document inQuery = new Document();
+                List<Object> values = getInListQueryValues(entity, in);
+
+                Class<?> storedAs = null;
+                try {
+                    PersistentProperty identityProp = entity.getIdentity();
+                    if (identityProp != null && identityProp.getName().equals(in.getProperty()) &&
+                            entity.getMapping() != null && entity.getMapping().getIdentifier() != null) {
+                        storedAs = entity.getMapping().getIdentifier().getStoredAs();
+                    }
+                } catch (Throwable ignored) {
+                    // defensive: mapping implementations without storedAs support fall through
+                }
+                if (storedAs != null) {
+                    MappingContext mappingContext = entity.getMappingContext();
+                    List<Object> coerced = new ArrayList<>(values.size());
+                    for (Object v : values) {
+                        if (v == null || storedAs.isInstance(v)) {
+                            coerced.add(v);
+                        } else {
+                            try {
+                                coerced.add(mappingContext.getConversionService().convert(v, storedAs));
+                            } catch (Throwable ignored) {
+                                coerced.add(v);
+                            }
+                        }
+                    }
+                    values = coerced;
+                }
+
+                inQuery.put(IN_OPERATOR, values);
+                String propertyName = getPropertyName(entity, in);
+                query.put(propertyName, inQuery);
             }
         });
 
