@@ -19,6 +19,8 @@
 package org.grails.plugins.sitemesh3;
 
 import java.io.IOException;
+import java.io.Writer;
+import java.nio.CharBuffer;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -51,7 +53,7 @@ public class Sitemesh3CapturedPage implements Content {
     private StreamCharBuffer bodyBuffer;
     private StreamCharBuffer titleBuffer;
     private StreamCharBuffer pageBuffer;
-    private String renderedContent;
+    private CharSequence renderedContent;
 
     private final Map<String, StreamCharBuffer> contentBuffers = new LinkedHashMap<>();
     private final Map<String, String> pageProperties = new HashMap<>();
@@ -81,8 +83,10 @@ public class Sitemesh3CapturedPage implements Content {
     // Attaches fully-rendered content (e.g. a layout's output after
     // inline-expanded taglibs have run) as the page's data, bypassing the
     // HTML parse step that would otherwise build the data from captured
-    // buffers.
-    public void setRenderedContent(String content) {
+    // buffers. Held as a CharSequence so callers can pass a CharBuffer
+    // straight through without allocating an intermediate String — the
+    // RawDataChunk writes via Writer.write(char[], int, int) when possible.
+    public void setRenderedContent(CharSequence content) {
         this.renderedContent = content;
         markUsed();
     }
@@ -171,24 +175,27 @@ public class Sitemesh3CapturedPage implements Content {
 
         ContentProperty root = delegate.getExtractedProperties();
 
-        if (renderedContent != null) {
-            delegate.getData().setValue(renderedContent);
-        } else if (pageBuffer != null) {
-            delegate.getData().setValue(pageBuffer.toString());
+        // pageBuffer is only set for fallback paths where the full rendered
+        // output is wrapped; renderedContent is the hot path (handled by
+        // getData() returning a RawDataChunk directly, no setValue needed).
+        if (pageBuffer != null) {
+            delegate.getData().setValue(pageBuffer);
         }
 
         if (headBuffer != null) {
+            // extractHead() strips the <title> via regex, so it materializes
+            // as String — the other captures pass through as CharSequence.
             root.getChild("head").setValue(extractHead());
         }
         if (bodyBuffer != null) {
-            root.getChild("body").setValue(bodyBuffer.toString());
+            root.getChild("body").setValue(bodyBuffer);
         }
         if (titleBuffer != null) {
-            root.getChild("title").setValue(titleBuffer.toString());
+            root.getChild("title").setValue(titleBuffer);
         }
 
         for (Map.Entry<String, StreamCharBuffer> entry : contentBuffers.entrySet()) {
-            root.getChild("page").getChild(entry.getKey()).setValue(entry.getValue().toString());
+            root.getChild("page").getChild(entry.getKey()).setValue(entry.getValue());
         }
 
         for (Map.Entry<String, String> entry : pageProperties.entrySet()) {
@@ -217,11 +224,18 @@ public class Sitemesh3CapturedPage implements Content {
     // instead of re-walking the property tree (which is InMemoryContent's
     // default behavior). Used when the captured page carries pre-rendered
     // layout output that has already had its placeholders inlined.
+    //
+    // Holds the value as CharSequence so no String copy is made at
+    // construction time. writeValueTo takes a fast path through
+    // Writer.write(char[], int, int) when the sequence is a CharBuffer with
+    // an accessible backing array — the common case, since we receive
+    // CharBuffers out of BaseSiteMeshContext's CharArrayWriter. Falls back
+    // to Appendable.append for any other CharSequence shape.
     private static final class RawDataChunk implements ContentChunk {
-        private String value;
+        private CharSequence value;
         private final Content owner;
 
-        RawDataChunk(String value, Content owner) {
+        RawDataChunk(CharSequence value, Content owner) {
             this.value = value;
             this.owner = owner;
         }
@@ -233,24 +247,34 @@ public class Sitemesh3CapturedPage implements Content {
 
         @Override
         public String getValue() {
-            return value;
+            return value == null ? null : value.toString();
         }
 
         @Override
         public String getNonNullValue() {
-            return value == null ? "" : value;
+            return value == null ? "" : value.toString();
         }
 
         @Override
         public void writeValueTo(Appendable out) throws IOException {
-            if (value != null) {
-                out.append(value);
+            if (value == null) {
+                return;
             }
+            if (out instanceof Writer && value instanceof CharBuffer) {
+                CharBuffer cb = (CharBuffer) value;
+                if (cb.hasArray()) {
+                    ((Writer) out).write(cb.array(),
+                            cb.arrayOffset() + cb.position(),
+                            cb.remaining());
+                    return;
+                }
+            }
+            out.append(value);
         }
 
         @Override
         public void setValue(CharSequence newValue) {
-            this.value = newValue == null ? null : newValue.toString();
+            this.value = newValue;
         }
 
         @Override

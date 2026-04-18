@@ -73,7 +73,7 @@ public class CaptureAwareContentProcessor implements ContentProcessor {
         // happened (e.g. a layout with no HTML skeleton).
         if (context.getContentToMerge() != null) {
             if (captured != null && captured.isUsed()) {
-                captured.setRenderedContent(data.toString());
+                captured.setRenderedContent(data);
                 return captured;
             }
             return fallback.build(data, context);
