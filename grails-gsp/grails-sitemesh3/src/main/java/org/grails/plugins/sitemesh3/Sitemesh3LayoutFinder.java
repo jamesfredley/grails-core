@@ -18,6 +18,8 @@
  */
 package org.grails.plugins.sitemesh3;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -104,7 +106,7 @@ public class Sitemesh3LayoutFinder implements DecoratorSelector<SiteMeshContext>
         }
 
         if (!GrailsStringUtils.isBlank(layoutName)) {
-            return toArray(resolveByName(layoutName));
+            return resolveMany(layoutName);
         }
 
         GroovyObject controller = (GroovyObject) request.getAttribute(GrailsApplicationAttributes.CONTROLLER);
@@ -191,6 +193,28 @@ public class Sitemesh3LayoutFinder implements DecoratorSelector<SiteMeshContext>
 
     private static String[] toArray(String value) {
         return value == null ? new String[0] : new String[] {value};
+    }
+
+    // Handles comma-separated decorator names from meta/attribute sources
+    // (e.g. <meta name="layout" content="a, b"/>), resolving each to a layout
+    // path. Matches SiteMesh 3's convention of applying multiple decorators
+    // in order.
+    private String[] resolveMany(String layoutName) {
+        if (layoutName.indexOf(',') < 0) {
+            return toArray(resolveByName(layoutName));
+        }
+        List<String> resolved = new ArrayList<>();
+        for (String part : layoutName.split(",")) {
+            String trimmed = part.trim();
+            if (GrailsStringUtils.isBlank(trimmed)) {
+                continue;
+            }
+            String path = resolveByName(trimmed);
+            if (path != null) {
+                resolved.add(path);
+            }
+        }
+        return resolved.toArray(new String[0]);
     }
 
     private static final class LayoutCacheKey {

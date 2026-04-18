@@ -44,6 +44,7 @@ class CaptureAwareContentProcessorSpec extends Specification {
         request = new MockHttpServletRequest()
         context = Stub(WebAppContext) {
             getRequest() >> request
+            getContentToMerge() >> null
         }
     }
 
@@ -81,6 +82,26 @@ class CaptureAwareContentProcessorSpec extends Specification {
 
         when:
         Content content = processor.build(CharBuffer.wrap('<html></html>'), context)
+
+        then:
+        1 * fallback.build(_ as CharBuffer, _ as SiteMeshContext) >> fallbackContent
+        content.is(fallbackContent)
+    }
+
+    void 'falls back during decoration phase even when captured page is populated'() {
+        given:
+        Sitemesh3CapturedPage page = new Sitemesh3CapturedPage()
+        page.setBodyBuffer(bufferOf('<p>hi</p>'))
+        request.setAttribute(Sitemesh3CapturedPage.REQUEST_ATTRIBUTE, page)
+        Content decorateContext = new InMemoryContent()
+        Content fallbackContent = new InMemoryContent()
+        WebAppContext decorating = Stub(WebAppContext) {
+            getRequest() >> request
+            getContentToMerge() >> decorateContext
+        }
+
+        when:
+        Content content = processor.build(CharBuffer.wrap('<layout/>'), decorating)
 
         then:
         1 * fallback.build(_ as CharBuffer, _ as SiteMeshContext) >> fallbackContent

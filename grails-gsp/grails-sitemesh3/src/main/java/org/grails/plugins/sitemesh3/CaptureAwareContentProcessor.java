@@ -28,6 +28,7 @@ import org.sitemesh.content.Content;
 import org.sitemesh.content.ContentProcessor;
 import org.sitemesh.content.tagrules.TagBasedContentProcessor;
 import org.sitemesh.content.tagrules.TagRuleBundle;
+import org.sitemesh.content.tagrules.decorate.DecoratorTagRuleBundle;
 import org.sitemesh.content.tagrules.html.CoreHtmlTagRuleBundle;
 import org.sitemesh.content.tagrules.html.Sm2TagRuleBundle;
 import org.sitemesh.webapp.WebAppContext;
@@ -44,7 +45,10 @@ public class CaptureAwareContentProcessor implements ContentProcessor {
     private final ContentProcessor fallback;
 
     public CaptureAwareContentProcessor() {
-        this(new TagBasedContentProcessor(new CoreHtmlTagRuleBundle(), new Sm2TagRuleBundle()));
+        this(new TagBasedContentProcessor(
+                new CoreHtmlTagRuleBundle(),
+                new DecoratorTagRuleBundle(),
+                new Sm2TagRuleBundle()));
     }
 
     public CaptureAwareContentProcessor(ContentProcessor fallback) {
@@ -57,6 +61,15 @@ public class CaptureAwareContentProcessor implements ContentProcessor {
 
     @Override
     public Content build(CharBuffer data, SiteMeshContext context) throws IOException {
+        // During the decorator phase (BaseSiteMeshContext.decorate sets
+        // currentContent before calling build), the buffer being parsed is the
+        // layout's output — containing <sitemesh:write property="..."/>
+        // placeholders that Sm2TagRuleBundle expands against the inner
+        // content. Skip the capture short-circuit or those placeholders leak
+        // through to the response unexpanded.
+        if (context.getContentToMerge() != null) {
+            return fallback.build(data, context);
+        }
         Sitemesh3CapturedPage captured = findCapturedPage(context);
         if (captured != null && captured.isUsed()) {
             return captured;
