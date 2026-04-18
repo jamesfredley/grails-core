@@ -16,53 +16,54 @@
  *  specific language governing permissions and limitations
  *  under the License.
  */
-
 package org.grails.plugins.web.taglib
 
 import java.nio.CharBuffer
 
+import org.sitemesh.DecoratorSelector
+import org.sitemesh.SiteMeshContext
 import org.sitemesh.content.Content
+import org.sitemesh.content.ContentProcessor
 import org.sitemesh.content.ContentProperty
-import org.sitemesh.webapp.SiteMeshFilter
 import org.sitemesh.webapp.WebAppContext
 import org.sitemesh.webapp.contentfilter.ResponseMetaData
 
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.beans.factory.annotation.Qualifier
-import org.springframework.boot.web.servlet.FilterRegistrationBean
 
 import grails.artefact.TagLibrary
 import grails.gsp.TagLib
 import org.grails.web.util.WebUtils
 
 /**
- * The tags in this library are rendered by sitemesh itself instead of the grails tags so they should always be written
- * as a 'sitemesh' namespace.
+ * Tags rendered by SiteMesh itself (not the Grails taglib pipeline) when a
+ * layout GSP is being processed. Kept in the {@code sitemesh} namespace.
  */
 @TagLib
 class RenderSitemeshTagLib implements TagLibrary {
 
-    SiteMeshFilter siteMeshFilter
+    @Autowired
+    ContentProcessor sitemesh3ContentProcessor
 
     @Autowired
-    RenderSitemeshTagLib(@Qualifier('sitemesh') FilterRegistrationBean sitemesh) {
-        this.siteMeshFilter = (SiteMeshFilter) sitemesh.getFilter()
-    }
+    DecoratorSelector<SiteMeshContext> sitemesh3DecoratorSelector
 
     Closure applyLayout = { Map attrs, body ->
         String savedAttribute = request.getAttribute(WebUtils.LAYOUT_ATTRIBUTE)
         WebAppContext context = new WebAppContext('text/html', request, response,
-                servletContext, siteMeshFilter.contentProcessor,  new ResponseMetaData(), false)
-        Content content = siteMeshFilter.contentProcessor.build(CharBuffer.wrap(body()), context)
+                servletContext, sitemesh3ContentProcessor, new ResponseMetaData(), false)
+        Content content = sitemesh3ContentProcessor.build(CharBuffer.wrap(body()), context)
         if (attrs.name) {
             request.setAttribute(WebUtils.LAYOUT_ATTRIBUTE, attrs.name)
         }
-        String[] decoratorPaths = siteMeshFilter.decoratorSelector.selectDecoratorPaths(content, context)
-        for (String decoratorPath : decoratorPaths) {
-            content = context.decorate(decoratorPath, content)
+        try {
+            String[] decoratorPaths = sitemesh3DecoratorSelector.selectDecoratorPaths(content, context)
+            for (String decoratorPath : decoratorPaths) {
+                content = context.decorate(decoratorPath, content)
+            }
+            content.getData().writeValueTo(out)
+        } finally {
+            request.setAttribute(WebUtils.LAYOUT_ATTRIBUTE, savedAttribute)
         }
-        content.getData().writeValueTo(out)
-        request.setAttribute(WebUtils.LAYOUT_ATTRIBUTE, savedAttribute)
     }
 
     private ContentProperty getContentProperty(String name) {
@@ -77,17 +78,6 @@ class RenderSitemeshTagLib implements TagLibrary {
         currentProperty
     }
 
-    /**
-     * Used to retrieve a property of the decorated page.<br/>
-     *
-     * &lt;g:pageProperty default="defaultValue" name="body.onload" /&gt;<br/>
-     *
-     * @emptyTag
-     *
-     * @attr REQUIRED name the property name
-     * @attr default the default value to use if the property is null
-     * @attr writeEntireProperty if true, writes the property in the form 'foo = "bar"', otherwise renders 'bar'
-     */
     Closure pageProperty = { attrs ->
         if (!attrs.name) {
             throwTagError('Tag [pageProperty] is missing required attribute [name]')
@@ -109,18 +99,6 @@ class RenderSitemeshTagLib implements TagLibrary {
         }
     }
 
-    /**
-     * Invokes the body of this tag if the page property exists:<br/>
-     *
-     * &lt;g:ifPageProperty name="meta.index"&gt;body to invoke&lt;/g:ifPageProperty&gt;<br/>
-     *
-     * or it equals a certain value:<br/>
-     *
-     * &lt;g:ifPageProperty name="meta.index" equals="blah"&gt;body to invoke&lt;/g:ifPageProperty&gt;
-     *
-     * @attr name REQUIRED the property name
-     * @attr equals optional value to test against
-     */
     Closure ifPageProperty = { Map attrs, body ->
         if (!attrs.name) {
             return
