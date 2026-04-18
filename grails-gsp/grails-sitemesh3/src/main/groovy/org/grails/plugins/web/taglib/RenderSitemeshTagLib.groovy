@@ -72,11 +72,21 @@ class RenderSitemeshTagLib implements TagLibrary {
         try {
             String[] decoratorPaths = sitemesh3DecoratorSelector.selectDecoratorPaths(content, context)
             for (String decoratorPath : decoratorPaths) {
-                content = context.decorate(decoratorPath, content)
+                Content next = context.decorate(decoratorPath, content)
+                if (next == null) {
+                    break
+                }
+                content = next
             }
-            content.getData().writeValueTo(out)
+            if (content != null) {
+                content.getData().writeValueTo(out)
+            }
         } finally {
-            request.setAttribute(WebUtils.LAYOUT_ATTRIBUTE, savedAttribute)
+            if (savedAttribute != null) {
+                request.setAttribute(WebUtils.LAYOUT_ATTRIBUTE, savedAttribute)
+            } else {
+                request.removeAttribute(WebUtils.LAYOUT_ATTRIBUTE)
+            }
         }
     }
 

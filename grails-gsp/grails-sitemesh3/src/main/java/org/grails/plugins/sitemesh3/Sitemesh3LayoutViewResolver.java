@@ -67,7 +67,7 @@ public class Sitemesh3LayoutViewResolver implements ViewResolver, Ordered {
         if (innerView instanceof SmartView && ((SmartView) innerView).isRedirectView()) {
             return innerView;
         }
-        if (viewName != null && viewName.startsWith(LAYOUT_VIEW_PREFIX)) {
+        if (viewName != null && isLayoutPath(viewName)) {
             return innerView;
         }
         if (innerView instanceof Sitemesh3LayoutView) {
@@ -87,5 +87,14 @@ public class Sitemesh3LayoutViewResolver implements ViewResolver, Ordered {
 
     public void setOrder(int order) {
         this.order = order;
+    }
+
+    // Matches the layout folder itself ("/layouts") or any view under it
+    // ("/layouts/foo", "/layouts/foo/bar"). Deliberately does not match
+    // sibling paths like "/layoutsManagement/..." that happen to share the
+    // prefix string.
+    private static boolean isLayoutPath(String viewName) {
+        return viewName.equals(LAYOUT_VIEW_PREFIX)
+                || viewName.startsWith(LAYOUT_VIEW_PREFIX + "/");
     }
 }

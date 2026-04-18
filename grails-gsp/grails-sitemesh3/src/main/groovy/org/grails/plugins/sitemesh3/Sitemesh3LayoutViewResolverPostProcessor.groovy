@@ -21,7 +21,6 @@ package org.grails.plugins.sitemesh3
 import groovy.transform.CompileStatic
 
 import org.springframework.beans.BeansException
-import org.springframework.beans.MutablePropertyValues
 import org.springframework.beans.factory.config.BeanDefinition
 import org.springframework.beans.factory.config.ConstructorArgumentValues
 import org.springframework.beans.factory.config.RuntimeBeanReference
