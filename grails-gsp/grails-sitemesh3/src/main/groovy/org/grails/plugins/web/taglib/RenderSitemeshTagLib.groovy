@@ -29,9 +29,11 @@ import org.sitemesh.webapp.WebAppContext
 import org.sitemesh.webapp.contentfilter.ResponseMetaData
 
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.web.servlet.ViewResolver
 
 import grails.artefact.TagLibrary
 import grails.gsp.TagLib
+import org.grails.plugins.sitemesh3.GrailsViewDispatchContext
 import org.grails.web.util.WebUtils
 
 /**
@@ -47,10 +49,22 @@ class RenderSitemeshTagLib implements TagLibrary {
     @Autowired
     DecoratorSelector<SiteMeshContext> sitemesh3DecoratorSelector
 
+    @Autowired
+    ViewResolver viewResolver
+
+    // Dispatches via GrailsViewDispatchContext so the layout is rendered
+    // through Spring's View API rather than RequestDispatcher.forward().
+    // Using the default WebAppContext here would re-enter the servlet
+    // pipeline on every <g:applyLayout> call, and nesting (applyLayout
+    // inside applyLayout inside a Sitemesh3LayoutView render) would tear
+    // down the outer request scope before the outer render finished —
+    // causing "request is not active anymore" errors.
     Closure applyLayout = { Map attrs, body ->
         String savedAttribute = request.getAttribute(WebUtils.LAYOUT_ATTRIBUTE)
-        WebAppContext context = new WebAppContext('text/html', request, response,
-                servletContext, sitemesh3ContentProcessor, new ResponseMetaData(), false)
+        GrailsViewDispatchContext context = new GrailsViewDispatchContext(
+                'text/html', request, response, servletContext,
+                sitemesh3ContentProcessor, new ResponseMetaData(), false,
+                viewResolver, request.getLocale())
         Content content = sitemesh3ContentProcessor.build(CharBuffer.wrap(body()), context)
         if (attrs.name) {
             request.setAttribute(WebUtils.LAYOUT_ATTRIBUTE, attrs.name)
