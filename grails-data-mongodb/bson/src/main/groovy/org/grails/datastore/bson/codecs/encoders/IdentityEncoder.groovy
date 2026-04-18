@@ -43,7 +43,7 @@ class IdentityEncoder implements PropertyEncoder<Identity> {
 
         Class<?> storedAs = resolveStoredAs(property)
         if (storedAs != null && id != null) {
-            if (ObjectId.class.isAssignableFrom(storedAs) && !(id instanceof ObjectId)) {
+            if (ObjectId.isAssignableFrom(storedAs) && !(id instanceof ObjectId)) {
                 String hex = id.toString()
                 // Guard against natural-key strings accidentally paired with storedAs: ObjectId.
                 // new ObjectId(<non-hex>) throws IllegalArgumentException, which would surface
@@ -54,7 +54,7 @@ class IdentityEncoder implements PropertyEncoder<Identity> {
                     return
                 }
             }
-            if (String.class.isAssignableFrom(storedAs) && !(id instanceof String)) {
+            if (String.isAssignableFrom(storedAs) && !(id instanceof String)) {
                 writer.writeString(id.toString())
                 return
             }
