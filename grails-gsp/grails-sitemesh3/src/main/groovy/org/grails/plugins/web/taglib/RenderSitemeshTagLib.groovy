@@ -75,11 +75,11 @@ class RenderSitemeshTagLib implements TagLibrary {
                 'text/html', request, response, servletContext,
                 contentProcessor, new ResponseMetaData(), false,
                 viewResolver, request.getLocale())
-        Content content = contentProcessor.build(CharBuffer.wrap(body()), context)
-        if (attrs.name) {
-            request.setAttribute(WebUtils.LAYOUT_ATTRIBUTE, attrs.name)
-        }
         try {
+            Content content = contentProcessor.build(CharBuffer.wrap(body()), context)
+            if (attrs.name) {
+                request.setAttribute(WebUtils.LAYOUT_ATTRIBUTE, attrs.name)
+            }
             String[] decoratorPaths = decoratorSelector.selectDecoratorPaths(content, context)
             for (String decoratorPath : decoratorPaths) {
                 Content next = context.decorate(decoratorPath, content)
@@ -197,9 +197,10 @@ class RenderSitemeshTagLib implements TagLibrary {
     }
 
     Closure content = { attrs, body ->
-        StringBuilder tag = new StringBuilder("""<content tag="${attrs.tag}">""")
-        tag.append(body())
-        tag.append('</content>')
-        out << tag.toString()
+        out << '<content tag="'
+        out << attrs.tag
+        out << '">'
+        out << body()
+        out << '</content>'
     }
 }

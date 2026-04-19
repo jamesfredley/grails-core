@@ -60,7 +60,12 @@ public class Sitemesh3CapturedPage implements Content {
 
     private boolean used;
     private boolean titleCaptured;
-    private boolean propertiesMaterialized;
+    // Volatile because a captured page can be passed to an async dispatch
+    // thread (Grails 7 supports @Async controller returns and
+    // Callable-returning actions). Without volatile, the JMM gives no
+    // happens-before guarantee on the flag across threads, and two threads
+    // could race to materialize the property tree.
+    private volatile boolean propertiesMaterialized;
 
     public void setHeadBuffer(StreamCharBuffer buffer) {
         this.headBuffer = buffer;
@@ -203,12 +208,61 @@ public class Sitemesh3CapturedPage implements Content {
         }
     }
 
-    private String extractHead() {
-        String headAsString = headBuffer.toString();
-        if (titleCaptured) {
-            return headAsString.replaceFirst("(?is)<title(\\s[^>]*)?>(.*?)</title>", "");
+    // Returns the head section without the <title>...</title> block when
+    // the title was separately captured. Scans the buffer as a CharSequence
+    // rather than materializing it to a String and running a regex —
+    // saves ~head-size bytes of allocation per decorated request, and
+    // avoids regex compilation on the hot path.
+    private CharSequence extractHead() {
+        CharSequence head = headBuffer;
+        if (!titleCaptured) {
+            return head;
         }
-        return headAsString;
+        int titleStart = indexOfIgnoreCase(head, "<title", 0);
+        if (titleStart < 0) {
+            return head;
+        }
+        int openTagEnd = indexOf(head, '>', titleStart + 6);
+        if (openTagEnd < 0) {
+            return head;
+        }
+        int closeStart = indexOfIgnoreCase(head, "</title>", openTagEnd + 1);
+        if (closeStart < 0) {
+            return head;
+        }
+        int closeEnd = closeStart + 8;
+        int len = head.length();
+        StringBuilder sb = new StringBuilder(len - (closeEnd - titleStart));
+        sb.append(head, 0, titleStart);
+        sb.append(head, closeEnd, len);
+        return sb;
+    }
+
+    private static int indexOfIgnoreCase(CharSequence seq, String needle, int fromIndex) {
+        int needleLen = needle.length();
+        int max = seq.length() - needleLen;
+        outer:
+        for (int i = fromIndex; i <= max; i++) {
+            for (int j = 0; j < needleLen; j++) {
+                char c = seq.charAt(i + j);
+                char n = needle.charAt(j);
+                if (Character.toLowerCase(c) != Character.toLowerCase(n)) {
+                    continue outer;
+                }
+            }
+            return i;
+        }
+        return -1;
+    }
+
+    private static int indexOf(CharSequence seq, char target, int fromIndex) {
+        int len = seq.length();
+        for (int i = fromIndex; i < len; i++) {
+            if (seq.charAt(i) == target) {
+                return i;
+            }
+        }
+        return -1;
     }
 
     private void setByDottedName(ContentProperty root, String dottedName, String value) {
