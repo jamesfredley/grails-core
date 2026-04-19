@@ -41,6 +41,7 @@ dependencies {
 
     implementation platform(project(':grails-bom'))
     api "org.sitemesh:spring-boot-starter-sitemesh"
+    api "org.sitemesh:spring-webmvc-sitemesh"
     api project(':grails-web-gsp-taglib')
     api project(':grails-web-gsp')
     api project(':grails-web-common')
