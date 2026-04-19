@@ -24,8 +24,6 @@ import jakarta.servlet.FilterChain
 import jakarta.servlet.ServletRequest
 import jakarta.servlet.ServletResponse
 
-import java.util.EnumSet
-
 import org.springframework.boot.web.servlet.FilterRegistrationBean
 import org.springframework.core.env.ConfigurableEnvironment
 import org.springframework.core.env.MapPropertySource
@@ -63,9 +61,9 @@ class Sitemesh3GrailsPlugin extends Plugin {
 
     static PropertySource getDefaultPropertySource(ConfigurableEnvironment configurableEnvironment, String defaultLayout) {
         Map props = [
-                'sitemesh.decorator.metaTag'  : 'layout',
+                'sitemesh.decorator.metaTag': 'layout',
                 'sitemesh.decorator.attribute': WebUtils.LAYOUT_ATTRIBUTE,
-                'sitemesh.decorator.prefix'   : '/layouts/',
+                'sitemesh.decorator.prefix': '/layouts/',
         ]
         if (defaultLayout) {
             props['sitemesh.decorator.default'] = defaultLayout
