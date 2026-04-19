@@ -60,6 +60,7 @@ svn_exists() {
 
 for folder in $(svn ls "${svn_flags[@]}" "${RELEASE_ROOT}"); do
   folder=$(echo "$folder" | sed 's|/$||')
+  [[ "${folder}" == "${RELEASE_VERSION}" ]] && continue
   PRIOR_RELEASE_URL="${RELEASE_ROOT}/${folder}"
   read -r -p "Remove old release folder '${folder}' at ${PRIOR_RELEASE_URL}? [y/N] " confirm < /dev/tty
   if [[ "${confirm}" =~ ^[Yy](es)?$ ]]; then
