@@ -152,6 +152,13 @@ public class MongoQuery extends BsonQuery implements QueryArgumentsAware {
                     targetType = identity.getType();
                 }
                 Object converted = mappingContext.getConversionService().convert(value, targetType);
+                // Symmetry with IdentityEncoder's non-hex fallback: if the converter returns
+                // null for a non-null input (e.g. a natural-key String being converted to
+                // ObjectId), keep the original value so the query targets what the encoder
+                // actually wrote rather than {_id: null}.
+                if (converted == null && value != null) {
+                    converted = value;
+                }
                 query.put(MongoEntityPersister.MONGO_ID_FIELD, converted);
             }
         });
@@ -182,11 +189,16 @@ public class MongoQuery extends BsonQuery implements QueryArgumentsAware {
                         if (v == null || storedAs.isInstance(v)) {
                             coerced.add(v);
                         } else {
+                            Object c;
                             try {
-                                coerced.add(mappingContext.getConversionService().convert(v, storedAs));
+                                c = mappingContext.getConversionService().convert(v, storedAs);
                             } catch (Throwable ignored) {
-                                coerced.add(v);
+                                c = v;
                             }
+                            // A null return (vs a throw) means the converter rejected the value —
+                            // e.g. a natural-key String being converted to ObjectId. Fall back to
+                            // the original so the $in list matches what the encoder actually wrote.
+                            coerced.add(c != null ? c : v);
                         }
                     }
                     values = coerced;

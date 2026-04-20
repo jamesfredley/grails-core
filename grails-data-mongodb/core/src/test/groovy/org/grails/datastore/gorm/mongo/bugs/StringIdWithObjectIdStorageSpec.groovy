@@ -249,6 +249,72 @@ class StringIdWithObjectIdStorageSpec extends GrailsDataTckSpec<GrailsDataMongoT
         raw.getString('title') == 'Slug-Keyed'
     }
 
+    void "with storedAs ObjectId, point lookup of a non-hex id matches the BSON String the encoder wrote"() {
+        given: '''save path falls back to BSON String for non-hex; the read path must mirror
+                 that fallback — otherwise the ConversionService returns null for invalid hex
+                 and the query targets {_id: null}, stranding the document.'''
+        new AssignedNonHexVideo(id: 'my-slug', title: 'Slug-Keyed').save(flush: true, failOnError: true)
+
+        when:
+        manager.session.clear()
+        AssignedNonHexVideo found = AssignedNonHexVideo.get('my-slug')
+
+        then: 'regression: String→ObjectId converter returns null for non-hex; IdEquals handler keeps original'
+        found != null
+        found.id == 'my-slug'
+        found.title == 'Slug-Keyed'
+    }
+
+    void "with storedAs ObjectId, update of a non-hex id document lands on the right row"() {
+        given:
+        new AssignedNonHexVideo(id: 'my-slug', title: 'Original').save(flush: true, failOnError: true)
+
+        when:
+        manager.session.clear()
+        AssignedNonHexVideo reloaded = AssignedNonHexVideo.get('my-slug')
+        reloaded.title = 'Updated'
+        reloaded.save(flush: true, failOnError: true)
+
+        and:
+        Document raw = manager.mongoClient.getDatabase('test').getCollection('assignedNonHexVideo')
+                .find(new Document('_id', 'my-slug')).first()
+
+        then: 'regression: without the null-return fallback the update filter targets {_id: null} and silently misses'
+        raw != null
+        raw.getString('title') == 'Updated'
+    }
+
+    void "with storedAs ObjectId, batch getAll with non-hex ids falls back to BSON String in the in-list"() {
+        given:
+        new AssignedNonHexVideo(id: 'slug-a', title: 'A').save(flush: true, failOnError: true)
+        new AssignedNonHexVideo(id: 'slug-b', title: 'B').save(flush: true, failOnError: true)
+
+        when:
+        manager.session.clear()
+        List<AssignedNonHexVideo> found = AssignedNonHexVideo.getAll(['slug-a', 'slug-b'])
+
+        then: 'regression: In handler converts each value to ObjectId (returns null for non-hex); fallback keeps original'
+        found.size() == 2
+        found*.title.sort() == ['A', 'B']
+    }
+
+    void "with storedAs ObjectId, delete of a non-hex id document removes the row"() {
+        given:
+        new AssignedNonHexVideo(id: 'my-slug', title: 'Delete Me').save(flush: true, failOnError: true)
+
+        when:
+        manager.session.clear()
+        AssignedNonHexVideo reloaded = AssignedNonHexVideo.get('my-slug')
+        reloaded.delete(flush: true)
+
+        and:
+        Document raw = manager.mongoClient.getDatabase('test').getCollection('assignedNonHexVideo')
+                .find(new Document('_id', 'my-slug')).first()
+
+        then: 'regression: delete filter must target {_id: "my-slug"} (BSON String), not {_id: null}'
+        raw == null
+    }
+
     void "with storedAs ObjectId, legacy documents written directly as BSON ObjectId are fully accessible"() {
         given: 'a document inserted outside GORM with _id as BSON ObjectId (simulates legacy data)'
         ObjectId legacyId = new ObjectId()

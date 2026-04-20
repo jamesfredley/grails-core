@@ -304,7 +304,13 @@ class MongoCodecSession extends AbstractMongoSession {
         if (storedAs == null) return nativeKey
         if (storedAs.isInstance(nativeKey)) return nativeKey
         try {
-            return mappingContext.conversionService.convert(nativeKey, storedAs)
+            def converted = mappingContext.conversionService.convert(nativeKey, storedAs)
+            // Symmetry with IdentityEncoder's non-hex fallback: a null return (vs a throw)
+            // means the converter rejected the value — e.g. a natural-key String being
+            // converted to ObjectId. Keep the original so update/delete filters match the
+            // document the encoder actually wrote (BSON String), rather than targeting
+            // {_id: null} and surfacing as a misleading OptimisticLockingException.
+            return converted != null ? converted : nativeKey
         } catch (Throwable ignored) {
             return nativeKey
         }
