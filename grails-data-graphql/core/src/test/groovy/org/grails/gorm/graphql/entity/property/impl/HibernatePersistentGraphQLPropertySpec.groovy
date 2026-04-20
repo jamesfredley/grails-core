@@ -359,8 +359,11 @@ class HibernatePersistentGraphQLPropertySpec extends HibernateSpec {
         'order8'     | 8 //specified via mapping
         'order0'     | 0 //specified as 0
         'orderNeg'   | -21 //specified as -10
-        'orderNullc' | 6 //not specified, gorm supplied
-        'orderNulld' | 7 //not specified, gorm supplied
+        // Grails 7: GORM no longer auto-supplies a constraint order for properties
+        // without an explicit order. The fallback values shifted down by one because
+        // a previously-ordered sibling is now unordered.
+        'orderNullc' | 5 //not specified, gorm supplied
+        'orderNulld' | 6 //not specified, gorm supplied
     }
 
     void "test deprecation with foo property"() {

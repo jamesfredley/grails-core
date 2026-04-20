@@ -19,7 +19,7 @@
 
 package myapp
 
-import grails.test.mixin.integration.Integration
+import grails.testing.mixin.integration.Integration
 import org.bson.types.ObjectId
 import org.grails.datastore.mapping.mongo.MongoDatastore
 import org.grails.gorm.graphql.plugin.testing.GraphQLSpec

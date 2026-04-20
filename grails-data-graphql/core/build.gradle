@@ -24,27 +24,27 @@ repositories {
 apply plugin: 'codenarc'
 
 dependencies {
-    documentation "org.codehaus.groovy:groovy-cli-picocli"
-
     api "org.apache.grails.data:grails-datamapping-core:${gormVersion}"
     api "com.graphql-java:graphql-java:$graphqlJavaVersion"
     api "com.graphql-java:graphql-java-extended-scalars:$graphqlJavaScalarExtVersion"
     api 'com.github.javaparser:javaparser-core:3.25.7'
-    api 'org.apache.grails:grails-views-gson:2.3.2'
+    api "org.apache.grails:grails-views-gson:$viewsJsonVersion"
     api "org.javassist:javassist:$javassistVersion"
 
     codenarc "org.codenarc:CodeNarc:$codenarcVersion"
 
     testImplementation "org.apache.grails.data:grails-data-hibernate5-core:${gormHibernateVersion}"
-    testImplementation "org.apache.grails.data:grails-data-mongodb-core:${gormMongoDbVersion}"
-    testImplementation 'com.github.fakemongo:fongo:2.1.1'
+    // MongoDB test path disabled during Grails 7.1.0 migration: fongo 2.1.1 is
+    // abandoned and incompatible with the MongoDB driver 5.x shipped with Grails 7.1.0.
+    // MongoSchemaSpec was already @Ignored upstream; follow-up: swap fongo for Testcontainers.
+    // testImplementation "org.apache.grails.data:grails-data-mongodb-core:${gormMongoDbVersion}"
+    // testImplementation 'com.github.fakemongo:fongo:2.1.1'
     testImplementation 'com.h2database:h2:2.2.224'
-    testImplementation 'org.apache.tomcat:tomcat-jdbc:8.5.97'
+    testImplementation 'org.apache.tomcat:tomcat-jdbc:10.1.28'
     testImplementation "org.slf4j:slf4j-api:$slf4jVersion"
+    testImplementation "org.objenesis:objenesis:$objenesisVersion"
+    testImplementation "net.bytebuddy:byte-buddy"
 }
-
-targetCompatibility = 1.8
-sourceCompatibility = 1.8
 
 codenarc {
     toolVersion = codenarcVersion

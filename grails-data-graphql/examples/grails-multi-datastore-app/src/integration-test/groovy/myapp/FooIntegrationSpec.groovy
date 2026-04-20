@@ -19,7 +19,7 @@
 
 package myapp
 
-import grails.test.mixin.integration.Integration
+import grails.testing.mixin.integration.Integration
 import org.grails.gorm.graphql.plugin.testing.GraphQLSpec
 import org.grails.orm.hibernate.HibernateDatastore
 

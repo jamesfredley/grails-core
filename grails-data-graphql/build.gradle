@@ -19,11 +19,11 @@
 
 buildscript {
     repositories {
+        mavenCentral()
         maven { url "https://repo.grails.org/grails/restricted" }
     }
     dependencies {
         classpath "org.apache.grails:grails-gradle-plugins:$grailsGradlePluginVersion"
-        classpath "org.apache.grails.gradle:grails-gson:$viewsJsonVersion"
     }
 }
 
@@ -35,7 +35,7 @@ repositories {
 version project.projectVersion
 
 ext {
-    commonBuild = 'https://raw.githubusercontent.com/grails/grails-common-build/v2.0.1'
+    commonBuild = 'https://raw.githubusercontent.com/grails/grails-common-build/v2.0.3'
 }
 
 subprojects {
@@ -49,6 +49,7 @@ subprojects {
     }
 
     repositories {
+        mavenCentral()
         maven { url "https://repo.grails.org/grails/restricted" }
     }
 
@@ -73,29 +74,53 @@ subprojects {
         return
     }
 
-    //TODO: See RENAME.md in grails-core on how to repackage these libraries
     group "org.apache.grails"
 
-    if (isGrailsPlugin) {
-        apply plugin: 'groovy'
-        apply plugin: 'eclipse'
-        apply plugin: 'idea'
-        apply plugin: 'java-library'
-        apply plugin: 'org.apache.grails.gradle.grails-plugin'
+    apply plugin: 'groovy'
+    apply plugin: 'eclipse'
+    apply plugin: 'idea'
+    apply plugin: 'java-library'
+    apply plugin: 'maven-publish'
 
-        sourceCompatibility = 1.11
-        targetCompatibility = 1.11
-    } else {
-        apply from: "${commonBuild}/common-project.gradle"
+    if (isGrailsPlugin) {
+        apply plugin: 'org.apache.grails.gradle.grails-plugin'
+    }
+
+    java {
+        sourceCompatibility = JavaVersion.toVersion(javaVersion)
+        targetCompatibility = JavaVersion.toVersion(javaVersion)
+    }
+
+    // Groovy 4 moved from org.codehaus.groovy → org.apache.groovy.
+    // Redirect any legacy coordinate that leaks in via transitive dependencies
+    // or the grails-plugin Gradle plugin. groovy-bom is excluded outright because
+    // it's pulled in as a "library" (wrong) by legacy build scripts, conflicting
+    // with the platform declared by spring-boot-dependencies / grails-bom.
+    configurations.configureEach {
+        exclude group: 'org.codehaus.groovy', module: 'groovy-bom'
+        resolutionStrategy.eachDependency { details ->
+            if (details.requested.group == 'org.codehaus.groovy' && details.requested.name != 'groovy-bom') {
+                details.useTarget(group: 'org.apache.groovy', name: details.requested.name, version: groovyVersion)
+            }
+        }
     }
 
     dependencies {
+        implementation platform("org.apache.grails:grails-bom:$grailsBomVersion")
+        testImplementation platform("org.apache.grails:grails-bom:$grailsBomVersion")
+        api "org.apache.groovy:groovy:$groovyVersion"
         implementation "com.graphql-java:graphql-java:$graphqlJavaVersion"
-        testImplementation "org.codehaus.groovy:groovy-test"
-        testImplementation "io.projectreactor:reactor-test:3.6.1"
+        testImplementation "org.apache.groovy:groovy-test"
+        testImplementation "io.projectreactor:reactor-test"
         testImplementation("org.spockframework:spock-core:$spockVersion")
-        implementation 'org.apache.grails.data:grails-datamapping-core:7.3.4'
+    }
+
+    tasks.withType(Test).configureEach {
+        useJUnitPlatform()
     }
 }
 
-apply from: "${commonBuild}/common-publishing.gradle"
+// Publishing is handled by the grails-gradle-plugins `grails-plugin` plugin and the
+// root monorepo release pipeline. The legacy grails-common-build/common-publishing.gradle
+// script used Gradle 7 APIs (Jar.classifier) that were removed in Gradle 8.
+// apply from: "${commonBuild}/common-publishing.gradle"

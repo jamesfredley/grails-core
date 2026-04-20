@@ -19,28 +19,24 @@
 
 package com.example.demo
 
-import org.junit.runner.RunWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.client.TestRestTemplate
 import org.springframework.http.ResponseEntity
-import org.springframework.test.context.junit4.SpringRunner
+import spock.lang.Specification
 
-@RunWith(SpringRunner)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-class AuthorIntegrationTests {
+class AuthorIntegrationTests extends Specification {
 
     @Autowired
-    private TestRestTemplate restTemplate
+    TestRestTemplate restTemplate
 
-    void createClient() {
+    void 'author list endpoint returns empty list'() {
+        when:
         ResponseEntity<String> responseEntity =
-                restTemplate.postForEntity("/graphql", "{ authorList { id } }", String)
-        String response = responseEntity.body
+                restTemplate.postForEntity('/graphql', '{ authorList { id } }', String)
 
-        expect:
-        response == '{"data":{"authorList":[]}}'
+        then:
+        responseEntity.body == '{"data":{"authorList":[]}}'
     }
-
-
 }

@@ -38,7 +38,7 @@ import org.grails.gorm.graphql.types.DefaultGraphQLTypeManager
 
 class GormGraphqlGrailsPlugin extends Plugin {
 
-    def grailsVersion = "4.0.0 > *"
+    def grailsVersion = "7.1.0 > *"
     def title = "Gorm GraphQL"
     def author = "James Kleeh"
     def authorEmail = "james.kleeh@gmail.com"

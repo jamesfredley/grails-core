@@ -68,7 +68,7 @@ import org.grails.gorm.graphql.types.GraphQLTypeManager
 import org.grails.gorm.graphql.types.scalars.coercing.DateCoercion
 import org.grails.gorm.graphql.types.scalars.coercing.jsr310.*
 import org.springframework.context.support.StaticMessageSource
-import javax.annotation.PostConstruct
+import jakarta.annotation.PostConstruct
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime

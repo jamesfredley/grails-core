@@ -19,17 +19,14 @@
 
 package com.example.demo
 
-import org.junit.Test
-import org.junit.runner.RunWith
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.test.context.junit4.SpringRunner
+import spock.lang.Specification
 
-@RunWith(SpringRunner)
 @SpringBootTest
-class DemoApplicationTests {
+class DemoApplicationTests extends Specification {
 
-	@Test
-	void contextLoads() {
-	}
-
+    void 'context loads'() {
+        expect:
+        true
+    }
 }
