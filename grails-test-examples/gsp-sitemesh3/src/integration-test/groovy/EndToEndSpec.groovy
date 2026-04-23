@@ -82,4 +82,30 @@ class EndToEndSpec extends ContainerGebSpec {
 <body><h1>Hello</h1>body text
 </body></html>"""
     }
+
+    // The async dispatch returns on a different thread than the original
+    // request — exercises Sitemesh3CapturedPage.propertiesMaterialized
+    // cross-thread visibility (the volatile field).
+    def 'async simple layout'() {
+        when:
+        go('endToEnd/asyncSimpleLayout')
+
+        then:
+        pageSource == """<html><head><title>Decorated This is the title</title><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"></head>
+<body><h1>Hello</h1>body text
+</body></html>"""
+    }
+
+    // Async dispatch + nested <g:applyLayout> — covers both the volatile
+    // captured-page field and the ViewResolver-based dispatch that replaced
+    // RequestDispatcher.forward() for nested layouts.
+    def 'async multiple levels of layouts'() {
+        when:
+        go('endToEnd/asyncMultipleLevelsOfLayouts')
+
+        then:
+        pageSource == """<html><head><title>Decorated Base - Dialog - This is the title</title><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"></head>
+<body><h1>Hello</h1><div id="base"><div id="dialog">body text</div></div>
+</body></html>"""
+    }
 }
