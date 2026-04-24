@@ -36,7 +36,7 @@ class GrailsVersionSpec extends Specification {
 
         when:
         Set<GrailsReleaseType> allowedTypes = null
-        SystemStubs.withEnvironmentVariable('GRAILS_WRAPPER_ALLOWED_TYPES', 'SNAPSHOT, RC').execute {
+        SystemStubs.withEnvironmentVariable(GrailsVersion.GRAILS_WRAPPER_ALLOWED_TYPES_ENV, 'SNAPSHOT, RC').execute {
             allowedTypes = GrailsVersion.getAllowedReleaseTypes(null, mockVersion)
         }
 
@@ -56,13 +56,13 @@ class GrailsVersionSpec extends Specification {
 
         when:
         Set<GrailsReleaseType> allowedTypes = null
-        SystemStubs.withEnvironmentVariable('GRAILS_WRAPPER_ALLOWED_TYPES', 'SNAPSHOT, FOO').execute {
+        SystemStubs.withEnvironmentVariable(GrailsVersion.GRAILS_WRAPPER_ALLOWED_TYPES_ENV, 'SNAPSHOT, FOO').execute {
             allowedTypes = GrailsVersion.getAllowedReleaseTypes(null, mockVersion)
         }
 
         then:
         def ie = thrown(IllegalStateException)
-        ie.message == 'Invalid Value in GRAILS_WRAPPER_ALLOWED_TYPES: FOO'
+        ie.message == "Invalid Value in ${GrailsVersion.GRAILS_WRAPPER_ALLOWED_TYPES_ENV}: FOO"
 
         and:
         0 * mockVersion._
@@ -77,7 +77,7 @@ class GrailsVersionSpec extends Specification {
 
         when:
         Set<GrailsReleaseType> allowedTypes = null
-        SystemStubs.withEnvironmentVariable('GRAILS_WRAPPER_ALLOWED_TYPES', 'SNAPSHOT, RC').execute {
+        SystemStubs.withEnvironmentVariable(GrailsVersion.GRAILS_WRAPPER_ALLOWED_TYPES_ENV, 'SNAPSHOT, RC').execute {
             allowedTypes = GrailsVersion.getAllowedReleaseTypes(preferredVersion, mockVersion)
         }
 
@@ -100,7 +100,7 @@ class GrailsVersionSpec extends Specification {
 
         when:
         Set<GrailsReleaseType> allowedTypes = null
-        SystemStubs.withEnvironmentVariable('GRAILS_WRAPPER_ALLOWED_TYPES', null).execute {
+        SystemStubs.withEnvironmentVariable(GrailsVersion.GRAILS_WRAPPER_ALLOWED_TYPES_ENV, null).execute {
             allowedTypes = GrailsVersion.getAllowedReleaseTypes(preferredVersion, mockVersion)
         }
 
@@ -122,7 +122,7 @@ class GrailsVersionSpec extends Specification {
 
         when:
         Set<GrailsReleaseType> allowedTypes = null
-        SystemStubs.withEnvironmentVariable('GRAILS_WRAPPER_ALLOWED_TYPES', null).execute {
+        SystemStubs.withEnvironmentVariable(GrailsVersion.GRAILS_WRAPPER_ALLOWED_TYPES_ENV, null).execute {
             allowedTypes = GrailsVersion.getAllowedReleaseTypes(null, mockVersion)
         }
 
@@ -141,7 +141,7 @@ class GrailsVersionSpec extends Specification {
 
         when:
         Set<GrailsReleaseType> allowedTypes = null
-        SystemStubs.withEnvironmentVariable('GRAILS_WRAPPER_ALLOWED_TYPES', null).execute {
+        SystemStubs.withEnvironmentVariable(GrailsVersion.GRAILS_WRAPPER_ALLOWED_TYPES_ENV, null).execute {
             allowedTypes = GrailsVersion.getAllowedReleaseTypes(null, mockVersion)
         }
 
@@ -160,7 +160,7 @@ class GrailsVersionSpec extends Specification {
 
         when:
         Set<GrailsReleaseType> allowedTypes = null
-        SystemStubs.withEnvironmentVariable('GRAILS_WRAPPER_ALLOWED_TYPES', null).execute {
+        SystemStubs.withEnvironmentVariable(GrailsVersion.GRAILS_WRAPPER_ALLOWED_TYPES_ENV, null).execute {
             allowedTypes = GrailsVersion.getAllowedReleaseTypes(null, mockVersion)
         }
 
@@ -178,7 +178,7 @@ class GrailsVersionSpec extends Specification {
 
         when:
         GrailsVersion resolved = null
-        SystemStubs.withEnvironmentVariable('PREFERRED_GRAILS_VERSION', '8.0.0-SNAPSHOT').execute {
+        SystemStubs.withEnvironmentVariable(GrailsVersion.PREFERRED_GRAILS_VERSION_ENV, '8.0.0-SNAPSHOT').execute {
             resolved = GrailsVersion.getPreferredGrailsVersion(gradleProperties)
         }
 
@@ -192,7 +192,7 @@ class GrailsVersionSpec extends Specification {
 
         when:
         GrailsVersion resolved = null
-        SystemStubs.withEnvironmentVariable('PREFERRED_GRAILS_VERSION', '7.0.11-SNAPSHOT').execute {
+        SystemStubs.withEnvironmentVariable(GrailsVersion.PREFERRED_GRAILS_VERSION_ENV, '7.0.11-SNAPSHOT').execute {
             resolved = GrailsVersion.getPreferredGrailsVersion(missing)
         }
 
@@ -207,7 +207,7 @@ class GrailsVersionSpec extends Specification {
 
         when:
         GrailsVersion resolved = null
-        SystemStubs.withEnvironmentVariable('PREFERRED_GRAILS_VERSION', '7.0.11-SNAPSHOT').execute {
+        SystemStubs.withEnvironmentVariable(GrailsVersion.PREFERRED_GRAILS_VERSION_ENV, '7.0.11-SNAPSHOT').execute {
             resolved = GrailsVersion.getPreferredGrailsVersion(gradleProperties)
         }
 
@@ -221,7 +221,7 @@ class GrailsVersionSpec extends Specification {
 
         when:
         GrailsVersion resolved = null
-        SystemStubs.withEnvironmentVariable('PREFERRED_GRAILS_VERSION', '   ').execute {
+        SystemStubs.withEnvironmentVariable(GrailsVersion.PREFERRED_GRAILS_VERSION_ENV, '   ').execute {
             resolved = GrailsVersion.getPreferredGrailsVersion(missing)
         }
 
@@ -235,7 +235,7 @@ class GrailsVersionSpec extends Specification {
 
         when:
         GrailsVersion resolved = null
-        SystemStubs.withEnvironmentVariable('PREFERRED_GRAILS_VERSION', null).execute {
+        SystemStubs.withEnvironmentVariable(GrailsVersion.PREFERRED_GRAILS_VERSION_ENV, null).execute {
             resolved = GrailsVersion.getPreferredGrailsVersion(missing)
         }
 
