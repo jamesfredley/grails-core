@@ -90,8 +90,7 @@ class Sitemesh3GrailsPlugin extends Plugin {
             boolean enableReload = env.isReloadEnabled() ||
                     config.getProperty('grails.gsp.enable.reload', Boolean, false) ||
                     (developmentMode && env == Environment.DEVELOPMENT)
-            String resolvedDefaultLayout = config.getProperty('grails.sitemesh.default.layout') ?:
-                    config.getProperty('sitemesh.decorator.default')
+            String resolvedDefaultLayout = defaultLayout
 
             // Bean names match the @ConditionalOnMissingBean(name = "contentProcessor"/"decoratorSelector")
             // guards on upstream's SiteMeshViewResolverAutoConfiguration, so
@@ -101,6 +100,7 @@ class Sitemesh3GrailsPlugin extends Plugin {
             decoratorSelector(Sitemesh3LayoutFinder, ref('groovyPageLocator')) {
                 gspReloadEnabled = enableReload
                 defaultDecoratorName = resolvedDefaultLayout ?: null
+                layoutCacheExpirationMillis = config.getProperty('grails.sitemesh.layout.cache.interval', Long, 5000L)
             }
 
             // Replace the filter registration from
@@ -118,6 +118,10 @@ class Sitemesh3GrailsPlugin extends Plugin {
         }
     }
 
+    // This class is never invoked (the FilterRegistrationBean has enabled = false).
+    // It exists solely so we can register a bean named "sitemesh" and satisfy
+    // SiteMeshAutoConfiguration's @ConditionalOnMissingBean(name = "sitemesh")
+    // guard — preventing the upstream filter-based integration from activating.
     static class NoopSitemeshFilter implements Filter {
         @Override
         void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) {

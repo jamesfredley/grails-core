@@ -59,18 +59,22 @@ import org.grails.web.util.WebUtils;
  * </ol>
  *
  * <p>Results are cached by (controllerName, actionUri) outside of the
- * DEVELOPMENT environment.</p>
+ * DEVELOPMENT environment. Both caches are unbounded in entry count,
+ * but are naturally bounded by the number of distinct (controllerName,
+ * actionUri) pairs in the application — typically a small, fixed set.</p>
  */
 public class Sitemesh3LayoutFinder implements DecoratorSelector<SiteMeshContext> {
 
     private static final String LAYOUTS_PATH = "/layouts";
-    private static final long LAYOUT_CACHE_EXPIRATION_MILLIS = Long.getLong("grails.gsp.reload.interval", 5000);
 
     private final GrailsConventionGroovyPageLocator groovyPageLocator;
 
     private String defaultDecoratorName;
     private boolean gspReloadEnabled;
     private boolean cacheEnabled = (Environment.getCurrent() != Environment.DEVELOPMENT);
+    // Configurable via grails.sitemesh.layout.cache.interval (milliseconds).
+    // Defaults to 5000 ms. Only consulted when gspReloadEnabled is true.
+    private long layoutCacheExpirationMillis = 5000L;
 
     private final Map<String, LayoutCacheValue> namedDecoratorCache = new ConcurrentHashMap<>();
     private final Map<LayoutCacheKey, LayoutCacheValue> layoutDecoratorCache = new ConcurrentHashMap<>();
@@ -89,6 +93,10 @@ public class Sitemesh3LayoutFinder implements DecoratorSelector<SiteMeshContext>
 
     public void setCacheEnabled(boolean cacheEnabled) {
         this.cacheEnabled = cacheEnabled;
+    }
+
+    public void setLayoutCacheExpirationMillis(long layoutCacheExpirationMillis) {
+        this.layoutCacheExpirationMillis = layoutCacheExpirationMillis;
     }
 
     @Override
@@ -129,7 +137,7 @@ public class Sitemesh3LayoutFinder implements DecoratorSelector<SiteMeshContext>
         if (cacheEnabled) {
             cacheKey = new LayoutCacheKey(controllerName, actionUri);
             LayoutCacheValue cached = layoutDecoratorCache.get(cacheKey);
-            if (cached != null && (!gspReloadEnabled || !cached.isExpired())) {
+            if (cached != null && (!gspReloadEnabled || !cached.isExpired(layoutCacheExpirationMillis))) {
                 return toArray(cached.path);
             }
         }
@@ -177,7 +185,7 @@ public class Sitemesh3LayoutFinder implements DecoratorSelector<SiteMeshContext>
         }
 
         LayoutCacheValue cached = namedDecoratorCache.get(name);
-        if (cacheEnabled && cached != null && (!gspReloadEnabled || !cached.isExpired())) {
+        if (cacheEnabled && cached != null && (!gspReloadEnabled || !cached.isExpired(layoutCacheExpirationMillis))) {
             return cached.path;
         }
 
@@ -248,8 +256,8 @@ public class Sitemesh3LayoutFinder implements DecoratorSelector<SiteMeshContext>
             this.path = path;
         }
 
-        boolean isExpired() {
-            return System.currentTimeMillis() - createdAt > LAYOUT_CACHE_EXPIRATION_MILLIS;
+        boolean isExpired(long expirationMillis) {
+            return System.currentTimeMillis() - createdAt > expirationMillis;
         }
     }
 }

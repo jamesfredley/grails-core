@@ -58,13 +58,12 @@ public class Sitemesh3CapturedPage implements Content {
     private final Map<String, StreamCharBuffer> contentBuffers = new LinkedHashMap<>();
     private final Map<String, String> pageProperties = new HashMap<>();
 
-    private boolean used;
-    private boolean titleCaptured;
-    // Volatile because a captured page can be passed to an async dispatch
-    // thread (Grails 7 supports @Async controller returns and
-    // Callable-returning actions). Without volatile, the JMM gives no
-    // happens-before guarantee on the flag across threads, and two threads
-    // could race to materialize the property tree.
+    // Volatile: a captured page can be passed to an async dispatch thread
+    // (Grails 7 supports @Async controller returns and Callable-returning
+    // actions). Without volatile, the JMM gives no happens-before guarantee
+    // on these flags across threads.
+    private volatile boolean used;
+    private volatile boolean titleCaptured;
     private volatile boolean propertiesMaterialized;
 
     public void setHeadBuffer(StreamCharBuffer buffer) {
@@ -176,8 +175,20 @@ public class Sitemesh3CapturedPage implements Content {
         if (propertiesMaterialized) {
             return;
         }
-        propertiesMaterialized = true;
+        // Double-checked locking: two async-dispatch threads could both see
+        // propertiesMaterialized == false before either sets it. Without the
+        // synchronized block, both would walk and mutate the InMemoryContent
+        // delegate concurrently, leaving it in a partially-initialized state.
+        synchronized (this) {
+            if (propertiesMaterialized) {
+                return;
+            }
+            propertiesMaterialized = true;
+            doMaterializeProperties();
+        }
+    }
 
+    private void doMaterializeProperties() {
         ContentProperty root = delegate.getExtractedProperties();
 
         // pageBuffer is only set for fallback paths where the full rendered

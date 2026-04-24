@@ -35,6 +35,8 @@ import org.springframework.web.servlet.ViewResolver
 
 import grails.artefact.TagLibrary
 import grails.gsp.TagLib
+import org.grails.encoder.CodecLookup
+import org.grails.encoder.Encoder
 import org.grails.plugins.sitemesh3.GrailsSiteMeshViewContext
 import org.grails.web.util.WebUtils
 
@@ -44,6 +46,9 @@ import org.grails.web.util.WebUtils
  */
 @TagLib
 class RenderSitemeshTagLib implements TagLibrary {
+
+    @Autowired
+    CodecLookup codecLookup
 
     @Autowired
     ContentProcessor contentProcessor
@@ -115,6 +120,17 @@ class RenderSitemeshTagLib implements TagLibrary {
         currentProperty
     }
 
+    /**
+     * Used to retrieve a property of the decorated page.<br/>
+     *
+     * &lt;g:pageProperty default="defaultValue" name="body.onload" /&gt;<br/>
+     *
+     * @emptyTag
+     *
+     * @attr REQUIRED name the property name
+     * @attr default the default value to use if the property is null
+     * @attr writeEntireProperty if true, writes the property in the form 'foo = "bar"', otherwise renders 'bar'
+     */
     Closure pageProperty = { attrs ->
         if (!attrs.name) {
             throwTagError('Tag [pageProperty] is missing required attribute [name]')
@@ -136,6 +152,18 @@ class RenderSitemeshTagLib implements TagLibrary {
         }
     }
 
+    /**
+     * Invokes the body of this tag if the page property exists:<br/>
+     *
+     * &lt;g:ifPageProperty name="meta.index"&gt;body to invoke&lt;/g:ifPageProperty&gt;<br/>
+     *
+     * or it equals a certain value:<br/>
+     *
+     * &lt;g:ifPageProperty name="meta.index" equals="blah"&gt;body to invoke&lt;/g:ifPageProperty&gt;
+     *
+     * @attr name REQUIRED the property name
+     * @attr equals optional value to test against
+     */
     Closure ifPageProperty = { Map attrs, body ->
         if (!attrs.name) {
             return
@@ -197,8 +225,9 @@ class RenderSitemeshTagLib implements TagLibrary {
     }
 
     Closure content = { attrs, body ->
+        Encoder htmlEncoder = codecLookup?.lookupEncoder('HTML')
         out << '<content tag="'
-        out << attrs.tag
+        out << (htmlEncoder != null ? htmlEncoder.encode(attrs.tag) : attrs.tag)
         out << '">'
         out << body()
         out << '</content>'
