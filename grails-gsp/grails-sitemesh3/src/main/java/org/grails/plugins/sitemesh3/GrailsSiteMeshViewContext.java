@@ -19,6 +19,7 @@
 package org.grails.plugins.sitemesh3;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.Locale;
 
 import jakarta.servlet.ServletContext;
@@ -30,6 +31,7 @@ import org.sitemesh.content.ContentProcessor;
 import org.sitemesh.webapp.contentfilter.ResponseMetaData;
 import org.sitemesh.webmvc.SiteMeshViewContext;
 
+import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.ViewResolver;
 
 /**
@@ -38,8 +40,17 @@ import org.springframework.web.servlet.ViewResolver;
  * decorator dispatch. The layout GSP's own capture taglibs populate that
  * page, which {@link CaptureAwareContentProcessor} then returns as the
  * decorated {@code Content} (enabling chained decoration without a second
- * HTML parse). The previous attribute is restored on exit so the caller's
- * captured page remains intact.
+ * HTML parse).
+ *
+ * <p>Overrides {@link #dispatch} to route absolute paths (those starting with
+ * {@code /}) through the {@link ViewResolver} rather than falling back to
+ * {@code RequestDispatcher.forward()}. All Grails layout paths are absolute
+ * (e.g. {@code /layouts/application}), but {@link SiteMeshViewContext#dispatch}
+ * only uses the ViewResolver for relative names — paths that start with {@code /}
+ * are handed off to {@code WebAppContext.dispatch()} which re-enters the servlet
+ * pipeline via a forward. Routing through the ViewResolver keeps decoration
+ * entirely within the Spring MVC view-resolver chain and avoids re-entering
+ * the filter stack.</p>
  */
 public class GrailsSiteMeshViewContext extends SiteMeshViewContext {
 
@@ -59,15 +70,34 @@ public class GrailsSiteMeshViewContext extends SiteMeshViewContext {
     @Override
     public void dispatch(HttpServletRequest request, HttpServletResponse response, String path)
             throws ServletException, IOException {
-        // Push a fresh Sitemesh3CapturedPage for the decorator render but
-        // DO NOT restore the previous value on exit. Chained decoration
-        // relies on reading the freshly-captured page after dispatch
-        // returns — the layout's own <g:capture*> taglibs populate it,
-        // and CaptureAwareContentProcessor then returns it as the
-        // "decorated Content" without a second HTML parse. The outer
-        // GrailsSiteMeshView.postRender is responsible for clearing the
-        // attribute at the end of the top-level render.
+        // Push a fresh Sitemesh3CapturedPage for the decorator render.
+        // DO NOT restore the previous value on exit — chained decoration
+        // relies on reading the freshly-captured page after dispatch returns:
+        // the layout's own <g:capture*> taglibs populate it, and
+        // CaptureAwareContentProcessor returns it as the decorated Content
+        // without a second HTML parse. The outer GrailsSiteMeshView.postRender
+        // is responsible for clearing the attribute at the end of the
+        // top-level render.
         request.setAttribute(Sitemesh3CapturedPage.REQUEST_ATTRIBUTE, new Sitemesh3CapturedPage());
+
+        // SiteMeshViewContext.dispatch() only uses the ViewResolver for paths
+        // that do NOT start with "/"; absolute paths fall through to
+        // WebAppContext.dispatch() (a RequestDispatcher.forward()). All Grails
+        // layout paths are absolute (/layouts/...), so we resolve them via the
+        // ViewResolver directly to stay within the Spring MVC view chain.
+        if (path != null && path.startsWith("/")) {
+            try {
+                View view = getViewResolver().resolveViewName(path, getLocale());
+                if (view != null) {
+                    view.render(Collections.emptyMap(), request, response);
+                    return;
+                }
+            } catch (IOException | ServletException e) {
+                throw e;
+            } catch (Exception e) {
+                throw new ServletException("Error rendering layout view: " + path, e);
+            }
+        }
         super.dispatch(request, response, path);
     }
 }
