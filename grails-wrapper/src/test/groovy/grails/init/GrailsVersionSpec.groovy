@@ -19,10 +19,16 @@
 package grails.init
 
 import spock.lang.Specification
+import spock.lang.TempDir
 import spock.lang.Unroll
 import uk.org.webcompere.systemstubs.SystemStubs
 
+import java.nio.file.Path
+
 class GrailsVersionSpec extends Specification {
+
+    @TempDir
+    Path tempDir
 
     def "allowed release types - specified valid"() {
         given:
@@ -163,6 +169,78 @@ class GrailsVersionSpec extends Specification {
 
         and: 'only later versions since its not snapshot'
         allowedTypes == [GrailsReleaseType.RELEASE] as LinkedHashSet
+    }
+
+    def "preferred version - gradle.properties with grailsVersion wins over env var"() {
+        given:
+        File gradleProperties = tempDir.resolve('gradle.properties').toFile()
+        gradleProperties.text = 'grailsVersion=7.0.11-SNAPSHOT'
+
+        when:
+        GrailsVersion resolved = null
+        SystemStubs.withEnvironmentVariable('PREFERRED_GRAILS_VERSION', '8.0.0-SNAPSHOT').execute {
+            resolved = GrailsVersion.getPreferredGrailsVersion(gradleProperties)
+        }
+
+        then:
+        resolved == new GrailsVersion('7.0.11-SNAPSHOT')
+    }
+
+    def "preferred version - env var used when gradle.properties is missing"() {
+        given:
+        File missing = tempDir.resolve('does-not-exist.properties').toFile()
+
+        when:
+        GrailsVersion resolved = null
+        SystemStubs.withEnvironmentVariable('PREFERRED_GRAILS_VERSION', '7.0.11-SNAPSHOT').execute {
+            resolved = GrailsVersion.getPreferredGrailsVersion(missing)
+        }
+
+        then:
+        resolved == new GrailsVersion('7.0.11-SNAPSHOT')
+    }
+
+    def "preferred version - env var used when gradle.properties has no grailsVersion key"() {
+        given:
+        File gradleProperties = tempDir.resolve('gradle.properties').toFile()
+        gradleProperties.text = 'projectVersion=7.0.11-SNAPSHOT'
+
+        when:
+        GrailsVersion resolved = null
+        SystemStubs.withEnvironmentVariable('PREFERRED_GRAILS_VERSION', '7.0.11-SNAPSHOT').execute {
+            resolved = GrailsVersion.getPreferredGrailsVersion(gradleProperties)
+        }
+
+        then:
+        resolved == new GrailsVersion('7.0.11-SNAPSHOT')
+    }
+
+    def "preferred version - env var trimmed and whitespace-only treated as unset"() {
+        given:
+        File missing = tempDir.resolve('does-not-exist.properties').toFile()
+
+        when:
+        GrailsVersion resolved = null
+        SystemStubs.withEnvironmentVariable('PREFERRED_GRAILS_VERSION', '   ').execute {
+            resolved = GrailsVersion.getPreferredGrailsVersion(missing)
+        }
+
+        then:
+        resolved == null
+    }
+
+    def "preferred version - returns null when neither gradle.properties nor env var is set"() {
+        given:
+        File missing = tempDir.resolve('does-not-exist.properties').toFile()
+
+        when:
+        GrailsVersion resolved = null
+        SystemStubs.withEnvironmentVariable('PREFERRED_GRAILS_VERSION', null).execute {
+            resolved = GrailsVersion.getPreferredGrailsVersion(missing)
+        }
+
+        then:
+        resolved == null
     }
 
     @Unroll
