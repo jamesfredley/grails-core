@@ -40,7 +40,7 @@ dependencies {
     runtimeOnly "ch.qos.logback:logback-classic:$logbackClassicVersion"
     runtimeOnly 'io.micronaut:micronaut-jackson-databind'
 
-    testCompileOnly "io.micronaut:micronaut-inject-groovy:$micronautVersion"
+    testCompileOnly 'io.micronaut:micronaut-inject-groovy'
 
     testImplementation "ch.qos.logback:logback-classic:$logbackClassicVersion"
     testImplementation 'io.micronaut:micronaut-http-client'
