@@ -141,11 +141,14 @@ public class GrailsVersion implements Comparable<GrailsVersion> {
      * <p>Precedence matches the documented behaviour in the wrapper README:
      * <ol>
      *   <li>Inside a Grails project (a {@code gradle.properties} containing a
-     *       {@code grailsVersion} key), use that value and ignore environment
-     *       variables.</li>
+     *       {@code grailsVersion} key with a non-blank value), use that value
+     *       and ignore environment variables. A present-but-blank value or an
+     *       unparseable version is treated as a project misconfiguration and
+     *       exits the process.</li>
      *   <li>Outside a Grails project (no {@code gradle.properties}, or one
      *       without {@code grailsVersion}), honour the
-     *       {@code PREFERRED_GRAILS_VERSION} environment variable.</li>
+     *       {@code PREFERRED_GRAILS_VERSION} environment variable. A
+     *       whitespace-only value is treated as unset.</li>
      *   <li>Otherwise return {@code null} and let the wrapper resolve the
      *       latest version from Maven metadata.</li>
      * </ol>
@@ -196,7 +199,8 @@ public class GrailsVersion implements Comparable<GrailsVersion> {
 
         String grailsVersion = properties.getProperty(GRAILS_VERSION_PROPERTY);
         if (grailsVersion == null || grailsVersion.trim().isEmpty()) {
-            return null;
+            System.out.println("A blank Grails Version was specified in gradle.properties for key [" + GRAILS_VERSION_PROPERTY + "]");
+            System.exit(1);
         }
 
         try {
