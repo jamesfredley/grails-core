@@ -88,7 +88,7 @@ dependencies {
     implementation "com.fizzed:rocker-runtime:$rockerVersion"
     implementation "info.picocli:picocli:$picocliVersion"
     implementation "info.picocli:picocli-shell-jline3:$picocliVersion"
-    implementation "jakarta.inject:jakarta.inject-api:$jakartaInjectVersion"
+    implementation 'jakarta.inject:jakarta.inject-api'
     implementation "org.fusesource.jansi:jansi:$jansiVersion"
     implementation "org.slf4j:slf4j-nop:$slf4jVersion"
     implementation "org.yaml:snakeyaml:$snakeyamlVersion"
