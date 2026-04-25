@@ -450,12 +450,8 @@ jobs:
           path: grails-forge/build/grails-forge-artifacts.txt
   verifyWrapper:
     name: "Verify grails-wrapper"
-    # The wrapper smoke test downloads org.apache.grails:grails-cli from Apache Nexus.
-    # That artifact is published by publishForge (in the grails-forge sub-project), so
-    # verification must run after BOTH publish (grails-core, which publishes the wrapper
-    # itself) AND publishForge (which publishes grails-cli). Previously the verify step
-    # lived inside publish and would 404 the very first time projectVersion was bumped,
-    # because publishForge had not yet pushed grails-cli for the new SNAPSHOT version.
+    # Verifies the wrapper works end-to-end. Must run after publishForge so that
+    # grails-cli (which the wrapper resolves at runtime) is available in Nexus.
     if: github.repository_owner == 'apache' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
     needs: [ publish, publishForge ]
     runs-on: ubuntu-24.04
