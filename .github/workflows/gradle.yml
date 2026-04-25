@@ -392,20 +392,14 @@ jobs:
           name: grails-core-artifacts.txt
           path: build/grails-core-artifacts.txt
       - name: "🔨 Create Grails Wrapper Distribution Zip"
-        run: |
+        run: >
           ./gradlew :grails-wrapper:distZip
-          mkdir -p build
-          cp grails-wrapper/build/distributions/apache-grails-wrapper-*.zip build/wrapper.zip
       - name: "📤 Upload Wrapper Distribution Zip"
-        # Intermediate artifact consumed by the verifyWrapper job after publishForge has
-        # uploaded grails-cli to Nexus. The user-facing apache-grails-wrapper-SNAPSHOT-bin
-        # artifact is produced by verifyWrapper from the contents of this zip. The zip is
-        # renamed to a stable filename so the download step in verifyWrapper does not have
-        # to glob over a version-stamped path.
+        # Intermediate artifact consumed by verifyWrapper after publishForge publishes grails-cli.
         uses: actions/upload-artifact@v7.0.1
         with:
           name: apache-grails-wrapper-distribution-zip
-          path: build/wrapper.zip
+          path: grails-wrapper/build/distributions/apache-grails-wrapper-*.zip
           if-no-files-found: error
   publishForge:
     if: github.repository_owner == 'apache' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
@@ -469,7 +463,7 @@ jobs:
         uses: actions/download-artifact@v7.0.0
         with:
           name: apache-grails-wrapper-distribution-zip
-          path: build
+          path: grails-wrapper/build/distributions
       - name: "✅ Verify grails-wrapper"
         env:
           GRAILS_WRAPPER_ALLOWED_TYPES: 'SNAPSHOT'
@@ -478,8 +472,10 @@ jobs:
           # globally latest SNAPSHOT in the Apache repo, which may be compiled
           # for a newer Java runtime than this job's JDK.
           export PREFERRED_GRAILS_VERSION=$(grep '^projectVersion=' gradle.properties | cut -d'=' -f2)
+          mkdir -p build
+          cp grails-wrapper/build/distributions/apache-grails-wrapper-*.zip build/wrapper.zip
           cd build
-          unzip wrapper.zip -d tmp
+          unzip wrapper -d tmp
           mv tmp/apache-grails-wrapper-* tmp/wrapper
           ./tmp/wrapper/grailsw --version
       - name: "📤 Upload Wrapper Zip to Workflow Summary Page"
