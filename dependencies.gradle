@@ -29,7 +29,12 @@ ext {
             'byte-buddy.version'            : '1.18.8',
             'commons-text.version'          : '1.15.0',
             'directory-watcher.version'     : '0.19.1',
-            'gradle-groovy.version'         : GroovySystem.version,
+            // Hard-coded rather than GroovySystem.version: the latter returns Gradle's
+            // bundled Groovy, which can lag the version grails-gradle code resolves
+            // transitively via grails-core. validateDependencyVersions requires the
+            // BOM-declared version to match what we actually resolve, so this needs to
+            // track grails-core's chosen Groovy, not Gradle's.
+            'gradle-groovy.version'         : '4.0.31',
             'gradle-spock.version'          : '2.3-groovy-4.0',
             'grails-publish-plugin.version' : '1.0.0-SNAPSHOT',
             'jansi.version'                 : '2.4.2',
