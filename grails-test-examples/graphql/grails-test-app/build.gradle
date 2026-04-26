@@ -17,16 +17,15 @@
  *  under the License.
  */
 plugins {
+    id 'groovy'
     id 'org.apache.grails.buildsrc.properties'
+    id 'org.apache.grails.gradle.grails-web'
+    id 'org.apache.grails.gradle.grails-gson'
     id 'org.apache.grails.buildsrc.compile'
 }
 
 version = projectVersion
 group = 'examples'
-
-apply plugin: 'groovy'
-apply plugin: 'org.apache.grails.gradle.grails-web'
-apply plugin: 'org.apache.grails.gradle.grails-gson'
 
 dependencies {
     implementation platform(project(':grails-bom'))
@@ -50,6 +49,7 @@ dependencies {
     implementation 'org.apache.grails:grails-async'
     implementation 'org.apache.grails:grails-events'
     implementation 'org.apache.grails:grails-data-hibernate5'
+    implementation 'org.apache.grails:grails-data-graphql'
     implementation 'org.apache.grails:grails-views-gson'
     implementation 'org.apache.grails:grails-data-mongodb-gson-templates'
 
@@ -59,8 +59,6 @@ dependencies {
     // JSON mapper for the micronaut HTTP client used by the GraphQLSpec trait.
     implementation "io.micronaut.serde:micronaut-serde-jackson:$micronautSerdeJacksonVersion"
 
-    implementation project(':grails-data-graphql')
-
     console 'org.apache.grails:grails-console'
     profile 'org.apache.grails.profiles:rest-api'
 
@@ -69,11 +67,6 @@ dependencies {
 
     testImplementation 'org.apache.grails:grails-testing-support-datamapping'
     testImplementation 'org.apache.grails:grails-testing-support-web'
-}
-
-bootRun {
-    jvmArgs('-Dspring.output.ansi.enabled=always')
-    sourceResources sourceSets.main
 }
 
 apply {

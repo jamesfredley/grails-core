@@ -71,16 +71,19 @@ dependencies {
     api 'jakarta.servlet:jakarta.servlet-api', {
         // api: HttpServletRequest/Response in GraphqlController
     }
-    api "io.micronaut:micronaut-http-client:$micronautHttpClientVersion", {
-        // api: HTTP client used by integration tests / playground
-    }
-    api "io.micronaut.rxjava2:micronaut-rxjava2-http-client:$micronautRxjava2Version", {
-        // api: RxJava2 variant of micronaut-http-client used by integration tests
-    }
+
+    // GraphQLSpec test trait imports types from io.micronaut.http.* and
+    // io.micronaut.rxjava2.http.client.* so the rxjava2 client (which transitively
+    // pulls micronaut-http-client and micronaut-http) is required to compile the
+    // trait. The trait is only useful from integration tests; the runtime
+    // dependency is therefore deferred to consumers (the example apps already
+    // declare it as `implementation`). Keeping it `compileOnly` here avoids
+    // shipping an unused micronaut HTTP client on every Grails app's runtime
+    // classpath - test dependencies must not leak onto the production classpath
+    // post Grails 7.
+    compileOnly "io.micronaut.rxjava2:micronaut-rxjava2-http-client:$micronautRxjava2Version"
 
     testImplementation project(':grails-testing-support-web')
-    // Spock 2.3 on Groovy 4 / JDK 17 uses net.bytebuddy for class mocking;
-    // cglib-nodep no longer works on JDK 17+.
     testImplementation 'net.bytebuddy:byte-buddy'
     testImplementation 'org.spockframework:spock-core'
 }
@@ -97,6 +100,9 @@ tasks.named('groovydoc').configure {
     dependsOn tasks.named('compileGsonViews')
 }
 
+// This is a Grails plugin (library), not an application; the Spring Boot
+// `bootRun` / `bootTestRun` tasks are inapplicable. Disabled to mirror
+// `grails-data-mongodb/grails-plugin/build.gradle`.
 def disabledTasks = ['bootRun', 'bootTestRun']
 disabledTasks.each { taskName ->
     tasks.named(taskName) {
@@ -105,10 +111,7 @@ disabledTasks.each { taskName ->
 }
 
 apply {
+    from rootProject.layout.projectDirectory.file('gradle/test-config.gradle')
     from rootProject.layout.projectDirectory.file('gradle/docs-config.gradle')
     from rootProject.layout.projectDirectory.file('gradle/grails-extension-gradle-config.gradle')
-}
-
-tasks.withType(Test).configureEach {
-    useJUnitPlatform()
 }

@@ -38,16 +38,15 @@ import org.grails.gorm.graphql.types.DefaultGraphQLTypeManager
 
 class GormGraphqlGrailsPlugin extends Plugin {
 
+    def license = 'Apache 2.0 License'
+    def organization = [name: 'Grails', url: 'https://grails.apache.org/']
+    def issueManagement = [system: 'Github', url: 'https://github.com/apache/grails-core/issues']
+    def scm = [url: 'https://github.com/apache/grails-core']
     def grailsVersion = '7.1.0 > *'
-    def title = 'Gorm GraphQL'
-    def author = 'James Kleeh'
-    def authorEmail = 'james.kleeh@gmail.com'
     def profiles = ['web']
-    def documentation = 'https://grails.github.io/grails-data-graphql/3.0.x/hibernate/guide/index.html'
-    def license = 'APACHE'
-    def developers = [[name: 'Puneet Behl', email: 'behlp@objectcomputing.com']]
-    def issueManagement = [system: 'GitHub', url: 'https://github.com/apache/grails-core/issues']
-    def scm = [url: 'https://github.com/apache/grails-core/']
+    def title = 'GORM GraphQL'
+    def description = 'Generates a GraphQL schema based on entities in GORM'
+    def documentation = 'https://grails.apache.org/docs/latest/grails-data/graphql/manual/'
 
     public static final MimeType GRAPHQL_MIME = new MimeType('application/graphql')
 

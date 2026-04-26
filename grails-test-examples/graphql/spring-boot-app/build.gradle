@@ -39,9 +39,9 @@ dependencies {
 
     // GORM + Hibernate 5 (Jakarta variant), configured via GORM's Spring Boot auto-config
     // (registers HibernateDatastore, dataSource, transactionManager as Spring beans).
-    implementation project(':grails-data-hibernate5-spring-boot')
-    implementation project(':grails-data-hibernate5-core')
-    implementation project(':grails-datamapping-core')
+    implementation 'org.apache.grails:grails-data-hibernate5-spring-boot'
+    implementation 'org.apache.grails.data:grails-data-hibernate5-core'
+    implementation 'org.apache.grails.data:grails-datamapping-core'
     implementation "org.hibernate:hibernate-core-jakarta:$hibernate5Version"
     implementation("org.hibernate:hibernate-ehcache:$hibernate5Version") {
         // Exclude javax variant of hibernate-core
@@ -51,7 +51,7 @@ dependencies {
     implementation 'jakarta.persistence:jakarta.persistence-api'
 
     // The GraphQL schema generator (core library only - no Grails plugin needed here).
-    implementation project(':grails-data-graphql-core')
+    implementation 'org.apache.grails.data:grails-data-graphql-core'
     implementation 'com.github.javaparser:javaparser-core'
     implementation "com.graphql-java:graphql-java:$graphqlJavaVersion"
 

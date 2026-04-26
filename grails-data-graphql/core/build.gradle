@@ -66,9 +66,6 @@ dependencies {
 }
 
 apply {
+    from rootProject.layout.projectDirectory.file('gradle/test-config.gradle')
     from rootProject.layout.projectDirectory.file('gradle/docs-config.gradle')
-}
-
-tasks.withType(Test).configureEach {
-    useJUnitPlatform()
 }

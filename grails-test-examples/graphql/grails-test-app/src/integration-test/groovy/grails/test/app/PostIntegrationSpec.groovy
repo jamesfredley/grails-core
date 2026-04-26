@@ -25,13 +25,11 @@ import spock.lang.Shared
 import spock.lang.Specification
 import spock.lang.Stepwise
 
-import java.text.SimpleDateFormat
+import java.time.Instant
 
 @Integration
 @Stepwise
 class PostIntegrationSpec extends Specification implements GraphQLSpec {
-
-    @Shared SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSX")
 
     @Shared Long postId
     @Shared Long post2Id
@@ -182,7 +180,7 @@ class PostIntegrationSpec extends Specification implements GraphQLSpec {
         obj.tags.size() == 2
         obj.tags.find { it.name == 'Grails' }
         obj.tags.find { it.name == 'Groovy' }
-        format.parse(obj.lastUpdated) > format.parse(obj.dateCreated)
+        Instant.parse(obj.lastUpdated as String) > Instant.parse(obj.dateCreated as String)
     }
 
     void "test listing posts"() {
