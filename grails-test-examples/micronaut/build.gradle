@@ -27,10 +27,6 @@ plugins {
 version = '0.1'
 group = 'micronaut'
 
-// Micronaut platform overrides versions managed by grails-bom (e.g. reactor, kotlin),
-// so dependency-version validation against the BOM is not meaningful for this project.
-ext.skipDependencyValidation = true
-
 apply plugin: 'org.apache.grails.gradle.grails-web'
 apply plugin: 'cloud.wondrify.asset-pipeline'
 
@@ -40,7 +36,7 @@ apply plugin: 'cloud.wondrify.asset-pipeline'
 apply plugin: 'org.apache.grails.gradle.grails-gsp'
 
 dependencies {
-    implementation platform(project(':grails-bom'))
+    implementation enforcedPlatform(project(':grails-micronaut-bom'))
 
     implementation "io.micronaut:micronaut-http-client:$micronautHttpClientVersion"
     implementation "io.micronaut:micronaut-retry:$micronautHttpClientVersion"
@@ -50,11 +46,11 @@ dependencies {
     implementation 'org.apache.grails:grails-scaffolding'
     implementation project(':grails-test-examples-plugins-micronaut-singleton')
 
-    annotationProcessor platform("io.micronaut.platform:micronaut-platform:$micronautPlatformVersion")
+    annotationProcessor enforcedPlatform(project(':grails-micronaut-bom'))
     annotationProcessor 'io.micronaut:micronaut-inject-java'
     annotationProcessor 'jakarta.annotation:jakarta.annotation-api'
 
-    testAndDevelopmentOnly platform(project(':grails-bom'))
+    testAndDevelopmentOnly enforcedPlatform(project(':grails-micronaut-bom'))
     testAndDevelopmentOnly 'org.apache.grails:grails-dependencies-assets'
 
     runtimeOnly 'cloud.wondrify:asset-pipeline-grails'

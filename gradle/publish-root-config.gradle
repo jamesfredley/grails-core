@@ -32,6 +32,7 @@ def publishedProjects = [
         'grails-async-rxjava3',
         'grails-bom',
         'grails-hibernate5-bom',
+        'grails-micronaut-bom',
         'grails-bootstrap',
         'grails-cache',
         'grails-codecs',

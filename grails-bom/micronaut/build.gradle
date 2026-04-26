@@ -27,6 +27,7 @@ buildscript {
 
 plugins {
     id 'java-platform'
+    id 'org.apache.grails.buildsrc.publish'
     id 'org.apache.grails.buildsrc.sbom'
 }
 
@@ -49,59 +50,60 @@ ext {
     ]
 }
 
-dependencies {
-    api platform(gradleBomPlatformDependencies['spring-boot-bom']), {
-        exclude group: 'org.apache.groovy'
-        exclude group: 'org.spockframework'
-        exclude group: 'com.fasterxml.jackson'
-        exclude group: 'org.liquibase'
-        exclude group: 'org.hibernate'
-        exclude group: 'jakarta.servlet'
-        exclude group: 'jakarta.validation'
-    }
+// Coordinates we override via customBomDependencies — these must be excluded from the
+// inherited platform chain so they don't conflict with our strictly-versioned overrides
+// when consumers apply this BOM via enforcedPlatform.
+def overriddenModules = customBomDependencies.values().collect { String coord ->
+    def parts = coord.split(':')
+    [group: parts[0], module: parts[1]]
+}
+Set<String> overriddenCoords = overriddenModules.collect { "${it.group}:${it.module}".toString() } as Set
 
-    for (def entry : bomPlatformDependencies.entrySet()) {
-        if (entry.key == 'groovy-bom') {
-            // groovy-bom 4.0.x constrains javaparser-core to 3.28. We declare javaparser-core
-            // directly in gradleBomDependencies so excluding it here lets per-BOM overrides
-            // (e.g. grails-micronaut-bom pinning 3.27 with strictly) win without conflict.
-            api(platform(entry.value)) {
-                exclude group: 'com.github.javaparser'
-            }
-        } else {
-            api platform(entry.value)
+dependencies {
+    api(platform(project(':grails-bom'))) {
+        overriddenModules.each { ovr ->
+            exclude group: ovr.group, module: ovr.module
         }
     }
+
+    // Re-export the Micronaut platform so consumers of grails-micronaut-bom inherit Micronaut's
+    // managed versions transitively and don't need to declare the platform themselves.
+    api platform("io.micronaut.platform:micronaut-platform:$micronautPlatformVersion")
 
     constraints {
-        for (def entry : gradleBomDependencies.entrySet()) {
+        // Re-declare base BOM constraints directly so enforcedPlatform() consumers
+        // get forced versions. Constraints inherited via platform() are not enforced
+        // by enforcedPlatform — only direct constraints are.
+        // Skip entries we override below in customBomDependencies to avoid conflicting
+        // strictly constraints under enforcedPlatform.
+        gradleBomDependencies.values().each { String coord ->
+            def parts = coord.split(':')
+            String key = parts[0] + ':' + parts[1]
+            if (key in overriddenCoords) return
+            api coord
+        }
+        bomDependencies.values().each { String coord ->
+            def parts = coord.split(':')
+            String key = parts[0] + ':' + parts[1]
+            if (key in overriddenCoords) return
+            api coord
+        }
+        for (def entry : bomPlatformDependencies.entrySet()) {
             api entry.value
         }
-        for (def entry : bomDependencies.entrySet()) {
-            api entry.value
-        }
-
-        for (Project subproject : rootProject.subprojects) {
-            if (subproject.path == project.path || subproject.name in testProjects || subproject.name in docProjects || subproject.name in cliProjects) {
-                continue // ignore self & test projects
+        // Re-declare the Micronaut platform as a constraint for enforcedPlatform support
+        api "io.micronaut.platform:micronaut-platform:$micronautPlatformVersion"
+        for (def entry : customBomDependencies.entrySet()) {
+            def parts = entry.value.split(':')
+            if (parts.length == 3) {
+                api("${parts[0]}:${parts[1]}") {
+                    version {
+                        strictly parts[2]
+                    }
+                }
+            } else {
+                api entry.value
             }
-
-            // skip other java-platform (BOM) projects - they are not library dependencies
-            if (subproject.pluginManager.hasPlugin('java-platform')) {
-                continue
-            }
-
-            boolean publishedProject = subproject.pluginManager.hasPlugin('org.apache.grails.gradle.grails-publish-profile') || subproject.pluginManager.hasPlugin('org.apache.grails.gradle.grails-publish')
-            if (!publishedProject) {
-                continue
-            }
-
-            api project(":${subproject.path}")
-        }
-
-        // since we're duplicating the bom instead of inheriting we have to add the grails-gradle projects
-        for (Map.Entry<String, String> dependency : project.ext.gradleBuildProjects.entrySet()) {
-            api "${dependency.value}:${dependency.key}:${projectVersion}"
         }
     }
 }
@@ -115,7 +117,7 @@ configurations.register('bomDependencies').configure {
 tasks.register('extractConstraints', ExtractDependenciesTask).configure { ExtractDependenciesTask it ->
     it.configuration = configurations.named('bomDependencies')
     it.configurationName = 'bomDependencies'
-    it.destination = project.layout.buildDirectory.file('grails-bom-constraints.adoc')
+    it.destination = project.layout.buildDirectory.file('grails-micronaut-bom-constraints.adoc')
     it.platformDefinitions = combinedPlatforms
     it.definitions = combinedDependencies
     it.projectName = project.name
@@ -184,7 +186,7 @@ if (ext.isReleaseBuild && ext.isPublishedExternal) {
 }
 
 ext {
-    pomDescription = 'Grails BOM (Bill of Materials) for managing dependency versions used by Grails Projects'
+    pomDescription = 'Grails Micronaut BOM (Bill of Materials) for Grails projects integrating with Micronaut. Layers Micronaut-specific dependency overrides on top of grails-bom; consume as enforcedPlatform.'
     pomCustomization = { xml ->
         def root = xml.asNode()
 
