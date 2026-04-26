@@ -32,7 +32,7 @@ ext {
             'gradle-spock.version'          : '2.3-groovy-3.0',
             'grails-publish-plugin.version' : '0.0.4',
             'jansi.version'                 : '1.18',
-            'javaparser-core.version'       : '3.28.0',
+            'javaparser-core.version'       : '3.27.0', // micronaut requires 3.27, groovy 4 ships with 3.28 but is compatible with 3.27
             'jline.version'                 : '2.14.6',
             'jna.version'                   : '5.17.0',
             'jquery.version'                : '3.7.1',
