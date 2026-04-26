@@ -76,7 +76,7 @@ ext {
             'groovy.version'              : '4.0.31',
             'jackson.version'             : '2.19.1',
             'jquery.version'              : '3.7.1',
-            'liquibase-hibernate5.version': '4.27.0',
+            'hibernate-groovy-proxy.version': '1.1',
             'mongodb.version'             : '5.5.1',
             'rxjava.version'              : '1.3.8',
             'rxjava2.version'             : '2.2.21',
@@ -136,10 +136,7 @@ ext {
             'groovy-yaml'         : "org.apache.groovy:groovy-yaml:${bomDependencyVersions['groovy.version']}",
             // end - restate the groovy-bom here because the spring dependency management
             'jquery'                   : "org.webjars.npm:jquery:${bomDependencyVersions['jquery.version']}",
-            'liquibase-hibernate5'     : "org.liquibase:liquibase:${bomDependencyVersions['liquibase-hibernate5.version']}",
-            'liquibase-hibernate5-cdi' : "org.liquibase:liquibase-cdi:${bomDependencyVersions['liquibase-hibernate5.version']}",
-            'liquibase-hibernate5-core': "org.liquibase:liquibase-core:${bomDependencyVersions['liquibase-hibernate5.version']}",
-            'liquibase-hibernate5-ext' : "org.liquibase.ext:liquibase-hibernate5:${bomDependencyVersions['liquibase-hibernate5.version']}",
+            'hibernate-groovy-proxy'   : "org.yakworks:hibernate-groovy-proxy:${bomDependencyVersions['hibernate-groovy-proxy.version']}",
             'mongodb-bson'             : "org.mongodb:bson:${bomDependencyVersions['mongodb.version']}",
             'mongodb-driver-core'      : "org.mongodb:mongodb-driver-core:${bomDependencyVersions['mongodb.version']}",
             'mongodb-driver-sync'      : "org.mongodb:mongodb-driver-sync:${bomDependencyVersions['mongodb.version']}",
@@ -156,4 +153,28 @@ ext {
     combinedPlatforms = ['spring-boot-bom': gradleBomPlatformDependencies['spring-boot-bom']] + bomPlatformDependencies
     combinedDependencies = gradleBomDependencies + bomDependencies
     combinedVersions = gradleBomDependencyVersions + bomDependencyVersions
+
+    // Liquibase / Hibernate dependency and version definitions used only for POM property name resolution
+    // by PropertyNameCalculator. The actual dependency constraints are declared directly in the
+    // BOM projects (grails-bom, grails-hibernate5-bom) so consumers of the hibernate5 BOM get the
+    // correct versions without needing to declare them.
+    customBomVersions = [:]
+    customBomDependencies = [:]
+    if (project.name in ['grails-bom', 'grails-hibernate5-bom'] || project.name.startsWith('grails-data-hibernate5')) {
+        customBomVersions = [
+                'liquibase-hibernate.version': '4.27.0',
+                'liquibase.version'          : '4.27.0',
+                'hibernate.version'          : '5.6.15.Final',
+        ]
+        combinedVersions += customBomVersions
+        customBomDependencies = [
+                'liquibase'             : "org.liquibase:liquibase:${combinedVersions['liquibase.version']}",
+                'liquibase-cdi'         : "org.liquibase:liquibase-cdi:${combinedVersions['liquibase.version']}",
+                'liquibase-core'        : "org.liquibase:liquibase-core:${combinedVersions['liquibase.version']}",
+                'liquibase-hibernate'   : "org.liquibase.ext:liquibase-hibernate5:${combinedVersions['liquibase-hibernate.version']}",
+                'hibernate-core-jakarta': "org.hibernate:hibernate-core-jakarta:${combinedVersions['hibernate.version']}",
+                'hibernate-ehcache'     : "org.hibernate:hibernate-ehcache:${combinedVersions['hibernate.version']}",
+        ]
+        combinedDependencies += customBomDependencies
+    }
 }

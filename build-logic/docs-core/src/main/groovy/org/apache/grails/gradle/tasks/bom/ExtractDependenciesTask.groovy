@@ -32,6 +32,7 @@ import org.gradle.api.artifacts.DependencyConstraint
 import org.gradle.api.artifacts.ExcludeRule
 import org.gradle.api.artifacts.ModuleDependency
 import org.gradle.api.artifacts.component.ModuleComponentSelector
+import org.gradle.api.artifacts.component.ProjectComponentSelector
 import org.gradle.api.artifacts.result.DependencyResult
 import org.gradle.api.artifacts.result.ResolvedDependencyResult
 import org.gradle.api.file.ConfigurableFileCollection
@@ -188,6 +189,13 @@ abstract class ExtractDependenciesTask extends DefaultTask {
             }
 
             ResolvedDependencyResult dep = (ResolvedDependencyResult) result
+
+            // Skip project dependencies (e.g. platform(project(':grails-bom'))) since their
+            // constraints are already captured through the explicit constraints population
+            if (dep.requested instanceof ProjectComponentSelector) {
+                continue
+            }
+
             ModuleComponentSelector moduleComponentSelector = dep.requested as ModuleComponentSelector
 
             // Any non-constraint via api dependency should *always* be a platform dependency, so expand each of those
@@ -199,6 +207,9 @@ abstract class ExtractDependenciesTask extends DefaultTask {
 
             // fetch the BOM as a pom file so it can be expanded
             ExtractedDependencyConstraint constraint = propertyNameCalculator.calculate(bomCoordinate.groupId, bomCoordinate.artifactId, bomCoordinate.version, true)
+            if(!constraint) {
+                throw new GradleException("Failed to find a property name for BOM dependency: ${bomCoordinate.coordinates}. All platform dependencies must have a property name defined meeting the naming requirements.")
+            }
             constraint.source = bomCoordinate.artifactId
             constraints.put(bomCoordinate.toCoordinateHolder(), constraint)
 
