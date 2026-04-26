@@ -77,6 +77,8 @@ ext {
             'jackson.version'               : '2.21.2',
             'jquery.version'                : '3.7.1',
             'hibernate-groovy-proxy.version': '1.1',
+            'jakarta-servlet-api.version'   : '6.1.0',
+            'jakarta-validation-api.version': '3.1.1',
             'junit.version'                 : '5.13.3',
             'junit-platform.version'        : '1.13.3',
             'mongodb.version'               : '5.5.2',
@@ -140,6 +142,10 @@ ext {
             'groovy-yaml'                 : "org.apache.groovy:groovy-yaml:${bomDependencyVersions['groovy.version']}",
             // end - restate the groovy-bom here because the spring dependency management
             'jquery'                      : "org.webjars.npm:jquery:${bomDependencyVersions['jquery.version']}",
+            // start - boot & selenium conflict, so pin the version we want (newest)
+            'jakarta-servlet-api'         : "jakarta.servlet:jakarta.servlet-api:${bomDependencyVersions['jakarta-servlet-api.version']}",
+            'jakarta-validation-api'      : "jakarta.validation:jakarta.validation-api:${bomDependencyVersions['jakarta-validation-api.version']}",
+            // end - boot & selenium conflict, so pin the version we want (newest)
             // start - boot & spock conflict, so pin the version we want (newest)
             'junit-jupiter'               : "org.junit.jupiter:junit-jupiter:${bomDependencyVersions['junit.version']}",
             'junit-jupiter-api'           : "org.junit.jupiter:junit-jupiter-api:${bomDependencyVersions['junit.version']}",

@@ -56,6 +56,8 @@ dependencies {
         exclude group: 'com.fasterxml.jackson'
         exclude group: 'org.liquibase'
         exclude group: 'org.hibernate'
+        exclude group: 'jakarta.servlet'
+        exclude group: 'jakarta.validation'
     }
 
     for (def entry : bomPlatformDependencies.entrySet()) {
