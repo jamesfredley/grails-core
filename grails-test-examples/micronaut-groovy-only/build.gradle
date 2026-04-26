@@ -25,6 +25,10 @@ plugins {
 version = '0.1'
 group = 'micronautgroovyonly'
 
+// Micronaut platform overrides versions managed by grails-bom (e.g. reactor, kotlin),
+// so dependency-version validation against the BOM is not meaningful for this project.
+ext.skipDependencyValidation = true
+
 apply plugin: 'org.apache.grails.gradle.grails-web'
 
 // This module intentionally has NO annotationProcessor dependencies.

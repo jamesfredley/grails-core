@@ -62,10 +62,29 @@ class GrailsDependencyValidatorPlugin implements Plugin<Project> {
             project.tasks.register(VALIDATE_TASK_NAME) { Task task ->
                 task.group = 'verification'
                 task.description = 'Validates that no transitive dependency upgrades a version beyond what the BOM manages.'
-                task.onlyIf { Task t -> !t.project.hasProperty('skipDependencyValidation') }
+                task.onlyIf { Task t -> !shouldSkip(t.project) }
                 task.doLast { Task t -> validateDependencies(project) }
             }
         }
+    }
+
+    /**
+     * Returns true when the project should skip dependency validation. Honors a
+     * {@code skipDependencyValidation} project property (any non-null, non-false value)
+     * and an {@code ext.skipDependencyValidation} extra property. This lets specific
+     * projects opt out via {@code ext.skipDependencyValidation = true} when they have
+     * unresolvable BOM conflicts (e.g. Micronaut platform overrides).
+     */
+    private static boolean shouldSkip(Project project) {
+        if (!project.hasProperty('skipDependencyValidation')) {
+            return false
+        }
+        Object value = project.findProperty('skipDependencyValidation')
+        if (value == null) {
+            // -PskipDependencyValidation with no value is treated as truthy
+            return true
+        }
+        return Boolean.parseBoolean(value.toString())
     }
 
     private static void validateDependencies(Project project) {
