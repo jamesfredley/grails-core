@@ -44,6 +44,7 @@ class WebCleanupSpecInterceptor implements IMethodInterceptor {
                 try {
                     def lookup = test.grailsApplication.mainContext.getBean(LazyTagLibraryLookup)
                     if (lookup) {
+                        lookup.clear()
                         lookup.cleanTagLibsMetaClass()
                     }
                 }
