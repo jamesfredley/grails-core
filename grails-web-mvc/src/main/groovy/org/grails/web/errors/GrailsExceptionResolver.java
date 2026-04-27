@@ -291,7 +291,7 @@ public class GrailsExceptionResolver extends SimpleMappingExceptionResolver impl
 
     protected boolean shouldLogRemoteAddr() {
         Config config = grailsApplication != null ? grailsApplication.getConfig() : null;
-        return config != null && config.getProperty(Settings.SETTING_LOG_REMOTE_ADDR, Boolean.class, true);
+        return config != null && config.getProperty(Settings.SETTING_LOG_REMOTE_ADDR, Boolean.class, false);
     }
 
     /**

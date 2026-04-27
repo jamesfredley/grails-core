@@ -125,15 +125,16 @@ grails:
 
 ===== Remote Client Address
 
-The resolver also includes the remote client address (`HttpServletRequest.getRemoteAddr()`) as ` ip: <value>`
-in the clause. Enabled by default. To keep client addresses out of exception logs, set:
+The resolver can also include the remote client address (`HttpServletRequest.getRemoteAddr()`) as ` ip: <value>`
+in the clause. Disabled by default to avoid writing client IPs into exception logs without an explicit decision.
+To opt in, set:
 
 [source, yaml]
 .grails-app/conf/application.yml
 ----
 grails:
     exceptionresolver:
-        logRemoteAddr: false
+        logRemoteAddr: true
 ----
 
 When the application is behind a reverse proxy, `getRemoteAddr()` returns the proxy's address, not the real

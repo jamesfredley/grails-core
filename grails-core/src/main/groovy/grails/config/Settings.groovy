@@ -310,8 +310,8 @@ interface Settings {
     /**
      * Whether the exception resolver should append the remote client address
      * ({@link jakarta.servlet.http.HttpServletRequest#getRemoteAddr()}) to the exception
-     * log line. Defaults to {@code true}; set to {@code false} to keep client addresses
-     * out of exception logs. Behind a reverse proxy, configure the servlet container
+     * log line. Defaults to {@code false}; set to {@code true} to include client addresses
+     * in exception logs. Behind a reverse proxy, configure the servlet container
      * (for example Spring Boot's {@code server.forward-headers-strategy}) so that
      * {@code remoteAddr} reflects the real client IP.
      */

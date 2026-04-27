@@ -97,7 +97,7 @@ class GrailsExceptionResolverSpec extends Specification {
         given:
             def config = Mock(Config)
             config.getProperty('grails.exceptionresolver.logAuditor', Boolean, true) >> true
-            config.getProperty('grails.exceptionresolver.logRemoteAddr', Boolean, true) >> false
+            config.getProperty('grails.exceptionresolver.logRemoteAddr', Boolean, false) >> false
             config.getProperty('grails.exceptionresolver.logRequestParameters', Boolean, _) >> false
             def grailsApp = Mock(GrailsApplication)
             grailsApp.getConfig() >> config
@@ -120,7 +120,7 @@ class GrailsExceptionResolverSpec extends Specification {
         given:
             def config = Mock(Config)
             config.getProperty('grails.exceptionresolver.logAuditor', Boolean, true) >> false
-            config.getProperty('grails.exceptionresolver.logRemoteAddr', Boolean, true) >> false
+            config.getProperty('grails.exceptionresolver.logRemoteAddr', Boolean, false) >> false
             config.getProperty('grails.exceptionresolver.logRequestParameters', Boolean, _) >> false
             def grailsApp = Mock(GrailsApplication)
             grailsApp.getConfig() >> config
@@ -143,7 +143,7 @@ class GrailsExceptionResolverSpec extends Specification {
         given:
             def config = Mock(Config)
             config.getProperty('grails.exceptionresolver.logAuditor', Boolean, true) >> true
-            config.getProperty('grails.exceptionresolver.logRemoteAddr', Boolean, true) >> false
+            config.getProperty('grails.exceptionresolver.logRemoteAddr', Boolean, false) >> false
             config.getProperty('grails.exceptionresolver.logRequestParameters', Boolean, _) >> false
             def grailsApp = Mock(GrailsApplication)
             grailsApp.getConfig() >> config
@@ -166,7 +166,7 @@ class GrailsExceptionResolverSpec extends Specification {
         given:
             def config = Mock(Config)
             config.getProperty('grails.exceptionresolver.logAuditor', Boolean, true) >> false
-            config.getProperty('grails.exceptionresolver.logRemoteAddr', Boolean, true) >> true
+            config.getProperty('grails.exceptionresolver.logRemoteAddr', Boolean, false) >> true
             config.getProperty('grails.exceptionresolver.logRequestParameters', Boolean, _) >> false
             def grailsApp = Mock(GrailsApplication)
             grailsApp.getConfig() >> config
@@ -187,7 +187,7 @@ class GrailsExceptionResolverSpec extends Specification {
         given:
             def config = Mock(Config)
             config.getProperty('grails.exceptionresolver.logAuditor', Boolean, true) >> true
-            config.getProperty('grails.exceptionresolver.logRemoteAddr', Boolean, true) >> true
+            config.getProperty('grails.exceptionresolver.logRemoteAddr', Boolean, false) >> true
             config.getProperty('grails.exceptionresolver.logRequestParameters', Boolean, _) >> false
             def grailsApp = Mock(GrailsApplication)
             grailsApp.getConfig() >> config
@@ -211,7 +211,7 @@ class GrailsExceptionResolverSpec extends Specification {
         given:
             def config = Mock(Config)
             config.getProperty('grails.exceptionresolver.logAuditor', Boolean, true) >> false
-            config.getProperty('grails.exceptionresolver.logRemoteAddr', Boolean, true) >> true
+            config.getProperty('grails.exceptionresolver.logRemoteAddr', Boolean, false) >> true
             config.getProperty('grails.exceptionresolver.logRequestParameters', Boolean, _) >> false
             def grailsApp = Mock(GrailsApplication)
             grailsApp.getConfig() >> config
@@ -251,7 +251,7 @@ class GrailsExceptionResolverSpec extends Specification {
             def config = Mock(Config)
             config.getProperty('grails.exceptionresolver.logFullStackTrace', Boolean, false) >> true
             config.getProperty('grails.exceptionresolver.logAuditor', Boolean, true) >> false
-            config.getProperty('grails.exceptionresolver.logRemoteAddr', Boolean, true) >> false
+            config.getProperty('grails.exceptionresolver.logRemoteAddr', Boolean, false) >> false
             config.getProperty('grails.exceptionresolver.logRequestParameters', Boolean, _) >> false
             config.getProperty('grails.logging.stackTraceFiltererClass', Class, _) >>
                 DefaultStackTraceFilterer
