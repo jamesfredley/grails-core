@@ -252,8 +252,9 @@ class GlobalGrailsClassInjectorTransformation implements ASTTransformation, Comp
     private static File findSourceDirectory(File compilationTargetDirectory) {
         // Prefer the project base directory supplied by the build tool — more reliable than
         // walking up from the compile target, which may live under a non-standard output
-        // directory (e.g. when project.buildDir is renamed).
-        String baseDirProp = System.getProperty('grails.project.base.dir')
+        // directory (e.g. when project.buildDir is renamed). The Grails Gradle plugin
+        // publishes this via GrailsAppBaseDirProvider on the compiler's forkOptions.
+        String baseDirProp = System.getProperty('base.dir')
         if (baseDirProp) {
             File baseDir = new File(baseDirProp)
             if (baseDir.isDirectory()) {

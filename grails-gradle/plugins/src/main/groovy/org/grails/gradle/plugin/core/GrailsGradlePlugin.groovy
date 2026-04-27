@@ -196,13 +196,14 @@ class GrailsGradlePlugin extends GroovyPlugin {
             Provider<RegularFile> groovyCompilerConfigFile = project.layout.buildDirectory.file("grailsGroovyCompilerConfig-${c.name}.groovy")
             c.outputs.file(groovyCompilerConfigFile)
 
-            // Publish the project base directory so Grails' compile-time AST transform
-            // (GlobalGrailsClassInjectorTransformation) can locate src/main/resources/META-INF/grails.factories
-            // without relying on hardcoded "build"/"target" output-directory names.
-            String projectBaseDir = project.layout.projectDirectory.asFile.absolutePath
+            // Publish the project base directory to the Groovy compiler's worker daemon JVM so the
+            // GlobalGrailsClassInjectorTransformation AST transform can locate
+            // src/main/resources/META-INF/grails.factories without relying on hardcoded
+            // "build"/"target" output-directory names. Reuses the same CommandLineArgumentProvider
+            // pattern as forked test/run tasks (see configureForkSettings).
+            c.groovyOptions.forkOptions.jvmArgumentProviders.add(new GrailsAppBaseDirProvider(project.projectDir))
             Closure<String> userScriptGenerator = getGroovyCompilerScript(c, project)
             c.doFirst {
-                System.setProperty('grails.project.base.dir', projectBaseDir)
                 // This isn't ideal - we're performing configuration at execution time, but the alternative would be having
                 // to maintain a clean / configuration task and then gradle would want to cache those tasks.  Since the inputs
                 // to those tasks would effectively be the runtimeClasspath, dependency problems can arise if another task
