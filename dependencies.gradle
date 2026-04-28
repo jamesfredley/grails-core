@@ -115,36 +115,36 @@ ext {
             'commons-codec'            : "commons-codec:commons-codec:${bomDependencyVersions['commons-codec.version']}",
             'commons-lang3'            : "org.apache.commons:commons-lang3:${bomDependencyVersions['commons-lang3.version']}",
             'geb-spock'                : "org.apache.groovy.geb:geb-spock:${bomDependencyVersions['geb-spock.version']}",
-            'groovy'                   : "org.apache.groovy:groovy:${bomDependencyVersions['groovy.version']}", // lower version of groovy than spring
-            'groovy-ant'               : "org.apache.groovy:groovy-ant:${bomDependencyVersions['groovy.version']}", // lower version of groovy than spring
-            'groovy-astbuilder'        : "org.apache.groovy:groovy-astbuilder:${bomDependencyVersions['groovy.version']}", // lower version of groovy than spring
-            'groovy-cli-commons'       : "org.apache.groovy:groovy-cli-commons:${bomDependencyVersions['groovy.version']}", // lower version of groovy than spring
-            'groovy-cli-picocli'       : "org.apache.groovy:groovy-cli-picocli:${bomDependencyVersions['groovy.version']}", // lower version of groovy than spring
-            'groovy-console'           : "org.apache.groovy:groovy-console:${bomDependencyVersions['groovy.version']}", // lower version of groovy than spring
-            'groovy-contracts'         : "org.apache.groovy:groovy-contracts:${bomDependencyVersions['groovy.version']}", // lower version of groovy than spring
-            'groovy-datetime'          : "org.apache.groovy:groovy-datetime:${bomDependencyVersions['groovy.version']}", // lower version of groovy than spring
-            'groovy-dateutil'          : "org.apache.groovy:groovy-dateutil:${bomDependencyVersions['groovy.version']}", // lower version of groovy than spring
-            'groovy-docgenerator'      : "org.apache.groovy:groovy-docgenerator:${bomDependencyVersions['groovy.version']}", // lower version of groovy than spring
-            'groovy-ginq'              : "org.apache.groovy:groovy-ginq:${bomDependencyVersions['groovy.version']}", // lower version of groovy than spring
-            'groovy-groovydoc'         : "org.apache.groovy:groovy-groovydoc:${bomDependencyVersions['groovy.version']}", // lower version of groovy than spring
-            'groovy-groovysh'          : "org.apache.groovy:groovy-groovysh:${bomDependencyVersions['groovy.version']}", // lower version of groovy than spring
-            'groovy-jmx'               : "org.apache.groovy:groovy-jmx:${bomDependencyVersions['groovy.version']}", // lower version of groovy than spring
-            'groovy-json'              : "org.apache.groovy:groovy-json:${bomDependencyVersions['groovy.version']}", // lower version of groovy than spring
-            'groovy-jsr223'            : "org.apache.groovy:groovy-jsr223:${bomDependencyVersions['groovy.version']}", // lower version of groovy than spring
-            'groovy-macro'             : "org.apache.groovy:groovy-macro:${bomDependencyVersions['groovy.version']}", // lower version of groovy than spring
-            'groovy-macro-library'     : "org.apache.groovy:groovy-macro-library:${bomDependencyVersions['groovy.version']}", // lower version of groovy than spring
-            'groovy-nio'               : "org.apache.groovy:groovy-nio:${bomDependencyVersions['groovy.version']}", // lower version of groovy than spring
-            'groovy-servlet'           : "org.apache.groovy:groovy-servlet:${bomDependencyVersions['groovy.version']}", // lower version of groovy than spring
-            'groovy-sql'               : "org.apache.groovy:groovy-sql:${bomDependencyVersions['groovy.version']}", // lower version of groovy than spring
-            'groovy-swing'             : "org.apache.groovy:groovy-swing:${bomDependencyVersions['groovy.version']}", // lower version of groovy than spring
-            'groovy-templates'         : "org.apache.groovy:groovy-templates:${bomDependencyVersions['groovy.version']}", // lower version of groovy than spring
-            'groovy-test'              : "org.apache.groovy:groovy-test:${bomDependencyVersions['groovy.version']}", // lower version of groovy than spring
-            'groovy-test-junit5'       : "org.apache.groovy:groovy-test-junit5:${bomDependencyVersions['groovy.version']}", // lower version of groovy than spring
-            'groovy-testng'            : "org.apache.groovy:groovy-testng:${bomDependencyVersions['groovy.version']}", // lower version of groovy than spring
-            'groovy-toml'              : "org.apache.groovy:groovy-toml:${bomDependencyVersions['groovy.version']}", // lower version of groovy than spring
-            'groovy-typecheckers'      : "org.apache.groovy:groovy-typecheckers:${bomDependencyVersions['groovy.version']}", // lower version of groovy than spring
-            'groovy-xml'               : "org.apache.groovy:groovy-xml:${bomDependencyVersions['groovy.version']}", // lower version of groovy than spring
-            'groovy-yaml'              : "org.apache.groovy:groovy-yaml:${bomDependencyVersions['groovy.version']}", // lower version of groovy than spring
+            'groovy'                   : "org.apache.groovy:groovy:${bomDependencyVersions['groovy.version']}",
+            'groovy-ant'               : "org.apache.groovy:groovy-ant:${bomDependencyVersions['groovy.version']}",
+            'groovy-astbuilder'        : "org.apache.groovy:groovy-astbuilder:${bomDependencyVersions['groovy.version']}",
+            'groovy-cli-commons'       : "org.apache.groovy:groovy-cli-commons:${bomDependencyVersions['groovy.version']}",
+            'groovy-cli-picocli'       : "org.apache.groovy:groovy-cli-picocli:${bomDependencyVersions['groovy.version']}",
+            'groovy-console'           : "org.apache.groovy:groovy-console:${bomDependencyVersions['groovy.version']}",
+            'groovy-contracts'         : "org.apache.groovy:groovy-contracts:${bomDependencyVersions['groovy.version']}",
+            'groovy-datetime'          : "org.apache.groovy:groovy-datetime:${bomDependencyVersions['groovy.version']}",
+            'groovy-dateutil'          : "org.apache.groovy:groovy-dateutil:${bomDependencyVersions['groovy.version']}",
+            'groovy-docgenerator'      : "org.apache.groovy:groovy-docgenerator:${bomDependencyVersions['groovy.version']}",
+            'groovy-ginq'              : "org.apache.groovy:groovy-ginq:${bomDependencyVersions['groovy.version']}",
+            'groovy-groovydoc'         : "org.apache.groovy:groovy-groovydoc:${bomDependencyVersions['groovy.version']}",
+            'groovy-groovysh'          : "org.apache.groovy:groovy-groovysh:${bomDependencyVersions['groovy.version']}",
+            'groovy-jmx'               : "org.apache.groovy:groovy-jmx:${bomDependencyVersions['groovy.version']}",
+            'groovy-json'              : "org.apache.groovy:groovy-json:${bomDependencyVersions['groovy.version']}",
+            'groovy-jsr223'            : "org.apache.groovy:groovy-jsr223:${bomDependencyVersions['groovy.version']}",
+            'groovy-macro'             : "org.apache.groovy:groovy-macro:${bomDependencyVersions['groovy.version']}",
+            'groovy-macro-library'     : "org.apache.groovy:groovy-macro-library:${bomDependencyVersions['groovy.version']}",
+            'groovy-nio'               : "org.apache.groovy:groovy-nio:${bomDependencyVersions['groovy.version']}",
+            'groovy-servlet'           : "org.apache.groovy:groovy-servlet:${bomDependencyVersions['groovy.version']}",
+            'groovy-sql'               : "org.apache.groovy:groovy-sql:${bomDependencyVersions['groovy.version']}",
+            'groovy-swing'             : "org.apache.groovy:groovy-swing:${bomDependencyVersions['groovy.version']}",
+            'groovy-templates'         : "org.apache.groovy:groovy-templates:${bomDependencyVersions['groovy.version']}",
+            'groovy-test'              : "org.apache.groovy:groovy-test:${bomDependencyVersions['groovy.version']}",
+            'groovy-test-junit5'       : "org.apache.groovy:groovy-test-junit5:${bomDependencyVersions['groovy.version']}",
+            'groovy-testng'            : "org.apache.groovy:groovy-testng:${bomDependencyVersions['groovy.version']}",
+            'groovy-toml'              : "org.apache.groovy:groovy-toml:${bomDependencyVersions['groovy.version']}",
+            'groovy-typecheckers'      : "org.apache.groovy:groovy-typecheckers:${bomDependencyVersions['groovy.version']}",
+            'groovy-xml'               : "org.apache.groovy:groovy-xml:${bomDependencyVersions['groovy.version']}",
+            'groovy-yaml'              : "org.apache.groovy:groovy-yaml:${bomDependencyVersions['groovy.version']}",
             'hibernate-groovy-proxy'      : "org.yakworks:hibernate-groovy-proxy:${bomDependencyVersions['hibernate-groovy-proxy.version']}",
             'jakarta-servlet-api'         : "jakarta.servlet:jakarta.servlet-api:${bomDependencyVersions['jakarta-servlet-api.version']}",
             'jakarta-validation'      : "jakarta.validation:jakarta.validation-api:${bomDependencyVersions['jakarta-validation.version']}",
@@ -181,6 +181,10 @@ ext {
     combinedDependencies = gradleBomDependencies + bomDependencies
     combinedVersions = gradleBomDependencyVersions + bomDependencyVersions
 
+    // Defaults for per-BOM overrides; populated in the if/else blocks below
+    customBomVersions = [:]
+    customBomDependencies = [:]
+
     // Liquibase / Hibernate dependency and version definitions used only for POM property name resolution
     // by PropertyNameCalculator. The actual dependency constraints are declared directly in the
     // BOM projects (grails-bom, grails-hibernate5-bom) so consumers of the hibernate5 BOM get the
@@ -214,7 +218,6 @@ ext {
         ]
         combinedVersions += customBomVersions
         customBomDependencies = [
-                'groovy-bom'           : "org.apache.groovy:groovy-bom:${combinedVersions['groovy.version']}",
                 'groovy'               : "org.apache.groovy:groovy:${combinedVersions['groovy.version']}",
                 'groovy-ant'           : "org.apache.groovy:groovy-ant:${combinedVersions['groovy.version']}",
                 'groovy-astbuilder'    : "org.apache.groovy:groovy-astbuilder:${combinedVersions['groovy.version']}",
@@ -247,6 +250,11 @@ ext {
                 'groovy-yaml'          : "org.apache.groovy:groovy-yaml:${combinedVersions['groovy.version']}",
                 'protobuf-java'        : "com.google.protobuf:protobuf-java:${combinedVersions['protobuf.version']}",
         ]
+        def customBomPlatformDependencies = [
+                'groovy-bom': "org.apache.groovy:groovy-bom:${combinedVersions['groovy.version']}",
+        ]
+        bomPlatformDependencies += customBomPlatformDependencies
         combinedDependencies += customBomDependencies
+        combinedPlatforms += customBomPlatformDependencies
     }
 }

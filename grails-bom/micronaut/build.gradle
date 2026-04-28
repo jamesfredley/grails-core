@@ -66,13 +66,10 @@ def overriddenModules = customBomDependencies.values().collect { String coord ->
 Set<String> overriddenCoords = overriddenModules.collect { "${it.group}:${it.module}".toString() } as Set
 
 dependencies {
-    api(platform(project(':grails-bom'))) {
+    api(platform(project(':grails-base-bom'))) {
         overriddenModules.each { ovr ->
             exclude group: ovr.group, module: ovr.module
         }
-        // Exclude Groovy from the base BOM so its strict [4.0, 5.0) constraints
-        // don't conflict with Micronaut 5.x which requires Groovy 5.x
-        exclude group: 'org.apache.groovy'
     }
 
     // Re-export the Micronaut platform so consumers of grails-micronaut-bom inherit Micronaut's
@@ -101,21 +98,10 @@ dependencies {
         bomDependencies.values().each { String coord ->
             def parts = coord.split(':')
             String key = parts[0] + ':' + parts[1]
-            if (key in overriddenCoords) {
-                return
-            }
-            // Skip Groovy modules — Micronaut 5.x requires Groovy 5.x, which is
-            // declared explicitly via customBomDependencies below
-            if (parts[0] == 'org.apache.groovy') {
-                return
-            }
+            if (key in overriddenCoords) return
             api coord
         }
         for (def entry : bomPlatformDependencies.entrySet()) {
-            // Skip groovy-bom — the Micronaut-required version is declared via customBomDependencies
-            if (entry.value.toString().startsWith('org.apache.groovy:')) {
-                continue
-            }
             api entry.value
         }
         // Re-declare the Micronaut platform as a constraint for enforcedPlatform support
