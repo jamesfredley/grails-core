@@ -70,12 +70,15 @@ dependencies {
         overriddenModules.each { ovr ->
             exclude group: ovr.group, module: ovr.module
         }
+        // Exclude Groovy from the base BOM so its strict [4.0, 5.0) constraints
+        // don't conflict with Micronaut 5.x which requires Groovy 5.x
+        exclude group: 'org.apache.groovy'
     }
 
     // Re-export the Micronaut platform so consumers of grails-micronaut-bom inherit Micronaut's
     // managed versions transitively and don't need to declare the platform themselves.
-    // Exclude Groovy and Spock since the base BOM manages those versions and Micronaut
-    // would otherwise upgrade them to Groovy 5.x-compatible releases.
+    // Exclude Groovy since we declare the required version explicitly below via customBomDependencies.
+    // Exclude Spock since the base BOM manages that version.
     api(platform("io.micronaut.platform:micronaut-platform:$micronautPlatformVersion")) {
         exclude group: 'org.apache.groovy'
         exclude group: 'org.spockframework'
@@ -90,16 +93,29 @@ dependencies {
         gradleBomDependencies.values().each { String coord ->
             def parts = coord.split(':')
             String key = parts[0] + ':' + parts[1]
-            if (key in overriddenCoords) return
+            if (key in overriddenCoords) {
+                return
+            }
             api coord
         }
         bomDependencies.values().each { String coord ->
             def parts = coord.split(':')
             String key = parts[0] + ':' + parts[1]
-            if (key in overriddenCoords) return
+            if (key in overriddenCoords) {
+                return
+            }
+            // Skip Groovy modules — Micronaut 5.x requires Groovy 5.x, which is
+            // declared explicitly via customBomDependencies below
+            if (parts[0] == 'org.apache.groovy') {
+                return
+            }
             api coord
         }
         for (def entry : bomPlatformDependencies.entrySet()) {
+            // Skip groovy-bom — the Micronaut-required version is declared via customBomDependencies
+            if (entry.value.toString().startsWith('org.apache.groovy:')) {
+                continue
+            }
             api entry.value
         }
         // Re-declare the Micronaut platform as a constraint for enforcedPlatform support
@@ -126,6 +142,7 @@ configurations.register('bomDependencies').configure {
 }
 
 tasks.register('extractConstraints', ExtractDependenciesTask).configure { ExtractDependenciesTask it ->
+    it.captureProjectServices(project.dependencies, project.configurations)
     it.configuration = configurations.named('bomDependencies')
     it.configurationName = 'bomDependencies'
     it.destination = project.layout.buildDirectory.file('grails-micronaut-bom-constraints.adoc')

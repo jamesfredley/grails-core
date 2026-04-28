@@ -209,11 +209,13 @@ ext {
     // enforcedPlatform(:grails-micronaut-bom).
     else if (project.name == 'grails-micronaut-bom') {
         customBomVersions = [
+                'groovy.version'  : '5.0.4',
                 'protobuf.version': '4.30.2',
         ]
         combinedVersions += customBomVersions
         customBomDependencies = [
-                'protobuf-java': "com.google.protobuf:protobuf-java:${combinedVersions['protobuf.version']}",
+                'groovy-bom'    : "org.apache.groovy:groovy-bom:${combinedVersions['groovy.version']}",
+                'protobuf-java' : "com.google.protobuf:protobuf-java:${combinedVersions['protobuf.version']}",
         ]
         combinedDependencies += customBomDependencies
     }
