@@ -12,6 +12,7 @@
 .gradle
 .gradle/
 .idea
+.mailmap
 .idea/
 !.idea/codeStyles/
 !.idea/codeStyles/Project.xml
