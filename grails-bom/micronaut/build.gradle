@@ -74,7 +74,12 @@ dependencies {
 
     // Re-export the Micronaut platform so consumers of grails-micronaut-bom inherit Micronaut's
     // managed versions transitively and don't need to declare the platform themselves.
-    api platform("io.micronaut.platform:micronaut-platform:$micronautPlatformVersion")
+    // Exclude Groovy and Spock since the base BOM manages those versions and Micronaut
+    // would otherwise upgrade them to Groovy 5.x-compatible releases.
+    api(platform("io.micronaut.platform:micronaut-platform:$micronautPlatformVersion")) {
+        exclude group: 'org.apache.groovy'
+        exclude group: 'org.spockframework'
+    }
 
     constraints {
         // Re-declare base BOM constraints directly so enforcedPlatform() consumers
