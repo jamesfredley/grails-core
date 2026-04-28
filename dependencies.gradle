@@ -218,9 +218,9 @@ ext {
     // enforcedPlatform(:grails-micronaut-bom).
     else if (project.name == 'grails-micronaut-bom') {
         customBomVersions = [
-                'javaparser-core.version': '3.27.0',  // micronaut requires 3.27, groovy 4 ships with 3.28 but is compatible with 3.27
-                'asm.version'            : '9.9.1',        // micronaut platform overrides spring boot's 9.8
-                'guava.version'          : '33.5.0-jre',   // micronaut platform overrides spring boot's 33.4.8-jre
+                'javaparser-core.version': '3.27.0', // micronaut requires 3.27, groovy 4 ships with 3.28 but is compatible with 3.27
+                'asm.version'            : '9.9.1',
+                'guava.version'          : '33.5.0-jre',
         ]
         combinedVersions += customBomVersions
         customBomDependencies = [
