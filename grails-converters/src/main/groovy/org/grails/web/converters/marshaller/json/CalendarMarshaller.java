@@ -59,9 +59,9 @@ public class CalendarMarshaller implements ObjectMarshaller<JSON> {
     public void marshalObject(Object object, JSON converter) throws ConverterException {
         try {
             Calendar calendar = (Calendar) object;
-            String formatted = legacyFormatter != null
-                    ? legacyFormatter.format(calendar.getTime())
-                    : DateTimeFormatter.ISO_INSTANT.format(calendar.toInstant());
+            String formatted = legacyFormatter != null ?
+                    legacyFormatter.format(calendar.getTime()) :
+                    DateTimeFormatter.ISO_INSTANT.format(calendar.toInstant());
             converter.getWriter().value(formatted);
         }
         catch (JSONException e) {

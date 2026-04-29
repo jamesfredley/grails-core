@@ -65,9 +65,9 @@ public class DateMarshaller implements ObjectMarshaller<XML> {
     public void marshalObject(Object object, XML xml) throws ConverterException {
         try {
             Date date = (Date) object;
-            String formatted = legacyFormatter != null
-                    ? legacyFormatter.format(date)
-                    : DEFAULT_FORMATTER.format(date.toInstant());
+            String formatted = legacyFormatter != null ?
+                    legacyFormatter.format(date) :
+                    DEFAULT_FORMATTER.format(date.toInstant());
             xml.chars(formatted);
         }
         catch (Exception e) {
