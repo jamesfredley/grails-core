@@ -103,9 +103,11 @@ trait GrailsWebUnitTest implements GrailsUnitTest {
         GrailsTagLibClass tagLib = grailsApplication.addArtefact(TagLibArtefactHandler.TYPE, tagLibClass)
         final tagLookup = applicationContext.getBean(TagLibraryLookup)
 
-        defineBeans {
-            "${tagLib.fullName}"(tagLibClass) { bean ->
-                bean.autowire = true
+        if (!applicationContext.containsBean(tagLib.fullName)) {
+            defineBeans {
+                "${tagLib.fullName}"(tagLibClass) { bean ->
+                    bean.autowire = true
+                }
             }
         }
 

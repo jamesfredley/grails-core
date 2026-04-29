@@ -23,6 +23,7 @@ import groovy.transform.CompileStatic
 import groovy.transform.TypeCheckingMode
 import org.codehaus.groovy.reflection.CachedMethod
 import org.codehaus.groovy.runtime.metaclass.MethodSelectionException
+import org.codehaus.groovy.runtime.InvokerHelper
 
 import org.springframework.context.ApplicationContext
 
@@ -62,6 +63,24 @@ class TagLibraryMetaUtils {
                 TagMethodContext.currentBody()
             }
         }
+        if (!doesMethodExist(metaClass, 'body', [] as Class[])) {
+            mc.setProperty('body') { ->
+                Closure currentBody = (Closure) TagMethodContext.currentBody()
+                currentBody.call()
+            }
+        }
+        if (!doesMethodExist(metaClass, 'body', [Map] as Class[])) {
+            mc.setProperty('body') { Map arguments ->
+                Closure currentBody = (Closure) TagMethodContext.currentBody()
+                currentBody.call(arguments)
+            }
+        }
+        if (!doesMethodExist(metaClass, 'body', [Object] as Class[])) {
+            mc.setProperty('body') { Object argument ->
+                Closure currentBody = (Closure) TagMethodContext.currentBody()
+                currentBody.call(argument)
+            }
+        }
     }
 
     @CompileStatic
@@ -73,7 +92,9 @@ class TagLibraryMetaUtils {
 
     @CompileStatic
     static void registerNamespaceMetaProperty(MetaClass metaClass, TagLibraryLookup gspTagLibraryLookup, String namespace) {
-        registerPropertyMissingForTag(metaClass, namespace, gspTagLibraryLookup.lookupNamespaceDispatcher(namespace))
+        if (!metaClass.hasProperty(namespace) && !doesMethodExist(metaClass, GrailsClassUtils.getGetterName(namespace), [] as Class[])) {
+            registerPropertyMissingForTag(metaClass, namespace, gspTagLibraryLookup.lookupNamespaceDispatcher(namespace))
+        }
     }
 
     @CompileStatic

@@ -44,6 +44,14 @@ class MethodDefinedTagLibSpec extends Specification implements TagLibUnitTest<Me
         applyTemplate('<g:multiTypedTag first="hello" second="world" />') == 'hello-world'
     }
 
+    void "method tag does not bind a single mismatched attribute by position"() {
+        when:
+        applyTemplate('<g:mismatchedArgTag foo="bar" />')
+
+        then:
+        thrown(GrailsTagException)
+    }
+
     void "method tag can bind map-valued attribute to map-typed argument by parameter name"() {
         expect:
         applyTemplate('<g:mapValueTag config="${[k:\'v\']}" />') == 'v'
@@ -89,6 +97,19 @@ class MethodDefinedTagLibSpec extends Specification implements TagLibUnitTest<Me
         then:
         thrown(GrailsTagException)
     }
+
+    void "object methods are not exposed as method tags"() {
+        when:
+        applyTemplate('<g:toString/>')
+
+        then:
+        thrown(GrailsTagException)
+    }
+
+    void "namespace metaproperty does not shadow a real getter"() {
+        expect:
+        applyTemplate('<g:readSharedProperty/>') == 'real-shared'
+    }
 }
 
 @GrailsCompileStatic
@@ -111,6 +132,10 @@ class StaticMethodTagLib {
 
 @Artefact('TagLib')
 class MethodTagLib {
+    String getShared() {
+        'real-shared'
+    }
+
     def methodTag() {
         out << "${attrs.blah} - is this"
     }
@@ -120,6 +145,10 @@ class MethodTagLib {
     }
     def multiTypedTag(String first, String second) {
         out << "${first}-${second}"
+    }
+
+    def mismatchedArgTag(String name) {
+        out << name
     }
 
     def mapValueTag(Map config) {
@@ -140,6 +169,14 @@ class MethodTagLib {
 
     def bodyTag() {
         out << "before-${body()}-after"
+    }
+
+    def readSharedProperty() {
+        out << shared
+    }
+
+    String toString() {
+        'object-method'
     }
 
     Closure legacyTag = { attrs, body ->

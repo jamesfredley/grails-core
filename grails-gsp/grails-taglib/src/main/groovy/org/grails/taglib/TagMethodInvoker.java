@@ -52,6 +52,15 @@ public final class TagMethodInvoker {
             "currentRequestAttributes"
     );
 
+    private static final Set<String> NON_TAG_METHOD_NAMES = Set.of(
+            "afterPropertiesSet",
+            "destroy",
+            "equals",
+            "hashCode",
+            "onApplicationEvent",
+            "toString"
+    );
+
     private static final ClassValue<Map<String, List<Method>>> INVOKABLE_METHODS_BY_NAME = new ClassValue<>() {
         @Override
         protected Map<String, List<Method>> computeValue(Class<?> type) {
@@ -143,8 +152,11 @@ public final class TagMethodInvoker {
         if (!Modifier.isPublic(modifiers) || Modifier.isStatic(modifiers) || method.isBridge() || method.isSynthetic()) {
             return false;
         }
+        if (method.getDeclaringClass() == Object.class || method.getDeclaringClass() == GroovyObject.class) {
+            return false;
+        }
         String name = method.getName();
-        if ("afterPropertiesSet".equals(name)) {
+        if (NON_TAG_METHOD_NAMES.contains(name)) {
             return false;
         }
         if (name.startsWith("get") && method.getParameterCount() == 0) {
@@ -163,7 +175,7 @@ public final class TagMethodInvoker {
         if (FRAMEWORK_METHOD_NAMES.contains(name)) {
             return false;
         }
-        return method.getDeclaringClass() != Object.class && method.getDeclaringClass() != GroovyObject.class;
+        return true;
     }
 
     private static Collection<Method> getCandidateMethods(Class<?> type) {
@@ -209,9 +221,6 @@ public final class TagMethodInvoker {
                 continue;
             }
             Object value = attrs != null ? attrs.get(parameterName) : null;
-            if (value == null && parameters.length == 1 && attrs != null && attrs.size() == 1) {
-                value = attrs.values().iterator().next();
-            }
             if (value == null) {
                 return null;
             }
