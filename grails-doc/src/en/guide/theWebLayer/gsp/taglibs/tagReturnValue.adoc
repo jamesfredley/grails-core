@@ -36,10 +36,10 @@ Example:
 ----
 class ObjectReturningTagLib {
 	static namespace = "cms"
-	static returnObjectForTags = ['content'] 
+	static returnObjectForTags = ['content']
+
 	def content() {
-	def content = { attrs, body ->
-		CmsContent.findByCode(attrs.code)?.content	
+		CmsContent.findByCode(attrs.code)?.content
     }
 }
 ----
