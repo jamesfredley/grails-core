@@ -35,11 +35,17 @@ Grails 7.2 upgrades the SiteMesh 3 integration to a *filter-less* architecture. 
 
 For most applications **no changes are required**. The filter-less integration is a drop-in replacement: layouts, `<g:layoutHead>`, `<g:layoutTitle>`, `<g:layoutBody>`, `<g:pageProperty>`, `<g:applyLayout>`, and layout-by-convention all behave identically to the previous release.
 
-The following SiteMesh 2-era configuration properties are no longer consulted and can be removed from your `application.yml` if present:
+[IMPORTANT]
+====
+The guidance below applies *only* when the SiteMesh 3 integration is in use. The legacy `grails-layout` plugin (SiteMesh 2) remains supported in Grails 7.2 and continues to honor its existing configuration. If your application still depends on `grails-layout`, leave the SiteMesh 2 properties in place — they remain meaningful for that codepath.
+====
+
+When using the SiteMesh 3 integration, the following SiteMesh 2-era configuration properties are no longer consulted and can be removed from your `application.yml` if present:
 
 [source,yaml]
 ----
-# Remove these — no longer used in Grails 7.2
+# Remove these — no longer used by the SiteMesh 3 integration in Grails 7.2.
+# (Retain them if your application still uses the grails-layout / SiteMesh 2 plugin.)
 grails.gsp.view.layoutViewResolver: false
 sitemesh.filter.order: ...
 sitemesh.decorator.tagRuleBundles: ...

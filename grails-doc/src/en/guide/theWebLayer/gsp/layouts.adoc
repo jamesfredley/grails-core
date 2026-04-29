@@ -193,3 +193,15 @@ def content = include(controller:"book", action:"list")
 ----
 
 The resulting content will be provided via the return value of the link:{gspTagsRef}include.html[include] tag.
+
+
+==== SiteMesh 2 Attribution (grails-layout)
+
+The legacy `grails-layout` plugin remains available for applications that have not yet migrated to the SiteMesh 3 integration. When `grails-layout` is on the classpath, decoration is provided by SiteMesh 2 and the following attribution applies:
+
+[NOTE]
+====
+This product includes software developed by the OpenSymphony Group (https://github.com/sitemesh). The SiteMesh 2 framework is licensed under the OpenSymphony Software License, Version 1.1.
+====
+
+This acknowledgment is required by the OpenSymphony Software License when redistributing SiteMesh 2 and applies only to applications that include the `grails-layout` plugin. Applications using only the SiteMesh 3 integration are not subject to this requirement.
