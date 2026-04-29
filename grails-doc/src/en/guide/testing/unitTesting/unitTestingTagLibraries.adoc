@@ -93,6 +93,12 @@ In order to test a tag library which invokes tags from another tag library,
 the second tag library needs to be explicitly mocked by invoking the
 `mockTagLib` method.
 
+NOTE: Mocked tag libraries are cleared after each feature method as part of the
+web test cleanup lifecycle. Call `mockTagLib` in `setup()` rather than
+`setupSpec()` to ensure the mock is active for every feature. Tests that
+implement `TagLibUnitTest` handle this automatically, but tests that use
+`GrailsWebUnitTest` directly must re-mock in each feature or in `setup()`.
+
 [source,groovy]
 .grails-app/taglib/demo/FirstTagLib.groovy
 ----

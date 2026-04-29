@@ -659,6 +659,10 @@ TagLib metaclass cleanup now happens automatically as part of the web test infra
 If your tests use `TagLibUnitTest` and mock additional tag libraries with `mockTagLib(...)` or `mockTagLibs(...)`, those mocked tag libraries are rebuilt automatically between feature methods.
 No replacement flag is required.
 
+IMPORTANT: Mocked tag libraries are cleared after each feature method.
+If your tests call `mockTagLib` directly (for example, when implementing `GrailsWebUnitTest` instead of `TagLibUnitTest`), move the call from `setupSpec()` to `setup()` so the mock is re-applied before every feature.
+`TagLibUnitTest` handles this automatically, but `GrailsWebUnitTest` does not.
+
 [source,groovy]
 ----
 // Before
