@@ -23,7 +23,6 @@ import groovy.transform.CompileStatic
 import groovy.transform.TypeCheckingMode
 import org.codehaus.groovy.reflection.CachedMethod
 import org.codehaus.groovy.runtime.metaclass.MethodSelectionException
-import org.codehaus.groovy.runtime.InvokerHelper
 
 import org.springframework.context.ApplicationContext
 
