@@ -63,11 +63,11 @@ class ApplicationTagLib implements ApplicationContextAware, InitializingBean, Gr
 
     RequestDataValueProcessor requestDataValueProcessor
 
-    static final SCOPES = [page       : 'pageScope',
+    static final SCOPES = [page: 'pageScope',
                            application: 'servletContext',
-                           request    : 'request',
-                           session    : 'session',
-                           flash      : 'flash']
+                           request: 'request',
+                           session: 'session',
+                           flash: 'flash']
 
     boolean useJsessionId = false
     boolean hasResourceProcessor = false
@@ -270,7 +270,7 @@ class ApplicationTagLib implements ApplicationContextAware, InitializingBean, Gr
     }
 
     static LINK_WRITERS = [
-            js  : { url, constants, attrs ->
+            js: { url, constants, attrs ->
                 return "<script src=\"${url}\"${getAttributesToRender(constants, attrs)}></script>"
             },
 
@@ -291,13 +291,13 @@ class ApplicationTagLib implements ApplicationContextAware, InitializingBean, Gr
     }
 
     static SUPPORTED_TYPES = [
-            css      : [type: 'text/css', rel: 'stylesheet', media: 'screen, projection'],
-            js       : [type: 'text/javascript', writer: 'js'],
+            css: [type: 'text/css', rel: 'stylesheet', media: 'screen, projection'],
+            js: [type: 'text/javascript', writer: 'js'],
 
-            gif      : [rel: 'shortcut icon'],
-            jpg      : [rel: 'shortcut icon'],
-            png      : [rel: 'shortcut icon'],
-            ico      : [rel: 'shortcut icon'],
+            gif: [rel: 'shortcut icon'],
+            jpg: [rel: 'shortcut icon'],
+            png: [rel: 'shortcut icon'],
+            ico: [rel: 'shortcut icon'],
             appleicon: [rel: 'apple-touch-icon']
 
             // @todo add feed link types here too
