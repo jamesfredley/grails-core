@@ -245,7 +245,6 @@ jobs:
       - name: "📝 Establish release version"
         run: echo "VERSION=${TAG#v}" >> "$GITHUB_ENV"
       - name: "🔬 Check Rate Limit"
-        working-directory: grails
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
