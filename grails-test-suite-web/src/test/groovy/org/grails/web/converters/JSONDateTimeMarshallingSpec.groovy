@@ -52,9 +52,9 @@ class JSONDateTimeMarshallingSpec extends Specification implements GrailsWebUnit
             createdInstant: instant
         ] as JSON).toString()
 
-        then: "Date and Calendar render with Z suffix and milliseconds"
-        json.contains('"createdDate":"2025-10-07T21:14:31.000Z"')
-        json.contains('"createdCalendar":"2025-10-07T21:14:31.000Z"')
+        then: "Date, Calendar, and Instant render with Z suffix; ISO_INSTANT drops the fraction on whole seconds"
+        json.contains('"createdDate":"2025-10-07T21:14:31Z"')
+        json.contains('"createdCalendar":"2025-10-07T21:14:31Z"')
 
         and: "Instant renders with Z suffix"
         json.contains('"createdInstant":"2025-10-07T21:14:31Z"')
@@ -91,8 +91,8 @@ class JSONDateTimeMarshallingSpec extends Specification implements GrailsWebUnit
         !json.contains('dayOfMonth')
     }
 
-    void "test Calendar renders with Z suffix and milliseconds"() {
-        given: "A Calendar value"
+    void "test Calendar renders with Z suffix"() {
+        given: "A Calendar value with zero milliseconds"
         def calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"))
         calendar.set(2025, Calendar.OCTOBER, 7, 21, 14, 31)
         calendar.set(Calendar.MILLISECOND, 0)
@@ -100,11 +100,24 @@ class JSONDateTimeMarshallingSpec extends Specification implements GrailsWebUnit
         when: "The Calendar is converted to JSON"
         def json = ([timestamp: calendar] as JSON).toString()
 
-        then: "Calendar renders as ISO-8601 with Z suffix and milliseconds, not as object properties"
-        json == '{"timestamp":"2025-10-07T21:14:31.000Z"}'
+        then: "Calendar renders as ISO_INSTANT — whole-second values drop the fraction"
+        json == '{"timestamp":"2025-10-07T21:14:31Z"}'
         !json.contains('timeInMillis')
         !json.contains('firstDayOfWeek')
         !json.contains('lenient')
+    }
+
+    void "test Calendar with non-zero milliseconds renders fraction"() {
+        given: "A Calendar value with 123 milliseconds"
+        def calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"))
+        calendar.set(2025, Calendar.OCTOBER, 7, 21, 14, 31)
+        calendar.set(Calendar.MILLISECOND, 123)
+
+        when: "The Calendar is converted to JSON"
+        def json = ([timestamp: calendar] as JSON).toString()
+
+        then: "Calendar renders as ISO_INSTANT with 3-digit fraction"
+        json == '{"timestamp":"2025-10-07T21:14:31.123Z"}'
     }
 
     void "test OffsetDateTime renders with timezone offset"() {

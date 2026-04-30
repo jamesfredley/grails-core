@@ -34,7 +34,7 @@ class DateMarshallerController {
     static responseFormats = ['json', 'xml']
 
     /**
-     * Returns a Date at epoch (1970-01-01T00:00:00.000Z) as JSON or XML.
+     * Returns a Date at epoch (1970-01-01T00:00:00Z) as JSON or XML.
      * Exercises json/DateMarshaller and xml/DateMarshaller.
      */
     def date() {
@@ -60,7 +60,7 @@ class DateMarshallerController {
     }
 
     /**
-     * Returns a Date with non-zero milliseconds to verify .SSS 3-digit padding.
+     * Returns a Date with non-zero milliseconds to verify the fractional-seconds path.
      * 1234567890123L = 2009-02-13T23:31:30.123Z
      */
     def dateWithMillis() {
