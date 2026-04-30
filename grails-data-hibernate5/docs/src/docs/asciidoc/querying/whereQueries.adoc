@@ -150,6 +150,7 @@ def callable = {
     lastName == "Simpson"
 }
 
+// Fails: where() requires an inline closure for the AST transform
 def query = Person.where(callable)
 ----
 
@@ -304,29 +305,18 @@ To sort by multiple fields, pass a `Map` to the `sort` argument:
 ----
 def results = query.list(sort: [
     firstName: "asc",
-    birthDate: "desc"
+    lastName: "desc"
 ])
 ----
 
-This sorts results first by `firstName` ascending and then by `birthDate` descending.
+This sorts results first by `firstName` ascending and then by `lastName` descending.
 
 ===== Sorting with Associations
 
-When sorting by properties of associated entities, you must define an explicit alias within the `where` query:
-
-[source,groovy]
-----
-def query = Pet.where {
-    def o = owner
-    o.firstName == "Fred"
-}
-
-def results = query.list(sort: "o.lastName")
-----
-
+When sorting by properties of associated entities, you must define an explicit alias within the `where` query.
 Without an explicit alias, sorting on association properties may fail due to dynamically generated aliases.
 
-In the example above, GORM will generate an alias for the `owner` association such as `owner_alias_0`. These generated aliases are fine for most cases, but are not useful if you want to later sort or use a projection on the results. For example the following query will fail:
+For example the following query will fail:
 
 [source,groovy]
 ----
@@ -334,6 +324,22 @@ In the example above, GORM will generate an alias for the `owner` association su
 Pet.where {
     owner.firstName == "Fred"
 }.list(sort:"owner.lastName")
+----
+
+In this case GORM will generate an alias for the `owner` association such as `owner_alias_0`. These generated aliases are internal and are not suitable for later reference in sorting or projections.
+
+To avoid this problem, define an explicit alias:
+
+[source,groovy]
+----
+// 1. Define alias
+def query = Pet.where {
+    def o = owner
+    o.firstName == "Fred"
+}
+
+// 2. Execute query using alias for sorting
+def results = query.list(sort: "o.lastName")
 ----
 
 

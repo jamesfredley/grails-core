@@ -65,6 +65,9 @@ The `list` method supports:
 * `sort` – property to sort by
 * `order` – sort direction (`asc` or `desc`)
 
+In addition to these you can specify advanced parameters such as `cache`, `fetch`, `lock`, `readOnly`, `fetchSize`, `timeout`, `flushMode`, and `ignoreCase`.
+
+See link:{domainClassesRef}list.html[list] for the complete list of supported parameters.
 
 === Read
 
@@ -145,7 +148,6 @@ You can handle this using a `try/catch` block:
 def p = Person.get(1)
 try {
     p.delete(flush: true)
-
 } catch (Exception e) {
     println "Delete failed: ${e.message}"
 }
@@ -170,16 +172,16 @@ import grails.gorm.DetachedCriteria
 private DetachedCriteria<Person> buildQuery(Map filterParams) {
     def query = Person.where {}
 
-    if (filterParams.containsKey('id')) query = query.where {
-        id == filterParams.id
+    if (filterParams.containsKey('id')) {
+        query = query.where { id == filterParams.id }
     }
 
-    if (filterParams.containsKey('name')) query = query.where {
-        name == filterParams.name
+    if (filterParams.containsKey('name')) {
+        query = query.where { name == filterParams.name }
     }
 
-    if (filterParams.containsKey('age')) query = query.where {
-        age == filterParams.age
+    if (filterParams.containsKey('age')) {
+        query = query.where { age == filterParams.age }
     }
 
     return query
@@ -189,6 +191,16 @@ private DetachedCriteria<Person> buildQuery(Map filterParams) {
 ==== Associations
 
 You can filter by associated properties using dot notation or nested criteria. For example, if `Person` has a self-referencing relationship `parent`, you can filter by properties of the parent.
+
+[source,groovy]
+----
+class Person {
+    String name
+    Integer age
+    Date lastVisit
+    Person parent
+}
+----
 
 Using dot notation:
 
@@ -226,6 +238,8 @@ def filterParams = [id: 1]
 def person = buildQuery(filterParams).get()
 ----
 
+NOTE: Note: `DetachedCriteria.get()` returns a single result from the criteria query, while `Person.get(id)` is a static lookup by primary key on the domain class.
+
 ==== List Results
 
 [source,groovy]
@@ -257,7 +271,7 @@ Each condition is applied only if the corresponding parameter exists, making thi
 
 * Each call to `where {}` returns a new `DetachedCriteria`, allowing safe chaining.
 * This pattern avoids large, hardcoded query methods.
-* It works seamlessly with Grails’ GORM and Hibernate.
+* It works seamlessly with GORM and Hibernate in Grails.
 
 This technique is especially useful in service layers where filtering logic must remain dynamic and maintainable.
 
