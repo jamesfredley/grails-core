@@ -19,21 +19,16 @@
 
 package functionaltests.marshaller
 
-import groovy.json.JsonSlurper
-
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
-import io.micronaut.http.HttpRequest
-import io.micronaut.http.HttpStatus
-import io.micronaut.http.MediaType
-import io.micronaut.http.client.HttpClient
 import spock.lang.Narrative
-import spock.lang.Shared
 import spock.lang.Specification
+import spock.lang.Tag
 
 import grails.testing.mixin.integration.Integration
+import org.apache.grails.testing.http.client.HttpClientSupport
 
 /**
  * Functional tests verifying that Date and Calendar objects are marshalled
@@ -44,74 +39,48 @@ import grails.testing.mixin.integration.Integration
  *   system default zone (numeric offset, e.g. "+00:00", "-04:00").
  */
 @Integration
+@Tag('http-client')
 @Narrative('''
 Grails converters marshal Date and Calendar objects using the JDK's standard
 ISO formatters. JSON output is RFC 3339 / ISO 8601 in UTC. XML output is
 ISO 8601 offset date-time in the system default zone.
 ''')
-class DateMarshallerSpec extends Specification {
+class DateMarshallerSpec extends Specification implements HttpClientSupport {
 
-    @Shared
-    HttpClient client
-
-    def setup() {
-        client = client ?: HttpClient.create(new URL("http://localhost:$serverPort"))
-    }
-
-    def cleanupSpec() {
-        client.close()
-    }
+    private static final Map<String, String> ACCEPT_JSON = [Accept: 'application/json']
+    private static final Map<String, String> ACCEPT_XML = [Accept: 'application/xml']
 
     // ========== JSON Date Marshalling ==========
 
     def "Date at epoch is marshalled to ISO_INSTANT in JSON"() {
         when:
-        def response = client.toBlocking().exchange(
-            HttpRequest.GET('/dateMarshaller/date')
-                .accept(MediaType.APPLICATION_JSON),
-            String
-        )
+        def response = http(ACCEPT_JSON, '/dateMarshaller/date')
 
         then:
-        response.status == HttpStatus.OK
+        response.assertStatus(200)
 
         and: "ISO_INSTANT drops the fraction on whole-second instants"
-        def json = new JsonSlurper().parseText(response.body())
-        json.dateField == '1970-01-01T00:00:00Z'
+        response.json().dateField == '1970-01-01T00:00:00Z'
     }
 
     def "Date with milliseconds renders fraction to .SSS in JSON"() {
         when:
-        def response = client.toBlocking().exchange(
-            HttpRequest.GET('/dateMarshaller/dateWithMillis')
-                .accept(MediaType.APPLICATION_JSON),
-            String
-        )
+        def response = http(ACCEPT_JSON, '/dateMarshaller/dateWithMillis')
 
         then:
-        response.status == HttpStatus.OK
-
-        and:
-        def json = new JsonSlurper().parseText(response.body())
-        json.dateField == '2009-02-13T23:31:30.123Z'
+        response.assertStatus(200)
+        response.json().dateField == '2009-02-13T23:31:30.123Z'
     }
 
     // ========== JSON Calendar Marshalling ==========
 
     def "Calendar at epoch is marshalled to ISO_INSTANT in JSON"() {
         when:
-        def response = client.toBlocking().exchange(
-            HttpRequest.GET('/dateMarshaller/calendar')
-                .accept(MediaType.APPLICATION_JSON),
-            String
-        )
+        def response = http(ACCEPT_JSON, '/dateMarshaller/calendar')
 
         then:
-        response.status == HttpStatus.OK
-
-        and:
-        def json = new JsonSlurper().parseText(response.body())
-        json.calField == '1970-01-01T00:00:00Z'
+        response.assertStatus(200)
+        response.json().calField == '1970-01-01T00:00:00Z'
     }
 
     // ========== XML Date Marshalling ==========
@@ -121,14 +90,10 @@ class DateMarshallerSpec extends Specification {
         def expectedDate = xmlFormatter().format(Instant.EPOCH)
 
         when:
-        def response = client.toBlocking().exchange(
-            HttpRequest.GET('/dateMarshaller/date')
-                .accept(MediaType.APPLICATION_XML),
-            String
-        )
+        def response = http(ACCEPT_XML, '/dateMarshaller/date')
 
         then:
-        response.status == HttpStatus.OK
+        response.assertStatus(200)
         response.body().contains(expectedDate)
     }
 
@@ -137,14 +102,10 @@ class DateMarshallerSpec extends Specification {
         def expectedDate = xmlFormatter().format(Instant.ofEpochMilli(1234567890123L))
 
         when:
-        def response = client.toBlocking().exchange(
-            HttpRequest.GET('/dateMarshaller/dateWithMillis')
-                .accept(MediaType.APPLICATION_XML),
-            String
-        )
+        def response = http(ACCEPT_XML, '/dateMarshaller/dateWithMillis')
 
         then:
-        response.status == HttpStatus.OK
+        response.assertStatus(200)
         response.body().contains(expectedDate)
     }
 
@@ -152,17 +113,11 @@ class DateMarshallerSpec extends Specification {
 
     def "Date JSON via .json URL extension"() {
         when:
-        def response = client.toBlocking().exchange(
-            HttpRequest.GET('/dateMarshaller/date.json'),
-            String
-        )
+        def response = http('/dateMarshaller/date.json')
 
         then:
-        response.status == HttpStatus.OK
-
-        and:
-        def json = new JsonSlurper().parseText(response.body())
-        json.dateField == '1970-01-01T00:00:00Z'
+        response.assertStatus(200)
+        response.json().dateField == '1970-01-01T00:00:00Z'
     }
 
     def "Date XML via .xml URL extension"() {
@@ -170,13 +125,10 @@ class DateMarshallerSpec extends Specification {
         def expectedDate = xmlFormatter().format(Instant.EPOCH)
 
         when:
-        def response = client.toBlocking().exchange(
-            HttpRequest.GET('/dateMarshaller/date.xml'),
-            String
-        )
+        def response = http('/dateMarshaller/date.xml')
 
         then:
-        response.status == HttpStatus.OK
+        response.assertStatus(200)
         response.body().contains(expectedDate)
     }
 
