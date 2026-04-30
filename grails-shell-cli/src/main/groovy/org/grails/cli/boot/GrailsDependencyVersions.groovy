@@ -90,10 +90,11 @@ class GrailsDependencyVersions implements DependencyManagement {
             String scope = dep.scope.text()
             String type = dep.type.text()
 
-            // Recursively resolve imported BOMs to pick up their managed dependencies
-            if (scope == 'import' || type == 'pom') {
+            // Recursively resolve imported Grails BOMs (e.g. grails-base-bom) to pick up their managed dependencies.
+            // Only follow Grails BOMs to avoid recursing into third-party BOMs like spring-boot-dependencies.
+            if ((scope == 'import' && type == 'pom') && groupId == 'org.apache.grails') {
                 resolveImportedBom(groupId, artifactId, version)
-            } else {
+            } else if (scope != 'import') {
                 addDependency(groupId, artifactId, version)
             }
         }
