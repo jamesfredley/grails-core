@@ -171,31 +171,38 @@ class FormTagLib2Tests extends AbstractGrailsTagTests {
     }
 
     private void testDatePickerTag(Object date, String precision) {
-        Document document = getDatePickerOutput(date, precision, null)
+        // Capture a single "now" instant up-front so that the picker output
+        // and the calendar used for assertions agree on the same point in
+        // time. Previously the picker rendered with one System.currentTimeMillis()
+        // and the calendar was constructed afterwards, which made the test
+        // flaky on slow runners (e.g. Windows CI) when the two calls fell
+        // on opposite sides of a minute (or hour/day/year) boundary -
+        // see testDatePickerTagWithMinutePrecision().
+        Calendar calendar = new GregorianCalendar()
+        Object resolvedDate = date
+        if (date == null) {
+            resolvedDate = calendar.getTime()
+        } else if (date instanceof Date) {
+            calendar.setTime(date)
+        } /*else if (date instanceof TemporalAccessor) {
+            ZonedDateTime zonedDateTime
+            if (date instanceof LocalDateTime) {
+                zonedDateTime = ZonedDateTime.of(date, ZoneId.systemDefault())
+            } else if (date instanceof LocalDate) {
+                zonedDateTime = ZonedDateTime.of(date, LocalTime.MIN, ZoneId.systemDefault())
+            } else {
+                zonedDateTime = ZonedDateTime.from(date)
+            }
+            calendar = GregorianCalendar.from(zonedDateTime)
+        }*/
+
+        Document document = getDatePickerOutput(resolvedDate, precision, null)
         assertNotNull(document)
 
         // validate presence and structure of hidden date picker form field
         assertXPathExists(
                 document,
                 "//input[@name='" + DATE_PICKER_TAG_NAME + "' and @type='hidden' and @value='date.struct']")
-
-        // if no date was given, default to the current date
-        Calendar calendar = new GregorianCalendar()
-        if (date != null) {
-            if (date instanceof Date) {
-                calendar.setTime(date)
-            } /*else if (date instanceof TemporalAccessor) {
-                ZonedDateTime zonedDateTime
-                if (date instanceof LocalDateTime) {
-                    zonedDateTime = ZonedDateTime.of(date, ZoneId.systemDefault())
-                } else if (date instanceof LocalDate) {
-                    zonedDateTime = ZonedDateTime.of(date, LocalTime.MIN, ZoneId.systemDefault())
-                } else {
-                    zonedDateTime = ZonedDateTime.from(date)
-                }
-                calendar = GregorianCalendar.from(zonedDateTime)
-            }*/
-        }
 
         // validate id attributes
         String xp
