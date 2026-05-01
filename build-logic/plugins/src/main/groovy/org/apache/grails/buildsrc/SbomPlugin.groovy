@@ -36,6 +36,7 @@ import org.cyclonedx.model.OrganizationalEntity
 import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.Task
 import org.gradle.api.file.CopySpec
 import org.gradle.api.file.RegularFile
 import org.gradle.api.java.archives.Manifest
@@ -142,6 +143,7 @@ class SbomPlugin implements Plugin<Project> {
 
         // sboms are only published to Grails jar files at this time
         publishSbomForJarProjects(project, sbomOutputLocation)
+        publishSbomForShadowJarProjects(project, sbomOutputLocation)
     }
 
     private static void configureSbomTask(Project project, Provider<RegularFile> sbomOutputLocation) {
@@ -388,6 +390,55 @@ class SbomPlugin implements Plugin<Project> {
                                     manifest.attributes('Sbom-Format': 'CycloneDX')
                                 }
                             }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Wires this project's own SBOM into the shadow jar produced by the
+     * com.gradleup.shadow plugin.
+     *
+     * Without this, shadow's first-wins merge picks up a META-INF/sbom.json
+     * from one of the bundled transitive jars (typically grails-shell-cli's),
+     * giving the fat jar the wrong serialNumber and metadata.component
+     * (it ends up describing grails-shell-cli rather than the fat jar's own
+     * project). Two fat jars that both bundle grails-shell-cli (e.g.
+     * :grails-cli and :grails-cli-shadow) then end up with byte-identical
+     * META-INF/sbom.json entries and identical urn:uuid serialNumbers,
+     * which violates the CycloneDX 1.6 specification.
+     *
+     * The fix is symmetrical with publishSbomForJarProjects: we exclude any
+     * META-INF/sbom.json that arrives from transitive dependencies during
+     * the shadow merge, then re-introduce this project's own SBOM (whose
+     * serialNumber is project-path-seeded and unique per fix(sbom): mix
+     * projectPath into deterministic UUID seed).
+     *
+     * Uses the broad Task type to avoid a compile-time dependency on
+     * com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar from
+     * build-logic; the cast is safe because ShadowJar extends Jar.
+     */
+    private static void publishSbomForShadowJarProjects(Project project, Provider<RegularFile> sbomOutputLocation) {
+        project.plugins.withId('com.gradleup.shadow') {
+            project.afterEvaluate {
+                if (!project.findProperty('skipJavaComponent')) {
+                    project.tasks.named('shadowJar').configure { Task t ->
+                        Jar shadowJar = (Jar) t
+                        shadowJar.dependsOn('cyclonedxDirectBom')
+                        // Drop any META-INF/sbom.json that comes in via transitive jars during the merge.
+                        shadowJar.exclude('META-INF/sbom.json')
+                        // Re-introduce this project's own SBOM after the merge.
+                        shadowJar.from(sbomOutputLocation) { CopySpec spec ->
+                            spec.into('META-INF')
+                            spec.rename {
+                                'sbom.json'
+                            }
+                        }
+                        shadowJar.manifest { Manifest manifest ->
+                            manifest.attributes('Sbom-Location': 'META-INF/sbom.json')
+                            manifest.attributes('Sbom-Format': 'CycloneDX')
                         }
                     }
                 }

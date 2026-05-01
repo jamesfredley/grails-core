@@ -77,6 +77,12 @@ shadowJarTask.configure { ShadowJar it ->
 
     it.exclude(
             'META-INF/DEPENDENCIES', // until we publish our own SBOM, this won't be correct so exclude
+            // This module does not apply org.apache.grails.buildsrc.sbom (it's an intermediate build
+            // artifact, not published). Without this exclude, shadow's first-wins merge picks one of
+            // the bundled transitive META-INF/sbom.json files (typically grails-shell-cli's),
+            // producing a fat jar whose SBOM describes the wrong module and shares its serialNumber
+            // with whichever sibling jar happens to win the merge - violating CycloneDX 1.6.
+            'META-INF/sbom.json',
             'about.html' // restatement of the Eclipse Distribution License - Version 1.0 for jakarta
     )
 }
