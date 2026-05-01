@@ -140,7 +140,7 @@ String getVersion(String artifact) {
 
 def generateBomDocumentation = tasks.register('generateBomDocumentation')
 generateBomDocumentation.configure { Task it ->
-    // grails-micronaut-bom is gated by -PskipMicronautTests in settings.gradle (see grails-core#15613).
+    // grails-micronaut-bom is gated by -PskipMicronautProjects in settings.gradle (see grails-core#15613).
     // findProject returns null when the flag is set; the Micronaut BOM page is then omitted.
     def grailsMicronautBom = findProject(':grails-micronaut-bom')
 
@@ -182,6 +182,9 @@ generateBomDocumentation.configure { Task it ->
             ? project.layout.projectDirectory.file('src/en/ref/Versions/Grails BOM Micronaut.adoc')
             : null
     def grailsBomMicronautConstraintFile = grailsMicronautBom?.layout?.buildDirectory?.file('grails-micronaut-bom-constraints.adoc')
+    def micronautBomCrossRefSuffix = grailsMicronautBom != null
+            ? ' | link:Grails%20BOM%20Micronaut.html[Grails Micronaut BOM]'
+            : ''
 
     it.doLast {
         // Generate default BOM page
@@ -190,7 +193,7 @@ generateBomDocumentation.configure { Task it ->
             writer.writeLine ''
             writer.writeLine 'This document provides information about the dependencies defined in the default Grails BOM - also known as `org.apache.grails:grails-bom`. The default BOM uses Hibernate 5 compatible dependency versions.'
             writer.writeLine ''
-            writer.writeLine 'NOTE: Variant BOMs are also available: link:Grails%20BOM%20Hibernate5.html[Grails Hibernate 5 BOM] | link:Grails%20BOM%20Micronaut.html[Grails Micronaut BOM]'
+            writer.writeLine "NOTE: Variant BOMs are also available: link:Grails%20BOM%20Hibernate5.html[Grails Hibernate 5 BOM]${micronautBomCrossRefSuffix}"
             writer.writeLine ''
             writer.write(grailsBomConstraintFile.get().asFile.text)
             writer.writeLine ''
@@ -203,7 +206,7 @@ generateBomDocumentation.configure { Task it ->
             writer.writeLine ''
             writer.writeLine 'This document provides information about the dependencies defined in `org.apache.grails:grails-hibernate5-bom`. This BOM inherits from the default `grails-bom` and explicitly enforces Hibernate 5 compatible dependency versions for consumers using `enforcedPlatform`.'
             writer.writeLine ''
-            writer.writeLine 'See also: link:Grails%20BOM.html[Default BOM] | link:Grails%20BOM%20Micronaut.html[Grails Micronaut BOM]'
+            writer.writeLine "See also: link:Grails%20BOM.html[Default BOM]${micronautBomCrossRefSuffix}"
             writer.writeLine ''
             writer.write(grailsBomHibernate5ConstraintFile.get().asFile.text)
             writer.writeLine ''
