@@ -20,11 +20,10 @@ package org.grails.web.converters.marshaller.json
 
 import java.text.SimpleDateFormat
 
-import grails.converters.JSON
-
-import org.grails.web.json.JSONWriter
-
 import spock.lang.Specification
+
+import grails.converters.JSON
+import org.grails.web.json.JSONWriter
 
 class CalendarMarshallerSpec extends Specification {
 
@@ -33,8 +32,10 @@ class CalendarMarshallerSpec extends Specification {
         def marshaller = new CalendarMarshaller()
 
         expect:
-        marshaller.supports(Calendar.getInstance())
-        marshaller.supports(new GregorianCalendar())
+        with(marshaller) {
+            supports(Calendar.getInstance())
+            supports(new GregorianCalendar())
+        }
     }
 
     void "supports returns false for non-Calendar instances"() {
@@ -42,16 +43,19 @@ class CalendarMarshallerSpec extends Specification {
         def marshaller = new CalendarMarshaller()
 
         expect:
-        !marshaller.supports(new Date())
-        !marshaller.supports("not a calendar")
-        !marshaller.supports(null)
+        with(marshaller) {
+            !supports(new Date())
+            !supports('not a calendar')
+            !supports(null)
+        }
     }
 
     void "default formatter produces ISO-8601 UTC format with Z suffix"() {
         given:
         def marshaller = new CalendarMarshaller()
-        def calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"))
-        calendar.setTimeInMillis(1718461845123L)
+        def calendar = Calendar.getInstance(TimeZone.getTimeZone('UTC')).tap {
+            timeInMillis = 1718461845123L
+        }
 
         when:
         def result = marshalToString(marshaller, calendar)
@@ -63,8 +67,9 @@ class CalendarMarshallerSpec extends Specification {
     void "default formatter converts non-UTC calendar to UTC"() {
         given:
         def marshaller = new CalendarMarshaller()
-        def calendar = Calendar.getInstance(TimeZone.getTimeZone("America/New_York"))
-        calendar.setTimeInMillis(1718461845123L)
+        def calendar = Calendar.getInstance(TimeZone.getTimeZone('America/New_York')).tap {
+            timeInMillis = 1718461845123L
+        }
 
         when:
         def result = marshalToString(marshaller, calendar)
@@ -76,8 +81,9 @@ class CalendarMarshallerSpec extends Specification {
     void "default formatter pads sub-100 milliseconds to three digits"() {
         given:
         def marshaller = new CalendarMarshaller()
-        def calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"))
-        calendar.setTimeInMillis(1704067200005L)
+        def calendar = Calendar.getInstance(TimeZone.getTimeZone('UTC')).tap {
+            timeInMillis = 1704067200005L
+        }
 
         when:
         def result = marshalToString(marshaller, calendar)
@@ -88,11 +94,13 @@ class CalendarMarshallerSpec extends Specification {
 
     void "legacy formatter is used when provided"() {
         given:
-        def customFormat = new SimpleDateFormat("dd/MM/yyyy")
-        customFormat.setTimeZone(TimeZone.getTimeZone("UTC"))
+        def customFormat = new SimpleDateFormat('dd/MM/yyyy').tap {
+            timeZone = TimeZone.getTimeZone('UTC')
+        }
         def marshaller = new CalendarMarshaller(customFormat)
-        def calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"))
-        calendar.setTimeInMillis(1718461845123L)
+        def calendar = Calendar.getInstance(TimeZone.getTimeZone('UTC')).tap {
+            timeInMillis = 1718461845123L
+        }
 
         when:
         def result = marshalToString(marshaller, calendar)

@@ -20,11 +20,10 @@ package org.grails.web.converters.marshaller.json
 
 import java.text.SimpleDateFormat
 
-import grails.converters.JSON
-
-import org.grails.web.json.JSONWriter
-
 import spock.lang.Specification
+
+import grails.converters.JSON
+import org.grails.web.json.JSONWriter
 
 class DateMarshallerSpec extends Specification {
 
@@ -41,7 +40,7 @@ class DateMarshallerSpec extends Specification {
         def marshaller = new DateMarshaller()
 
         expect:
-        !marshaller.supports("not a date")
+        !marshaller.supports('not a date')
         !marshaller.supports(42)
         !marshaller.supports(null)
     }
@@ -86,8 +85,8 @@ class DateMarshallerSpec extends Specification {
 
     void "legacy formatter is used when provided"() {
         given:
-        def customFormat = new SimpleDateFormat("dd/MM/yyyy")
-        customFormat.setTimeZone(TimeZone.getTimeZone("UTC"))
+        def customFormat = new SimpleDateFormat('dd/MM/yyyy')
+        customFormat.setTimeZone(TimeZone.getTimeZone('UTC'))
         def marshaller = new DateMarshaller(customFormat)
         def date = new Date(1718461845123L)
 

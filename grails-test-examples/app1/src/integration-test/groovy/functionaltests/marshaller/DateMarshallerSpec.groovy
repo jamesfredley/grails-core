@@ -16,7 +16,6 @@
  *  specific language governing permissions and limitations
  *  under the License.
  */
-
 package functionaltests.marshaller
 
 import java.time.Instant
@@ -56,11 +55,8 @@ class DateMarshallerSpec extends Specification implements HttpClientSupport {
         when:
         def response = http(ACCEPT_JSON, '/dateMarshaller/date')
 
-        then:
-        response.assertStatus(200)
-
-        and: "ISO_INSTANT drops the fraction on whole-second instants"
-        response.json().dateField == '1970-01-01T00:00:00Z'
+        then: "ISO_INSTANT drops the fraction on whole-second instants"
+        response.assertJson(200, [dateField: '1970-01-01T00:00:00Z'])
     }
 
     def "Date with milliseconds renders fraction to .SSS in JSON"() {
@@ -68,8 +64,7 @@ class DateMarshallerSpec extends Specification implements HttpClientSupport {
         def response = http(ACCEPT_JSON, '/dateMarshaller/dateWithMillis')
 
         then:
-        response.assertStatus(200)
-        response.json().dateField == '2009-02-13T23:31:30.123Z'
+        response.assertJson(200, [dateField: '2009-02-13T23:31:30.123Z'])
     }
 
     // ========== JSON Calendar Marshalling ==========
@@ -79,8 +74,7 @@ class DateMarshallerSpec extends Specification implements HttpClientSupport {
         def response = http(ACCEPT_JSON, '/dateMarshaller/calendar')
 
         then:
-        response.assertStatus(200)
-        response.json().calField == '1970-01-01T00:00:00Z'
+        response.assertJson(200, [calField: '1970-01-01T00:00:00Z'])
     }
 
     // ========== XML Date Marshalling ==========
@@ -93,8 +87,7 @@ class DateMarshallerSpec extends Specification implements HttpClientSupport {
         def response = http(ACCEPT_XML, '/dateMarshaller/date')
 
         then:
-        response.assertStatus(200)
-        response.body().contains(expectedDate)
+        response.assertContains(200, expectedDate)
     }
 
     def "Date with milliseconds renders fraction in XML"() {
@@ -105,8 +98,7 @@ class DateMarshallerSpec extends Specification implements HttpClientSupport {
         def response = http(ACCEPT_XML, '/dateMarshaller/dateWithMillis')
 
         then:
-        response.assertStatus(200)
-        response.body().contains(expectedDate)
+        response.assertContains(200, expectedDate)
     }
 
     // ========== URL Extension Format ==========
@@ -116,8 +108,7 @@ class DateMarshallerSpec extends Specification implements HttpClientSupport {
         def response = http('/dateMarshaller/date.json')
 
         then:
-        response.assertStatus(200)
-        response.json().dateField == '1970-01-01T00:00:00Z'
+        response.assertJson(200, [dateField: '1970-01-01T00:00:00Z'])
     }
 
     def "Date XML via .xml URL extension"() {
@@ -128,8 +119,7 @@ class DateMarshallerSpec extends Specification implements HttpClientSupport {
         def response = http('/dateMarshaller/date.xml')
 
         then:
-        response.assertStatus(200)
-        response.body().contains(expectedDate)
+        response.assertContains(200, expectedDate)
     }
 
     private static DateTimeFormatter xmlFormatter() {

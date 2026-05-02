@@ -22,9 +22,9 @@ import java.text.SimpleDateFormat
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
-import grails.converters.XML
-
 import spock.lang.Specification
+
+import grails.converters.XML
 
 class DateMarshallerSpec extends Specification {
 
@@ -41,9 +41,11 @@ class DateMarshallerSpec extends Specification {
         def marshaller = new DateMarshaller()
 
         expect:
-        !marshaller.supports("not a date")
-        !marshaller.supports(42)
-        !marshaller.supports(null)
+        with(marshaller) {
+            !supports('not a date')
+            !supports(42)
+            !supports(null)
+        }
     }
 
     void "default formatter produces ISO_OFFSET_DATE_TIME in system zone"() {
@@ -79,8 +81,9 @@ class DateMarshallerSpec extends Specification {
 
     void "legacy formatter is used when provided"() {
         given:
-        def customFormat = new SimpleDateFormat("dd/MM/yyyy")
-        customFormat.setTimeZone(TimeZone.getTimeZone("UTC"))
+        def customFormat = new SimpleDateFormat('dd/MM/yyyy').tap {
+            timeZone = TimeZone.getTimeZone('UTC')
+        }
         def marshaller = new DateMarshaller(customFormat)
         def date = new Date(1718461845123L)
         def xml = Mock(XML)
@@ -89,6 +92,6 @@ class DateMarshallerSpec extends Specification {
         marshaller.marshalObject(date, xml)
 
         then:
-        1 * xml.chars("15/06/2024")
+        1 * xml.chars('15/06/2024')
     }
 }
