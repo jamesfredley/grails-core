@@ -93,16 +93,6 @@ jarTask.configure { Jar it ->
     }
 }
 
-// The shadowJar merges multiple jars (including transitive ones from grails-shell-cli, grails-forge-cli,
-// etc.) into a single fat jar. Each of those source jars carries its own META-INF/sbom.json published by
-// the org.apache.grails.buildsrc.sbom convention plugin, and shadow's first-wins merge would otherwise
-// pick a transitive sbom.json (typically grails-shell-cli's) and produce a fat jar whose SBOM describes
-// the wrong module. We exclude any incoming META-INF/sbom.json during the merge and then re-introduce
-// this project's own SBOM (whose serialNumber is project-path-seeded and unique). This keeps fat-jar
-// packaging concerns local to this project rather than leaking shadow knowledge into the generic
-// org.apache.grails.buildsrc.sbom plugin. See: https://cyclonedx.org/docs/1.6/json/#serialNumber
-TaskProvider<CyclonedxDirectTask> cyclonedxDirectBomTask = tasks.named('cyclonedxDirectBom', CyclonedxDirectTask)
-
 TaskProvider<Jar> shadowJarTask = tasks.named('shadowJar', ShadowJar)
 shadowJarTask.configure { ShadowJar it ->
     it.archiveClassifier = 'all'
@@ -133,17 +123,14 @@ shadowJarTask.configure { ShadowJar it ->
             'META-INF/DEPENDENCIES', // until we publish our own SBOM, this won't be correct so exclude
             'META-INF/grails-plugin.xml', // we do not start or compile a grails application so these files are not needed (grails-core, url mappings, etc plugins)
             'META-INF/grails-plugin.xml.asc', // avoid signing artifacts
-            // Drop any incoming sbom.json that arrives via transitive jars during the shadow merge;
-            // re-introduced below from this project's own cyclonedxDirectBom output.
-            'META-INF/sbom.json',
+            'META-INF/sbom.json', // re-introduced below from this project's own cyclonedxDirectBom output to avoid the wrong transitive SBOM winning the shadow merge
             'about.html' // restatement of the Eclipse Distribution License - Version 1.0 for jakarta
     )
 
-    // Re-introduce this project's own SBOM after the merge (mirrors the regular jar wiring done by
-    // the org.apache.grails.buildsrc.sbom plugin). Mirrored only when skipJavaComponent is unset to
-    // match the convention used elsewhere in the build for projects that opt out of jar publication.
+    // Re-introduce this project's own SBOM into the fat jar (mirrors org.apache.grails.buildsrc.sbom).
     if (!project.findProperty('skipJavaComponent')) {
-        it.from(cyclonedxDirectBomTask.flatMap { CyclonedxDirectTask t -> t.jsonOutput }) { CopySpec spec ->
+        TaskProvider<CyclonedxDirectTask> cyclonedxDirectBomTask = tasks.named('cyclonedxDirectBom', CyclonedxDirectTask)
+        it.from(cyclonedxDirectBomTask) { CopySpec spec ->
             spec.into('META-INF')
             spec.rename {
                 'sbom.json'

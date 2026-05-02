@@ -140,10 +140,7 @@ class SbomPlugin implements Plugin<Project> {
         configureNormalization(project)
         ensureLicensesValidated(project)
 
-        // sboms are only published to Grails jar files at this time. Projects that produce a fat
-        // jar via com.gradleup.shadow are responsible for wiring the SBOM into their shadowJar
-        // task in their own build.gradle (see grails-forge/grails-cli/build.gradle), since fat-jar
-        // packaging is a project-specific concern and shadow is not a dependency of this plugin.
+        // sboms are only published to Grails jar files at this time
         publishSbomForJarProjects(project, sbomOutputLocation)
     }
 
