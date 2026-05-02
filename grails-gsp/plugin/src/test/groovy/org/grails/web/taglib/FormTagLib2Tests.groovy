@@ -171,17 +171,11 @@ class FormTagLib2Tests extends AbstractGrailsTagTests {
     }
 
     private void testDatePickerTag(Object date, String precision) {
-        // Capture a single "now" instant up-front so that the picker output
-        // and the calendar used for assertions agree on the same point in
-        // time. Previously the picker rendered with one System.currentTimeMillis()
-        // and the calendar was constructed afterwards, which made the test
-        // flaky on slow runners (e.g. Windows CI) when the two calls fell
-        // on opposite sides of a minute (or hour/day/year) boundary -
-        // see testDatePickerTagWithMinutePrecision().
+        // Capture "now" upfront to prevent test pollution at minute/hour/day boundaries.
         Calendar calendar = new GregorianCalendar()
-        Object resolvedDate = date
+        Date xdefault = null
         if (date == null) {
-            resolvedDate = calendar.getTime()
+            xdefault = calendar.getTime()
         } else if (date instanceof Date) {
             calendar.setTime(date)
         } /*else if (date instanceof TemporalAccessor) {
@@ -196,7 +190,7 @@ class FormTagLib2Tests extends AbstractGrailsTagTests {
             calendar = GregorianCalendar.from(zonedDateTime)
         }*/
 
-        Document document = getDatePickerOutput(resolvedDate, precision, null)
+        Document document = getDatePickerOutput(date, precision, xdefault)
         assertNotNull(document)
 
         // validate presence and structure of hidden date picker form field
