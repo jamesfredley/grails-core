@@ -23,7 +23,7 @@ in [Appendix: Release Setup Requirements & History](#appendix-release-setup-requ
 
 ## Prerequisites
 
-Prior to starting the release process, ensure that any other dependent library is set to a non-snapshot version in `dependencies.gradle`. Per the [Apache Release Policy](https://www.apache.org/legal/release-policy.html), all dependencies must be official releases and cannot be snapshots. The build will fail if any snapshot dependencies are present. The verification process will also now check for SNAPSHOT versions.
+Prior to starting the release process, ensure that any other dependent library is set to a non-snapshot version in `dependencies.gradle`. Per the [Apache Release Policy](https://www.apache.org/legal/release-policy.html), all dependencies must be official releases and cannot be snapshots. The build will fail if any snapshot dependencies are present. The verification process will also now check for SNAPSHOT versions. Additionally, `./gradlew validateDependencyVersions` is run during the release workflow and verification to ensure all BOM dependency versions resolve correctly.
 
 Due to a limitation with GitHub, private groups cannot be used as approvers for an environment.  For this reason, prior to performing the release, add GitHub username to asf.yaml in the environment section for approvers. Only 6 approvers may exist on a given environment.
 
@@ -155,6 +155,14 @@ There is a dockerfile checked into to assist building in an environment like Git
 The license audit can be triggered by running the gradle task `rat`. This will ensure that license requirements are met:
 
     ./gradlew rat
+
+### Manual Verification: Validating Dependency Versions
+
+To ensure that all dependencies declared in the BOM resolve correctly and no version mismatches exist, run:
+
+    ./gradlew validateDependencyVersions
+
+This task is also run automatically during the `publish` job of the release workflow, so any dependency resolution issues will fail the build before artifacts are staged.
 
 ### Manual Verification: Binary Distribution Verification
 
