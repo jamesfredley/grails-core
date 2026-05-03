@@ -192,6 +192,10 @@ Verifies the wrapper distribution signature via the command:
 Extracts the zip file and verifies the contents:
 * Ensure the `LICENSE` & `NOTICE` files are present to ensure license compliance.
 
+Generates applications using the wrapper and verifies all dependencies resolve:
+* Creates a shell app and a forge app against the staging repository.
+* Runs `./gradlew dependencies` in each generated app to confirm all dependencies resolve successfully. The build will fail if any dependency is marked as `FAILED`.
+
 #### Manual Verification: Verify Grails Delegating CLI Binary Distribution
 
 The following are the Grails distribution artifacts:
@@ -213,6 +217,10 @@ Verifies the cli distribution signature via the command:
 
 Extracts the zip file and verifies the contents:
 * Ensure the `LICENSE` & `NOTICE` files are present to ensure license compliance.
+
+Generates applications using the CLIs and verifies all dependencies resolve:
+* Creates a shell app via `grails-shell-cli` and a forge app via `grails-forge-cli` against the staging repository.
+* Runs `./gradlew dependencies` in each generated app to confirm all dependencies resolve successfully. The build will fail if any dependency is marked as `FAILED`.
 
 ## 3. Verifying the CLIs are Functional
 
