@@ -62,8 +62,8 @@ class GradleDependencyComparatorSpec extends Specification {
         "${str(dependencies[8])}" == 'runtimeOnly "ch.qos.logback:logback-classic"'
         "${str(dependencies[9])}" == 'runtimeOnly "com.mysql:mysql-connector-j"'
         "${str(dependencies[10])}" == 'testImplementation "org.testcontainers:junit-jupiter"'
-        "${str(dependencies[11])}" == 'testImplementation "org.testcontainers:testcontainers-mysql"'
-        "${str(dependencies[12])}" == 'testImplementation "org.testcontainers:testcontainers"'
+        "${str(dependencies[11])}" == 'testImplementation "org.testcontainers:testcontainers"'
+        "${str(dependencies[12])}" == 'testImplementation "org.testcontainers:testcontainers-mysql"'
     }
 
     private static String str(GradleDependency dependency) {
