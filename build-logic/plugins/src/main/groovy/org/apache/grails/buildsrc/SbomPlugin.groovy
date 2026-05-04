@@ -25,7 +25,6 @@ import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import groovy.transform.CompileDynamic
 import groovy.transform.CompileStatic
-import org.cyclonedx.gradle.CyclonedxPlugin
 import org.cyclonedx.gradle.CyclonedxDirectTask
 import org.cyclonedx.model.Component
 import org.cyclonedx.model.ExternalReference
@@ -37,6 +36,7 @@ import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.file.CopySpec
+import org.gradle.api.file.Directory
 import org.gradle.api.file.RegularFile
 import org.gradle.api.java.archives.Manifest
 import org.gradle.api.provider.Provider
@@ -126,7 +126,7 @@ class SbomPlugin implements Plugin<Project> {
 
     @Override
     void apply(Project project) {
-        project.pluginManager.apply(CyclonedxPlugin)
+        registerCyclonedxDirectBomTask(project)
 
         def sbomOutputLocation = project.layout.buildDirectory.file(
                 project.provider {
@@ -142,6 +142,25 @@ class SbomPlugin implements Plugin<Project> {
 
         // sboms are only published to Grails jar files at this time
         publishSbomForJarProjects(project, sbomOutputLocation)
+    }
+
+    /**
+     * Register only the per-module {@link CyclonedxDirectTask}. We deliberately do not apply
+     * {@code CyclonedxPlugin} because doing so unconditionally also registers the
+     * {@code cyclonedxBom} aggregate task ({@code CyclonedxAggregateTask}), and triggers
+     * Spring Boot 4's {@code CycloneDxPluginAction} to wire that aggregate's output into the
+     * jar at {@code META-INF/sbom/application.cdx.json}. Grails ships per-module SBOMs only
+     * (at {@code META-INF/sbom.json}, see {@link #publishSbomForJarProjects}); the aggregate
+     * SBOM is misleading for library jars and would also need its own reproducibility
+     * post-processing. Registering the direct task ourselves means the aggregate task is
+     * never created in the first place, so there is nothing to disable, exclude, or filter.
+     */
+    private static void registerCyclonedxDirectBomTask(Project project) {
+        project.tasks.register('cyclonedxDirectBom', CyclonedxDirectTask) { CyclonedxDirectTask task ->
+            Provider<Directory> reportDir = project.layout.buildDirectory.dir('reports/cyclonedx-direct')
+            task.xmlOutput.convention(reportDir.map { it.file('bom.xml') })
+            task.jsonOutput.convention(reportDir.map { it.file('bom.json') })
+        }
     }
 
     private static void configureSbomTask(Project project, Provider<RegularFile> sbomOutputLocation) {
@@ -203,6 +222,13 @@ class SbomPlugin implements Plugin<Project> {
                 // turn off license text since it's base64 encoded & will inflate the jar sizes
                 includeLicenseText.set(false)
 
+                // Don't auto-inject the build-system externalReference. cyclonedx-gradle-plugin 3.0.0
+                // populates this from CI env vars (e.g. GitHub Actions run URL), which is unknowable
+                // from a local rebuild and would break byte-identical reproducibility between CI and
+                // local builds. Per ASF policy we ship reproducible artifacts and intentionally leave
+                // build info out of the sbom; this is the supported plugin-level off switch for it.
+                includeBuildSystem.set(false)
+
                 // disable xml output
                 xmlOutput.unsetConvention()
                 jsonOutput.set(sbomOutputLocation.get())
@@ -261,10 +287,20 @@ class SbomPlugin implements Plugin<Project> {
                             }
                         }
 
-                        // force the serialNumber to be reproducible by removing it & recalculating
+                        // force the serialNumber to be reproducible by clearing it & recalculating.
+                        // Mix the projectPath into the UUID seed so two modules whose post-processed
+                        // BOM JSON happens to be identical (for example, empty BOM platforms with no
+                        // runtime dependencies, or modules whose metadata.component is filled in
+                        // identically by the CycloneDX plugin) still receive distinct serialNumbers
+                        // as required by the CycloneDX specification. Including projectPath preserves
+                        // reproducibility because the same project path + same content always yields
+                        // the same UUID across rebuilds. This guards against collisions introduced by
+                        // CycloneDX 3.0.0 / Gradle 9 metadata changes.
+                        // See: https://cyclonedx.org/docs/1.6/json/#serialNumber
                         bom['serialNumber'] = ''
-                        def withOutSerial = JsonOutput.prettyPrint(JsonOutput.toJson(bom))
-                        def uuid = UUID.nameUUIDFromBytes(withOutSerial.getBytes(StandardCharsets.UTF_8.name()))
+                        def withoutSerial = JsonOutput.prettyPrint(JsonOutput.toJson(bom))
+                        def uuidSeed = "${projectPath}\n${withoutSerial}"
+                        def uuid = UUID.nameUUIDFromBytes(uuidSeed.getBytes(StandardCharsets.UTF_8))
                         bom['serialNumber'] = "urn:uuid:$uuid".toString()
 
                         f.setText(JsonOutput.prettyPrint(JsonOutput.toJson(bom)), StandardCharsets.UTF_8.name())
