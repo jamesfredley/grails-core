@@ -31,6 +31,10 @@ import spock.lang.Specification
  */
 class Pr15465ReproducerSpec extends Specification {
 
+    void cleanup() {
+        GroovySystem.metaClassRegistry.removeMetaClass(H2UserTagLib)
+    }
+
     // ============================================================
     // C1: -parameters compile flag is silently required
     // ============================================================
@@ -132,29 +136,28 @@ class Pr15465ReproducerSpec extends Specification {
 
     // ============================================================
     // H2: framework-namespace tag dispatcher overrides user-defined methods
-    //
-    // Note: H2 is observed at the metaclass-enhancement layer; reproducing it
-    // fully requires standing up TagLibraryLookup + a tag dispatcher. Here we
-    // demonstrate the MECHANISM that enables the override by showing that
-    // registerTagMetaMethods now passes overrideMethods=true by default.
     // ============================================================
 
     void "H2: registerTagMetaMethods default for overrideMethods is now 'true' (was 'false' in 7.x)"() {
         given:
-        java.lang.reflect.Method m = TagLibraryMetaUtils.class.getDeclaredMethod(
-                'registerTagMetaMethods',
-                MetaClass, TagLibraryLookup, String, boolean)
+        MetaClass metaClass = new ExpandoMetaClass(H2UserTagLib, false, true)
+        metaClass.initialize()
+        GroovySystem.metaClassRegistry.setMetaClass(H2UserTagLib, metaClass)
+        def tagLib = new H2UserTagLib()
 
-        expect: "the default-value parameter is accessible"
-        m != null
+        expect: "the user's real method is visible before Grails registers default-namespace tag dispatchers"
+        tagLib.actionSubmit([value: 'before']) == 'user:before'
+        def originalMethod = metaClass.pickMethod('actionSubmit', [Map] as Class[])
+        originalMethod.declaringClass.theClass == H2UserTagLib
+        originalMethod.class.name != 'org.codehaus.groovy.runtime.metaclass.ClosureMetaMethod'
 
-        and: "the call site in registerTagMetaMethods passes overrideMethods through (verified by source inspection)"
-        // Pre-PR: the call site was registerMethodMissingForTags(emc, lookup, namespace, tagName, addAll, false)
-        // Post-PR: the call site is registerMethodMissingForTags(emc, lookup, namespace, tagName, addAll, overrideMethods)
-        // and the overload without that arg defaults to true. This means a user TagLib that
-        // declares `def actionSubmit(Map x)` (a name shared with FormTagLib's default-namespace tag)
-        // will have its method silently shadowed at runtime when the tag dispatcher is registered.
-        true
+        when: "Grails registers a default-namespace tag with the same name"
+        TagLibraryMetaUtils.registerTagMetaMethods(metaClass, new H2DefaultNamespaceLookup(), TagOutput.DEFAULT_NAMESPACE)
+
+        then: "the generated tag dispatcher shadows the user's real method"
+        def shadowingMethod = metaClass.pickMethod('actionSubmit', [Map] as Class[])
+        shadowingMethod != originalMethod
+        shadowingMethod.class.name == 'org.codehaus.groovy.runtime.metaclass.ClosureMetaMethod'
     }
 }
 
@@ -196,4 +199,17 @@ class M1NamingTagLib {
 
     /** Closure named 'renderer' - ALSO bound (asymmetric with Map rule). */
     def closureRenderer(Closure renderer) { "closureRenderer got: ${renderer.call()}" }
+}
+
+class H2UserTagLib {
+
+    def actionSubmit(Map attrs) { "user:${attrs.value}" }
+}
+
+class H2DefaultNamespaceLookup extends TagLibraryLookup {
+
+    @Override
+    Set<String> getAvailableTags(String namespace) {
+        namespace == TagOutput.DEFAULT_NAMESPACE ? ['actionSubmit'] as Set : Collections.emptySet()
+    }
 }
