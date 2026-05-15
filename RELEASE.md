@@ -140,7 +140,7 @@ After all jar files are verified to be signed by a valid Grails key, we need to 
 
     gradle -p gradle-bootstrap
 
-Further details on the building can be found in the [INSTALL](INSTALL.md) document.  Otherwise, run the `verify-reproducible.sh` shell script to compare the published jar files to a locally built version of them. 
+Further details on the building can be found in the [INSTALL](INSTALL) document.  Otherwise, run the `verify-reproducible.sh` shell script to compare the published jar files to a locally built version of them. 
 
 If there are any jar file differences, confirm they are relevant by following the following steps: 
 1. Extract the differing jar file using the `etc/bin/extract-build-artifact.sh <jarfilepath from diff.txt>`

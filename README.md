@@ -34,7 +34,7 @@ available that provide easy integration of add-on features. To assist in getting
 exist and are provided by the Apache Grails team.
 
 ## Using the source distribution
-Please see the [INSTALL](INSTALL.md) document for instructions on how to build, use, and run Apache Grails CLIs from the source distribution. 
+Please see the [INSTALL](INSTALL) document for instructions on how to build, use, and run Apache Grails CLIs from the source distribution. 
 
 ## Getting help
 
