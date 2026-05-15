@@ -55,7 +55,8 @@ class AuditorAwareLookup {
     }
 
     Optional<?> getCurrentAuditor() {
-        if (!resolve() || bean == null) {
+        resolve();
+        if (bean == null) {
             return Optional.empty();
         }
         try {
@@ -68,13 +69,13 @@ class AuditorAwareLookup {
         }
     }
 
-    private boolean resolve() {
+    private void resolve() {
         if (resolved) {
-            return true;
+            return;
         }
         synchronized (this) {
             if (resolved) {
-                return true;
+                return;
             }
             try {
                 if (applicationContext != null &&
@@ -96,6 +97,5 @@ class AuditorAwareLookup {
                 resolved = true;
             }
         }
-        return true;
     }
 }
