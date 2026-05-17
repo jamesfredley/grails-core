@@ -227,8 +227,8 @@ class GrailsGradlePlugin implements Plugin<Project> {
         // Configure indy and log status after evaluation so user's grails { } block has been applied
         GrailsExtension grailsExtension = project.extensions.findByType(GrailsExtension)
         project.afterEvaluate {
-            boolean indyEnabled = grailsExtension.indy?.getOrElse(false) ?: false
-            Boolean preserveParameterNames = grailsExtension.preserveParameterNames?.getOrNull()
+            boolean indyEnabled = grailsExtension.indy.getOrElse(false)
+            Boolean preserveParameterNames = grailsExtension.preserveParameterNames.getOrNull()
 
             project.tasks.withType(GroovyCompile).configureEach { GroovyCompile c ->
                 c.groovyOptions.optimizationOptions.indy = indyEnabled

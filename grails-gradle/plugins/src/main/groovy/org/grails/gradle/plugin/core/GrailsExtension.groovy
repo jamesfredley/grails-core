@@ -108,9 +108,10 @@ class GrailsExtension {
     }
 
     /**
-     * Keep class file parameter names so autowire by name can be supported without additional annotations such as '@Qualifier'.
+     * Keep method and constructor parameter names in class files, allowing frameworks such as Spring to use parameter
+     * names for dependency resolution, including autowiring by name without requiring annotations such as @Qualifier.
      */
-    Property<Boolean> preserveParameterNames
+    final Property<Boolean> preserveParameterNames
 
     DependencyHandler getPlugins() {
         if (pluginDefiner == null) {

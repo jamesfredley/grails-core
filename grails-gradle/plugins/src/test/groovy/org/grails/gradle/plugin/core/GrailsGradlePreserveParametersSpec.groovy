@@ -42,7 +42,7 @@ class GrailsGradlePreserveParametersSpec extends GradleSpecification {
         result.output.contains("HAS_PRESERVE_PARAM_ENABLED=false")
     }
 
-    def "preserveParameterNames is set to true when configured as explicit null"() {
+    def "preserveParameterNames falls back to true convention when assigned null"() {
         given:
         setupTestResourceProject('preserve-params-null')
 
@@ -50,7 +50,23 @@ class GrailsGradlePreserveParametersSpec extends GradleSpecification {
         def result = executeTask('inspectPreserveParam')
 
         then:
+        //  For Gradle properties, assigning null does not set the value to null as the final resolved value.
+        // It clears/unsets the explicit value. Once the explicit value is absent, getOrNull() resolves to
+        // the property’s convention value, which is true.
         result.output.contains("HAS_PRESERVE_PARAM_ENABLED=true")
+    }
+
+    def "preserveParameterNames provider with no value leaves GroovyCompile parameters unchanged"() {
+        given:
+        setupTestResourceProject('preserve-params-provider-null')
+
+        when:
+        def result = executeTask('inspectPreserveParam')
+
+        then:
+        // when actually assigned via a provider null, the value will not be set and will remain the default value, which
+        // is false for GroovyCompile
+        result.output.contains("HAS_PRESERVE_PARAM_ENABLED=false")
     }
 
     def "GroovyCompile tasks get parameters = true when preserveParameterNames is enabled"() {
