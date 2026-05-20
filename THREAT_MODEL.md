@@ -46,7 +46,7 @@ limitations under the License.
 |---|---|---|
 | **End user (HTTP client)** | **Untrusted** | Sends HTTP requests to a deployed Grails application. Source of all attacker-controllable input considered in this model. *(inferred)* |
 | **Application developer / operator** | **Trusted** | Writes controllers, services, domain classes, URL mappings, GSP templates; configures `application.yml` / `application.groovy`; runs the CLI; chooses plugins. *(inferred)* |
-| **Plugin / profile author** | **Trusted-by-association** | Author of a third-party Grails plugin or `grails-forge` profile. Code from a plugin runs with full application privileges. The framework does not isolate plugin code. *(inferred)* |
+| **Plugin / profile author** | **Trusted-by-association** | Author of a third-party Grails plugin or `grails` profile. Code from a plugin runs with full application privileges. The framework does not isolate plugin code. *(inferred)* |
 
 ### Component-family table
 
@@ -319,7 +319,7 @@ These properties are **disclaimed by design**. A report that depends on one of t
 - **Rate limiting / DoS protection against request volume.** No built-in throttling. *(documented: [securingAgainstAttacks.adoc](./grails-doc/src/en/guide/security/securingAgainstAttacks.adoc) "Denial of service")*
 - **Constant-time cryptographic operations.** No constant-time comparison or secret-handling primitives are provided. *(inferred)*
 - **Sandboxing of Groovy code in `application.groovy`, plugin `doWithSpring` blocks, or AST transforms.** Groovy source on the classpath is trusted, full stop. *(inferred)*
-- **Verification of plugin or `grails-forge` profile JAR provenance.** The CLI uses standard Maven resolution; trust in the configured repository is operator-supplied. *(inferred)*
+- **Verification of plugin or `grails` profile JAR provenance.** The CLI uses standard Maven resolution; trust in the configured repository is operator-supplied. *(inferred)*
 - **Cross-process / cross-tenant isolation.** One application per JVM is assumed. Sharing a JVM across mutually-untrusting apps is unsupported. *(inferred)*
 - **Transport security.** Provided by Spring Boot / the operator's proxy. *(inferred)*
 
