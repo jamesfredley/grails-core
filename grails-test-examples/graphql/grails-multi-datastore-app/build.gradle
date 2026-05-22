@@ -73,7 +73,7 @@ dependencies {
 
     // Auto-start a MongoDB testcontainer before integration tests (overrides the
     // localhost:27017 host in application.yml via grails.mongodb.host system property).
-    integrationTestImplementation 'org.apache.grails.testing:grails-testing-support-mongodb'
+    testImplementation 'org.apache.grails.testing:grails-testing-support-mongodb'
 }
 
 apply {
