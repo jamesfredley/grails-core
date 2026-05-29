@@ -44,5 +44,48 @@ class VersionComparatorSpec extends Specification {
         "3.0.0"                | "3.0.0"                || 0
         "4.0.1"                | "3.1.110"              || 1
         "4.0.1"                | "3.0.0.BUILD-SNAPSHOT" || 1
+
+        // A pre-release (milestone/rc/snapshot) is older than the final release of the same number
+        "7.0.0-M1"             | "7.0.0"                || -1
+        "7.0.0"                | "7.0.0-M1"             || 1
+        "7.0.0-RC1"            | "7.0.0"                || -1
+        "7.0.0-SNAPSHOT"       | "7.0.0"                || -1
+        "7.0.0"                | "7.0.0-SNAPSHOT"       || 1
+
+        // The numeric version is compared before the qualifier, so the patch number is never lost
+        "7.0.5-M1"             | "7.0.0"                || 1
+        "7.0.0"                | "7.0.5-M1"             || -1
+        "7.0.1-M1"             | "7.0.0"                || 1
+        "7.0.0-RC1"            | "6.9.9"                || 1
+        "6.9.9"                | "7.0.0-RC1"            || -1
+
+        // Milestones and release candidates are ordered by their number, numerically not lexically
+        "7.0.0-M1"             | "7.0.0-M2"             || -1
+        "7.0.0-M2"             | "7.0.0-M1"             || 1
+        "7.0.0-RC1"            | "7.0.0-RC2"            || -1
+        "7.0.0-RC10"           | "7.0.0-RC2"            || 1
+
+        // Qualifier tiers: milestone < release candidate < snapshot < final
+        "7.0.0-M2"             | "7.0.0-RC1"            || -1
+        "7.0.0-RC1"            | "7.0.0-SNAPSHOT"       || -1
+        "7.0.0-M9"             | "7.0.0-SNAPSHOT"       || -1
+
+        // The dotted and hyphenated qualifier forms are equivalent, and matching is case insensitive
+        "7.0.0.M1"             | "7.0.0-M1"             || 0
+        "7.0.0.RC1"            | "7.0.0-RC1"            || 0
+        "7.0.0.BUILD-SNAPSHOT" | "7.0.0-SNAPSHOT"       || 0
+        "7.0.0-rc3"            | "7.0.0-RC3"            || 0
+    }
+
+    def "sorts mixed milestone, release candidate, snapshot and final versions from oldest to newest"() {
+        given:
+        def comparator = new VersionComparator()
+        def versions = ["7.0.0", "7.0.0-M1", "7.0.0-RC2", "7.0.0-SNAPSHOT", "7.0.0-M2", "7.0.0-RC1", "6.9.9"]
+
+        when:
+        def sorted = versions.sort(false, comparator)
+
+        then:
+        sorted == ["6.9.9", "7.0.0-M1", "7.0.0-M2", "7.0.0-RC1", "7.0.0-RC2", "7.0.0-SNAPSHOT", "7.0.0"]
     }
 }
